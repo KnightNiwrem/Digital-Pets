@@ -8,7 +8,7 @@ import { PetCarePanel } from "@/components/pet/PetCarePanel";
 import { WorldScreen } from "@/components/world/WorldScreen";
 import { InventoryScreen } from "@/components/inventory/InventoryScreen";
 import { useGameState } from "@/hooks/useGameState";
-import { Home, Map, Package } from "lucide-react";
+import { Home, Map as MapIcon, Package } from "lucide-react";
 
 export function GameScreen() {
   const {
@@ -222,7 +222,7 @@ export function GameScreen() {
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <Map className="w-4 h-4 inline mr-2" />
+              <MapIcon className="w-4 h-4 inline mr-2" />
               Explore World
             </button>
             <button
