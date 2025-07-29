@@ -2,8 +2,21 @@
 
 import { describe, test, expect, beforeEach } from "bun:test";
 import { BattleSystem } from "@/systems/BattleSystem";
-import type { Pet, PetSpecies, Battle, BattleAction } from "@/types";
+import type { Pet, PetSpecies, Battle, BattleAction, Move } from "@/types";
 import { getStarterMoves } from "@/data/moves";
+
+// Helper to convert BattleMove to Move for test pets
+function convertBattleMoveToMove(battleMove: any): Move {
+  return {
+    id: battleMove.id,
+    name: battleMove.name,
+    description: battleMove.description,
+    damage: battleMove.power,
+    energyCost: battleMove.energyCost,
+    accuracy: battleMove.accuracy,
+    type: battleMove.category,
+  };
+}
 
 // Test helper to create a standard test pet
 function createTestPet(overrides: Partial<Pet> = {}): Pet {
@@ -18,7 +31,7 @@ function createTestPet(overrides: Partial<Pet> = {}): Pet {
     icon: "test_icon.png",
   };
 
-  const starterMoves = getStarterMoves();
+  const starterMoves = getStarterMoves().map(convertBattleMoveToMove);
 
   return {
     id: "test_pet_1",
