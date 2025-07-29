@@ -28,6 +28,11 @@ export default [
         localStorage: 'readonly',
         sessionStorage: 'readonly',
         console: 'readonly',
+        clearInterval: 'readonly',
+        setInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        performance: 'readonly',
         // Node.js globals
         process: 'readonly',
         Buffer: 'readonly',
