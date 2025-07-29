@@ -89,7 +89,7 @@ export class GameLoop {
       if (this.gameState.currentPet) {
         const petChanges = PetSystem.processPetTick(this.gameState.currentPet);
         stateChanges.push(...petChanges);
-        
+
         // Add specific actions for important changes
         if (petChanges.includes("pet_died")) {
           this.handlePetDeath(actions, stateChanges);
@@ -97,9 +97,9 @@ export class GameLoop {
         if (petChanges.includes("pet_grew")) {
           actions.push({
             type: "pet_growth",
-            payload: { 
-              petId: this.gameState.currentPet.id, 
-              newStage: this.gameState.currentPet.growthStage 
+            payload: {
+              petId: this.gameState.currentPet.id,
+              newStage: this.gameState.currentPet.growthStage,
             },
             timestamp: Date.now(),
             source: "system",
