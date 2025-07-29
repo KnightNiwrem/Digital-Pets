@@ -2,6 +2,41 @@
 
 This document defines repetitive tasks and workflows for the Digital Pets project. These tasks follow established patterns and can be referenced for consistency.
 
+## Completed Major Systems
+
+### Implement Core Game System (PetSystem Pattern)
+**Last performed:** July 29, 2025
+**Status:** ✅ COMPLETED  
+**Files created/modified:**
+- `src/systems/PetSystem.ts` - Core system logic with all pet care mechanics
+- `src/types/Pet.ts` - Pet interfaces and constants
+- `src/types/GameState.ts` - Game state interfaces
+- `src/types/index.ts` - Type exports and constants
+- `src/engine/GameLoop.ts` - Integration with existing game loop
+- `tests/systems/PetSystem.test.ts` - Comprehensive unit tests (54 test cases)
+
+**Implementation Pattern:**
+1. **Design Phase**: Define comprehensive requirements from project brief
+2. **Core System**: Implement main system class with static methods for all operations
+3. **Type Safety**: Create complete TypeScript interfaces with strict typing
+4. **Integration**: Update existing systems (GameLoop) to use new system
+5. **Testing**: Write comprehensive unit tests covering all functionality and edge cases
+6. **Validation**: Ensure all tests pass, TypeScript compiles, and production builds
+
+**Key Implementation Details:**
+- Used static class methods for stateless operations
+- Implemented hidden tick counters with display value calculations
+- Added comprehensive error handling with Result<T> pattern
+- Created realistic game mechanics (poop system, health states, growth progression)
+- Integrated with existing GameLoop tick processing
+- 54 test cases with 110 expect() assertions for full coverage
+
+**Important Notes:**
+- This pattern should be followed for all future core systems (WorldSystem, BattleSystem, etc.)
+- Comprehensive testing is critical - aim for 50+ test cases per major system
+- Always integrate with GameLoop for tick-based progression
+- Use Result<T> pattern for operation results with proper error handling
+
 ## Development Setup Tasks
 
 ### Initialize New Game System
@@ -187,3 +222,138 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
 - [ ] Performance meets requirements
 - [ ] Memory usage remains stable during extended play
 - [ ] Offline progression calculations work correctly
+
+## Project TODO Breakdown
+
+### Phase 2: Storage & UI Foundation (CURRENT PHASE)
+**Priority: HIGH - Foundation for gameplay**
+
+#### 2.1 Complete Storage System
+- [ ] **Storage Integration** (`src/storage/GameStorage.ts`)
+  - [ ] Implement complete save/load functionality using Web Storage API
+  - [ ] Add save data validation and error recovery
+  - [ ] Implement save migration system for version updates
+  - [ ] Add offline progression calculation on game load
+  - [ ] Test save/load with complex game states
+
+#### 2.2 Basic Pet Care UI
+- [ ] **Pet Display Component** (`src/components/pet/PetDisplay.tsx`)
+  - [ ] Show pet sprite, name, and basic info
+  - [ ] Display current stats (satiety, hydration, happiness)
+  - [ ] Show health status and growth stage
+  - [ ] Add visual indicators for critical states
+- [ ] **Pet Care Interface** (`src/components/pet/PetCarePanel.tsx`)
+  - [ ] Feed, water, and play action buttons
+  - [ ] Medicine and hygiene controls
+  - [ ] Sleep/wake toggle functionality
+  - [ ] Status messages and action feedback
+- [ ] **Game State Management** (`src/hooks/useGameState.ts`)
+  - [ ] React hook for game state access
+  - [ ] Automatic save triggering
+  - [ ] State change notifications
+
+#### 2.3 Essential Data Models
+- [ ] **Item System Types** (`src/types/Item.ts`)
+  - [ ] Item interfaces (consumables, medicine, toys, hygiene)
+  - [ ] Inventory management types
+  - [ ] Item effect definitions
+- [ ] **World System Types** (`src/types/World.ts`)
+  - [ ] Location definitions and connections
+  - [ ] Travel state management
+  - [ ] Activity and NPC interfaces
+
+### Phase 3: World & Battle Systems
+**Priority: MEDIUM - Core gameplay expansion**
+
+#### 3.1 World System Implementation
+- [ ] **WorldSystem** (`src/systems/WorldSystem.ts`)
+  - [ ] Location management and travel mechanics
+  - [ ] Activity processing (foraging, fishing, mining)
+  - [ ] NPC interaction system
+  - [ ] Quest progression logic
+- [ ] **World UI Components**
+  - [ ] Location map and navigation
+  - [ ] Travel interface and progress
+  - [ ] Activity panels and results
+  - [ ] NPC dialog system
+
+#### 3.2 Battle System Implementation
+- [ ] **BattleSystem** (`src/systems/BattleSystem.ts`)
+  - [ ] Turn-based combat mechanics
+  - [ ] Move execution and damage calculation
+  - [ ] Status effects and conditions
+  - [ ] Victory/defeat handling
+- [ ] **Battle UI Components**
+  - [ ] Battle field visualization
+  - [ ] Move selection interface
+  - [ ] Battle stats and health bars
+  - [ ] Combat animations and feedback
+
+#### 3.3 Item System Implementation
+- [ ] **ItemSystem** (`src/systems/ItemSystem.ts`)
+  - [ ] Item usage and effect processing
+  - [ ] Inventory management
+  - [ ] Shop and trading mechanics
+  - [ ] Durability and consumption logic
+
+### Phase 4: Content & Polish
+**Priority: LOW - Content expansion**
+
+#### 4.1 Game Content Creation
+- [ ] **Pet Species** (`src/data/pets.ts`)
+  - [ ] Define all 31 pet species across rarities
+  - [ ] Create pet sprites and icons
+  - [ ] Balance stats and growth rates
+- [ ] **Items Database** (`src/data/items.ts`)
+  - [ ] Food, drinks, medicine, toys, hygiene items
+  - [ ] Item icons and descriptions
+  - [ ] Shop prices and availability
+- [ ] **World Content** (`src/data/locations.ts`, `src/data/npcs.ts`)
+  - [ ] Multiple towns and cities
+  - [ ] Explorable areas with activities
+  - [ ] NPCs with dialog and quests
+- [ ] **Battle Content** (`src/data/moves.ts`)
+  - [ ] Move database with effects
+  - [ ] Training facilities
+  - [ ] Battle encounters
+
+#### 4.2 Advanced Features
+- [ ] **Quest System** (`src/systems/QuestSystem.ts`)
+  - [ ] Quest line management
+  - [ ] Objective tracking
+  - [ ] Reward distribution
+- [ ] **Achievement System**
+  - [ ] Achievement definitions and tracking
+  - [ ] Progress notifications
+  - [ ] Unlock rewards
+- [ ] **Advanced UI Features**
+  - [ ] Settings and preferences
+  - [ ] Help and tutorial system
+  - [ ] Advanced pet statistics
+  - [ ] Collection tracking
+
+#### 4.3 Performance & Polish
+- [ ] **Performance Optimization**
+  - [ ] Game loop performance tuning
+  - [ ] UI rendering optimization
+  - [ ] Memory usage monitoring
+- [ ] **Testing & Quality**
+  - [ ] Integration tests for complete workflows
+  - [ ] UI component testing
+  - [ ] Cross-browser compatibility testing
+- [ ] **Documentation**
+  - [ ] Player documentation and guides
+  - [ ] Developer documentation updates
+  - [ ] API documentation completion
+
+### Current Status Summary
+- ✅ **Phase 1 Complete**: PetSystem with comprehensive testing
+- 🔄 **Phase 2 In Progress**: Storage system and basic UI foundation
+- ⏳ **Phase 3 Planned**: World and battle systems
+- 📅 **Phase 4 Future**: Content creation and polish
+
+### Estimated Timeline
+- **Phase 2**: 2-3 weeks (storage + basic UI)
+- **Phase 3**: 4-6 weeks (world + battle systems)  
+- **Phase 4**: 6-8 weeks (content + polish)
+- **Total**: ~3-4 months for complete game

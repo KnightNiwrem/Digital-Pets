@@ -1,8 +1,9 @@
 // Core game loop and state management
 
-import type { GameState, GameTick, GameAction, Pet } from "@/types";
-import { GAME_CONSTANTS, PET_CONSTANTS } from "@/types";
+import type { GameState, GameTick, GameAction } from "@/types";
+import { GAME_CONSTANTS } from "@/types";
 import { GameStorage } from "@/storage/GameStorage";
+import { PetSystem } from "@/systems/PetSystem";
 
 export class GameLoop {
   private static instance: GameLoop | null = null;
@@ -86,7 +87,40 @@ export class GameLoop {
 
       // Process pet if one exists
       if (this.gameState.currentPet) {
-        this.processPetTick(this.gameState.currentPet, actions, stateChanges);
+        const petChanges = PetSystem.processPetTick(this.gameState.currentPet);
+        stateChanges.push(...petChanges);
+
+        // Add specific actions for important changes
+        if (petChanges.includes("pet_died")) {
+          this.handlePetDeath(actions, stateChanges);
+        }
+        if (petChanges.includes("pet_grew")) {
+          actions.push({
+            type: "pet_growth",
+            payload: {
+              petId: this.gameState.currentPet.id,
+              newStage: this.gameState.currentPet.growthStage,
+            },
+            timestamp: Date.now(),
+            source: "system",
+          });
+        }
+        if (petChanges.includes("pet_pooped")) {
+          actions.push({
+            type: "pet_pooped",
+            payload: { petId: this.gameState.currentPet.id },
+            timestamp: Date.now(),
+            source: "system",
+          });
+        }
+        if (petChanges.includes("pet_sick_from_poop")) {
+          actions.push({
+            type: "pet_became_sick",
+            payload: { petId: this.gameState.currentPet.id, reason: "uncleaned_poop" },
+            timestamp: Date.now(),
+            source: "system",
+          });
+        }
       }
 
       // Process world activities
@@ -131,103 +165,6 @@ export class GameLoop {
     } catch (error) {
       console.error("Error during game tick:", error);
     }
-  }
-
-  /**
-   * Process pet-related mechanics for this tick
-   */
-  private processPetTick(pet: Pet, actions: GameAction[], stateChanges: string[]): void {
-    // Decrement hidden counters
-    pet.satietyTicksLeft = Math.max(0, pet.satietyTicksLeft - 1);
-    pet.hydrationTicksLeft = Math.max(0, pet.hydrationTicksLeft - 1);
-    pet.happinessTicksLeft = Math.max(0, pet.happinessTicksLeft - 1);
-    pet.poopTicksLeft = Math.max(0, pet.poopTicksLeft - 1);
-    pet.sickByPoopTicksLeft = Math.max(0, pet.sickByPoopTicksLeft - 1);
-
-    // Update displayed stats
-    pet.satiety = Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.satiety);
-    pet.hydration = Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.hydration);
-    pet.happiness = Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.happiness);
-
-    // Handle poop
-    if (pet.poopTicksLeft === 0) {
-      // Pet pooped, reset counter to random value
-      pet.poopTicksLeft = Math.floor(Math.random() * 240) + 240; // 1-2 hours
-      stateChanges.push("pet_pooped");
-
-      actions.push({
-        type: "pet_pooped",
-        payload: { petId: pet.id },
-        timestamp: Date.now(),
-        source: "system",
-      });
-    }
-
-    // Handle sickness from uncleaned poop
-    if (pet.sickByPoopTicksLeft === 0 && pet.health === "healthy") {
-      pet.health = "sick";
-      pet.sickByPoopTicksLeft = PET_CONSTANTS.SICK_BY_POOP_TICKS;
-      stateChanges.push("pet_sick_from_poop");
-
-      actions.push({
-        type: "pet_became_sick",
-        payload: { petId: pet.id, reason: "uncleaned_poop" },
-        timestamp: Date.now(),
-        source: "system",
-      });
-    }
-
-    // Handle life changes
-    let lifeDecrease = 0;
-    let shouldRecover = true;
-
-    // Life decreases
-    if (pet.health === "injured") {
-      lifeDecrease += PET_CONSTANTS.LIFE_DECREASE.injured;
-      shouldRecover = false;
-    }
-    if (pet.health === "sick") {
-      lifeDecrease += PET_CONSTANTS.LIFE_DECREASE.sick;
-      shouldRecover = false;
-    }
-    if (pet.satiety === 0) {
-      lifeDecrease += PET_CONSTANTS.LIFE_DECREASE.noSatiety;
-      shouldRecover = false;
-    }
-    if (pet.hydration === 0) {
-      lifeDecrease += PET_CONSTANTS.LIFE_DECREASE.noHydration;
-      shouldRecover = false;
-    }
-    if (pet.growthStage === PET_CONSTANTS.GROWTH_STAGES - 1) {
-      lifeDecrease += PET_CONSTANTS.LIFE_DECREASE.finalStage;
-    }
-
-    // Apply life changes
-    if (lifeDecrease > 0) {
-      pet.life = Math.max(0, pet.life - lifeDecrease);
-      stateChanges.push("pet_life_decreased");
-    } else if (shouldRecover) {
-      pet.life = Math.min(PET_CONSTANTS.MAX_LIFE, pet.life + PET_CONSTANTS.LIFE_RECOVERY);
-      stateChanges.push("pet_life_recovered");
-    }
-
-    // Handle death
-    if (pet.life === 0) {
-      this.handlePetDeath(actions, stateChanges);
-    }
-
-    // Handle energy recovery during sleep
-    if (pet.state === "sleeping") {
-      const energyRecovery = this.calculateEnergyRecovery(pet);
-      pet.currentEnergy = Math.min(pet.maxEnergy, pet.currentEnergy + energyRecovery);
-      if (energyRecovery > 0) {
-        stateChanges.push("pet_energy_recovered");
-      }
-    }
-
-    // Handle growth
-    pet.totalLifetime++;
-    this.checkPetGrowth(pet, actions, stateChanges);
   }
 
   /**
@@ -280,42 +217,6 @@ export class GameLoop {
   private processBattleTick(_actions: GameAction[], _stateChanges: string[]): void {
     // Battle processing would be implemented here
     // For now, just a placeholder
-  }
-
-  /**
-   * Calculate energy recovery for a sleeping pet
-   */
-  private calculateEnergyRecovery(pet: Pet): number {
-    // Base recovery of 1 energy per tick while sleeping
-    let recovery = 1;
-
-    // Higher stages recover energy faster
-    const stageBonus = Math.floor(pet.growthStage / 10);
-    recovery += stageBonus;
-
-    return recovery;
-  }
-
-  /**
-   * Check if pet should grow to next stage
-   */
-  private checkPetGrowth(pet: Pet, actions: GameAction[], stateChanges: string[]): void {
-    // Growth calculation would be based on lifetime and other factors
-    // This is a simplified version
-    const requiredLifetime = (pet.growthStage + 1) * 10000; // Example growth requirement
-
-    if (pet.totalLifetime >= requiredLifetime && pet.growthStage < PET_CONSTANTS.GROWTH_STAGES - 1) {
-      pet.growthStage++;
-      pet.maxEnergy += 10; // Increase energy capacity
-
-      stateChanges.push("pet_grew");
-      actions.push({
-        type: "pet_growth",
-        payload: { petId: pet.id, newStage: pet.growthStage },
-        timestamp: Date.now(),
-        source: "system",
-      });
-    }
   }
 
   /**
@@ -386,7 +287,7 @@ export class GameLoop {
       this.gameState.gameTime.totalTicks = this.tickNumber;
 
       if (this.gameState.currentPet) {
-        this.processPetTick(this.gameState.currentPet, [], []);
+        PetSystem.processPetTick(this.gameState.currentPet);
       }
     }
 
