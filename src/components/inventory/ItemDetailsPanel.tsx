@@ -52,9 +52,9 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
       .map(effect => {
         switch (effect.type) {
           case "satiety":
-            return `+${effect.value} Hunger`;
+            return `+${effect.value} Satiety`;
           case "hydration":
-            return `+${effect.value} Thirst`;
+            return `+${effect.value} Hydration`;
           case "happiness":
             return `+${effect.value} Happiness`;
           case "energy":
