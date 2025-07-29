@@ -123,7 +123,7 @@ describe("PetSystem - Pet Care Actions", () => {
   });
 
   describe("giveDrink", () => {
-    test("should successfully give drink to thirsty pet", () => {
+    test("should successfully give drink to dehydrated pet", () => {
       pet.hydration = 30;
       pet.hydrationTicksLeft = 2400;
 
@@ -145,13 +145,13 @@ describe("PetSystem - Pet Care Actions", () => {
       expect(result.error).toContain("too sick to drink");
     });
 
-    test("should fail to give drink to pet that's not thirsty", () => {
+    test("should fail to give drink to pet that's not dehydrated", () => {
       pet.hydration = 100;
 
       const result = PetSystem.giveDrink(pet, 30);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("not thirsty");
+      expect(result.error).toContain("not dehydrated");
     });
   });
 

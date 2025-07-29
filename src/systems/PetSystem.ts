@@ -54,7 +54,7 @@ export class PetSystem {
     if (actualIncrease <= 0) {
       return {
         success: false,
-        error: "Pet is not thirsty right now.",
+        error: "Pet is not dehydrated right now.",
       };
     }
 

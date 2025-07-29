@@ -85,7 +85,7 @@ export function PetDisplay({ pet }: PetDisplayProps) {
           {/* Satiety */}
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
-              <span>Hunger</span>
+              <span>Satiety</span>
               <span>{displayStats.satiety}/100</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -99,7 +99,7 @@ export function PetDisplay({ pet }: PetDisplayProps) {
           {/* Hydration */}
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
-              <span>Thirst</span>
+              <span>Hydration</span>
               <span>{displayStats.hydration}/100</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
