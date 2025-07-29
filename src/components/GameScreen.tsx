@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PetDisplay } from "@/components/pet/PetDisplay";
 import { PetCarePanel } from "@/components/pet/PetCarePanel";
 import { WorldScreen } from "@/components/world/WorldScreen";
+import { InventoryScreen } from "@/components/inventory/InventoryScreen";
 import { useGameState } from "@/hooks/useGameState";
-import { Home, Map } from "lucide-react";
+import { Home, Map, Package } from "lucide-react";
 
 export function GameScreen() {
   const {
@@ -23,6 +24,9 @@ export function GameScreen() {
     cleanPoop,
     treatPet,
     toggleSleep,
+    useItem,
+    sellItem,
+    sortInventory,
     pauseGame,
     resumeGame,
     isPaused,
@@ -32,7 +36,7 @@ export function GameScreen() {
 
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
-  const [activeTab, setActiveTab] = useState<"pet" | "world">("pet");
+  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory">("pet");
 
   // World action handlers
   const handleTravel = async (destinationId: string) => {
@@ -221,6 +225,17 @@ export function GameScreen() {
               <Map className="w-4 h-4 inline mr-2" />
               Explore World
             </button>
+            <button
+              onClick={() => setActiveTab("inventory")}
+              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "inventory"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <Package className="w-4 h-4 inline mr-2" />
+              Inventory
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -255,6 +270,16 @@ export function GameScreen() {
               onStartActivity={handleStartActivity}
               onCancelActivity={handleCancelActivity}
               disabled={isLoading || isPaused}
+            />
+          )}
+
+          {activeTab === "inventory" && gameState.inventory && (
+            <InventoryScreen
+              inventory={gameState.inventory}
+              pet={gameState.currentPet}
+              onUseItem={useItem}
+              onSellItem={sellItem}
+              onSortInventory={sortInventory}
             />
           )}
         </div>

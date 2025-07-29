@@ -3,6 +3,8 @@
 import type { GameState, Pet, PetSpecies, Inventory, WorldState, QuestLog } from "@/types";
 import { GAME_CONSTANTS, DEFAULT_GAME_SETTINGS, DEFAULT_PLAYER_STATS } from "@/types";
 import { WorldSystem } from "@/systems/WorldSystem";
+import { ItemSystem } from "@/systems/ItemSystem";
+import { getItemById } from "@/data/items";
 
 export class GameStateFactory {
   /**
@@ -122,61 +124,29 @@ export class GameStateFactory {
    * Create starting inventory for new players
    */
   private static createStartingInventory(): Inventory {
-    return {
-      slots: [
-        // Starting with basic food and water
-        {
-          item: {
-            id: "basic_food",
-            name: "Pet Food",
-            description: "Basic food for your pet",
-            type: "consumable",
-            rarity: "common",
-            icon: "food.png",
-            effects: [{ type: "satiety", value: 25 }],
-            value: 10,
-            stackable: true,
-          },
-          quantity: 5,
-          slotIndex: 0,
-        },
-        {
-          item: {
-            id: "basic_water",
-            name: "Water Bowl",
-            description: "Fresh water for your pet",
-            type: "consumable",
-            rarity: "common",
-            icon: "water.png",
-            effects: [{ type: "hydration", value: 30 }],
-            value: 5,
-            stackable: true,
-          },
-          quantity: 5,
-          slotIndex: 1,
-        },
-        {
-          item: {
-            id: "basic_toy",
-            name: "Ball",
-            description: "A simple ball to play with",
-            type: "toy",
-            rarity: "common",
-            icon: "ball.png",
-            effects: [{ type: "happiness", value: 20 }],
-            value: 15,
-            stackable: false,
-            maxDurability: 100,
-            currentDurability: 100,
-            durabilityLossPerUse: 5,
-          },
-          quantity: 1,
-          slotIndex: 2,
-        },
-      ],
-      maxSlots: GAME_CONSTANTS.STARTING_INVENTORY_SLOTS,
-      gold: GAME_CONSTANTS.STARTING_GOLD,
-    };
+    // Create empty inventory
+    let inventory = ItemSystem.createInventory(GAME_CONSTANTS.STARTING_INVENTORY_SLOTS, GAME_CONSTANTS.STARTING_GOLD);
+
+    // Add starting items
+    const startingItems = [
+      { id: "apple", quantity: 3 },
+      { id: "water_bottle", quantity: 3 },
+      { id: "ball", quantity: 1 },
+      { id: "basic_medicine", quantity: 1 },
+      { id: "soap", quantity: 2 },
+    ];
+
+    startingItems.forEach(({ id, quantity }) => {
+      const item = getItemById(id);
+      if (item) {
+        const result = ItemSystem.addItem(inventory, item, quantity);
+        if (result.success) {
+          inventory = result.data!;
+        }
+      }
+    });
+
+    return inventory;
   }
 
   /**
