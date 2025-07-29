@@ -70,53 +70,58 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
 - **Status Moves**: focus, defend, quick_step, confusion_ray  
 - **Healing Moves**: recover
 
-### ItemSystem UI Implementation (Following Established Pattern)
-**Last performed:** January 14, 2025
+### Shop Integration Implementation (Following Established Pattern)
+**Last performed:** January 15, 2025
 **Status:** ✅ COMPLETED
 **Files created/modified:**
-- `src/systems/ItemSystem.ts` - Complete inventory management and item usage system
-- `src/components/inventory/` - Complete inventory UI component suite
-  - `InventoryScreen.tsx` - Main inventory interface with tabs and controls
-  - `InventoryGrid.tsx` - Grid-based item display with filtering
-  - `ItemSlot.tsx` - Individual item slots with rarity and durability indicators
-  - `ItemDetailsPanel.tsx` - Detailed item information and actions
-  - `ItemCategoryTabs.tsx` - Category filtering interface
-  - `ItemIcon.tsx` - Visual item representation system
-- `src/hooks/useGameState.ts` - Enhanced with item action functions
-- `src/engine/GameStateFactory.ts` - Updated to create starting inventory with real items
-- `src/components/GameScreen.tsx` - Added inventory tab integration
-- `tests/systems/ItemSystem.test.ts` - 58 comprehensive test cases
+- `src/systems/WorldSystem.ts` - Added shop management methods
+- `src/components/world/ShopPanel.tsx` - Complete shop interface with buy/sell functionality
+- `src/components/world/ShopModal.tsx` - Modal dialog for shop interactions
+- `src/components/world/ActivitiesPanel.tsx` - Enhanced with shop buttons and UI
+- `src/components/world/WorldScreen.tsx` - Integrated shop modal and state management
+- `src/components/GameScreen.tsx` - Added shop handlers connecting to ItemSystem
+- `src/components/ui/badge.tsx` - Badge component for item rarity display
+- `src/components/ui/separator.tsx` - UI separator component
+- `tests/systems/WorldSystem.test.ts` - Added 5 comprehensive shop system tests
 
 **Implementation Features:**
-- Complete inventory management (add, remove, stack, sort, categorize)
-- Item usage validation and effects application integrated with PetSystem
-- Shop and trade system (buy/sell with configurable pricing)
-- Durability system for equipment and toys with visual indicators
-- Grid-based UI with 8x6 layout (48 slots)
-- Item categorization and filtering (All, Food, Drinks, Medicine, Toys, Equipment)
-- Visual rarity indicators and status effects
+- Complete shop interface with tabbed buy/sell layout
+- Real-time inventory and gold management
+- Item categorization with rarity badges and stock indicators
+- Modal-based shopping experience with responsive design
+- Integration with existing ItemSystem backend (buyItem/sellItem methods)
+- Shop availability based on current location
+- Dynamic pricing with configurable buy/sell ratios
 - Comprehensive error handling and user feedback
-- Starting inventory with 5 essential item types
+- Stock management for limited vs unlimited items
 
 **Key Technical Achievements:**
-- 58 test cases with comprehensive coverage of all inventory mechanics
+- 5 new test cases with comprehensive coverage of all shop mechanics
 - Full TypeScript compliance with strict typing
-- Follows established static class method pattern
-- Complete UI integration with existing game interface
+- Follows established UI component patterns (shadcn/ui)
+- Complete integration with existing game state management
 - Production builds and linting pass
-- Now 183 total tests passing (125 + 58 new ItemSystem tests)
+- Now 265 total tests passing (260 + 5 new shop tests)
 
 **Integration Points:**
-- ItemSystem backend integrates seamlessly with PetSystem for item effects
-- UI components follow shadcn/ui design patterns established in project
-- Game state management extended to handle inventory operations
-- Visual design consistent with existing pet care and world exploration tabs
+- WorldSystem provides shop discovery and validation methods
+- ActivitiesPanel displays available shops with interactive buttons
+- ShopPanel backend integrates seamlessly with ItemSystem buy/sell functionality
+- UI components follow established design patterns from inventory system
+- Game state management extended to handle shop transactions
+- Visual design consistent with existing world exploration interface
+
+**Shop Data Available:**
+- Hometown General Store with 4 items (Apple, Water Bottle, Basic Medicine, Soap)
+- Shopkeeper Sam with dialogue system integration
+- Configurable item pricing and stock levels
+- Foundation ready for additional shops in new locations
 
 **Important Notes:**
 - Successfully followed the established system implementation pattern
-- Inventory system is fully functional and ready for content expansion
-- Foundation provides excellent base for shop NPCs and trading mechanics
-- Item icon system ready for visual asset integration when available
+- Shop system is fully functional and ready for content expansion
+- Foundation provides excellent base for more complex shop features
+- Integration with quest system ready for future development
 
 ## Development Setup Tasks
 
@@ -373,23 +378,62 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
   - [x] Full coverage of battle mechanics
   - [x] Edge case and error handling tests
 
-#### 3.3 Item System Implementation
-- [ ] **ItemSystem** (`src/systems/ItemSystem.ts`)
-  - [ ] Item usage and effect processing
-  - [ ] Inventory management
-  - [ ] Shop and trading mechanics
-  - [ ] Durability and consumption logic
+#### 3.3 Shop Integration ✅ COMPLETED
+- [x] **Shop UI Components** (`src/components/world/ShopPanel.tsx`, `ShopModal.tsx`)
+  - [x] Shop interface with buy/sell tabs and item display
+  - [x] Modal dialog for immersive shopping experience
+  - [x] Integration with existing WorldSystem and ItemSystem
+  - [x] Real-time inventory and gold management
+- [x] **WorldSystem Enhancement** (`src/systems/WorldSystem.ts`)
+  - [x] Shop discovery and validation methods
+  - [x] Location-based shop availability
+  - [x] Integration with existing location data
+- [x] **UI Integration** (ActivitiesPanel, WorldScreen, GameScreen)
+  - [x] Shop buttons in activities panel
+  - [x] Shop modal integration in world screen
+  - [x] Shop handlers in main game screen
+- [x] **Shop System Tests** (`tests/systems/WorldSystem.test.ts`)
+  - [x] 5 comprehensive test cases for shop functionality
+  - [x] Full coverage of shop discovery and validation
+  - [x] Error handling and edge case tests
 
-### Phase 4: Content & Polish
-**Priority: LOW - Content expansion**
+### Phase 4: Content & Polish ✅ MAJOR PROGRESS
 
-#### 4.1 Game Content Creation
+#### 4.1 ItemSystem & Inventory ✅ COMPLETED
+- [x] **ItemSystem** (`src/systems/ItemSystem.ts`)
+  - [x] Item usage and effect processing
+  - [x] Inventory management
+  - [x] Shop and trading mechanics
+  - [x] Durability and consumption logic
+- [x] **Inventory UI Components** (`src/components/inventory/`)
+  - [x] Complete inventory interface with grid layout
+  - [x] Item categorization and filtering
+  - [x] Visual rarity and durability indicators
+  - [x] Item usage and selling functionality
+
+#### 4.2 Shop Integration ✅ COMPLETED  
+- [x] **Shop UI Components** (`src/components/world/ShopPanel.tsx`, `ShopModal.tsx`)
+  - [x] Complete shop interface with buy/sell functionality
+  - [x] Modal-based shopping experience
+  - [x] Real-time inventory and gold management
+- [x] **WorldSystem Enhancement** 
+  - [x] Shop discovery and validation methods
+  - [x] Location-based shop availability
+- [x] **Shop Integration Tests**
+  - [x] 5 comprehensive shop system tests
+  - [x] Full coverage of shop functionality
+
+#### 4.3 Content Creation & Battle UI (Current)
+- [ ] **Battle UI Components** (`src/components/battle/`)
+  - [ ] Battle interface with move selection
+  - [ ] Combat visualization and feedback
+  - [ ] Turn-based UI flow
 - [ ] **Pet Species** (`src/data/pets.ts`)
   - [ ] Define all 31 pet species across rarities
   - [ ] Create pet sprites and icons
   - [ ] Balance stats and growth rates
 - [ ] **Items Database** (`src/data/items.ts`)
-  - [ ] Food, drinks, medicine, toys, hygiene items
+  - [ ] More food, drinks, medicine, toys, hygiene items
   - [ ] Item icons and descriptions
   - [ ] Shop prices and availability
 - [ ] **World Content** (`src/data/locations.ts`, `src/data/npcs.ts`)
@@ -397,11 +441,20 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
   - [ ] Explorable areas with activities
   - [ ] NPCs with dialog and quests
 - [ ] **Battle Content** (`src/data/moves.ts`)
-  - [ ] Move database with effects
+  - [ ] Expand move database with effects
   - [ ] Training facilities
   - [ ] Battle encounters
 
-#### 4.2 Advanced Features
+#### 4.4 Advanced Features
+- [ ] **Quest System** (`src/systems/QuestSystem.ts`)
+  - [ ] Quest line management
+  - [ ] Objective tracking
+  - [ ] Reward distribution
+- [ ] **Achievement System**
+  - [ ] Achievement definitions and tracking
+  - [ ] Progress notifications
+  - [ ] Unlock rewards
+- [ ] **Advanced UI Features**
 - [ ] **Quest System** (`src/systems/QuestSystem.ts`)
   - [ ] Quest line management
   - [ ] Objective tracking
@@ -435,7 +488,8 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
 - ✅ **Phase 2 Complete**: Storage system, game loop, and basic UI foundation
 - ✅ **Phase 3 Complete**: World and battle systems (WorldSystem + BattleSystem)
 - ✅ **Phase 4.1 Complete**: ItemSystem with full inventory UI implementation
-- 🔄 **Phase 4.2 Current**: Content expansion and shop integration
+- ✅ **Phase 4.2 Complete**: Shop Integration with complete UI and backend
+- 🔄 **Phase 4.3 Current**: Battle UI Components and Content expansion
 - 📅 **Phase 5 Future**: Advanced features and polish
 
 ### Estimated Timeline

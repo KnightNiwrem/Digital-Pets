@@ -1,6 +1,6 @@
 // WorldSystem - Manages locations, travel, and world interactions
 
-import type { WorldState, TravelState, Location, Activity, ActiveActivity, ActivityReward } from "@/types/World";
+import type { WorldState, TravelState, Location, Activity, ActiveActivity, ActivityReward, Shop } from "@/types/World";
 import type { Pet } from "@/types/Pet";
 import type { Result } from "@/types";
 import { PetValidator, EnergyManager } from "@/lib/utils";
@@ -428,5 +428,33 @@ export class WorldSystem {
       success: true,
       data: { worldState: currentWorldState, rewards: allRewards },
     };
+  }
+
+  // ============= SHOP SYSTEM =============
+
+  /**
+   * Get available shops at current location
+   */
+  static getAvailableShops(worldState: WorldState): Shop[] {
+    const currentLocation = this.getCurrentLocation(worldState);
+    if (!currentLocation) {
+      return [];
+    }
+    return currentLocation.shops || [];
+  }
+
+  /**
+   * Get a specific shop by ID at current location
+   */
+  static getShopById(worldState: WorldState, shopId: string): Shop | undefined {
+    const shops = this.getAvailableShops(worldState);
+    return shops.find(shop => shop.id === shopId);
+  }
+
+  /**
+   * Check if a shop is available at the current location
+   */
+  static isShopAvailable(worldState: WorldState, shopId: string): boolean {
+    return this.getShopById(worldState, shopId) !== undefined;
   }
 }

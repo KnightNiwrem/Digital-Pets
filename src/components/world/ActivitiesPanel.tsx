@@ -11,6 +11,7 @@ interface ActivitiesPanelProps {
   worldState: WorldState;
   onStartActivity: (activityId: string) => void;
   onCancelActivity: () => void;
+  onOpenShop?: (shopId: string) => void;
   disabled?: boolean;
 }
 
@@ -30,11 +31,13 @@ export function ActivitiesPanel({
   worldState,
   onStartActivity,
   onCancelActivity,
+  onOpenShop,
   disabled = false,
 }: ActivitiesPanelProps) {
   const currentLocation = WorldSystem.getCurrentLocation(worldState);
   const activityProgress = WorldSystem.getActivityProgress(worldState, pet.id);
   const isTravel = worldState.travelState !== undefined;
+  const availableShops = WorldSystem.getAvailableShops(worldState);
 
   if (!currentLocation) {
     return (
@@ -107,6 +110,42 @@ export function ActivitiesPanel({
               <p className="text-sm text-orange-600">
                 Activities will be available when you arrive at your destination.
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* Available Shops */}
+        {!isTravel && availableShops.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="font-medium text-sm text-gray-600 uppercase tracking-wide">
+              Shops & Services
+            </h4>
+            <div className="space-y-2">
+              {availableShops.map(shop => (
+                <div key={shop.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Gift className="w-4 h-4 text-gray-600" />
+                        <h5 className="font-medium">{shop.name}</h5>
+                      </div>
+                      <p className="text-sm text-gray-600">{shop.description}</p>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Keeper: {shop.keeper} • {shop.items.length} items available
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => onOpenShop?.(shop.id)}
+                      disabled={disabled}
+                      className="ml-3"
+                    >
+                      <Gift className="w-4 h-4 mr-1" />
+                      Shop
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
