@@ -213,7 +213,7 @@ export function PetCarePanel({
         <div className="text-xs text-muted-foreground space-y-1">
           <p>💡 Tips:</p>
           <ul className="list-disc list-inside space-y-0.5 ml-2">
-            <li>Feed when hunger is low</li>
+            <li>Feed when satiety is low</li>
             <li>Play requires energy but increases happiness</li>
             <li>Sleep restores energy over time</li>
             <li>Clean poop quickly to prevent sickness</li>
