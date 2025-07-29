@@ -119,6 +119,7 @@ describe("GameLoop", () => {
       testGameState.world.travelState = {
         destinationId: "forest",
         ticksRemaining: 50,
+        totalTravelTime: 100,
         startTime: Date.now() - (30 * 60 * 1000),
       };
       testPet.state = "travelling";
@@ -131,7 +132,8 @@ describe("GameLoop", () => {
       expect(result.majorEvents).toContain("travel_completed");
       expect(testGameState.world.currentLocationId).toBe("forest");
       expect(testGameState.world.travelState).toBeUndefined();
-      expect(testPet.state).toBe("idle");
+      // Pet should be back to idle after travel completion
+      expect((testPet as Pet).state).toBe("idle");
     });
 
     it("should update game time and metrics", () => {

@@ -47,7 +47,7 @@ export class GameLoop {
     const globalSetInterval = typeof window !== "undefined" ? window.setInterval : globalThis.setInterval;
     this.intervalId = globalSetInterval(() => {
       this.tick();
-    }, GAME_CONSTANTS.TICK_INTERVAL);
+    }, GAME_CONSTANTS.TICK_INTERVAL) as any;
 
     console.log("Game loop started");
   }

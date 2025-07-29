@@ -1,7 +1,7 @@
 // React hook for managing game state and game loop
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { GameState, Pet, Result } from "@/types";
+import type { GameState, Pet, Result, PetCareAction } from "@/types";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 import { GameStorage } from "@/storage/GameStorage";
@@ -73,7 +73,7 @@ export function useGameState(): UseGameStateReturn {
 
   // Pet care action wrapper
   const performPetAction = useCallback(
-    async (action: (pet: Pet) => Result<string[]>, actionName: string): Promise<Result<void>> => {
+    async (action: (pet: Pet) => Result<PetCareAction>, actionName: string): Promise<Result<void>> => {
       if (!gameState?.currentPet) {
         return { success: false, error: "No active pet" };
       }
@@ -191,16 +191,20 @@ export function useGameState(): UseGameStateReturn {
   }, [gameState]);
 
   // Pet care actions
-  const feedPet = useCallback(() => performPetAction(PetSystem.feedPet, "feed pet"), [performPetAction]);
+  const feedPet = useCallback(() => performPetAction(pet => PetSystem.feedPet(pet, 25), "feed pet"), [performPetAction]);
 
-  const giveDrink = useCallback(() => performPetAction(PetSystem.giveDrink, "give drink"), [performPetAction]);
+  const giveDrink = useCallback(() => performPetAction(pet => PetSystem.giveDrink(pet, 25), "give drink"), [performPetAction]);
 
-  const playWithPet = useCallback(() => performPetAction(PetSystem.playWithPet, "play with pet"), [performPetAction]);
+  const playWithPet = useCallback(() => performPetAction(pet => PetSystem.playWithPet(pet, 20), "play with pet"), [performPetAction]);
 
   const cleanPoop = useCallback(() => performPetAction(PetSystem.cleanPoop, "clean poop"), [performPetAction]);
 
   const treatPet = useCallback(
-    (medicineType: string) => performPetAction(pet => PetSystem.treatPet(pet, medicineType), "treat pet"),
+    (_medicineType: string) => {
+      // For now, create a simple medicine effect based on the medicine type
+      const medicineEffect = [{ type: "cure" as const, value: 100 }];
+      return performPetAction(pet => PetSystem.treatPet(pet, medicineEffect), "treat pet");
+    },
     [performPetAction]
   );
 
@@ -210,7 +214,7 @@ export function useGameState(): UseGameStateReturn {
     }
 
     const pet = gameState.currentPet;
-    const actionFn = pet.state === "sleeping" ? PetSystem.wakePet : PetSystem.putPetToSleep;
+    const actionFn = pet.state === "sleeping" ? PetSystem.wakePetUp : PetSystem.putPetToSleep;
     const actionName = pet.state === "sleeping" ? "wake pet" : "put pet to sleep";
 
     return performPetAction(actionFn, actionName);

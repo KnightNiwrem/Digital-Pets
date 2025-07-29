@@ -59,7 +59,7 @@ const parseValue = (value: string): string | number | boolean | string[] => {
 
 // Magical argument parser that converts CLI args to BuildConfig
 function parseArgs(): Partial<BuildConfig> {
-  const config: Record<string, string | number | boolean | string[]> = {};
+  const config: Record<string, any> = {};
   const args = process.argv.slice(2);
 
   for (let i = 0; i < args.length; i++) {
@@ -97,7 +97,9 @@ function parseArgs(): Partial<BuildConfig> {
     // Handle nested properties (e.g. --minify.whitespace)
     if (key.includes(".")) {
       const [parentKey, childKey] = key.split(".");
-      config[parentKey] = config[parentKey] || {};
+      if (typeof config[parentKey] !== 'object' || config[parentKey] === null) {
+        config[parentKey] = {};
+      }
       config[parentKey][childKey] = parseValue(value);
     } else {
       config[key] = parseValue(value);

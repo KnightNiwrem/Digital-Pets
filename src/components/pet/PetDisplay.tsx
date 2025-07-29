@@ -162,8 +162,8 @@ export function PetDisplay({ pet }: PetDisplayProps) {
         {/* Next Critical Event */}
         {nextCriticalEvent && (
           <div className="text-center p-2 bg-yellow-50 border border-yellow-200 rounded">
-            <p className="text-sm font-medium text-yellow-800">Next: {nextCriticalEvent.type}</p>
-            <p className="text-xs text-yellow-600">In ~{Math.ceil((nextCriticalEvent.ticksUntil * 15) / 60)} minutes</p>
+            <p className="text-sm font-medium text-yellow-800">Next: {nextCriticalEvent.event}</p>
+            <p className="text-xs text-yellow-600">In ~{Math.ceil((nextCriticalEvent.ticksRemaining * 15) / 60)} minutes</p>
           </div>
         )}
 
