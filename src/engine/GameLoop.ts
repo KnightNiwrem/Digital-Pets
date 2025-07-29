@@ -4,6 +4,7 @@ import type { GameState, GameTick, GameAction } from "@/types";
 import { GAME_CONSTANTS } from "@/types";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
+import { WorldSystem } from "@/systems/WorldSystem";
 
 export class GameLoop {
   private static instance: GameLoop | null = null;
@@ -178,19 +179,14 @@ export class GameLoop {
   private processWorldTick(actions: GameAction[], stateChanges: string[]): void {
     if (!this.gameState) return;
 
-    // Process travel
-    if (this.gameState.world.travelState) {
-      this.gameState.world.travelState.ticksRemaining--;
-
-      if (this.gameState.world.travelState.ticksRemaining <= 0) {
-        // Travel completed
-        this.gameState.world.currentLocationId = this.gameState.world.travelState.destinationId;
-        this.gameState.world.travelState = undefined;
-
+    // Process travel using WorldSystem
+    const travelResult = WorldSystem.processTravelTick(this.gameState.world);
+    if (travelResult.success) {
+      if (travelResult.message) {
         stateChanges.push("travel_completed");
         actions.push({
           type: "travel_completed",
-          payload: { locationId: this.gameState.world.currentLocationId },
+          payload: { locationId: travelResult.data.currentLocationId },
           timestamp: Date.now(),
           source: "system",
         });
@@ -200,20 +196,20 @@ export class GameLoop {
           this.gameState.currentPet.state = "idle";
         }
       }
+      this.gameState.world = travelResult.data;
     }
 
-    // Process active activities
-    this.gameState.world.activeActivities = this.gameState.world.activeActivities.filter(activity => {
-      activity.ticksRemaining--;
-
-      if (activity.ticksRemaining <= 0) {
-        // Activity completed
-        this.completeActivity(activity, actions, stateChanges);
-        return false; // Remove from active activities
+    // Process activities using WorldSystem
+    const activityResult = WorldSystem.processActivitiesTick(this.gameState.world);
+    if (activityResult.success) {
+      this.gameState.world = activityResult.data.worldState;
+      
+      // Process rewards from completed activities
+      if (activityResult.data.rewards.length > 0) {
+        stateChanges.push("activities_completed");
+        this.processActivityRewards(activityResult.data.rewards, actions, stateChanges);
       }
-
-      return true; // Keep in active activities
-    });
+    }
   }
 
   /**
@@ -270,6 +266,55 @@ export class GameLoop {
   }
 
   /**
+   * Process activity rewards
+   */
+  private processActivityRewards(
+    rewards: import("@/types/World").ActivityReward[],
+    actions: GameAction[],
+    stateChanges: string[]
+  ): void {
+    if (!this.gameState) return;
+
+    for (const reward of rewards) {
+      switch (reward.type) {
+        case "gold":
+          this.gameState.inventory.gold += reward.amount;
+          actions.push({
+            type: "gold_earned",
+            payload: { amount: reward.amount, source: "activity" },
+            timestamp: Date.now(),
+            source: "system",
+          });
+          break;
+        
+        case "item":
+          if (reward.id) {
+            // TODO: Add item to inventory when ItemSystem is implemented
+            actions.push({
+              type: "item_earned",
+              payload: { itemId: reward.id, amount: reward.amount, source: "activity" },
+              timestamp: Date.now(),
+              source: "system",
+            });
+          }
+          break;
+        
+        case "experience":
+          this.gameState.playerStats.experience += reward.amount;
+          actions.push({
+            type: "experience_earned",
+            payload: { amount: reward.amount, source: "activity" },
+            timestamp: Date.now(),
+            source: "system",
+          });
+          break;
+      }
+    }
+
+    stateChanges.push("rewards_processed");
+  }
+
+  /**
    * Calculate offline progression when loading a saved game
    */
   calculateOfflineProgression(lastSaveTime: number): void {
@@ -281,18 +326,32 @@ export class GameLoop {
 
     if (ticksPassed <= 0) return;
 
-    console.log(`Processing ${ticksPassed} offline ticks (${Math.round(timeDiff / 1000)}s offline)`);
+    console.log(`Processing ${ticksPassed} offline ticks (${Math.round(timeDiff / 60000)} minutes offline)`);
 
     // Process each tick (up to a reasonable limit to avoid performance issues)
-    const maxOfflineTicks = 2880; // 12 hours worth of ticks
+    const maxOfflineTicks = 40320; // 7 days worth of ticks  
     const actualTicks = Math.min(ticksPassed, maxOfflineTicks);
 
+    // Process pet progression
     for (let i = 0; i < actualTicks; i++) {
       this.tickNumber++;
       this.gameState.gameTime.totalTicks = this.tickNumber;
 
       if (this.gameState.currentPet) {
         PetSystem.processPetTick(this.gameState.currentPet);
+      }
+    }
+
+    // Process world progression (travel and activities)
+    const worldResult = WorldSystem.processOfflineProgression(this.gameState.world, actualTicks);
+    if (worldResult.success) {
+      this.gameState.world = worldResult.data.worldState;
+      
+      // Process any rewards from offline activities
+      if (worldResult.data.rewards.length > 0) {
+        const actions: GameAction[] = [];
+        const stateChanges: string[] = [];
+        this.processActivityRewards(worldResult.data.rewards, actions, stateChanges);
       }
     }
 

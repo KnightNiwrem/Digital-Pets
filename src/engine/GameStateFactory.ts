@@ -2,6 +2,7 @@
 
 import type { GameState, Pet, PetSpecies, Inventory, WorldState, QuestLog } from "@/types";
 import { GAME_CONSTANTS, DEFAULT_GAME_SETTINGS, DEFAULT_PLAYER_STATS } from "@/types";
+import { WorldSystem } from "@/systems/WorldSystem";
 
 export class GameStateFactory {
   /**
@@ -182,13 +183,7 @@ export class GameStateFactory {
    * Create starting world state
    */
   private static createStartingWorld(): WorldState {
-    return {
-      currentLocationId: "hometown",
-      unlockedLocations: ["hometown"],
-      visitedLocations: ["hometown"],
-      travelState: undefined,
-      activeActivities: [],
-    };
+    return WorldSystem.initializeWorldState();
   }
 
   /**
