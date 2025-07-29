@@ -203,7 +203,7 @@ export class GameLoop {
     const activityResult = WorldSystem.processActivitiesTick(this.gameState.world);
     if (activityResult.success) {
       this.gameState.world = activityResult.data.worldState;
-      
+
       // Process rewards from completed activities
       if (activityResult.data.rewards.length > 0) {
         stateChanges.push("activities_completed");
@@ -286,7 +286,7 @@ export class GameLoop {
             source: "system",
           });
           break;
-        
+
         case "item":
           if (reward.id) {
             // TODO: Add item to inventory when ItemSystem is implemented
@@ -298,7 +298,7 @@ export class GameLoop {
             });
           }
           break;
-        
+
         case "experience":
           this.gameState.playerStats.experience += reward.amount;
           actions.push({
@@ -329,7 +329,7 @@ export class GameLoop {
     console.log(`Processing ${ticksPassed} offline ticks (${Math.round(timeDiff / 60000)} minutes offline)`);
 
     // Process each tick (up to a reasonable limit to avoid performance issues)
-    const maxOfflineTicks = 40320; // 7 days worth of ticks  
+    const maxOfflineTicks = 40320; // 7 days worth of ticks
     const actualTicks = Math.min(ticksPassed, maxOfflineTicks);
 
     // Process pet progression
@@ -346,7 +346,7 @@ export class GameLoop {
     const worldResult = WorldSystem.processOfflineProgression(this.gameState.world, actualTicks);
     if (worldResult.success) {
       this.gameState.world = worldResult.data.worldState;
-      
+
       // Process any rewards from offline activities
       if (worldResult.data.rewards.length > 0) {
         const actions: GameAction[] = [];

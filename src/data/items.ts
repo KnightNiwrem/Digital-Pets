@@ -185,17 +185,17 @@ export const ITEMS: Item[] = [
 
 // Helper function to get item by ID
 export function getItemById(id: string): Item | undefined {
-  return ITEMS.find((item) => item.id === id);
+  return ITEMS.find(item => item.id === id);
 }
 
 // Helper function to get items by type
 export function getItemsByType(type: ItemType): Item[] {
-  return ITEMS.filter((item) => item.type === type);
+  return ITEMS.filter(item => item.type === type);
 }
 
 // Helper function to get items by rarity
 export function getItemsByRarity(rarity: ItemRarity): Item[] {
-  return ITEMS.filter((item) => item.rarity === rarity);
+  return ITEMS.filter(item => item.rarity === rarity);
 }
 
 // Helper function to create new item instance (important for durability items)

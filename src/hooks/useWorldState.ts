@@ -2,12 +2,12 @@
 
 import { useCallback } from "react";
 import { WorldSystem } from "@/systems/WorldSystem";
-import type { Pet, WorldState } from "@/types";
+import type { Pet, WorldState, GameState, Location, Activity } from "@/types";
 
 interface UseWorldStateProps {
   pet: Pet | null;
   worldState: WorldState;
-  updateGameState: (updater: (prev: any) => any) => void;
+  updateGameState: (updater: (prev: GameState) => GameState) => void;
   disabled?: boolean;
 }
 
@@ -16,81 +16,86 @@ interface UseWorldStateReturn {
   startTravel: (destinationId: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   getTravelProgress: () => number;
   isTravel: boolean;
-  
+
   // Activity functions
   startActivity: (activityId: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   cancelActivity: () => Promise<{ success: boolean; message?: string; error?: string }>;
-  getActivityProgress: () => { activity: any; progress: number; timeRemaining: number };
+  getActivityProgress: () => { activity: Activity | undefined; progress: number; timeRemaining: number };
   hasActiveActivity: boolean;
-  
+
   // Location functions
-  getCurrentLocation: () => any;
-  getAvailableDestinations: () => any[];
-  getAvailableLocations: () => any[];
-  
+  getCurrentLocation: () => Location | null;
+  getAvailableDestinations: () => Location[];
+  getAvailableLocations: () => Location[];
+
   // State
   worldState: WorldState;
   disabled: boolean;
 }
 
-export function useWorldState({ 
-  pet, 
-  worldState, 
-  updateGameState, 
-  disabled = false 
+export function useWorldState({
+  pet,
+  worldState,
+  updateGameState,
+  disabled = false,
 }: UseWorldStateProps): UseWorldStateReturn {
-  
-  const startTravel = useCallback(async (destinationId: string) => {
-    if (!pet || disabled) {
-      return { success: false, error: "Cannot travel at this time" };
-    }
+  const startTravel = useCallback(
+    async (destinationId: string) => {
+      if (!pet || disabled) {
+        return { success: false, error: "Cannot travel at this time" };
+      }
 
-    const result = WorldSystem.startTravel(worldState, pet, destinationId);
-    
-    if (result.success) {
-      updateGameState((prev: any) => ({
-        ...prev,
-        world: result.data.worldState,
-        currentPet: result.data.pet,
-      }));
-      
-      return { 
-        success: true, 
-        message: result.message || "Travel started successfully" 
-      };
-    } else {
-      return { 
-        success: false, 
-        error: result.error 
-      };
-    }
-  }, [pet, worldState, updateGameState, disabled]);
+      const result = WorldSystem.startTravel(worldState, pet, destinationId);
 
-  const startActivity = useCallback(async (activityId: string) => {
-    if (!pet || disabled) {
-      return { success: false, error: "Cannot start activity at this time" };
-    }
+      if (result.success) {
+        updateGameState((prev: GameState) => ({
+          ...prev,
+          world: result.data.worldState,
+          currentPet: result.data.pet,
+        }));
 
-    const result = WorldSystem.startActivity(worldState, pet, activityId);
-    
-    if (result.success) {
-      updateGameState((prev: any) => ({
-        ...prev,
-        world: result.data.worldState,
-        currentPet: result.data.pet,
-      }));
-      
-      return { 
-        success: true, 
-        message: result.message || "Activity started successfully" 
-      };
-    } else {
-      return { 
-        success: false, 
-        error: result.error 
-      };
-    }
-  }, [pet, worldState, updateGameState, disabled]);
+        return {
+          success: true,
+          message: result.message || "Travel started successfully",
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    },
+    [pet, worldState, updateGameState, disabled]
+  );
+
+  const startActivity = useCallback(
+    async (activityId: string) => {
+      if (!pet || disabled) {
+        return { success: false, error: "Cannot start activity at this time" };
+      }
+
+      const result = WorldSystem.startActivity(worldState, pet, activityId);
+
+      if (result.success) {
+        updateGameState((prev: GameState) => ({
+          ...prev,
+          world: result.data.worldState,
+          currentPet: result.data.pet,
+        }));
+
+        return {
+          success: true,
+          message: result.message || "Activity started successfully",
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+    },
+    [pet, worldState, updateGameState, disabled]
+  );
 
   const cancelActivity = useCallback(async () => {
     if (!pet || disabled) {
@@ -98,21 +103,21 @@ export function useWorldState({
     }
 
     const result = WorldSystem.cancelActivity(worldState, pet.id);
-    
+
     if (result.success) {
-      updateGameState((prev: any) => ({
+      updateGameState((prev: GameState) => ({
         ...prev,
         world: result.data,
       }));
-      
-      return { 
-        success: true, 
-        message: result.message || "Activity cancelled successfully" 
+
+      return {
+        success: true,
+        message: result.message || "Activity cancelled successfully",
       };
     } else {
-      return { 
-        success: false, 
-        error: result.error 
+      return {
+        success: false,
+        error: result.error,
       };
     }
   }, [pet, worldState, updateGameState, disabled]);
@@ -152,18 +157,18 @@ export function useWorldState({
     startTravel,
     getTravelProgress,
     isTravel,
-    
+
     // Activity functions
     startActivity,
     cancelActivity,
     getActivityProgress,
     hasActiveActivity,
-    
+
     // Location functions
     getCurrentLocation,
     getAvailableDestinations,
     getAvailableLocations,
-    
+
     // State
     worldState,
     disabled,

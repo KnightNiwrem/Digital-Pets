@@ -1,23 +1,11 @@
 // WorldSystem - Manages locations, travel, and world interactions
 
-import type { 
-  WorldState, 
-  TravelState, 
-  Location, 
-  Activity, 
-  ActiveActivity, 
-  ActivityReward 
-} from "@/types/World";
-import type { GameState } from "@/types/GameState";
+import type { WorldState, TravelState, Location, Activity, ActiveActivity, ActivityReward } from "@/types/World";
 import type { Pet } from "@/types/Pet";
-import type { Item } from "@/types/Item";
 import { LOCATIONS, getLocationById, getStartingLocation } from "@/data/locations";
-import { getItemById, createItemInstance } from "@/data/items";
 
 // Result type for operations
-type Result<T> = 
-  | { success: true; data: T; message?: string }
-  | { success: false; error: string };
+type Result<T> = { success: true; data: T; message?: string } | { success: false; error: string };
 
 export class WorldSystem {
   /**
@@ -25,7 +13,7 @@ export class WorldSystem {
    */
   static initializeWorldState(): WorldState {
     const startingLocation = getStartingLocation();
-    
+
     return {
       currentLocationId: startingLocation.id,
       unlockedLocations: [startingLocation.id],
@@ -45,9 +33,7 @@ export class WorldSystem {
    * Get all available locations (unlocked)
    */
   static getAvailableLocations(worldState: WorldState): Location[] {
-    return LOCATIONS.filter(location => 
-      worldState.unlockedLocations.includes(location.id)
-    );
+    return LOCATIONS.filter(location => worldState.unlockedLocations.includes(location.id));
   }
 
   /**
@@ -60,7 +46,7 @@ export class WorldSystem {
     }
 
     const availableDestinations: Location[] = [];
-    
+
     for (const connection of currentLocation.connections) {
       const destination = getLocationById(connection.destinationId);
       if (!destination) continue;
@@ -89,8 +75,8 @@ export class WorldSystem {
    * Start travel to a destination
    */
   static startTravel(
-    worldState: WorldState, 
-    pet: Pet, 
+    worldState: WorldState,
+    pet: Pet,
     destinationId: string
   ): Result<{ worldState: WorldState; pet: Pet }> {
     // Check if pet is already travelling
@@ -300,9 +286,7 @@ export class WorldSystem {
   /**
    * Process active activities during game tick
    */
-  static processActivitiesTick(
-    worldState: WorldState
-  ): Result<{ worldState: WorldState; rewards: ActivityReward[] }> {
+  static processActivitiesTick(worldState: WorldState): Result<{ worldState: WorldState; rewards: ActivityReward[] }> {
     const completedActivities: ActiveActivity[] = [];
     const continuingActivities: ActiveActivity[] = [];
     const allRewards: ActivityReward[] = [];
@@ -344,9 +328,7 @@ export class WorldSystem {
     return {
       success: true,
       data: { worldState: updatedWorldState, rewards: allRewards },
-      message: completedActivities.length > 0 
-        ? `Completed ${completedActivities.length} activities`
-        : undefined,
+      message: completedActivities.length > 0 ? `Completed ${completedActivities.length} activities` : undefined,
     };
   }
 
@@ -355,7 +337,7 @@ export class WorldSystem {
    */
   static getTravelProgress(worldState: WorldState): number {
     if (!worldState.travelState) return 0;
-    
+
     const { ticksRemaining, totalTravelTime } = worldState.travelState;
     return Math.max(0, Math.min(100, ((totalTravelTime - ticksRemaining) / totalTravelTime) * 100));
   }
@@ -363,9 +345,12 @@ export class WorldSystem {
   /**
    * Get activity progress for a pet
    */
-  static getActivityProgress(worldState: WorldState, petId: string): { 
-    activity: Activity | undefined; 
-    progress: number; 
+  static getActivityProgress(
+    worldState: WorldState,
+    petId: string
+  ): {
+    activity: Activity | undefined;
+    progress: number;
     timeRemaining: number;
   } {
     const activeActivity = worldState.activeActivities.find(a => a.petId === petId);
@@ -375,7 +360,7 @@ export class WorldSystem {
 
     const location = getLocationById(activeActivity.locationId);
     const activity = location?.activities.find(a => a.id === activeActivity.activityId);
-    
+
     if (!activity) {
       return { activity: undefined, progress: 0, timeRemaining: 0 };
     }

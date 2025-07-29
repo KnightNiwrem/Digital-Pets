@@ -14,26 +14,21 @@ interface WorldScreenProps {
   disabled?: boolean;
 }
 
-export function WorldScreen({ 
-  pet, 
-  worldState, 
-  onTravel, 
-  onStartActivity, 
-  onCancelActivity, 
-  disabled = false 
+export function WorldScreen({
+  pet,
+  worldState,
+  onTravel,
+  onStartActivity,
+  onCancelActivity,
+  disabled = false,
 }: WorldScreenProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
       {/* World Map - Left Side */}
       <div className="w-full">
-        <WorldMap
-          pet={pet}
-          worldState={worldState}
-          onTravel={onTravel}
-          disabled={disabled}
-        />
+        <WorldMap pet={pet} worldState={worldState} onTravel={onTravel} disabled={disabled} />
       </div>
-      
+
       {/* Activities Panel - Right Side */}
       <div className="w-full">
         <ActivitiesPanel

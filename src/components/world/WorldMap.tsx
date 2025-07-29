@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Zap, Lock } from "lucide-react";
-import type { Pet, WorldState, Location } from "@/types";
+import type { Pet, WorldState } from "@/types";
 import { WorldSystem } from "@/systems/WorldSystem";
 
 interface WorldMapProps {
@@ -18,7 +18,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
   const currentLocation = WorldSystem.getCurrentLocation(worldState);
   const availableDestinationsResult = WorldSystem.getAvailableDestinations(worldState, pet);
   const availableDestinations = availableDestinationsResult.success ? availableDestinationsResult.data : [];
-  
+
   // Check if currently travelling
   const isTravel = worldState.travelState !== undefined;
   const travelProgress = WorldSystem.getTravelProgress(worldState);
@@ -33,9 +33,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-gray-500">
-            Location not found
-          </div>
+          <div className="text-center text-gray-500">Location not found</div>
         </CardContent>
       </Card>
     );
@@ -57,9 +55,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
               <h3 className="font-semibold text-blue-900">{currentLocation.name}</h3>
               <p className="text-sm text-blue-700">{currentLocation.description}</p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                  {currentLocation.type}
-                </span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">{currentLocation.type}</span>
                 {currentLocation.activities.length > 0 && (
                   <span className="text-xs text-blue-600">
                     {currentLocation.activities.length} activities available
@@ -79,17 +75,21 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
               <span className="font-medium text-orange-900">Travelling...</span>
             </div>
             <div className="text-sm text-orange-700 mb-2">
-              Heading to {WorldSystem.getCurrentLocation({ ...worldState, currentLocationId: worldState.travelState.destinationId })?.name}
+              Heading to{" "}
+              {
+                WorldSystem.getCurrentLocation({
+                  ...worldState,
+                  currentLocationId: worldState.travelState.destinationId,
+                })?.name
+              }
             </div>
             <div className="w-full bg-orange-200 rounded-full h-2">
-              <div 
-                className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
+              <div
+                className="bg-orange-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${travelProgress}%` }}
               />
             </div>
-            <div className="text-xs text-orange-600 mt-1">
-              {Math.round(travelProgress)}% complete
-            </div>
+            <div className="text-xs text-orange-600 mt-1">{Math.round(travelProgress)}% complete</div>
           </div>
         )}
 
@@ -105,17 +105,14 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
               </div>
             ) : (
               <div className="space-y-2">
-                {availableDestinations.map((destination) => {
+                {availableDestinations.map(destination => {
                   const connection = currentLocation.connections.find(c => c.destinationId === destination.id);
                   const energyCost = connection ? Math.floor(connection.travelTime / 4) : 0;
                   const canAfford = pet.currentEnergy >= energyCost;
                   const travelTime = connection ? Math.ceil(connection.travelTime / 4) : 0;
 
                   return (
-                    <div 
-                      key={destination.id} 
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
+                    <div key={destination.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h5 className="font-medium">{destination.name}</h5>
@@ -129,9 +126,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
                               <Zap className="w-3 h-3" />
                               {energyCost} energy
                             </div>
-                            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
-                              {destination.type}
-                            </span>
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full">{destination.type}</span>
                           </div>
                         </div>
                         <Button

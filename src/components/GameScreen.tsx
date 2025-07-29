@@ -37,10 +37,10 @@ export function GameScreen() {
   // World action handlers
   const handleTravel = async (destinationId: string) => {
     if (!gameState?.currentPet || !gameState?.world) return;
-    
+
     const { WorldSystem } = await import("@/systems/WorldSystem");
     const result = WorldSystem.startTravel(gameState.world, gameState.currentPet, destinationId);
-    
+
     if (result.success) {
       // Update the game state through the existing game loop
       // This is a simplified approach - in practice, this would be handled by the GameLoop
@@ -52,10 +52,10 @@ export function GameScreen() {
 
   const handleStartActivity = async (activityId: string) => {
     if (!gameState?.currentPet || !gameState?.world) return;
-    
+
     const { WorldSystem } = await import("@/systems/WorldSystem");
     const result = WorldSystem.startActivity(gameState.world, gameState.currentPet, activityId);
-    
+
     if (result.success) {
       console.log("Activity started:", result.message);
     } else {
@@ -65,10 +65,10 @@ export function GameScreen() {
 
   const handleCancelActivity = async () => {
     if (!gameState?.currentPet || !gameState?.world) return;
-    
+
     const { WorldSystem } = await import("@/systems/WorldSystem");
     const result = WorldSystem.cancelActivity(gameState.world, gameState.currentPet.id);
-    
+
     if (result.success) {
       console.log("Activity cancelled:", result.message);
     } else {

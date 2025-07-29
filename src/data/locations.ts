@@ -107,9 +107,7 @@ const FOREST_PATH: Location = {
       description: "Practice basic moves with your pet in the peaceful forest",
       energyCost: 20,
       duration: 60, // 15 minutes
-      rewards: [
-        { type: "experience", amount: 10, probability: 1.0 },
-      ],
+      rewards: [{ type: "experience", amount: 10, probability: 1.0 }],
     },
   ],
   shops: [],
@@ -192,9 +190,7 @@ const RIVERSIDE: Location = {
       description: "Relax by the peaceful water and restore energy",
       energyCost: -10, // actually restores energy
       duration: 30,
-      rewards: [
-        { type: "experience", amount: 5, probability: 1.0 },
-      ],
+      rewards: [{ type: "experience", amount: 5, probability: 1.0 }],
     },
   ],
   shops: [
@@ -262,7 +258,7 @@ export const LOCATIONS: Location[] = [HOMETOWN, FOREST_PATH, RIVERSIDE];
 
 // Helper function to get location by ID
 export function getLocationById(id: string): Location | undefined {
-  return LOCATIONS.find((location) => location.id === id);
+  return LOCATIONS.find(location => location.id === id);
 }
 
 // Helper function to get starting location
@@ -276,6 +272,6 @@ export function getAvailableDestinations(fromLocationId: string): Location[] {
   if (!location) return [];
 
   return location.connections
-    .map((connection) => getLocationById(connection.destinationId))
+    .map(connection => getLocationById(connection.destinationId))
     .filter((dest): dest is Location => dest !== undefined);
 }
