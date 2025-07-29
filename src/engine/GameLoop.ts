@@ -7,7 +7,7 @@ import { PetSystem } from "@/systems/PetSystem";
 
 export class GameLoop {
   private static instance: GameLoop | null = null;
-  private intervalId: number | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
   private gameState: GameState | null = null;
   private tickNumber = 0;
   private isRunning = false;
@@ -47,7 +47,7 @@ export class GameLoop {
     const globalSetInterval = typeof window !== "undefined" ? window.setInterval : globalThis.setInterval;
     this.intervalId = globalSetInterval(() => {
       this.tick();
-    }, GAME_CONSTANTS.TICK_INTERVAL) as any;
+    }, GAME_CONSTANTS.TICK_INTERVAL);
 
     console.log("Game loop started");
   }

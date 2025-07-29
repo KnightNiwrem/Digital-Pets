@@ -191,11 +191,20 @@ export function useGameState(): UseGameStateReturn {
   }, [gameState]);
 
   // Pet care actions
-  const feedPet = useCallback(() => performPetAction(pet => PetSystem.feedPet(pet, 25), "feed pet"), [performPetAction]);
+  const feedPet = useCallback(
+    () => performPetAction(pet => PetSystem.feedPet(pet, 25), "feed pet"),
+    [performPetAction]
+  );
 
-  const giveDrink = useCallback(() => performPetAction(pet => PetSystem.giveDrink(pet, 25), "give drink"), [performPetAction]);
+  const giveDrink = useCallback(
+    () => performPetAction(pet => PetSystem.giveDrink(pet, 25), "give drink"),
+    [performPetAction]
+  );
 
-  const playWithPet = useCallback(() => performPetAction(pet => PetSystem.playWithPet(pet, 20), "play with pet"), [performPetAction]);
+  const playWithPet = useCallback(
+    () => performPetAction(pet => PetSystem.playWithPet(pet, 20), "play with pet"),
+    [performPetAction]
+  );
 
   const cleanPoop = useCallback(() => performPetAction(PetSystem.cleanPoop, "clean poop"), [performPetAction]);
 
