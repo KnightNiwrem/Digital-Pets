@@ -42,7 +42,10 @@ export class GameLoop {
     }
 
     this.isRunning = true;
-    this.intervalId = window.setInterval(() => {
+    
+    // Use globalThis to handle both browser and test environments
+    const globalSetInterval = typeof window !== "undefined" ? window.setInterval : globalThis.setInterval;
+    this.intervalId = globalSetInterval(() => {
       this.tick();
     }, GAME_CONSTANTS.TICK_INTERVAL);
 
@@ -59,7 +62,9 @@ export class GameLoop {
 
     this.isRunning = false;
     if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
+      // Use globalThis to handle both browser and test environments
+      const globalClearInterval = typeof window !== "undefined" ? window.clearInterval : globalThis.clearInterval;
+      globalClearInterval(this.intervalId);
       this.intervalId = null;
     }
 
@@ -354,5 +359,142 @@ export class GameLoop {
         console.error("Force save failed:", result.error);
       }
     }
+  }
+
+  /**
+   * Calculate and apply offline progression when loading a saved game
+   */
+  static calculateOfflineProgression(gameState: GameState): {
+    ticksElapsed: number;
+    progressionApplied: boolean;
+    majorEvents: string[];
+  } {
+    const now = Date.now();
+    const lastSaveTime = gameState.metadata.lastSaveTime;
+    const offlineTimeMs = now - lastSaveTime;
+    
+    // Convert offline time to ticks (15 second intervals)
+    const ticksElapsed = Math.floor(offlineTimeMs / GAME_CONSTANTS.TICK_INTERVAL);
+    const majorEvents: string[] = [];
+
+    // Don't process if less than one tick elapsed or offline progression is disabled
+    if (ticksElapsed < 1 || !gameState.settings.offlineProgressEnabled) {
+      return { ticksElapsed: 0, progressionApplied: false, majorEvents: [] };
+    }
+
+    // Cap offline progression to prevent excessive calculation (max 7 days)
+    const maxOfflineTicks = Math.floor((7 * 24 * 60 * 60 * 1000) / GAME_CONSTANTS.TICK_INTERVAL);
+    const actualTicksToProcess = Math.min(ticksElapsed, maxOfflineTicks);
+
+    console.log(`Processing ${actualTicksToProcess} offline ticks (${(actualTicksToProcess * GAME_CONSTANTS.TICK_INTERVAL / 1000 / 60).toFixed(1)} minutes)`);
+
+    // Update game time
+    gameState.gameTime.totalTicks += actualTicksToProcess;
+    gameState.gameTime.lastTickTime = now;
+
+    // Process pet progression if pet exists
+    if (gameState.currentPet) {
+      for (let i = 0; i < actualTicksToProcess; i++) {
+        const petChanges = PetSystem.processPetTick(gameState.currentPet);
+        
+        // Track major events
+        if (petChanges.includes("pet_died")) {
+          majorEvents.push("pet_died");
+          // Reset to starting city and clear pet like in normal tick
+          gameState.world.currentLocationId = "hometown";
+          gameState.world.travelState = undefined;
+          gameState.currentPet = null;
+          break; // Stop processing if pet died
+        }
+        if (petChanges.includes("pet_grew")) {
+          majorEvents.push("pet_grew");
+        }
+        if (petChanges.includes("pet_sick_from_poop")) {
+          majorEvents.push("pet_became_sick");
+        }
+      }
+    }
+
+    // Process world progression
+    if (gameState.world.travelState) {
+      gameState.world.travelState.ticksRemaining -= actualTicksToProcess;
+      
+      if (gameState.world.travelState.ticksRemaining <= 0) {
+        // Travel completed during offline time
+        gameState.world.currentLocationId = gameState.world.travelState.destinationId;
+        gameState.world.travelState = undefined;
+        majorEvents.push("travel_completed");
+        
+        // Set pet back to idle if it was travelling
+        if (gameState.currentPet?.state === "travelling") {
+          gameState.currentPet.state = "idle";
+        }
+      }
+    }
+
+    // Process active activities
+    gameState.world.activeActivities = gameState.world.activeActivities.filter(activity => {
+      activity.ticksRemaining -= actualTicksToProcess;
+      
+      if (activity.ticksRemaining <= 0) {
+        majorEvents.push("activity_completed");
+        // Note: Actual reward distribution would need ItemSystem implementation
+        return false; // Remove completed activity
+      }
+      
+      return true; // Keep ongoing activity
+    });
+
+    // Update metrics
+    gameState.metrics.totalTicks += actualTicksToProcess;
+    gameState.metrics.totalPlayTime += offlineTimeMs;
+
+    return {
+      ticksElapsed: actualTicksToProcess,
+      progressionApplied: true,
+      majorEvents: [...new Set(majorEvents)], // Remove duplicates
+    };
+  }
+
+  /**
+   * Load a game state and apply offline progression
+   */
+  static loadGameWithProgression(): {
+    success: boolean;
+    gameState?: GameState;
+    offlineProgression?: {
+      ticksElapsed: number;
+      progressionApplied: boolean;
+      majorEvents: string[];
+    };
+    error?: string;
+  } {
+    // Load the game state
+    const loadResult = GameStorage.loadGame();
+    if (!loadResult.success) {
+      return {
+        success: false,
+        error: loadResult.error,
+      };
+    }
+
+    const gameState = loadResult.data!;
+
+    // Calculate and apply offline progression
+    const offlineProgression = this.calculateOfflineProgression(gameState);
+
+    // Update save timestamp and save the updated state
+    gameState.metadata.lastSaveTime = Date.now();
+    const saveResult = GameStorage.saveGame(gameState);
+    
+    if (!saveResult.success) {
+      console.warn("Failed to save after offline progression:", saveResult.error);
+    }
+
+    return {
+      success: true,
+      gameState,
+      offlineProgression,
+    };
   }
 }
