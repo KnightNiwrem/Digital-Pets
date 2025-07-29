@@ -154,7 +154,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.startTravel(worldState, readyPet, "forest_path");
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.worldState.travelState).toBeDefined();
         expect(result.data.worldState.travelState?.destinationId).toBe("forest_path");
         expect(result.data.pet.state).toBe("travelling");
@@ -177,7 +177,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.processTravelTick(travellingWorld);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.currentLocationId).toBe("forest_path");
         expect(result.data.travelState).toBeUndefined();
         expect(result.data.unlockedLocations).toContain("forest_path");
@@ -200,7 +200,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.processTravelTick(travellingWorld);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.currentLocationId).toBe("hometown"); // Still at origin
         expect(result.data.travelState?.ticksRemaining).toBe(29);
         expect(result.message).toBeUndefined();
@@ -284,7 +284,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging");
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(1);
         expect(result.data.worldState.activeActivities[0].activityId).toBe("hometown_foraging");
         expect(result.data.pet.currentEnergy).toBeLessThan(mockPet.currentEnergy);
@@ -307,7 +307,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.processActivitiesTick(worldWithActivity);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(0);
         expect(result.data.rewards.length).toBeGreaterThanOrEqual(0); // May get rewards
       }
@@ -328,7 +328,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.processActivitiesTick(worldWithActivity);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(1);
         expect(result.data.worldState.activeActivities[0].ticksRemaining).toBe(9);
       }
@@ -377,7 +377,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.cancelActivity(worldWithActivity, mockPet.id);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.activeActivities).toHaveLength(0);
         expect(result.message).toBe("Activity cancelled");
       }
@@ -406,7 +406,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.processOfflineProgression(travellingWorld, 10);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.worldState.currentLocationId).toBe("forest_path");
         expect(result.data.worldState.travelState).toBeUndefined();
       }
@@ -427,7 +427,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.processOfflineProgression(worldWithActivity, 10);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(0);
         expect(result.data.rewards.length).toBeGreaterThanOrEqual(0);
       }
@@ -440,7 +440,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.getAvailableDestinations(worldState, lowLevelPet);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data).toHaveLength(0);
       }
     });
@@ -450,7 +450,7 @@ describe("WorldSystem", () => {
       const result = WorldSystem.getAvailableDestinations(worldState, highLevelPet);
       
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data).toHaveLength(1);
         expect(result.data[0].id).toBe("forest_path");
       }

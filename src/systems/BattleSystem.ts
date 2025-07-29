@@ -3,6 +3,7 @@
 import type { Battle, BattleAction, BattlePet, BattleResult, BattleTurn, BattleType, BattleMove } from "@/types/Battle";
 import type { Pet, Move } from "@/types/Pet";
 import type { Result } from "@/types/index";
+import { EnergyManager } from "@/lib/utils";
 import { getMoveById, getStarterMoves } from "@/data/moves";
 
 // Import constants
@@ -64,7 +65,7 @@ export class BattleSystem {
         return { success: false, error: "Your pet is unable to battle - no health remaining" };
       }
 
-      if (playerPet.currentEnergy < 20) {
+      if (!EnergyManager.hasEnoughEnergy(playerPet, 20)) {
         return { success: false, error: "Your pet is too tired to battle - needs at least 20 energy" };
       }
 
@@ -222,7 +223,7 @@ export class BattleSystem {
     }
 
     // Check energy cost
-    if (attacker.currentEnergy < move.energyCost) {
+    if (!EnergyManager.hasEnoughEnergy(attacker, move.energyCost)) {
       results.push({
         type: "miss",
         targetId: defender.id,
@@ -234,7 +235,7 @@ export class BattleSystem {
     }
 
     // Deduct energy cost
-    attacker.currentEnergy = Math.max(0, attacker.currentEnergy - move.energyCost);
+    EnergyManager.deductEnergy(attacker, move.energyCost);
 
     // Check accuracy
     const accuracy = this.calculateAccuracy(attacker, defender, move.accuracy);
@@ -430,8 +431,8 @@ export class BattleSystem {
         return { success: false, error: "Pet doesn't know this move" };
       }
 
-      if (battle.playerPet.currentEnergy < move.energyCost) {
-        return { success: false, error: "Insufficient energy for this move" };
+      if (!EnergyManager.hasEnoughEnergy(battle.playerPet, move.energyCost)) {
+        return { success: false, error: EnergyManager.ERROR_MESSAGES.BATTLE };
       }
     }
 

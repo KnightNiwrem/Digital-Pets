@@ -47,11 +47,11 @@ export function useWorldState({
 
       const result = WorldSystem.startTravel(worldState, pet, destinationId);
 
-      if (result.success) {
+      if (result.success && result.data) {
         updateGameState((prev: GameState) => ({
           ...prev,
-          world: result.data.worldState,
-          currentPet: result.data.pet,
+          world: result.data!.worldState,
+          currentPet: result.data!.pet,
         }));
 
         return {
@@ -76,11 +76,11 @@ export function useWorldState({
 
       const result = WorldSystem.startActivity(worldState, pet, activityId);
 
-      if (result.success) {
+      if (result.success && result.data) {
         updateGameState((prev: GameState) => ({
           ...prev,
-          world: result.data.worldState,
-          currentPet: result.data.pet,
+          world: result.data!.worldState,
+          currentPet: result.data!.pet,
         }));
 
         return {
@@ -104,10 +104,10 @@ export function useWorldState({
 
     const result = WorldSystem.cancelActivity(worldState, pet.id);
 
-    if (result.success) {
+    if (result.success && result.data) {
       updateGameState((prev: GameState) => ({
         ...prev,
-        world: result.data,
+        world: result.data!,
       }));
 
       return {
@@ -140,7 +140,7 @@ export function useWorldState({
   const getAvailableDestinations = useCallback(() => {
     if (!pet) return [];
     const result = WorldSystem.getAvailableDestinations(worldState, pet);
-    return result.success ? result.data : [];
+    return result.success && result.data ? result.data : [];
   }, [worldState, pet]);
 
   const getAvailableLocations = useCallback(() => {

@@ -2,12 +2,9 @@
 
 import type { WorldState, TravelState, Location, Activity, ActiveActivity, ActivityReward } from "@/types/World";
 import type { Pet } from "@/types/Pet";
+import type { Result } from "@/types";
+import { PetValidator, EnergyManager } from "@/lib/utils";
 import { LOCATIONS, getLocationById, getStartingLocation } from "@/data/locations";
-
-// Result type for operations
-type Result<T> =
-  | { success: true; data: T; message?: string; error?: never }
-  | { success: false; error: string; data?: never; message?: never };
 
 export class WorldSystem {
   /**
@@ -87,7 +84,7 @@ export class WorldSystem {
     }
 
     // Check if pet is sleeping
-    if (pet.state === "sleeping") {
+    if (PetValidator.isSleeping(pet)) {
       return { success: false, error: "Cannot travel while pet is sleeping" };
     }
 
@@ -121,9 +118,9 @@ export class WorldSystem {
     }
 
     // Check energy cost for travel
-    const energyCost = Math.floor(connection.travelTime / 4); // 1 energy per minute of travel
-    if (pet.currentEnergy < energyCost) {
-      return { success: false, error: "Pet doesn't have enough energy for this journey" };
+    const energyCost = EnergyManager.calculateTravelCost(connection.travelTime);
+    if (!EnergyManager.hasEnoughEnergy(pet, energyCost)) {
+      return { success: false, error: EnergyManager.ERROR_MESSAGES.TRAVEL };
     }
 
     // Start travel
@@ -142,9 +139,11 @@ export class WorldSystem {
     const updatedPet: Pet = {
       ...pet,
       state: "travelling",
-      currentEnergy: pet.currentEnergy - energyCost,
       lastCareTime: Date.now(),
     };
+
+    // Deduct energy cost for travel
+    EnergyManager.deductEnergy(updatedPet, energyCost);
 
     return {
       success: true,
@@ -233,12 +232,12 @@ export class WorldSystem {
     }
 
     // Check energy requirements
-    if (pet.currentEnergy < activity.energyCost) {
-      return { success: false, error: "Pet doesn't have enough energy for this activity" };
+    if (!EnergyManager.hasEnoughEnergy(pet, activity.energyCost)) {
+      return { success: false, error: EnergyManager.ERROR_MESSAGES.ACTIVITY };
     }
 
     // Check pet state
-    if (pet.state === "sleeping") {
+    if (PetValidator.isSleeping(pet)) {
       return { success: false, error: "Cannot start activity while pet is sleeping" };
     }
 
@@ -274,9 +273,11 @@ export class WorldSystem {
 
     const updatedPet: Pet = {
       ...pet,
-      currentEnergy: pet.currentEnergy - activity.energyCost,
       lastCareTime: Date.now(),
     };
+
+    // Deduct energy cost for activity
+    EnergyManager.deductEnergy(updatedPet, activity.energyCost);
 
     return {
       success: true,
@@ -409,14 +410,14 @@ export class WorldSystem {
     for (let i = 0; i < ticksToProcess; i++) {
       // Process travel
       const travelResult = WorldSystem.processTravelTick(currentWorldState);
-      if (!travelResult.success) {
+      if (!travelResult.success || !travelResult.data) {
         return { success: false, error: travelResult.error };
       }
       currentWorldState = travelResult.data;
 
       // Process activities
       const activityResult = WorldSystem.processActivitiesTick(currentWorldState);
-      if (!activityResult.success) {
+      if (!activityResult.success || !activityResult.data) {
         return { success: false, error: activityResult.error };
       }
       currentWorldState = activityResult.data.worldState;

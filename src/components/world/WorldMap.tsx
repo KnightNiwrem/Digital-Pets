@@ -96,7 +96,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
         {!isTravel && (
           <div>
             <h4 className="font-medium mb-3">Available Destinations</h4>
-            {availableDestinations.length === 0 ? (
+            {!availableDestinations || availableDestinations.length === 0 ? (
               <div className="text-center text-gray-500 py-4">
                 <Lock className="w-8 h-8 mx-auto mb-2 text-gray-400" />
                 <p className="text-sm">No destinations available.</p>
@@ -146,7 +146,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
         )}
 
         {/* Help Text */}
-        {!isTravel && availableDestinations.length === 0 && (
+        {!isTravel && (!availableDestinations || availableDestinations.length === 0) && (
           <div className="text-xs text-gray-500 text-center">
             💡 Take care of your pet and help them grow to unlock new locations!
           </div>

@@ -181,7 +181,7 @@ export class GameLoop {
 
     // Process travel using WorldSystem
     const travelResult = WorldSystem.processTravelTick(this.gameState.world);
-    if (travelResult.success) {
+    if (travelResult.success && travelResult.data) {
       if (travelResult.message) {
         stateChanges.push("travel_completed");
         actions.push({
@@ -201,7 +201,7 @@ export class GameLoop {
 
     // Process activities using WorldSystem
     const activityResult = WorldSystem.processActivitiesTick(this.gameState.world);
-    if (activityResult.success) {
+    if (activityResult.success && activityResult.data) {
       this.gameState.world = activityResult.data.worldState;
 
       // Process rewards from completed activities
@@ -321,7 +321,7 @@ export class GameLoop {
 
     // Process world progression (travel and activities)
     const worldResult = WorldSystem.processOfflineProgression(this.gameState.world, actualTicks);
-    if (worldResult.success) {
+    if (worldResult.success && worldResult.data) {
       this.gameState.world = worldResult.data.worldState;
 
       // Process any rewards from offline activities
