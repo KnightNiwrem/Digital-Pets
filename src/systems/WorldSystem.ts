@@ -5,7 +5,9 @@ import type { Pet } from "@/types/Pet";
 import { LOCATIONS, getLocationById, getStartingLocation } from "@/data/locations";
 
 // Result type for operations
-type Result<T> = { success: true; data: T; message?: string } | { success: false; error: string };
+type Result<T> =
+  | { success: true; data: T; message?: string; error?: never }
+  | { success: false; error: string; data?: never; message?: never };
 
 export class WorldSystem {
   /**

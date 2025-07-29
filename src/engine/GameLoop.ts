@@ -243,29 +243,6 @@ export class GameLoop {
   }
 
   /**
-   * Complete an activity and distribute rewards
-   */
-  private completeActivity(
-    activity: { activityId: string; locationId: string; startTime: number; petId: string },
-    actions: GameAction[],
-    stateChanges: string[]
-  ): void {
-    stateChanges.push("activity_completed");
-    actions.push({
-      type: "activity_completed",
-      payload: {
-        activityId: activity.activityId,
-        locationId: activity.locationId,
-        petId: activity.petId,
-      },
-      timestamp: Date.now(),
-      source: "system",
-    });
-
-    // Reward distribution would be implemented here
-  }
-
-  /**
    * Process activity rewards
    */
   private processActivityRewards(

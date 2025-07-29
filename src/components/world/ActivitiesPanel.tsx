@@ -1,6 +1,5 @@
 // Activities Panel - shows available activities and current progress
 
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pickaxe, Fish, TreePine, Sword, Trophy, Clock, Zap, Gift } from "lucide-react";

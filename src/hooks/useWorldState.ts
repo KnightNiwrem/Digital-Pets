@@ -134,7 +134,7 @@ export function useWorldState({
   }, [worldState, pet]);
 
   const getCurrentLocation = useCallback(() => {
-    return WorldSystem.getCurrentLocation(worldState);
+    return WorldSystem.getCurrentLocation(worldState) || null;
   }, [worldState]);
 
   const getAvailableDestinations = useCallback(() => {

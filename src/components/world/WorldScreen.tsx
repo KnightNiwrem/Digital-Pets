@@ -1,6 +1,5 @@
 // World Screen - main interface for world exploration
 
-import React from "react";
 import { WorldMap } from "./WorldMap";
 import { ActivitiesPanel } from "./ActivitiesPanel";
 import type { Pet, WorldState } from "@/types";
