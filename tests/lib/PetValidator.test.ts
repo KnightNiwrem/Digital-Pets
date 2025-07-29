@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { PetValidator, GameMath } from "@/lib/utils";
+import { PetValidator, GameMath, EnergyManager } from "@/lib/utils";
 import { PET_CONSTANTS } from "@/types";
 import type { Pet } from "@/types/Pet";
 
@@ -395,6 +395,129 @@ describe("GameMath", () => {
     it("should clamp between 5 and 100", () => {
       expect(GameMath.calculateAccuracy(90, 0, 1000)).toBe(5);
       expect(GameMath.calculateAccuracy(90, 1000, 0)).toBe(100);
+    });
+  });
+});
+
+describe("EnergyManager", () => {
+  const createTestPet = (overrides: Partial<Pet> = {}): Pet => ({
+    id: "test-pet",
+    name: "Test Pet",
+    species: "starter_dog",
+    rarity: "common",
+    growthStage: 0,
+    satiety: 50,
+    hydration: 50,
+    happiness: 50,
+    satietyTicksLeft: 50 * 100,
+    hydrationTicksLeft: 50 * 80,
+    happinessTicksLeft: 50 * 120,
+    poopTicksLeft: 2000,
+    sickByPoopTicksLeft: 17280,
+    life: 1000000,
+    maxEnergy: 100,
+    currentEnergy: 50,
+    health: "healthy",
+    state: "idle",
+    attack: 10,
+    defense: 10,
+    speed: 10,
+    maxHealth: 100,
+    currentHealth: 100,
+    moves: [],
+    level: 1,
+    experience: 0,
+    experienceToNext: 100,
+    lastCareTime: Date.now(),
+    createdAt: Date.now(),
+    lifetime: 0,
+    ...overrides,
+  });
+
+  describe("hasEnoughEnergy", () => {
+    it("should return true when pet has enough energy", () => {
+      const pet = createTestPet({ currentEnergy: 50 });
+      expect(EnergyManager.hasEnoughEnergy(pet, 30)).toBe(true);
+    });
+
+    it("should return false when pet has insufficient energy", () => {
+      const pet = createTestPet({ currentEnergy: 20 });
+      expect(EnergyManager.hasEnoughEnergy(pet, 30)).toBe(false);
+    });
+
+    it("should return true when pet has exactly required energy", () => {
+      const pet = createTestPet({ currentEnergy: 30 });
+      expect(EnergyManager.hasEnoughEnergy(pet, 30)).toBe(true);
+    });
+  });
+
+  describe("deductEnergy", () => {
+    it("should deduct energy from pet", () => {
+      const pet = createTestPet({ currentEnergy: 50 });
+      EnergyManager.deductEnergy(pet, 20);
+      expect(pet.currentEnergy).toBe(30);
+    });
+
+    it("should not go below zero", () => {
+      const pet = createTestPet({ currentEnergy: 10 });
+      EnergyManager.deductEnergy(pet, 20);
+      expect(pet.currentEnergy).toBe(0);
+    });
+
+    it("should handle exact energy cost", () => {
+      const pet = createTestPet({ currentEnergy: 30 });
+      EnergyManager.deductEnergy(pet, 30);
+      expect(pet.currentEnergy).toBe(0);
+    });
+  });
+
+  describe("calculateTravelCost", () => {
+    it("should calculate correct travel cost", () => {
+      expect(EnergyManager.calculateTravelCost(100)).toBe(25);
+    });
+
+    it("should handle small travel times", () => {
+      expect(EnergyManager.calculateTravelCost(3)).toBe(0);
+    });
+
+    it("should handle large travel times", () => {
+      expect(EnergyManager.calculateTravelCost(400)).toBe(100);
+    });
+  });
+
+  describe("validateAndDeductEnergy", () => {
+    it("should succeed and deduct energy when sufficient", () => {
+      const pet = createTestPet({ currentEnergy: 50 });
+      const result = EnergyManager.validateAndDeductEnergy(pet, 20, "test action");
+      expect(result).toBeNull();
+      expect(pet.currentEnergy).toBe(30);
+    });
+
+    it("should fail when insufficient energy", () => {
+      const pet = createTestPet({ currentEnergy: 10 });
+      const result = EnergyManager.validateAndDeductEnergy(pet, 20, "test action");
+      expect(result).toBe("Pet doesn't have enough energy for test action.");
+      expect(pet.currentEnergy).toBe(10); // Should not be modified
+    });
+
+    it("should handle exact energy requirement", () => {
+      const pet = createTestPet({ currentEnergy: 30 });
+      const result = EnergyManager.validateAndDeductEnergy(pet, 30, "exact action");
+      expect(result).toBeNull();
+      expect(pet.currentEnergy).toBe(0);
+    });
+  });
+
+  describe("ERROR_MESSAGES", () => {
+    it("should have correct static error messages", () => {
+      expect(EnergyManager.ERROR_MESSAGES.TRAVEL).toBe("Pet doesn't have enough energy for this journey");
+      expect(EnergyManager.ERROR_MESSAGES.ACTIVITY).toBe("Pet doesn't have enough energy for this activity");
+      expect(EnergyManager.ERROR_MESSAGES.BATTLE).toBe("Insufficient energy for this move");
+      expect(EnergyManager.ERROR_MESSAGES.PLAY).toBe("Pet doesn't have enough energy to play");
+    });
+
+    it("should generate dynamic error messages", () => {
+      expect(EnergyManager.ERROR_MESSAGES.GENERAL("custom action")).toBe("Pet doesn't have enough energy for custom action");
     });
   });
 });

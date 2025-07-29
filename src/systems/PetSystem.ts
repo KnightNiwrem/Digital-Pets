@@ -2,7 +2,7 @@
 
 import type { Pet, PetCareAction, ItemEffect, Result } from "@/types";
 import { PET_CONSTANTS } from "@/types";
-import { PetValidator, GameMath } from "@/lib/utils";
+import { PetValidator, GameMath, EnergyManager } from "@/lib/utils";
 
 export class PetSystem {
   /**
@@ -98,7 +98,7 @@ export class PetSystem {
     const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
     pet.happinessTicksLeft = GameMath.addToStat(pet.happinessTicksLeft, tickIncrease, 18000); // Cap at ~75 hours
     pet.happiness = GameMath.calculateHappinessDisplay(pet.happinessTicksLeft);
-    pet.currentEnergy = GameMath.subtractEnergy(pet.currentEnergy, energyCost);
+    EnergyManager.deductEnergy(pet, energyCost);
     pet.lastCareTime = Date.now();
 
     const action: PetCareAction = {

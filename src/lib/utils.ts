@@ -215,3 +215,54 @@ export class GameMath {
     return this.clamp(baseAccuracy + (attackerAccuracy - defenderEvasion) / 10, 5, 100);
   }
 }
+
+/**
+ * Utility class for energy management across systems
+ * Centralizes energy cost validation and deduction patterns
+ */
+export class EnergyManager {
+  /**
+   * Check if pet has enough energy for an action
+   */
+  static hasEnoughEnergy(pet: Pet, requiredEnergy: number): boolean {
+    return PetValidator.hasEnoughEnergy(pet, requiredEnergy);
+  }
+
+  /**
+   * Safely deduct energy from pet, preventing negative values
+   */
+  static deductEnergy(pet: Pet, energyCost: number): void {
+    pet.currentEnergy = GameMath.subtractEnergy(pet.currentEnergy, energyCost);
+  }
+
+  /**
+   * Calculate travel energy cost based on time
+   */
+  static calculateTravelCost(travelTime: number): number {
+    return Math.floor(travelTime / 4); // 1 energy per minute of travel
+  }
+
+  /**
+   * Validate and deduct energy for an action
+   * Returns error message if insufficient energy, null if successful
+   */
+  static validateAndDeductEnergy(pet: Pet, energyCost: number, actionName: string): string | null {
+    if (!this.hasEnoughEnergy(pet, energyCost)) {
+      return `Pet doesn't have enough energy for ${actionName}.`;
+    }
+    
+    this.deductEnergy(pet, energyCost);
+    return null;
+  }
+
+  /**
+   * Common energy validation messages
+   */
+  static readonly ERROR_MESSAGES = {
+    TRAVEL: "Pet doesn't have enough energy for this journey",
+    ACTIVITY: "Pet doesn't have enough energy for this activity", 
+    BATTLE: "Insufficient energy for this move",
+    PLAY: "Pet doesn't have enough energy to play",
+    GENERAL: (action: string) => `Pet doesn't have enough energy for ${action}`,
+  } as const;
+}
