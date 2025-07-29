@@ -11,7 +11,6 @@ interface PetDisplayProps {
 export function PetDisplay({ pet }: PetDisplayProps) {
   const displayStats = PetSystem.calculateDisplayStats(pet);
   const status = PetSystem.getPetStatus(pet);
-  const nextCriticalEvent = PetSystem.getNextCriticalEvent(pet);
 
   // Helper function to get status color
   const getStatusColor = (statusLevel: string) => {
@@ -141,11 +140,6 @@ export function PetDisplay({ pet }: PetDisplayProps) {
           </div>
         </div>
 
-        {/* Life */}
-        <div className="text-center">
-          <span className="text-sm text-muted-foreground">Life: {pet.life.toLocaleString()} / 1,000,000</span>
-        </div>
-
         {/* Overall Status */}
         <div className="text-center p-2 bg-muted rounded">
           <p className={`font-medium ${getStatusColor(status.overall)}`}>
@@ -158,16 +152,6 @@ export function PetDisplay({ pet }: PetDisplayProps) {
             <p className="text-sm text-orange-600 mt-1">⚠️ {status.warnings.join(", ")}</p>
           )}
         </div>
-
-        {/* Next Critical Event */}
-        {nextCriticalEvent && (
-          <div className="text-center p-2 bg-yellow-50 border border-yellow-200 rounded">
-            <p className="text-sm font-medium text-yellow-800">Next: {nextCriticalEvent.event}</p>
-            <p className="text-xs text-yellow-600">
-              In ~{Math.ceil((nextCriticalEvent.ticksRemaining * 15) / 60)} minutes
-            </p>
-          </div>
-        )}
 
         {/* Poop Indicator */}
         {displayStats.needsPoop && (

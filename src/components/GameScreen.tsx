@@ -27,8 +27,6 @@ export function GameScreen() {
     useItem,
     sellItem,
     sortInventory,
-    pauseGame,
-    resumeGame,
     isPaused,
     hasExistingSave,
     storageInfo,
@@ -177,10 +175,6 @@ export function GameScreen() {
         <h1 className="text-2xl font-bold">🐾 Digital Pets</h1>
 
         <div className="flex gap-2">
-          <Button onClick={isPaused ? resumeGame : pauseGame} variant="outline" size="sm">
-            {isPaused ? "▶️ Resume" : "⏸️ Pause"}
-          </Button>
-
           <Button onClick={handleSaveGame} variant="outline" size="sm">
             💾 Save
           </Button>
@@ -294,10 +288,7 @@ export function GameScreen() {
 
       {/* Game Stats Footer */}
       <div className="mt-8 text-center text-xs text-muted-foreground space-y-1">
-        <p>
-          Game Time: {gameState.gameTime.totalTicks} ticks
-          {gameState.playerStats && <> • Level {gameState.playerStats.level}</>}
-        </p>
+        <p>{gameState.playerStats && <>Level {gameState.playerStats.level}</>}</p>
         <p>
           Storage: {storageInfo.percentage.toFixed(1)}% used
           {isPaused && <> • Game is paused</>}
