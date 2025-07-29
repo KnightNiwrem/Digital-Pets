@@ -1,6 +1,10 @@
 {
-  "name": "bun-react-template",
-  "version": "0.1.0",
+  "name": "digital-pets",
+  "version": "1.0.0",
+  "description": "A client-side HTML5 pet raising game with comprehensive care mechanics, world exploration, and turn-based battles",
+  "keywords": ["pet-game", "virtual-pet", "html5-game", "offline-game", "react", "typescript", "bun", "pet-simulation"],
+  "author": "KnightNiwrem",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "main": "src/index.tsx",
