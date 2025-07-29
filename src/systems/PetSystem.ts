@@ -2,16 +2,18 @@
 
 import type { Pet, PetCareAction, ItemEffect, Result } from "@/types";
 import { PET_CONSTANTS } from "@/types";
+import { PetValidator, GameMath } from "@/lib/utils";
 
 export class PetSystem {
   /**
    * Feed the pet with a food item
    */
   static feedPet(pet: Pet, satietyValue: number): Result<PetCareAction> {
-    if (pet.health === "sick" && satietyValue > 0) {
+    const validationError = PetValidator.validateCareAction(pet, "feed");
+    if (validationError) {
       return {
         success: false,
-        error: "Pet is too sick to eat. Use medicine first.",
+        error: validationError,
       };
     }
 
@@ -25,9 +27,9 @@ export class PetSystem {
     }
 
     // Convert display value back to ticks
-    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.SATIETY;
-    pet.satietyTicksLeft = Math.min(pet.satietyTicksLeft + tickIncrease, 15000); // Cap at ~62 hours
-    pet.satiety = Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY);
+    const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.SATIETY);
+    pet.satietyTicksLeft = GameMath.addToStat(pet.satietyTicksLeft, tickIncrease, 15000); // Cap at ~62 hours
+    pet.satiety = GameMath.calculateSatietyDisplay(pet.satietyTicksLeft);
     pet.lastCareTime = Date.now();
 
     const action: PetCareAction = {
@@ -42,10 +44,11 @@ export class PetSystem {
    * Give the pet water or other drinks
    */
   static giveDrink(pet: Pet, hydrationValue: number): Result<PetCareAction> {
-    if (pet.health === "sick" && hydrationValue > 0) {
+    const validationError = PetValidator.validateCareAction(pet, "drink");
+    if (validationError) {
       return {
         success: false,
-        error: "Pet is too sick to drink. Use medicine first.",
+        error: validationError,
       };
     }
 
@@ -58,9 +61,9 @@ export class PetSystem {
       };
     }
 
-    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION;
-    pet.hydrationTicksLeft = Math.min(pet.hydrationTicksLeft + tickIncrease, 12000); // Cap at ~50 hours
-    pet.hydration = Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION);
+    const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION);
+    pet.hydrationTicksLeft = GameMath.addToStat(pet.hydrationTicksLeft, tickIncrease, 12000); // Cap at ~50 hours
+    pet.hydration = GameMath.calculateHydrationDisplay(pet.hydrationTicksLeft);
     pet.lastCareTime = Date.now();
 
     const action: PetCareAction = {
@@ -75,17 +78,11 @@ export class PetSystem {
    * Play with the pet using toys or activities
    */
   static playWithPet(pet: Pet, happinessValue: number, energyCost: number = 10): Result<PetCareAction> {
-    if (pet.currentEnergy < energyCost) {
+    const validationError = PetValidator.validateCareAction(pet, "play", energyCost);
+    if (validationError) {
       return {
         success: false,
-        error: "Pet doesn't have enough energy to play.",
-      };
-    }
-
-    if (pet.health === "sick") {
-      return {
-        success: false,
-        error: "Pet is too sick to play. Use medicine first.",
+        error: validationError,
       };
     }
 
@@ -98,10 +95,10 @@ export class PetSystem {
       };
     }
 
-    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS;
-    pet.happinessTicksLeft = Math.min(pet.happinessTicksLeft + tickIncrease, 18000); // Cap at ~75 hours
-    pet.happiness = Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
-    pet.currentEnergy = Math.max(0, pet.currentEnergy - energyCost);
+    const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
+    pet.happinessTicksLeft = GameMath.addToStat(pet.happinessTicksLeft, tickIncrease, 18000); // Cap at ~75 hours
+    pet.happiness = GameMath.calculateHappinessDisplay(pet.happinessTicksLeft);
+    pet.currentEnergy = GameMath.subtractEnergy(pet.currentEnergy, energyCost);
     pet.lastCareTime = Date.now();
 
     const action: PetCareAction = {
@@ -182,17 +179,11 @@ export class PetSystem {
    * Put the pet to sleep for energy recovery
    */
   static putPetToSleep(pet: Pet): Result<PetCareAction> {
-    if (pet.state === "sleeping") {
+    const validationError = PetValidator.validateSleepAction(pet);
+    if (validationError) {
       return {
         success: false,
-        error: "Pet is already sleeping.",
-      };
-    }
-
-    if (pet.state === "travelling") {
-      return {
-        success: false,
-        error: "Pet cannot sleep while travelling.",
+        error: validationError,
       };
     }
 
@@ -247,9 +238,9 @@ export class PetSystem {
     const prevHydration = pet.hydration;
     const prevHappiness = pet.happiness;
 
-    pet.satiety = Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY);
-    pet.hydration = Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION);
-    pet.happiness = Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
+    pet.satiety = GameMath.calculateSatietyDisplay(pet.satietyTicksLeft);
+    pet.hydration = GameMath.calculateHydrationDisplay(pet.hydrationTicksLeft);
+    pet.happiness = GameMath.calculateHappinessDisplay(pet.happinessTicksLeft);
 
     // Track changes in displayed stats
     if (pet.satiety !== prevSatiety) changes.push("satiety_changed");
@@ -487,15 +478,9 @@ export class PetSystem {
     needsPoop: boolean;
   } {
     // Convert hidden tick counters to display percentages
-    const satiety = Math.max(0, Math.min(100, Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY)));
-    const hydration = Math.max(
-      0,
-      Math.min(100, Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION))
-    );
-    const happiness = Math.max(
-      0,
-      Math.min(100, Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS))
-    );
+    const satiety = GameMath.calculateSatietyDisplay(pet.satietyTicksLeft);
+    const hydration = GameMath.calculateHydrationDisplay(pet.hydrationTicksLeft);
+    const happiness = GameMath.calculateHappinessDisplay(pet.happinessTicksLeft);
 
     // Check if pet needs poop cleaning
     const needsPoop = pet.poopTicksLeft <= 0;

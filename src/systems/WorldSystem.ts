@@ -2,12 +2,9 @@
 
 import type { WorldState, TravelState, Location, Activity, ActiveActivity, ActivityReward } from "@/types/World";
 import type { Pet } from "@/types/Pet";
+import type { Result } from "@/types";
+import { PetValidator } from "@/lib/utils";
 import { LOCATIONS, getLocationById, getStartingLocation } from "@/data/locations";
-
-// Result type for operations
-type Result<T> =
-  | { success: true; data: T; message?: string; error?: never }
-  | { success: false; error: string; data?: never; message?: never };
 
 export class WorldSystem {
   /**
@@ -87,7 +84,7 @@ export class WorldSystem {
     }
 
     // Check if pet is sleeping
-    if (pet.state === "sleeping") {
+    if (PetValidator.isSleeping(pet)) {
       return { success: false, error: "Cannot travel while pet is sleeping" };
     }
 
@@ -238,7 +235,7 @@ export class WorldSystem {
     }
 
     // Check pet state
-    if (pet.state === "sleeping") {
+    if (PetValidator.isSleeping(pet)) {
       return { success: false, error: "Cannot start activity while pet is sleeping" };
     }
 

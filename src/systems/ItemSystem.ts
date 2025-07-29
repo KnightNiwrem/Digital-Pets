@@ -2,15 +2,10 @@
 
 import type { Item, Inventory, InventorySlot, ItemUsage, DurabilityItem } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
+import type { Result } from "@/types";
+import { PetValidator } from "@/lib/utils";
 import { ITEM_CONSTANTS } from "@/types/Item";
 import { getItemById } from "@/data/items";
-
-export interface Result<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
 
 export class ItemSystem {
   // ============= INVENTORY MANAGEMENT =============
@@ -291,7 +286,7 @@ export class ItemSystem {
         if (pet.happiness >= 100) {
           return { success: false, error: "Pet is already very happy" };
         }
-        if (pet.currentEnergy < 10) {
+        if (!PetValidator.hasEnoughEnergy(pet, 10)) {
           return { success: false, error: "Pet has insufficient energy to play" };
         }
         break;
