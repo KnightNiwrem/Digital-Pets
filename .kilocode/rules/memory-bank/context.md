@@ -27,7 +27,7 @@ The project has completed **Phase 2: Storage & UI Foundation** with a fully func
 ### What's Working
 **Core Game Features:**
 - Pet care actions: Feed, Water, Play, Sleep/Wake, Medicine, Clean
-- Real-time stat tracking with visual progress bars (Hunger, Thirst, Happiness, Energy)
+- Real-time stat tracking with visual progress bars (Satiety, Hydration, Happiness, Energy)
 - Health system with treatment mechanics
 - Automatic game loop with 15-second tick progression
 - Offline progression calculation (up to 7 days catch-up)
