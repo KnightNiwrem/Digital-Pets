@@ -34,7 +34,7 @@ export function ItemIcon({ item, className }: ItemIconProps) {
       case "ball":
         return <CircleDot className="text-orange-500" />;
       case "fishing_rod":
-        return <Utensils className="text-brown-500" />;
+        return <Utensils className="text-amber-700" />;
       case "bait":
         return <CircleDot className="text-green-700" />;
       default:
