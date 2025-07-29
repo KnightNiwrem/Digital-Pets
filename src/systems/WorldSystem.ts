@@ -410,14 +410,14 @@ export class WorldSystem {
     for (let i = 0; i < ticksToProcess; i++) {
       // Process travel
       const travelResult = WorldSystem.processTravelTick(currentWorldState);
-      if (!travelResult.success) {
+      if (!travelResult.success || !travelResult.data) {
         return { success: false, error: travelResult.error };
       }
       currentWorldState = travelResult.data;
 
       // Process activities
       const activityResult = WorldSystem.processActivitiesTick(currentWorldState);
-      if (!activityResult.success) {
+      if (!activityResult.success || !activityResult.data) {
         return { success: false, error: activityResult.error };
       }
       currentWorldState = activityResult.data.worldState;

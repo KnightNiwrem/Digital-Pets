@@ -4,39 +4,49 @@ import { PET_CONSTANTS } from "@/types";
 import type { Pet } from "@/types/Pet";
 
 describe("PetValidator", () => {
-  const createTestPet = (overrides: Partial<Pet> = {}): Pet => ({
-    id: "test-pet",
-    name: "Test Pet",
-    species: "starter_dog",
-    rarity: "common",
-    growthStage: 0,
-    satiety: 50,
-    hydration: 50,
-    happiness: 50,
-    satietyTicksLeft: 50 * 100, // SATIETY multiplier is 100
-    hydrationTicksLeft: 50 * 80, // HYDRATION multiplier is 80
-    happinessTicksLeft: 50 * 120, // HAPPINESS multiplier is 120
-    poopTicksLeft: 2000,
-    sickByPoopTicksLeft: 17280,
-    life: 1000000,
-    maxEnergy: 100,
-    currentEnergy: 50,
-    health: "healthy",
-    state: "idle",
-    attack: 10,
-    defense: 10,
-    speed: 10,
-    maxHealth: 100,
-    currentHealth: 100,
-    moves: [],
-    level: 1,
-    experience: 0,
-    experienceToNext: 100,
-    lastCareTime: Date.now(),
-    createdAt: Date.now(),
-    lifetime: 0,
-    ...overrides,
-  });
+  const createTestPet = (overrides: Partial<Pet> = {}): Pet => {
+    const testSpecies: import("@/types/Pet").PetSpecies = {
+      id: "test_species",
+      name: "Test Pet", 
+      rarity: "common",
+      description: "A pet for testing",
+      baseStats: { attack: 10, defense: 8, speed: 12, health: 50 },
+      growthRates: { attack: 1.1, defense: 1.1, speed: 1.1, health: 1.2, energy: 1.1 },
+      sprite: "test.png",
+      icon: "test_icon.png",
+    };
+
+    return {
+      id: "test-pet",
+      name: "Test Pet",
+      species: testSpecies,
+      rarity: "common",
+      growthStage: 0,
+      satiety: 50,
+      hydration: 50,
+      happiness: 50,
+      satietyTicksLeft: 50 * 100, // SATIETY multiplier is 100
+      hydrationTicksLeft: 50 * 80, // HYDRATION multiplier is 80
+      happinessTicksLeft: 50 * 120, // HAPPINESS multiplier is 120
+      poopTicksLeft: 2000,
+      sickByPoopTicksLeft: 17280,
+      life: 1000000,
+      maxEnergy: 100,
+      currentEnergy: 50,
+      health: "healthy",
+      state: "idle",
+      attack: 10,
+      defense: 10,
+      speed: 10,
+      maxHealth: 100,
+      currentHealth: 100,
+      moves: [],
+      birthTime: Date.now(),
+      totalLifetime: 0,
+      lastCareTime: Date.now(),
+      ...overrides,
+    };
+  };
 
   describe("isSick", () => {
     it("should return true when pet is sick", () => {
@@ -400,39 +410,49 @@ describe("GameMath", () => {
 });
 
 describe("EnergyManager", () => {
-  const createTestPet = (overrides: Partial<Pet> = {}): Pet => ({
-    id: "test-pet",
-    name: "Test Pet",
-    species: "starter_dog",
-    rarity: "common",
-    growthStage: 0,
-    satiety: 50,
-    hydration: 50,
-    happiness: 50,
-    satietyTicksLeft: 50 * 100,
-    hydrationTicksLeft: 50 * 80,
-    happinessTicksLeft: 50 * 120,
-    poopTicksLeft: 2000,
-    sickByPoopTicksLeft: 17280,
-    life: 1000000,
-    maxEnergy: 100,
-    currentEnergy: 50,
-    health: "healthy",
-    state: "idle",
-    attack: 10,
-    defense: 10,
-    speed: 10,
-    maxHealth: 100,
-    currentHealth: 100,
-    moves: [],
-    level: 1,
-    experience: 0,
-    experienceToNext: 100,
-    lastCareTime: Date.now(),
-    createdAt: Date.now(),
-    lifetime: 0,
-    ...overrides,
-  });
+  const createTestPet = (overrides: Partial<Pet> = {}): Pet => {
+    const testSpecies: import("@/types/Pet").PetSpecies = {
+      id: "test_species",
+      name: "Test Pet",
+      rarity: "common", 
+      description: "A pet for testing",
+      baseStats: { attack: 10, defense: 8, speed: 12, health: 50 },
+      growthRates: { attack: 1.1, defense: 1.1, speed: 1.1, health: 1.2, energy: 1.1 },
+      sprite: "test.png",
+      icon: "test_icon.png",
+    };
+
+    return {
+      id: "test-pet",
+      name: "Test Pet",
+      species: testSpecies,
+      rarity: "common",
+      growthStage: 0,
+      satiety: 50,
+      hydration: 50,
+      happiness: 50,
+      satietyTicksLeft: 50 * 100,
+      hydrationTicksLeft: 50 * 80,
+      happinessTicksLeft: 50 * 120,
+      poopTicksLeft: 2000,
+      sickByPoopTicksLeft: 17280,
+      life: 1000000,
+      maxEnergy: 100,
+      currentEnergy: 50,
+      health: "healthy",
+      state: "idle",
+      attack: 10,
+      defense: 10,
+      speed: 10,
+      maxHealth: 100,
+      currentHealth: 100,
+      moves: [],
+      birthTime: Date.now(),
+      lastCareTime: Date.now(),
+      totalLifetime: 0,
+      ...overrides,
+    } as Pet;
+  };
 
   describe("hasEnoughEnergy", () => {
     it("should return true when pet has enough energy", () => {

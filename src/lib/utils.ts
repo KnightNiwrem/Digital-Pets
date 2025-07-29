@@ -3,6 +3,12 @@ import { twMerge } from "tailwind-merge";
 import type { Pet } from "@/types/Pet";
 import { PET_CONSTANTS } from "@/types";
 
+// Interface for objects that have energy properties
+interface HasEnergy {
+  currentEnergy: number;
+  maxEnergy?: number;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -222,17 +228,17 @@ export class GameMath {
  */
 export class EnergyManager {
   /**
-   * Check if pet has enough energy for an action
+   * Check if an entity has enough energy for an action
    */
-  static hasEnoughEnergy(pet: Pet, requiredEnergy: number): boolean {
-    return PetValidator.hasEnoughEnergy(pet, requiredEnergy);
+  static hasEnoughEnergy(entity: HasEnergy, requiredEnergy: number): boolean {
+    return entity.currentEnergy >= requiredEnergy;
   }
 
   /**
-   * Safely deduct energy from pet, preventing negative values
+   * Safely deduct energy from entity, preventing negative values
    */
-  static deductEnergy(pet: Pet, energyCost: number): void {
-    pet.currentEnergy = GameMath.subtractEnergy(pet.currentEnergy, energyCost);
+  static deductEnergy(entity: HasEnergy, energyCost: number): void {
+    entity.currentEnergy = GameMath.subtractEnergy(entity.currentEnergy, energyCost);
   }
 
   /**
@@ -246,12 +252,12 @@ export class EnergyManager {
    * Validate and deduct energy for an action
    * Returns error message if insufficient energy, null if successful
    */
-  static validateAndDeductEnergy(pet: Pet, energyCost: number, actionName: string): string | null {
-    if (!this.hasEnoughEnergy(pet, energyCost)) {
+  static validateAndDeductEnergy(entity: HasEnergy, energyCost: number, actionName: string): string | null {
+    if (!this.hasEnoughEnergy(entity, energyCost)) {
       return `Pet doesn't have enough energy for ${actionName}.`;
     }
 
-    this.deductEnergy(pet, energyCost);
+    this.deductEnergy(entity, energyCost);
     return null;
   }
 
