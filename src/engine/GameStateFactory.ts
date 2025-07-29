@@ -1,0 +1,278 @@
+// Factory for creating game state objects
+
+import type { GameState, Pet, PetSpecies, Inventory, WorldState, QuestLog } from "@/types";
+import { GAME_CONSTANTS, DEFAULT_GAME_SETTINGS, DEFAULT_PLAYER_STATS } from "@/types";
+
+export class GameStateFactory {
+  /**
+   * Create a new game state for a fresh game
+   */
+  static createNewGame(starterPet?: Pet): GameState {
+    const now = Date.now();
+
+    return {
+      metadata: {
+        version: GAME_CONSTANTS.SAVE_VERSION,
+        lastSaveTime: now,
+        saveCount: 0,
+        platform: this.getPlatform(),
+        gameVersion: GAME_CONSTANTS.SAVE_VERSION,
+      },
+
+      currentPet: starterPet || null,
+      ownedPets: starterPet ? [starterPet] : [],
+
+      inventory: this.createStartingInventory(),
+      world: this.createStartingWorld(),
+      quests: this.createEmptyQuestLog(),
+
+      currentBattle: null,
+
+      playerStats: { ...DEFAULT_PLAYER_STATS },
+      settings: { ...DEFAULT_GAME_SETTINGS },
+
+      metrics: {
+        sessionStartTime: now,
+        ticksThisSession: 0,
+        totalSessions: 1,
+        totalTicks: 0,
+        totalPlayTime: 0,
+        totalFeedings: 0,
+        totalDrinks: 0,
+        totalPlays: 0,
+        totalCleanings: 0,
+        totalMedicineUsed: 0,
+        totalBattles: 0,
+        totalForaging: 0,
+        totalFishing: 0,
+        totalMining: 0,
+        totalTraining: 0,
+        totalGoldEarned: 0,
+        totalGoldSpent: 0,
+        totalItemsUsed: 0,
+        totalItemsSold: 0,
+      },
+
+      gameTime: {
+        totalTicks: 0,
+        lastTickTime: now,
+        isPaused: false,
+      },
+
+      tutorial: {
+        completed: false,
+        currentStep: "welcome",
+        skippedSteps: [],
+      },
+
+      achievements: {},
+      notifications: [],
+    };
+  }
+
+  /**
+   * Create a starter pet for new players
+   */
+  static createStarterPet(species: PetSpecies, name: string): Pet {
+    const now = Date.now();
+
+    return {
+      id: this.generateId(),
+      name,
+      species,
+      rarity: species.rarity,
+      growthStage: 0,
+
+      // Starting care stats
+      satiety: 100,
+      hydration: 100,
+      happiness: 100,
+
+      // Starting hidden counters (full)
+      satietyTicksLeft: 10000, // ~41 hours
+      hydrationTicksLeft: 8000, // ~33 hours
+      happinessTicksLeft: 12000, // ~50 hours
+      poopTicksLeft: 480, // ~2 hours
+      sickByPoopTicksLeft: 17280, // 72 hours
+
+      // Core stats
+      life: 1000000, // Start with full life
+      maxEnergy: 100,
+      currentEnergy: 100,
+      health: "healthy",
+      state: "idle",
+
+      // Battle stats based on species
+      attack: species.baseStats.attack,
+      defense: species.baseStats.defense,
+      speed: species.baseStats.speed,
+      maxHealth: species.baseStats.health,
+      currentHealth: species.baseStats.health,
+      moves: [], // No moves initially
+
+      // Metadata
+      birthTime: now,
+      lastCareTime: now,
+      totalLifetime: 0,
+    };
+  }
+
+  /**
+   * Create starting inventory for new players
+   */
+  private static createStartingInventory(): Inventory {
+    return {
+      slots: [
+        // Starting with basic food and water
+        {
+          item: {
+            id: "basic_food",
+            name: "Pet Food",
+            description: "Basic food for your pet",
+            type: "consumable",
+            rarity: "common",
+            icon: "food.png",
+            effects: [{ type: "satiety", value: 25 }],
+            value: 10,
+            stackable: true,
+          },
+          quantity: 5,
+          slotIndex: 0,
+        },
+        {
+          item: {
+            id: "basic_water",
+            name: "Water Bowl",
+            description: "Fresh water for your pet",
+            type: "consumable",
+            rarity: "common",
+            icon: "water.png",
+            effects: [{ type: "hydration", value: 30 }],
+            value: 5,
+            stackable: true,
+          },
+          quantity: 5,
+          slotIndex: 1,
+        },
+        {
+          item: {
+            id: "basic_toy",
+            name: "Ball",
+            description: "A simple ball to play with",
+            type: "toy",
+            rarity: "common",
+            icon: "ball.png",
+            effects: [{ type: "happiness", value: 20 }],
+            value: 15,
+            stackable: false,
+            maxDurability: 100,
+            currentDurability: 100,
+            durabilityLossPerUse: 5,
+          },
+          quantity: 1,
+          slotIndex: 2,
+        },
+      ],
+      maxSlots: GAME_CONSTANTS.STARTING_INVENTORY_SLOTS,
+      gold: GAME_CONSTANTS.STARTING_GOLD,
+    };
+  }
+
+  /**
+   * Create starting world state
+   */
+  private static createStartingWorld(): WorldState {
+    return {
+      currentLocationId: "hometown",
+      unlockedLocations: ["hometown"],
+      visitedLocations: ["hometown"],
+      travelState: undefined,
+      activeActivities: [],
+    };
+  }
+
+  /**
+   * Create empty quest log for new players
+   */
+  private static createEmptyQuestLog(): QuestLog {
+    return {
+      activeQuests: [],
+      completedQuests: [],
+      failedQuests: [],
+      availableQuests: ["welcome_quest"], // Starting quest
+      questChains: [],
+    };
+  }
+
+  /**
+   * Generate a unique ID
+   */
+  private static generateId(): string {
+    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Detect the current platform
+   */
+  private static getPlatform(): string {
+    if (typeof window === "undefined") return "server";
+
+    const userAgent = window.navigator.userAgent.toLowerCase();
+
+    if (/mobile|android|iphone|ipad/.test(userAgent)) {
+      return "mobile";
+    } else if (/tablet/.test(userAgent)) {
+      return "tablet";
+    } else {
+      return "desktop";
+    }
+  }
+
+  /**
+   * Validate a game state object
+   */
+  static validateGameState(gameState: unknown): gameState is GameState {
+    if (!gameState || typeof gameState !== "object") {
+      return false;
+    }
+
+    const state = gameState as Record<string, unknown>;
+
+    // Check for required properties
+    const requiredProps = [
+      "metadata",
+      "inventory",
+      "world",
+      "quests",
+      "playerStats",
+      "settings",
+      "metrics",
+      "gameTime",
+      "tutorial",
+      "achievements",
+      "notifications",
+    ];
+
+    return requiredProps.every(prop => prop in state);
+  }
+
+  /**
+   * Create a minimal test game state for development
+   */
+  static createTestGame(): GameState {
+    // This would create a game state with test data for development
+    const testSpecies: PetSpecies = {
+      id: "test_pet",
+      name: "Test Pet",
+      rarity: "common",
+      description: "A pet for testing",
+      baseStats: { attack: 10, defense: 8, speed: 12, health: 50 },
+      growthRates: { attack: 1.1, defense: 1.1, speed: 1.1, health: 1.2, energy: 1.1 },
+      sprite: "test_pet.png",
+      icon: "test_pet_icon.png",
+    };
+
+    const testPet = this.createStarterPet(testSpecies, "Test");
+    return this.createNewGame(testPet);
+  }
+}
