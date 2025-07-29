@@ -41,7 +41,7 @@ const toCamelCase = (str: string): string => {
 };
 
 // Helper function to parse a value into appropriate type
-const parseValue = (value: string): any => {
+const parseValue = (value: string): string | number | boolean | string[] => {
   // Handle true/false strings
   if (value === "true") return true;
   if (value === "false") return false;
@@ -97,7 +97,9 @@ function parseArgs(): Partial<BuildConfig> {
     // Handle nested properties (e.g. --minify.whitespace)
     if (key.includes(".")) {
       const [parentKey, childKey] = key.split(".");
-      config[parentKey] = config[parentKey] || {};
+      if (typeof config[parentKey] !== 'object' || config[parentKey] === null) {
+        config[parentKey] = {};
+      }
       config[parentKey][childKey] = parseValue(value);
     } else {
       config[key] = parseValue(value);
@@ -135,7 +137,9 @@ if (existsSync(outdir)) {
 const start = performance.now();
 
 // Scan for all HTML files in the project
-const entrypoints = [...new Bun.Glob("**.html").scanSync("src")]
+// Note: Using dynamic import to access Bun.Glob for better compatibility
+const glob = (await import("bun")).Glob;
+const entrypoints = [...new glob("**.html").scanSync("src")]
   .map(a => path.resolve("src", a))
   .filter(dir => !dir.includes("node_modules"));
 console.log(`📄 Found ${entrypoints.length} HTML ${entrypoints.length === 1 ? "file" : "files"} to process\n`);
@@ -158,9 +162,9 @@ const result = await build({
 const end = performance.now();
 
 const outputTable = result.outputs.map(output => ({
-  "File": path.relative(process.cwd(), output.path),
-  "Type": output.kind,
-  "Size": formatFileSize(output.size),
+  File: path.relative(process.cwd(), output.path),
+  Type: output.kind,
+  Size: formatFileSize(output.size),
 }));
 
 console.table(outputTable);

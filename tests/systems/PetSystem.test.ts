@@ -24,26 +24,26 @@ function createTestPet(overrides: Partial<Pet> = {}): Pet {
     species: testSpecies,
     rarity: "common",
     growthStage: 0,
-    
+
     // Care stats
     satiety: 50,
     hydration: 50,
     happiness: 50,
-    
+
     // Hidden counters
     satietyTicksLeft: 5000,
     hydrationTicksLeft: 4000,
     happinessTicksLeft: 6000,
     poopTicksLeft: 240,
     sickByPoopTicksLeft: PET_CONSTANTS.SICK_BY_POOP_TICKS,
-    
+
     // Core stats
     life: PET_CONSTANTS.MAX_LIFE,
     maxEnergy: 100,
     currentEnergy: 100,
     health: "healthy",
     state: "idle",
-    
+
     // Battle stats
     attack: 10,
     defense: 8,
@@ -51,12 +51,12 @@ function createTestPet(overrides: Partial<Pet> = {}): Pet {
     maxHealth: 50,
     currentHealth: 50,
     moves: [],
-    
+
     // Metadata
     birthTime: Date.now(),
     lastCareTime: Date.now(),
     totalLifetime: 0,
-    
+
     ...overrides,
   };
 }
@@ -102,7 +102,7 @@ describe("PetSystem - Pet Care Actions", () => {
 
     test("should cap satiety at maximum", () => {
       pet.satiety = 90;
-      
+
       const result = PetSystem.feedPet(pet, 50);
 
       expect(result.success).toBe(true);
@@ -115,7 +115,7 @@ describe("PetSystem - Pet Care Actions", () => {
 
       // Add small delay to ensure timestamp difference
       await new Promise(resolve => setTimeout(resolve, 1));
-      
+
       PetSystem.feedPet(pet, 25);
 
       expect(pet.lastCareTime).toBeGreaterThan(beforeTime);
@@ -343,9 +343,9 @@ describe("PetSystem - Tick Processing", () => {
 
     PetSystem.processPetTick(pet);
 
-    expect(pet.satiety).toBe(Math.ceil(99 / PET_CONSTANTS.STAT_MULTIPLIER.satiety));
-    expect(pet.hydration).toBe(Math.ceil(79 / PET_CONSTANTS.STAT_MULTIPLIER.hydration));
-    expect(pet.happiness).toBe(Math.ceil(119 / PET_CONSTANTS.STAT_MULTIPLIER.happiness));
+    expect(pet.satiety).toBe(Math.ceil(99 / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY));
+    expect(pet.hydration).toBe(Math.ceil(79 / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION));
+    expect(pet.happiness).toBe(Math.ceil(119 / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS));
   });
 
   test("should handle pet pooping", () => {
@@ -659,7 +659,7 @@ describe("PetSystem - Edge Cases", () => {
 
     PetSystem.processPetTick(pet);
 
-    const expectedDecrease = 
+    const expectedDecrease =
       PET_CONSTANTS.LIFE_DECREASE.sick +
       PET_CONSTANTS.LIFE_DECREASE.noSatiety +
       PET_CONSTANTS.LIFE_DECREASE.noHydration;

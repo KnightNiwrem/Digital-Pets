@@ -132,8 +132,8 @@ export const PET_CONSTANTS = {
 
   // Stat display calculation
   STAT_MULTIPLIER: {
-    satiety: 100,
-    hydration: 80,
-    happiness: 120,
+    SATIETY: 100,
+    HYDRATION: 80,
+    HAPPINESS: 120,
   },
 } as const;
