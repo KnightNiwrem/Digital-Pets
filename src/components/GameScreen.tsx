@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PetDisplay } from "@/components/pet/PetDisplay";
 import { PetCarePanel } from "@/components/pet/PetCarePanel";
+import { WorldScreen } from "@/components/world/WorldScreen";
 import { useGameState } from "@/hooks/useGameState";
+import { Home, Map } from "lucide-react";
 
 export function GameScreen() {
   const {
@@ -30,6 +32,49 @@ export function GameScreen() {
 
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
+  const [activeTab, setActiveTab] = useState<"pet" | "world">("pet");
+
+  // World action handlers
+  const handleTravel = async (destinationId: string) => {
+    if (!gameState?.currentPet || !gameState?.world) return;
+
+    const { WorldSystem } = await import("@/systems/WorldSystem");
+    const result = WorldSystem.startTravel(gameState.world, gameState.currentPet, destinationId);
+
+    if (result.success) {
+      // Update the game state through the existing game loop
+      // This is a simplified approach - in practice, this would be handled by the GameLoop
+      console.log("Travel started:", result.message);
+    } else {
+      console.error("Travel failed:", result.error);
+    }
+  };
+
+  const handleStartActivity = async (activityId: string) => {
+    if (!gameState?.currentPet || !gameState?.world) return;
+
+    const { WorldSystem } = await import("@/systems/WorldSystem");
+    const result = WorldSystem.startActivity(gameState.world, gameState.currentPet, activityId);
+
+    if (result.success) {
+      console.log("Activity started:", result.message);
+    } else {
+      console.error("Activity failed:", result.error);
+    }
+  };
+
+  const handleCancelActivity = async () => {
+    if (!gameState?.currentPet || !gameState?.world) return;
+
+    const { WorldSystem } = await import("@/systems/WorldSystem");
+    const result = WorldSystem.cancelActivity(gameState.world, gameState.currentPet.id);
+
+    if (result.success) {
+      console.log("Activity cancelled:", result.message);
+    } else {
+      console.error("Cancel failed:", result.error);
+    }
+  };
 
   // Auto-load existing save on mount
   useEffect(() => {
@@ -151,25 +196,67 @@ export function GameScreen() {
 
       {/* Main Game Content */}
       {gameState.currentPet ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pet Display */}
-          <div>
-            <PetDisplay pet={gameState.currentPet} />
+        <div className="space-y-6">
+          {/* Tab Navigation */}
+          <div className="flex space-x-4 border-b">
+            <button
+              onClick={() => setActiveTab("pet")}
+              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "pet"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <Home className="w-4 h-4 inline mr-2" />
+              Pet Care
+            </button>
+            <button
+              onClick={() => setActiveTab("world")}
+              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "world"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <Map className="w-4 h-4 inline mr-2" />
+              Explore World
+            </button>
           </div>
 
-          {/* Pet Care Panel */}
-          <div>
-            <PetCarePanel
+          {/* Tab Content */}
+          {activeTab === "pet" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pet Display */}
+              <div>
+                <PetDisplay pet={gameState.currentPet} />
+              </div>
+
+              {/* Pet Care Panel */}
+              <div>
+                <PetCarePanel
+                  pet={gameState.currentPet}
+                  isLoading={isLoading}
+                  onFeed={feedPet}
+                  onDrink={giveDrink}
+                  onPlay={playWithPet}
+                  onCleanPoop={cleanPoop}
+                  onTreat={treatPet}
+                  onToggleSleep={toggleSleep}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "world" && gameState.world && (
+            <WorldScreen
               pet={gameState.currentPet}
-              isLoading={isLoading}
-              onFeed={feedPet}
-              onDrink={giveDrink}
-              onPlay={playWithPet}
-              onCleanPoop={cleanPoop}
-              onTreat={treatPet}
-              onToggleSleep={toggleSleep}
+              worldState={gameState.world}
+              onTravel={handleTravel}
+              onStartActivity={handleStartActivity}
+              onCancelActivity={handleCancelActivity}
+              disabled={isLoading || isPaused}
             />
-          </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-12">
