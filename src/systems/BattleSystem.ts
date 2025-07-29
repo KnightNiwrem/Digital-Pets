@@ -1,9 +1,9 @@
 // Battle system for turn-based combat
 
-import type { Battle, BattleAction, BattlePet, BattleResult, BattleTurn, BattleType } from "@/types/Battle";
-import type { Pet } from "@/types/Pet";
+import type { Battle, BattleAction, BattlePet, BattleResult, BattleTurn, BattleType, BattleMove } from "@/types/Battle";
+import type { Pet, Move } from "@/types/Pet";
 import type { Result } from "@/types/index";
-import { getMoveById } from "@/data/moves";
+import { getMoveById, getStarterMoves } from "@/data/moves";
 
 // Import constants
 const {
@@ -21,6 +21,37 @@ const {
   MAX_STATUS_EFFECTS: 5,
   FLEE_SUCCESS_RATE: 0.8,
 } as const;
+
+/**
+ * Convert a Pet Move to BattleMove format
+ */
+function convertMoveToBattleMove(move: Move): BattleMove {
+  return {
+    id: move.id,
+    name: move.name,
+    description: move.description,
+    category: "physical", // Default category, could be enhanced based on move.type
+    power: move.damage,
+    accuracy: move.accuracy,
+    energyCost: move.energyCost,
+    priority: 0, // Default priority
+    effects: [], // Convert move.effects if needed
+    targetType: "opponent", // Default target
+  };
+}
+
+/**
+ * Get battle-ready moves for a pet
+ */
+function getPetBattleMoves(pet: Pet): BattleMove[] {
+  if (pet.moves.length === 0) {
+    // If pet has no moves, give them starter moves
+    return getStarterMoves().slice(0, MAX_MOVES_PER_PET);
+  }
+
+  // Convert existing moves to battle format
+  return pet.moves.slice(0, MAX_MOVES_PER_PET).map(convertMoveToBattleMove);
+}
 
 export class BattleSystem {
   /**
@@ -56,7 +87,7 @@ export class BattleSystem {
         turnPhase: "select_action",
         experience: this.calculateExperienceReward(battleOpponentPet, battleType),
         goldReward: this.calculateGoldReward(battleOpponentPet, battleType),
-        itemRewards: this.calculateItemRewards(battleOpponentPet, battleType),
+        itemRewards: this.calculateItemRewards(battleType),
         startTime: Date.now(),
         location,
       };
@@ -83,7 +114,7 @@ export class BattleSystem {
       // Validate action
       const validationResult = this.validateAction(battle, action);
       if (!validationResult.success) {
-        return validationResult;
+        return { success: false, error: validationResult.error };
       }
 
       // Generate opponent action (AI)
@@ -371,7 +402,7 @@ export class BattleSystem {
       evasion: 0,
       currentEnergy: pet.currentEnergy,
       maxEnergy: pet.maxEnergy,
-      moves: pet.moves.slice(0, MAX_MOVES_PER_PET), // Use existing Move interface
+      moves: getPetBattleMoves(pet),
       statusEffects: [],
       tempStatModifiers: {
         attack: 0,
@@ -554,7 +585,7 @@ export class BattleSystem {
     return Math.floor(baseGold * typeMultiplier);
   }
 
-  private static calculateItemRewards(opponent: BattlePet, battleType: BattleType): string[] {
+  private static calculateItemRewards(battleType: BattleType): string[] {
     // Simple item reward system - could be expanded
     const rewards: string[] = [];
 
