@@ -141,7 +141,7 @@ export class WorldSystem {
       state: "travelling",
       lastCareTime: Date.now(),
     };
-    
+
     // Deduct energy cost for travel
     EnergyManager.deductEnergy(updatedPet, energyCost);
 
@@ -275,7 +275,7 @@ export class WorldSystem {
       ...pet,
       lastCareTime: Date.now(),
     };
-    
+
     // Deduct energy cost for activity
     EnergyManager.deductEnergy(updatedPet, activity.energyCost);
 

@@ -48,8 +48,8 @@ export class PetValidator {
     if (this.isSick(pet)) {
       const actionMessages = {
         feed: "Pet is too sick to eat. Use medicine first.",
-        drink: "Pet is too sick to drink. Use medicine first.", 
-        play: "Pet is too sick to play. Use medicine first."
+        drink: "Pet is too sick to drink. Use medicine first.",
+        play: "Pet is too sick to play. Use medicine first.",
       };
       return actionMessages[actionType];
     }
@@ -200,11 +200,11 @@ export class GameMath {
     const attackDefenseRatio = attack / Math.max(1, defense);
     const randomFactor = 0.85 + Math.random() * 0.3; // 0.85 to 1.15
     let damage = Math.floor(attackDefenseRatio * movePower * randomFactor);
-    
+
     if (isCritical) {
       damage = Math.floor(damage * 1.5); // 1.5x critical multiplier
     }
-    
+
     return Math.max(1, damage); // Minimum 1 damage
   }
 
@@ -250,7 +250,7 @@ export class EnergyManager {
     if (!this.hasEnoughEnergy(pet, energyCost)) {
       return `Pet doesn't have enough energy for ${actionName}.`;
     }
-    
+
     this.deductEnergy(pet, energyCost);
     return null;
   }
@@ -260,7 +260,7 @@ export class EnergyManager {
    */
   static readonly ERROR_MESSAGES = {
     TRAVEL: "Pet doesn't have enough energy for this journey",
-    ACTIVITY: "Pet doesn't have enough energy for this activity", 
+    ACTIVITY: "Pet doesn't have enough energy for this activity",
     BATTLE: "Insufficient energy for this move",
     PLAY: "Pet doesn't have enough energy to play",
     GENERAL: (action: string) => `Pet doesn't have enough energy for ${action}`,

@@ -3,7 +3,7 @@
 import type { Battle, BattleAction, BattlePet, BattleResult, BattleTurn, BattleType, BattleMove } from "@/types/Battle";
 import type { Pet, Move } from "@/types/Pet";
 import type { Result } from "@/types/index";
-import { PetValidator, EnergyManager } from "@/lib/utils";
+import { EnergyManager } from "@/lib/utils";
 import { getMoveById, getStarterMoves } from "@/data/moves";
 
 // Import constants
