@@ -1,11 +1,12 @@
 // React hook for managing game state and game loop
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { GameState, Pet, Result, PetCareAction } from "@/types";
+import type { GameState, Pet, Result, PetCareAction, Inventory } from "@/types";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
+import { ItemSystem } from "@/systems/ItemSystem";
 
 export interface UseGameStateReturn {
   // State
@@ -25,6 +26,12 @@ export interface UseGameStateReturn {
   cleanPoop: () => Promise<Result<void>>;
   treatPet: (medicineType: string) => Promise<Result<void>>;
   toggleSleep: () => Promise<Result<void>>;
+
+  // Item actions
+  useItem: (itemId: string) => Promise<Result<void>>;
+  sellItem: (itemId: string, quantity: number) => Promise<Result<void>>;
+  buyItem: (itemId: string, quantity: number) => Promise<Result<void>>;
+  sortInventory: (sortBy: "name" | "value" | "rarity" | "type" | "quantity") => Promise<Result<void>>;
 
   // Game loop control
   pauseGame: () => void;
@@ -229,6 +236,99 @@ export function useGameState(): UseGameStateReturn {
     return performPetAction(actionFn, actionName);
   }, [gameState, performPetAction]);
 
+  // Item action wrapper
+  const performItemAction = useCallback(
+    async (
+      action: (inventory: Inventory, pet: Pet) => Result<{ inventory?: Inventory; pet?: Pet }>,
+      actionName: string
+    ): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.inventory) {
+        return { success: false, error: "No active pet or inventory" };
+      }
+
+      try {
+        const result = action(gameState.inventory, gameState.currentPet);
+
+        if (result.success) {
+          // Update the game state with new inventory and pet data
+          setGameState(prev => {
+            if (!prev) return null;
+            const updates: Partial<GameState> = { ...prev };
+
+            if (result.data?.inventory) {
+              updates.inventory = result.data.inventory;
+            }
+            if (result.data?.pet) {
+              updates.currentPet = result.data.pet;
+            }
+
+            return updates as GameState;
+          });
+
+          // Save the game
+          const saveResult = GameStorage.saveGame(gameState);
+          if (!saveResult.success) {
+            console.warn(`${actionName} succeeded but save failed:`, saveResult.error);
+          }
+
+          return { success: true };
+        } else {
+          return { success: false, error: result.error };
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : `Unknown error in ${actionName}`;
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+    [gameState]
+  );
+
+  // Item actions
+  const useItem = useCallback(
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    (itemId: string) => performItemAction((inventory, pet) => ItemSystem.useItem(inventory, pet, itemId), "use item"),
+    [performItemAction]
+  );
+
+  const sellItem = useCallback(
+    (itemId: string, quantity: number) =>
+      performItemAction(inventory => {
+        const result = ItemSystem.sellItem(inventory, itemId, quantity, 0.5);
+        return {
+          success: result.success,
+          error: result.error,
+          data: result.success ? { inventory: result.data } : undefined,
+        };
+      }, "sell item"),
+    [performItemAction]
+  );
+
+  const buyItem = useCallback(
+    (itemId: string, quantity: number) =>
+      performItemAction(inventory => {
+        const result = ItemSystem.buyItem(inventory, itemId, quantity, 1.0);
+        return {
+          success: result.success,
+          error: result.error,
+          data: result.success ? { inventory: result.data } : undefined,
+        };
+      }, "buy item"),
+    [performItemAction]
+  );
+
+  const sortInventory = useCallback(
+    (sortBy: "name" | "value" | "rarity" | "type" | "quantity") =>
+      performItemAction(
+        inventory => ({
+          success: true,
+          data: { inventory: ItemSystem.sortInventory(inventory, sortBy) },
+        }),
+        "sort inventory"
+      ),
+    [performItemAction]
+  );
+
   // Game loop control
   const pauseGame = useCallback(() => {
     if (gameLoopRef.current) {
@@ -262,6 +362,12 @@ export function useGameState(): UseGameStateReturn {
     cleanPoop,
     treatPet,
     toggleSleep,
+
+    // Item actions
+    useItem,
+    sellItem,
+    buyItem,
+    sortInventory,
 
     // Game loop control
     pauseGame,
