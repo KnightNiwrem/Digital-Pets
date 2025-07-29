@@ -343,9 +343,9 @@ describe("PetSystem - Tick Processing", () => {
 
     PetSystem.processPetTick(pet);
 
-    expect(pet.satiety).toBe(Math.ceil(99 / PET_CONSTANTS.STAT_MULTIPLIER.satiety));
-    expect(pet.hydration).toBe(Math.ceil(79 / PET_CONSTANTS.STAT_MULTIPLIER.hydration));
-    expect(pet.happiness).toBe(Math.ceil(119 / PET_CONSTANTS.STAT_MULTIPLIER.happiness));
+    expect(pet.satiety).toBe(Math.ceil(99 / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY));
+    expect(pet.hydration).toBe(Math.ceil(79 / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION));
+    expect(pet.happiness).toBe(Math.ceil(119 / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS));
   });
 
   test("should handle pet pooping", () => {

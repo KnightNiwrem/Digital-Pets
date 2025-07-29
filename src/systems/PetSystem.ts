@@ -25,9 +25,9 @@ export class PetSystem {
     }
 
     // Convert display value back to ticks
-    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.satiety;
+    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.SATIETY;
     pet.satietyTicksLeft = Math.min(pet.satietyTicksLeft + tickIncrease, 15000); // Cap at ~62 hours
-    pet.satiety = Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.satiety);
+    pet.satiety = Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY);
     pet.lastCareTime = Date.now();
 
     const action: PetCareAction = {
@@ -58,9 +58,9 @@ export class PetSystem {
       };
     }
 
-    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.hydration;
+    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION;
     pet.hydrationTicksLeft = Math.min(pet.hydrationTicksLeft + tickIncrease, 12000); // Cap at ~50 hours
-    pet.hydration = Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.hydration);
+    pet.hydration = Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION);
     pet.lastCareTime = Date.now();
 
     const action: PetCareAction = {
@@ -98,9 +98,9 @@ export class PetSystem {
       };
     }
 
-    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.happiness;
+    const tickIncrease = actualIncrease * PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS;
     pet.happinessTicksLeft = Math.min(pet.happinessTicksLeft + tickIncrease, 18000); // Cap at ~75 hours
-    pet.happiness = Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.happiness);
+    pet.happiness = Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
     pet.currentEnergy = Math.max(0, pet.currentEnergy - energyCost);
     pet.lastCareTime = Date.now();
 
@@ -247,9 +247,9 @@ export class PetSystem {
     const prevHydration = pet.hydration;
     const prevHappiness = pet.happiness;
 
-    pet.satiety = Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.satiety);
-    pet.hydration = Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.hydration);
-    pet.happiness = Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.happiness);
+    pet.satiety = Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY);
+    pet.hydration = Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION);
+    pet.happiness = Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
 
     // Track changes in displayed stats
     if (pet.satiety !== prevSatiety) changes.push("satiety_changed");
@@ -475,5 +475,36 @@ export class PetSystem {
 
     // Return the event that will happen soonest
     return events.reduce((soonest, current) => (current.ticksRemaining < soonest.ticksRemaining ? current : soonest));
+  }
+
+  /**
+   * Calculate display stats from hidden tick counters
+   */
+  static calculateDisplayStats(pet: Pet): {
+    satiety: number;
+    hydration: number;
+    happiness: number;
+    needsPoop: boolean;
+  } {
+    // Convert hidden tick counters to display percentages
+    const satiety = Math.max(0, Math.min(100, Math.ceil(pet.satietyTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.SATIETY)));
+    const hydration = Math.max(
+      0,
+      Math.min(100, Math.ceil(pet.hydrationTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION))
+    );
+    const happiness = Math.max(
+      0,
+      Math.min(100, Math.ceil(pet.happinessTicksLeft / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS))
+    );
+
+    // Check if pet needs poop cleaning
+    const needsPoop = pet.poopTicksLeft <= 0;
+
+    return {
+      satiety,
+      hydration,
+      happiness,
+      needsPoop,
+    };
   }
 }

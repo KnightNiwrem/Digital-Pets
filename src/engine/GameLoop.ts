@@ -42,7 +42,7 @@ export class GameLoop {
     }
 
     this.isRunning = true;
-    
+
     // Use globalThis to handle both browser and test environments
     const globalSetInterval = typeof window !== "undefined" ? window.setInterval : globalThis.setInterval;
     this.intervalId = globalSetInterval(() => {
@@ -372,7 +372,7 @@ export class GameLoop {
     const now = Date.now();
     const lastSaveTime = gameState.metadata.lastSaveTime;
     const offlineTimeMs = now - lastSaveTime;
-    
+
     // Convert offline time to ticks (15 second intervals)
     const ticksElapsed = Math.floor(offlineTimeMs / GAME_CONSTANTS.TICK_INTERVAL);
     const majorEvents: string[] = [];
@@ -386,7 +386,9 @@ export class GameLoop {
     const maxOfflineTicks = Math.floor((7 * 24 * 60 * 60 * 1000) / GAME_CONSTANTS.TICK_INTERVAL);
     const actualTicksToProcess = Math.min(ticksElapsed, maxOfflineTicks);
 
-    console.log(`Processing ${actualTicksToProcess} offline ticks (${(actualTicksToProcess * GAME_CONSTANTS.TICK_INTERVAL / 1000 / 60).toFixed(1)} minutes)`);
+    console.log(
+      `Processing ${actualTicksToProcess} offline ticks (${((actualTicksToProcess * GAME_CONSTANTS.TICK_INTERVAL) / 1000 / 60).toFixed(1)} minutes)`
+    );
 
     // Update game time
     gameState.gameTime.totalTicks += actualTicksToProcess;
@@ -396,7 +398,7 @@ export class GameLoop {
     if (gameState.currentPet) {
       for (let i = 0; i < actualTicksToProcess; i++) {
         const petChanges = PetSystem.processPetTick(gameState.currentPet);
-        
+
         // Track major events
         if (petChanges.includes("pet_died")) {
           majorEvents.push("pet_died");
@@ -418,13 +420,13 @@ export class GameLoop {
     // Process world progression
     if (gameState.world.travelState) {
       gameState.world.travelState.ticksRemaining -= actualTicksToProcess;
-      
+
       if (gameState.world.travelState.ticksRemaining <= 0) {
         // Travel completed during offline time
         gameState.world.currentLocationId = gameState.world.travelState.destinationId;
         gameState.world.travelState = undefined;
         majorEvents.push("travel_completed");
-        
+
         // Set pet back to idle if it was travelling
         if (gameState.currentPet?.state === "travelling") {
           gameState.currentPet.state = "idle";
@@ -435,13 +437,13 @@ export class GameLoop {
     // Process active activities
     gameState.world.activeActivities = gameState.world.activeActivities.filter(activity => {
       activity.ticksRemaining -= actualTicksToProcess;
-      
+
       if (activity.ticksRemaining <= 0) {
         majorEvents.push("activity_completed");
         // Note: Actual reward distribution would need ItemSystem implementation
         return false; // Remove completed activity
       }
-      
+
       return true; // Keep ongoing activity
     });
 
@@ -486,7 +488,7 @@ export class GameLoop {
     // Update save timestamp and save the updated state
     gameState.metadata.lastSaveTime = Date.now();
     const saveResult = GameStorage.saveGame(gameState);
-    
+
     if (!saveResult.success) {
       console.warn("Failed to save after offline progression:", saveResult.error);
     }
