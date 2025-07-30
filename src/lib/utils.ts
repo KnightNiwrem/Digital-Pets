@@ -159,15 +159,32 @@ export class GameMath {
 
   /**
    * Convert ticks to display value for pet stats
+   * Using Math.round instead of Math.ceil for better round-trip accuracy
    */
   static ticksToDisplayValue(ticks: number, multiplier: number): number {
-    return this.clamp(Math.ceil(ticks / multiplier), 0, 100);
+    return this.clamp(Math.round(ticks / multiplier), 0, 100);
   }
 
   /**
    * Convert display value to ticks for pet stats
    */
   static displayValueToTicks(displayValue: number, multiplier: number): number {
+    return displayValue * multiplier;
+  }
+
+  /**
+   * Convert display value to ticks with improved accuracy
+   * Preserves fractional tick values when possible for better precision
+   */
+  static displayValueToTicksAccurate(displayValue: number, currentTicks: number, multiplier: number): number {
+    // If the current ticks would round to the same display value, preserve them
+    // This helps maintain precision in round-trip conversions
+    const currentDisplay = this.ticksToDisplayValue(currentTicks, multiplier);
+    if (currentDisplay === displayValue) {
+      return currentTicks;
+    }
+    
+    // Otherwise, use the standard conversion
     return displayValue * multiplier;
   }
 
