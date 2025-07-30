@@ -275,3 +275,18 @@ export function getAvailableDestinations(fromLocationId: string): Location[] {
     .map(connection => getLocationById(connection.destinationId))
     .filter((dest): dest is Location => dest !== undefined);
 }
+
+// Helper function to get NPC by ID from all locations
+export function getNpcById(npcId: string): { id: string; name: string; description: string } | undefined {
+  for (const location of LOCATIONS) {
+    const npc = location.npcs.find(npc => npc.id === npcId);
+    if (npc) {
+      return {
+        id: npc.id,
+        name: npc.name,
+        description: npc.description,
+      };
+    }
+  }
+  return undefined;
+}

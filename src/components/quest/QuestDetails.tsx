@@ -8,6 +8,7 @@ import { CheckCircle, Circle, Coins, Star, MapPin, User, Gift, AlertTriangle } f
 import type { Quest, QuestProgress, QuestObjective, QuestReward } from "@/types/Quest";
 import type { Result } from "@/types";
 import { getItemById } from "@/data/items";
+import { getNpcById } from "@/data/locations";
 
 interface QuestDetailsProps {
   quest: Quest | QuestProgress | null;
@@ -182,7 +183,7 @@ export function QuestDetails({
         {questNpcId && (
           <div className="flex items-center gap-2 text-gray-600">
             <User className="w-4 h-4" />
-            <span>Quest Giver: {questNpcId}</span>
+            <span>Quest Giver: {getNpcById(questNpcId)?.name || questNpcId}</span>
           </div>
         )}
       </div>
