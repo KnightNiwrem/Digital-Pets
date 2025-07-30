@@ -8,10 +8,11 @@ import { PetCarePanel } from "@/components/pet/PetCarePanel";
 import { WorldScreen } from "@/components/world/WorldScreen";
 import { InventoryScreen } from "@/components/inventory/InventoryScreen";
 import { BattleScreen } from "@/components/battle/BattleScreen";
+import { QuestScreen } from "@/components/quest/QuestScreen";
 import { useGameState } from "@/hooks/useGameState";
 import { useBattleState } from "@/hooks/useBattleState";
 import type { BattleAction } from "@/types/Battle";
-import { Home, Map as MapIcon, Package, Sword } from "lucide-react";
+import { Home, Map as MapIcon, Package, Sword, ScrollText } from "lucide-react";
 
 export function GameScreen() {
   const {
@@ -31,6 +32,12 @@ export function GameScreen() {
     sellItem,
     buyItem,
     sortInventory,
+    startQuest,
+    abandonQuest,
+    completeQuest,
+    getAvailableQuests,
+    getActiveQuests,
+    getCompletedQuests,
     isPaused,
     hasExistingSave,
     storageInfo,
@@ -49,7 +56,7 @@ export function GameScreen() {
 
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
-  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle">("pet");
+  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle" | "quest">("pet");
 
   // World action handlers
   const handleTravel = async (destinationId: string) => {
@@ -312,6 +319,17 @@ export function GameScreen() {
               <Sword className="w-4 h-4 inline mr-2" />
               Battle
             </button>
+            <button
+              onClick={() => setActiveTab("quest")}
+              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "quest"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <ScrollText className="w-4 h-4 inline mr-2" />
+              Quests
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -370,6 +388,18 @@ export function GameScreen() {
               onBattleAction={handleBattleAction}
               onBattleEnd={handleBattleEnd}
               currentBattle={currentBattle || undefined}
+            />
+          )}
+
+          {activeTab === "quest" && (
+            <QuestScreen
+              activeQuests={getActiveQuests()}
+              availableQuests={getAvailableQuests()}
+              completedQuests={getCompletedQuests()}
+              onStartQuest={startQuest}
+              onAbandonQuest={abandonQuest}
+              onCompleteQuest={completeQuest}
+              isLoading={isLoading}
             />
           )}
         </div>

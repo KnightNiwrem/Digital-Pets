@@ -2,11 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { GameState, Pet, Result, PetCareAction, Inventory } from "@/types";
+import type { Quest, QuestProgress } from "@/types/Quest";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
+import { QuestSystem } from "@/systems/QuestSystem";
+import { QUESTS } from "@/data/quests";
 
 export interface UseGameStateReturn {
   // State
@@ -32,6 +35,14 @@ export interface UseGameStateReturn {
   sellItem: (itemId: string, quantity: number) => Promise<Result<void>>;
   buyItem: (itemId: string, quantity: number) => Promise<Result<void>>;
   sortInventory: (sortBy: "name" | "value" | "rarity" | "type" | "quantity") => Promise<Result<void>>;
+
+  // Quest actions
+  startQuest: (questId: string) => Promise<Result<void>>;
+  abandonQuest: (questId: string) => Promise<Result<void>>;
+  completeQuest: (questId: string) => Promise<Result<void>>;
+  getAvailableQuests: () => Quest[];
+  getActiveQuests: () => QuestProgress[];
+  getCompletedQuests: () => string[];
 
   // Game loop control
   pauseGame: () => void;
@@ -329,6 +340,103 @@ export function useGameState(): UseGameStateReturn {
     [performItemAction]
   );
 
+  // Quest actions
+  const startQuest = useCallback(
+    async (questId: string): Promise<Result<void>> => {
+      if (!gameState) {
+        return { success: false, error: "No game state available" };
+      }
+
+      try {
+        const { quests } = await import("@/data/quests");
+        const quest = quests.find(q => q.id === questId);
+        if (!quest) {
+          return { success: false, error: "Quest not found" };
+        }
+
+        const result = QuestSystem.startQuest(quest, gameState);
+        if (result.success && result.data) {
+          setGameState(result.data);
+          console.log(`Started quest: ${quest.name}`);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to start quest";
+        console.error("Start quest error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState]
+  );
+
+  const abandonQuest = useCallback(
+    async (questId: string): Promise<Result<void>> => {
+      if (!gameState) {
+        return { success: false, error: "No game state available" };
+      }
+
+      try {
+        const result = QuestSystem.abandonQuest(gameState, questId);
+        if (result.success && result.data) {
+          setGameState(result.data);
+          console.log(`Abandoned quest: ${questId}`);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to abandon quest";
+        console.error("Abandon quest error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState]
+  );
+
+  const completeQuest = useCallback(
+    async (questId: string): Promise<Result<void>> => {
+      if (!gameState) {
+        return { success: false, error: "No game state available" };
+      }
+
+      try {
+        const result = QuestSystem.completeQuest(gameState, questId);
+        if (result.success && result.data) {
+          setGameState(result.data);
+          console.log(`Completed quest: ${questId}`);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to complete quest";
+        console.error("Complete quest error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState]
+  );
+
+  const getAvailableQuests = useCallback((): Quest[] => {
+    if (!gameState) return [];
+
+    try {
+      return QuestSystem.getAvailableQuests(QUESTS, gameState);
+    } catch (error) {
+      console.error("Get available quests error:", error);
+      return [];
+    }
+  }, [gameState]);
+
+  const getActiveQuests = useCallback((): QuestProgress[] => {
+    if (!gameState?.questLog) return [];
+    return gameState.questLog.activeQuests;
+  }, [gameState]);
+
+  const getCompletedQuests = useCallback((): string[] => {
+    if (!gameState?.questLog) return [];
+    return gameState.questLog.completedQuests;
+  }, [gameState]);
+
   // Game loop control
   const pauseGame = useCallback(() => {
     if (gameLoopRef.current) {
@@ -368,6 +476,14 @@ export function useGameState(): UseGameStateReturn {
     sellItem,
     buyItem,
     sortInventory,
+
+    // Quest actions
+    startQuest,
+    abandonQuest,
+    completeQuest,
+    getAvailableQuests,
+    getActiveQuests,
+    getCompletedQuests,
 
     // Game loop control
     pauseGame,

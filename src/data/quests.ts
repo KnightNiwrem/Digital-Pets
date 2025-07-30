@@ -295,6 +295,9 @@ export const QUESTS: Quest[] = [
   FIRST_BATTLE,
 ];
 
+// Export with alternative name for consistency
+export const quests = QUESTS;
+
 // Helper functions
 export function getQuestById(id: string): Quest | undefined {
   return QUESTS.find(quest => quest.id === id);
