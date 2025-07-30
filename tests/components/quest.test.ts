@@ -1,6 +1,6 @@
 // Unit tests for Quest UI components
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import type { Quest, QuestProgress, QuestReward } from "@/types/Quest";
 
 // Mock quest data for testing
@@ -109,9 +109,9 @@ describe("Quest Component Props", () => {
       activeQuests: [mockQuestProgress],
       availableQuests: [mockQuest],
       completedQuests: ["completed_quest_1"],
-      onStartQuest: async (questId: string) => ({ success: true }),
-      onAbandonQuest: async (questId: string) => ({ success: true }),
-      onCompleteQuest: async (questId: string) => ({ success: true }),
+      onStartQuest: async (_questId: string) => ({ success: true }),
+      onAbandonQuest: async (_questId: string) => ({ success: true }),
+      onCompleteQuest: async (_questId: string) => ({ success: true }),
       isLoading: false,
     };
 
@@ -123,7 +123,7 @@ describe("Quest Component Props", () => {
   it("should handle quest dialog props correctly", () => {
     const questDialogProps = {
       quest: mockQuest,
-      onStartQuest: async (questId: string) => ({ success: true }),
+      onStartQuest: async (_questId: string) => ({ success: true }),
       onClose: () => {},
       isLoading: false,
     };
@@ -233,12 +233,19 @@ describe("Quest Component Error Handling", () => {
       objectives: [],
       requirements: [],
       rewards: [],
+      npcId: "minimal_npc",
+      location: "minimal_location", 
+      dialogue: {
+        start: "Hello!",
+        progress: "Keep going!",
+        complete: "Well done!",
+      },
       isMainQuest: false,
     };
 
-    expect(minimalQuest.npcId).toBeUndefined();
-    expect(minimalQuest.location).toBeUndefined();
-    expect(minimalQuest.dialogue).toBeUndefined();
+    expect(minimalQuest.npcId).toBe("minimal_npc");
+    expect(minimalQuest.location).toBe("minimal_location");
+    expect(minimalQuest.dialogue).toBeDefined();
     expect(minimalQuest.objectives).toHaveLength(0);
   });
 });
