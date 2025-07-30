@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { GameState, Pet, Result, PetCareAction, Inventory } from "@/types";
 import type { Quest, QuestProgress } from "@/types/Quest";
+import type { Battle } from "@/types/Battle";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { QuestSystem } from "@/systems/QuestSystem";
+import { WorldSystem } from "@/systems/WorldSystem";
 import { QUESTS } from "@/data/quests";
 
 export interface UseGameStateReturn {
@@ -43,6 +45,14 @@ export interface UseGameStateReturn {
   getAvailableQuests: () => Quest[];
   getActiveQuests: () => QuestProgress[];
   getCompletedQuests: () => string[];
+
+  // World actions
+  startTravel: (destinationId: string) => Promise<Result<void>>;
+  startActivity: (activityId: string) => Promise<Result<void>>;
+  cancelActivity: () => Promise<Result<void>>;
+
+  // Battle actions
+  applyBattleResults: (battleResults: Battle) => Promise<Result<void>>;
 
   // Game loop control
   pauseGame: () => void;
@@ -89,6 +99,25 @@ export function useGameState(): UseGameStateReturn {
     };
   }, []);
 
+  // Enhanced autosave utility for user actions
+  const triggerAutosave = useCallback(
+    async (actionName: string): Promise<void> => {
+      if (!gameState) return;
+
+      try {
+        const saveResult = GameStorage.saveGame(gameState);
+        if (!saveResult.success) {
+          console.warn(`${actionName} succeeded but autosave failed:`, saveResult.error);
+        } else {
+          console.log(`Autosave triggered after: ${actionName}`);
+        }
+      } catch (error) {
+        console.warn(`Autosave error after ${actionName}:`, error);
+      }
+    },
+    [gameState]
+  );
+
   // Pet care action wrapper
   const performPetAction = useCallback(
     async (action: (pet: Pet) => Result<PetCareAction>, actionName: string): Promise<Result<void>> => {
@@ -103,11 +132,8 @@ export function useGameState(): UseGameStateReturn {
           // Update the game state
           setGameState(prev => (prev ? { ...prev } : null));
 
-          // Save the game
-          const saveResult = GameStorage.saveGame(gameState);
-          if (!saveResult.success) {
-            console.warn(`${actionName} succeeded but save failed:`, saveResult.error);
-          }
+          // Trigger autosave after user action
+          await triggerAutosave(actionName);
 
           return { success: true };
         } else {
@@ -119,7 +145,7 @@ export function useGameState(): UseGameStateReturn {
         return { success: false, error: errorMessage };
       }
     },
-    [gameState]
+    [gameState, triggerAutosave]
   );
 
   // Game management functions
@@ -276,11 +302,8 @@ export function useGameState(): UseGameStateReturn {
             return updates as GameState;
           });
 
-          // Save the game
-          const saveResult = GameStorage.saveGame(gameState);
-          if (!saveResult.success) {
-            console.warn(`${actionName} succeeded but save failed:`, saveResult.error);
-          }
+          // Trigger autosave after inventory/money update
+          await triggerAutosave(actionName);
 
           return { success: true };
         } else {
@@ -292,7 +315,7 @@ export function useGameState(): UseGameStateReturn {
         return { success: false, error: errorMessage };
       }
     },
-    [gameState]
+    [gameState, triggerAutosave]
   );
 
   // Item actions
@@ -356,6 +379,10 @@ export function useGameState(): UseGameStateReturn {
         const result = QuestSystem.startQuest(quest, gameState);
         if (result.success && result.data) {
           setGameState(result.data);
+
+          // Trigger autosave after quest update
+          await triggerAutosave(`start quest: ${quest.name}`);
+
           console.log(`Started quest: ${quest.name}`);
           return { success: true };
         }
@@ -366,7 +393,7 @@ export function useGameState(): UseGameStateReturn {
         return { success: false, error: message };
       }
     },
-    [gameState]
+    [gameState, triggerAutosave]
   );
 
   const abandonQuest = useCallback(
@@ -379,6 +406,10 @@ export function useGameState(): UseGameStateReturn {
         const result = QuestSystem.abandonQuest(gameState, questId);
         if (result.success && result.data) {
           setGameState(result.data);
+
+          // Trigger autosave after quest update
+          await triggerAutosave(`abandon quest: ${questId}`);
+
           console.log(`Abandoned quest: ${questId}`);
           return { success: true };
         }
@@ -389,7 +420,7 @@ export function useGameState(): UseGameStateReturn {
         return { success: false, error: message };
       }
     },
-    [gameState]
+    [gameState, triggerAutosave]
   );
 
   const completeQuest = useCallback(
@@ -402,6 +433,10 @@ export function useGameState(): UseGameStateReturn {
         const result = QuestSystem.completeQuest(gameState, questId);
         if (result.success && result.data) {
           setGameState(result.data);
+
+          // Trigger autosave after quest update
+          await triggerAutosave(`complete quest: ${questId}`);
+
           console.log(`Completed quest: ${questId}`);
           return { success: true };
         }
@@ -412,7 +447,7 @@ export function useGameState(): UseGameStateReturn {
         return { success: false, error: message };
       }
     },
-    [gameState]
+    [gameState, triggerAutosave]
   );
 
   const getAvailableQuests = useCallback((): Quest[] => {
@@ -435,6 +470,138 @@ export function useGameState(): UseGameStateReturn {
     if (!gameState?.questLog) return [];
     return gameState.questLog.completedQuests;
   }, [gameState]);
+
+  // World actions
+  const startTravel = useCallback(
+    async (destinationId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.world) {
+        return { success: false, error: "No active pet or world state" };
+      }
+
+      try {
+        const result = WorldSystem.startTravel(gameState.world, gameState.currentPet, destinationId);
+        if (result.success && result.data) {
+          setGameState(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              world: result.data!.worldState,
+              currentPet: result.data!.pet,
+            };
+          });
+
+          // Trigger autosave after world state change
+          await triggerAutosave(`start travel to: ${destinationId}`);
+
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to start travel";
+        console.error("Start travel error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
+
+  const startActivity = useCallback(
+    async (activityId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.world) {
+        return { success: false, error: "No active pet or world state" };
+      }
+
+      try {
+        const result = WorldSystem.startActivity(gameState.world, gameState.currentPet, activityId);
+        if (result.success && result.data) {
+          setGameState(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              world: result.data!.worldState,
+              currentPet: result.data!.pet,
+            };
+          });
+
+          // Trigger autosave after world state change
+          await triggerAutosave(`start activity: ${activityId}`);
+
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to start activity";
+        console.error("Start activity error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
+
+  const cancelActivity = useCallback(async (): Promise<Result<void>> => {
+    if (!gameState?.currentPet || !gameState?.world) {
+      return { success: false, error: "No active pet or world state" };
+    }
+
+    try {
+      const result = WorldSystem.cancelActivity(gameState.world, gameState.currentPet.id);
+      if (result.success && result.data) {
+        setGameState(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            world: result.data!,
+          };
+        });
+
+        // Trigger autosave after world state change
+        await triggerAutosave("cancel activity");
+
+        return { success: true };
+      }
+      return { success: false, error: result.error };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to cancel activity";
+      console.error("Cancel activity error:", error);
+      return { success: false, error: message };
+    }
+  }, [gameState, triggerAutosave]);
+
+  // Battle actions
+  const applyBattleResults = useCallback(
+    async (battleResults: Battle): Promise<Result<void>> => {
+      if (!gameState?.currentPet) {
+        return { success: false, error: "No active pet" };
+      }
+
+      try {
+        // Import BattleSystem dynamically
+        const { BattleSystem } = await import("@/systems/BattleSystem");
+        const result = BattleSystem.applyBattleResults(gameState.currentPet, battleResults);
+
+        if (result.success && result.data) {
+          setGameState(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              currentPet: result.data!,
+            };
+          });
+
+          // Trigger autosave after pet state change from battle
+          await triggerAutosave("apply battle results");
+
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to apply battle results";
+        console.error("Apply battle results error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
 
   // Game loop control
   const pauseGame = useCallback(() => {
@@ -483,6 +650,14 @@ export function useGameState(): UseGameStateReturn {
     getAvailableQuests,
     getActiveQuests,
     getCompletedQuests,
+
+    // World actions
+    startTravel,
+    startActivity,
+    cancelActivity,
+
+    // Battle actions
+    applyBattleResults,
 
     // Game loop control
     pauseGame,

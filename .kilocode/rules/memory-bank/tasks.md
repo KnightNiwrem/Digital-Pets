@@ -197,6 +197,64 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
 - Integration with all existing systems ready for quest-driven gameplay progression
 - Complete user experience from quest discovery through acceptance to completion available
 
+### Enhanced Autosave Implementation (Following Established Pattern)
+**Last performed:** January 15, 2025
+**Status:** ✅ COMPLETED
+**Files created/modified:**
+- `src/hooks/useGameState.ts` - Enhanced with triggerAutosave utility and autosave integration for all user actions
+- `src/components/GameScreen.tsx` - Updated to use enhanced autosave actions instead of direct system calls
+- `tests/hooks/useGameState.test.ts` - Comprehensive unit tests for enhanced autosave functionality (9 new tests)
+
+**Implementation Features:**
+- Enhanced autosave utility function that triggers immediate saves after user actions
+- Autosave triggers for quest actions (startQuest, abandonQuest, completeQuest)
+- Autosave triggers for world actions (startTravel, startActivity, cancelActivity)
+- Autosave triggers for battle result application (applyBattleResults)
+- Verified autosave for inventory/money actions (useItem, sellItem, buyItem, sortInventory)
+- Verified autosave for pet care actions (feedPet, giveDrink, playWithPet, cleanPoop, treatPet, toggleSleep)
+- Graceful error handling for autosave failures with console logging
+- Clear logging of which user action triggered each autosave
+
+**Key Technical Achievements:**
+- 9 new test cases with comprehensive coverage of enhanced autosave functionality
+- Full TypeScript compliance with proper error handling and Result<T> patterns
+- Minimal changes to existing working systems - added autosave without breaking existing functionality
+- Enhanced useGameState hook now handles all user action autosave triggers
+- GameScreen components updated to use enhanced autosave actions for better integration
+- All 330 tests passing (321 existing + 9 new enhanced autosave tests)
+
+**Enhanced Autosave Features:**
+- **Quest Actions**: Quest acceptance, completion, abandonment trigger immediate autosave
+- **Pet Care Actions**: All pet care interactions trigger autosave after state changes
+- **Inventory/Money Actions**: Item usage, buying/selling items trigger autosave after inventory updates
+- **World Actions**: Travel initiation, activity start/cancel trigger autosave after world state changes
+- **Battle Actions**: Battle completion with pet state changes triggers autosave
+- **Error Handling**: Autosave failures are logged but don't interrupt gameplay
+- **Action Logging**: Clear identification of which action triggered each autosave
+
+**Integration Points:**
+- Enhanced useGameState hook provides centralized autosave utility for all user actions
+- Maintains existing tick-based autosave system for background progression
+- GameScreen components now use enhanced autosave actions instead of direct system calls
+- World and battle actions properly integrated with main game state management
+- Error handling ensures game continues smoothly even if autosave fails
+- Integration follows established patterns without breaking existing functionality
+
+**User Actions with Enhanced Autosave:**
+- **Quest Management**: startQuest, abandonQuest, completeQuest
+- **Pet Care**: feedPet, giveDrink, playWithPet, cleanPoop, treatPet, toggleSleep
+- **Inventory/Money**: useItem, sellItem, buyItem, sortInventory
+- **World Exploration**: startTravel, startActivity, cancelActivity  
+- **Battle Results**: applyBattleResults when battle ends
+- All actions trigger immediate autosave after successful state updates
+
+**Important Notes:**
+- Successfully implemented enhanced autosave without breaking existing tick-based autosave system
+- User experience significantly improved with immediate saves after all user actions
+- Foundation provides excellent data safety and user confidence in game state persistence
+- Integration ready for future user actions that modify game state
+- Complete enhanced autosave experience now available for all player interactions
+
 ## Development Setup Tasks
 
 ### Initialize New Game System
