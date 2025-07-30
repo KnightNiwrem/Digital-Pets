@@ -70,9 +70,9 @@ export const ARENA_CHAMPION: PetSpecies = {
 
 // COMMON PETS (10 total - 3 starters + 7 others)
 // Starter pets (player chooses from these 3)
-export const WATER_SPRITE: PetSpecies = {
-  id: "water_sprite",
-  name: "Water Sprite",
+export const BLUE_SALAMANDER: PetSpecies = {
+  id: "blue_salamander",
+  name: "Blue Salamander",
   rarity: "common",
   description:
     "A small amphibious creature with bright blue skin that loves to swim in streams. One of the three starter pets.",
@@ -89,8 +89,8 @@ export const WATER_SPRITE: PetSpecies = {
     health: 1.1,
     energy: 1.1,
   },
-  sprite: "water-sprite.png",
-  icon: "water-sprite-icon.png",
+  sprite: "blue-salamander.png",
+  icon: "blue-salamander-icon.png",
 };
 
 export const FLAME_PUP: PetSpecies = {
@@ -273,9 +273,9 @@ export const VALLEY_RABBIT: PetSpecies = {
 };
 
 // UNCOMMON PETS (8 total)
-export const CRYSTAL_CAT: PetSpecies = {
-  id: "crystal_cat",
-  name: "Crystal Cat",
+export const GLASS_CAT: PetSpecies = {
+  id: "glass_cat",
+  name: "Glass Cat",
   rarity: "uncommon",
   description: "A feline with translucent fur that has a unique refractive quality, creating beautiful light patterns.",
   baseStats: {
@@ -291,8 +291,8 @@ export const CRYSTAL_CAT: PetSpecies = {
     health: 1.2,
     energy: 1.15,
   },
-  sprite: "crystal-cat.png",
-  icon: "crystal-cat-icon.png",
+  sprite: "glass-cat.png",
+  icon: "glass-cat-icon.png",
 };
 
 export const STORM_HAWK: PetSpecies = {
@@ -405,9 +405,9 @@ export const IRON_BEAR: PetSpecies = {
   icon: "iron-bear-icon.png",
 };
 
-export const STARLIGHT_DEER: PetSpecies = {
-  id: "starlight_deer",
-  name: "Starlight Deer",
+export const FIREFLY_DEER: PetSpecies = {
+  id: "firefly_deer",
+  name: "Firefly Deer",
   rarity: "uncommon",
   description: "An elegant deer with white antlers that have bioluminescent properties, creating a soft glow at night.",
   baseStats: {
@@ -423,31 +423,8 @@ export const STARLIGHT_DEER: PetSpecies = {
     health: 1.25,
     energy: 1.3,
   },
-  sprite: "starlight-deer.png",
-  icon: "starlight-deer-icon.png",
-};
-
-export const PRISM_BIRD: PetSpecies = {
-  id: "prism_bird",
-  name: "Prism Bird",
-  rarity: "uncommon",
-  description:
-    "A beautiful bird with iridescent feathers that create rainbow patterns when light hits them at different angles.",
-  baseStats: {
-    attack: 36,
-    defense: 30,
-    speed: 46,
-    health: 115,
-  },
-  growthRates: {
-    attack: 1.3,
-    defense: 1.2,
-    speed: 1.4,
-    health: 1.2,
-    energy: 1.25,
-  },
-  sprite: "prism-bird.png",
-  icon: "prism-bird-icon.png",
+  sprite: "firefly-deer.png",
+  icon: "firefly-deer-icon.png",
 };
 
 // RARE PETS (6 total)
@@ -496,9 +473,9 @@ export const GLACIER_MAMMOTH: PetSpecies = {
   icon: "glacier-mammoth-icon.png",
 };
 
-export const PHOENIX_CHICK: PetSpecies = {
-  id: "phoenix_chick",
-  name: "Phoenix Chick",
+export const FIRE_FINCH: PetSpecies = {
+  id: "fire_finch",
+  name: "Fire Finch",
   rarity: "rare",
   description: "A young bird with brilliant red and orange plumage that resembles flickering flames in sunlight.",
   baseStats: {
@@ -514,13 +491,13 @@ export const PHOENIX_CHICK: PetSpecies = {
     health: 1.3,
     energy: 1.4,
   },
-  sprite: "phoenix-chick.png",
-  icon: "phoenix-chick-icon.png",
+  sprite: "fire-finch.png",
+  icon: "fire-finch-icon.png",
 };
 
-export const VOID_SERPENT: PetSpecies = {
-  id: "void_serpent",
-  name: "Void Serpent",
+export const CAVE_PYTHON: PetSpecies = {
+  id: "cave_python",
+  name: "Cave Python",
   rarity: "rare",
   description: "A mysterious deep-cave serpent with dark scales and bioluminescent markings along its spine.",
   baseStats: {
@@ -536,13 +513,13 @@ export const VOID_SERPENT: PetSpecies = {
     health: 1.3,
     energy: 1.35,
   },
-  sprite: "void-serpent.png",
-  icon: "void-serpent-icon.png",
+  sprite: "cave-python.png",
+  icon: "cave-python-icon.png",
 };
 
-export const CELESTIAL_WHALE: PetSpecies = {
-  id: "celestial_whale",
-  name: "Celestial Whale",
+export const STAR_WHALE: PetSpecies = {
+  id: "star_whale",
+  name: "Star Whale",
   rarity: "rare",
   description:
     "A gentle giant whale with star-like white spots across its dark blue skin, found in the deepest ocean trenches.",
@@ -559,14 +536,14 @@ export const CELESTIAL_WHALE: PetSpecies = {
     health: 1.5,
     energy: 1.3,
   },
-  sprite: "celestial-whale.png",
-  icon: "celestial-whale-icon.png",
+  sprite: "star-whale.png",
+  icon: "star-whale-icon.png",
 };
 
 // EPIC PETS (4 total)
-export const COSMIC_DRAGON: PetSpecies = {
-  id: "cosmic_dragon",
-  name: "Cosmic Dragon",
+export const STAR_MONITOR: PetSpecies = {
+  id: "star_monitor",
+  name: "Star Monitor",
   rarity: "epic",
   description:
     "A large reptilian creature with dark scales patterned like a night sky, dwelling in high mountain peaks.",
@@ -583,13 +560,13 @@ export const COSMIC_DRAGON: PetSpecies = {
     health: 1.5,
     energy: 1.4,
   },
-  sprite: "cosmic-dragon.png",
-  icon: "cosmic-dragon-icon.png",
+  sprite: "star-monitor.png",
+  icon: "star-monitor-icon.png",
 };
 
-export const SPIRIT_GUARDIAN: PetSpecies = {
-  id: "spirit_guardian",
-  name: "Spirit Guardian",
+export const GROVE_BEAR: PetSpecies = {
+  id: "grove_bear",
+  name: "Grove Bear",
   rarity: "epic",
   description: "An ancient, wise creature with pale markings that has protected sacred groves for centuries.",
   baseStats: {
@@ -605,13 +582,13 @@ export const SPIRIT_GUARDIAN: PetSpecies = {
     health: 1.55,
     energy: 1.45,
   },
-  sprite: "spirit-guardian.png",
-  icon: "spirit-guardian-icon.png",
+  sprite: "grove-bear.png",
+  icon: "grove-bear-icon.png",
 };
 
-export const NIGHTMARE_STALLION: PetSpecies = {
-  id: "nightmare_stallion",
-  name: "Nightmare Stallion",
+export const MIDNIGHT_STALLION: PetSpecies = {
+  id: "midnight_stallion",
+  name: "Midnight Stallion",
   rarity: "epic",
   description: "A powerful dark horse with a jet-black coat and remarkable speed, known for its wild temperament.",
   baseStats: {
@@ -627,13 +604,13 @@ export const NIGHTMARE_STALLION: PetSpecies = {
     health: 1.45,
     energy: 1.5,
   },
-  sprite: "nightmare-stallion.png",
-  icon: "nightmare-stallion-icon.png",
+  sprite: "midnight-stallion.png",
+  icon: "midnight-stallion-icon.png",
 };
 
-export const DIVINE_PHOENIX: PetSpecies = {
-  id: "divine_phoenix",
-  name: "Divine Phoenix",
+export const GOLDEN_HAWK: PetSpecies = {
+  id: "golden_hawk",
+  name: "Golden Hawk",
   rarity: "epic",
   description: "A mature bird of prey with brilliant golden and crimson plumage that shimmers with incredible beauty.",
   baseStats: {
@@ -649,14 +626,14 @@ export const DIVINE_PHOENIX: PetSpecies = {
     health: 1.5,
     energy: 1.6,
   },
-  sprite: "divine-phoenix.png",
-  icon: "divine-phoenix-icon.png",
+  sprite: "golden-hawk.png",
+  icon: "golden-hawk-icon.png",
 };
 
 // LEGENDARY PETS (3 total)
-export const WORLD_TREE_SPIRIT: PetSpecies = {
-  id: "world_tree_spirit",
-  name: "World Tree Spirit",
+export const ANCIENT_TURTLE: PetSpecies = {
+  id: "ancient_turtle",
+  name: "Ancient Turtle",
   rarity: "legendary",
   description:
     "A magnificent creature resembling an ancient tree with living bark and moss, representing the pinnacle of forest wisdom.",
@@ -673,13 +650,13 @@ export const WORLD_TREE_SPIRIT: PetSpecies = {
     health: 1.8,
     energy: 1.7,
   },
-  sprite: "world-tree-spirit.png",
-  icon: "world-tree-spirit-icon.png",
+  sprite: "ancient-turtle.png",
+  icon: "ancient-turtle-icon.png",
 };
 
-export const ETERNAL_DRAGON: PetSpecies = {
-  id: "eternal_dragon",
-  name: "Eternal Dragon",
+export const GIANT_MONITOR: PetSpecies = {
+  id: "giant_monitor",
+  name: "Giant Monitor",
   rarity: "legendary",
   description:
     "An enormous reptilian creature with ancient scarred hide and tremendous size, believed to be centuries old.",
@@ -696,13 +673,13 @@ export const ETERNAL_DRAGON: PetSpecies = {
     health: 1.7,
     energy: 1.8,
   },
-  sprite: "eternal-dragon.png",
-  icon: "eternal-dragon-icon.png",
+  sprite: "giant-monitor.png",
+  icon: "giant-monitor-icon.png",
 };
 
-export const PRIMORDIAL_GOD_BEAST: PetSpecies = {
-  id: "primordial_god_beast",
-  name: "Primordial God Beast",
+export const APEX_PANTHER: PetSpecies = {
+  id: "apex_panther",
+  name: "Apex Panther",
   rarity: "legendary",
   description:
     "A legendary creature of unmatched power and perfect balance, representing the ultimate achievement in pet companionship.",
@@ -719,14 +696,14 @@ export const PRIMORDIAL_GOD_BEAST: PetSpecies = {
     health: 2.0,
     energy: 1.9,
   },
-  sprite: "primordial-god-beast.png",
-  icon: "primordial-god-beast-icon.png",
+  sprite: "apex-panther.png",
+  icon: "apex-panther-icon.png",
 };
 
 export const getAllPetSpecies = (): PetSpecies[] => [
   // Common pets (10 total - including 3 starters)
   WILD_BEAST,
-  WATER_SPRITE,
+  BLUE_SALAMANDER,
   FLAME_PUP,
   MEADOW_MOUSE,
   ROCK_BEETLE,
@@ -738,35 +715,35 @@ export const getAllPetSpecies = (): PetSpecies[] => [
 
   // Uncommon pets (8 total)
   FOREST_GUARDIAN,
-  CRYSTAL_CAT,
+  GLASS_CAT,
   STORM_HAWK,
   EMBER_WOLF,
   CORAL_TURTLE,
   SHADOW_FOX,
   IRON_BEAR,
-  STARLIGHT_DEER,
+  FIREFLY_DEER,
 
   // Rare pets (6 total)
   ARENA_CHAMPION,
   THUNDER_LION,
   GLACIER_MAMMOTH,
-  PHOENIX_CHICK,
-  VOID_SERPENT,
-  CELESTIAL_WHALE,
+  FIRE_FINCH,
+  CAVE_PYTHON,
+  STAR_WHALE,
 
   // Epic pets (4 total)
-  COSMIC_DRAGON,
-  SPIRIT_GUARDIAN,
-  NIGHTMARE_STALLION,
-  DIVINE_PHOENIX,
+  STAR_MONITOR,
+  GROVE_BEAR,
+  MIDNIGHT_STALLION,
+  GOLDEN_HAWK,
 
   // Legendary pets (3 total)
-  WORLD_TREE_SPIRIT,
-  ETERNAL_DRAGON,
-  PRIMORDIAL_GOD_BEAST,
+  ANCIENT_TURTLE,
+  GIANT_MONITOR,
+  APEX_PANTHER,
 ];
 
-export const getStarterPets = (): PetSpecies[] => [WILD_BEAST, WATER_SPRITE, FLAME_PUP];
+export const getStarterPets = (): PetSpecies[] => [WILD_BEAST, BLUE_SALAMANDER, FLAME_PUP];
 
 export const getPetsByRarity = (rarity: string): PetSpecies[] => {
   return getAllPetSpecies().filter(pet => pet.rarity === rarity);

@@ -40,7 +40,7 @@ describe("Pet Species Data", () => {
       const starters = getStarterPets();
       const starterIds = starters.map(pet => pet.id);
       expect(starterIds).toContain("wild_beast");
-      expect(starterIds).toContain("water_sprite");
+      expect(starterIds).toContain("blue_salamander");
       expect(starterIds).toContain("flame_pup");
     });
 
