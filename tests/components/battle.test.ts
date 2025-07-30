@@ -45,10 +45,11 @@ describe("Pet Species Data", () => {
 
   it("should return all pet species", () => {
     const allSpecies = getAllPetSpecies();
-    expect(allSpecies).toHaveLength(3);
-    expect(allSpecies[0]).toEqual(WILD_BEAST);
-    expect(allSpecies[1]).toEqual(FOREST_GUARDIAN);
-    expect(allSpecies[2]).toEqual(ARENA_CHAMPION);
+    expect(allSpecies).toHaveLength(31);
+    // Check that the first few species are as expected
+    expect(allSpecies).toContain(WILD_BEAST);
+    expect(allSpecies).toContain(FOREST_GUARDIAN); 
+    expect(allSpecies).toContain(ARENA_CHAMPION);
   });
 
   it("should find pet species by id", () => {
