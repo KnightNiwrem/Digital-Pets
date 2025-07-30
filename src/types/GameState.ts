@@ -96,7 +96,7 @@ export interface GameState {
   ownedPets: Pet[]; // all pets ever owned
   inventory: Inventory;
   world: WorldState;
-  quests: QuestLog;
+  questLog: QuestLog;
 
   // Current battle (if any)
   currentBattle: Battle | null;
