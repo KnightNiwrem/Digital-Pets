@@ -27,30 +27,30 @@ Create an engaging, purely client-side HTML5 pet raising game that captures the 
 5. **World Interaction**: Complete quests, trade with NPCs, discover lore
 
 ### Long-term Engagement
-- **Pet Collection**: 31 total pets across 5 rarity tiers
-- **World Exploration**: Multiple towns, cities, and explorable areas
-- **Battle System**: Turn-based combat with stat progression
-- **Quest Lines**: Narrative-driven tasks with meaningful rewards
-- **Mastery Systems**: Training facilities and skill development
+- **Pet Collection**: Multiple pets across rarity tiers with unique characteristics
+- **World Exploration**: Rich environments with diverse activities and NPCs
+- **Battle System**: Strategic combat with meaningful progression
+- **Quest Lines**: Narrative-driven tasks that guide player journey
+- **Mastery Systems**: Deep progression mechanics that reward dedication
 
 ## Key Value Propositions
-1. **No Internet Required**: Complete offline functionality
-2. **Persistent Progress**: Automatic save system with offline progression
-3. **Deep Mechanics**: Complex interconnected systems (health, poop, life, energy)
-4. **Rich World**: Diverse locations with unique activities and NPCs
-5. **Collection Aspect**: Multiple pets with varying rarities and abilities
-6. **Meaningful Choices**: Strategic decisions in pet care, battles, and exploration
+1. **No Internet Required**: Complete offline gaming experience
+2. **Persistent Progress**: Never lose progress with automatic saving
+3. **Deep Care Mechanics**: Realistic pet care with meaningful consequences
+4. **Rich World**: Immersive exploration and discovery
+5. **Collection Aspect**: Satisfaction of obtaining and raising different pets
+6. **Strategic Depth**: Meaningful choices in pet care, battles, and exploration
 
 ## Success Metrics
-- **Engagement**: Players return daily for pet care
-- **Progression**: Pets successfully reach later growth stages
-- **Exploration**: Players discover and visit multiple locations
-- **Collection**: Players obtain pets across different rarity tiers
-- **Retention**: Game maintains interest over months/years of play
+- **Daily Engagement**: Players return for regular pet care
+- **Long-term Progression**: Pets successfully grow over months/years
+- **World Discovery**: Players explore and unlock new areas
+- **Collection Completion**: Players pursue pets across all rarity tiers
+- **Emotional Investment**: Players form attachment to their virtual pets
 
-## Technical Philosophy
-- **Client-First**: No server dependencies, everything runs in browser
-- **Performance**: Efficient 15-second tick system
-- **Reliability**: Robust save system prevents data loss
-- **Accessibility**: Works across all modern browsers and devices
-- **Maintainability**: Clean, typed codebase with comprehensive testing
+## Design Philosophy
+- **Nostalgia-Driven**: Captures classic virtual pet charm with modern polish
+- **Accessibility-First**: Simple to learn, deep to master
+- **Respect Player Time**: Meaningful progress even in short sessions
+- **Offline-First**: Complete experience without connectivity requirements
+- **Long-term Vision**: Designed for years of engagement, not quick consumption
