@@ -244,7 +244,7 @@ describe("Enhanced Autosave Functionality", () => {
       // Test starting activity triggers autosave - ensure we're at a location that has activities
       // First move to a location with activities or test with current location
       const testWorld = { ...world, currentLocation: "forest-path" };
-      const activityResult = WorldSystem.startActivity(testWorld, currentPet, "foraging");
+      const activityResult = WorldSystem.startActivity(testWorld, currentPet, "foraging", testGameState.inventory);
       if (activityResult.success && activityResult.data) {
         const activityAutosaveSuccess = simulateAutosave({
           ...testGameState,
