@@ -348,8 +348,7 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const { quests } = await import("@/data/quests");
-        const quest = quests.find(q => q.id === questId);
+        const quest = QUESTS.find(q => q.id === questId);
         if (!quest) {
           return { success: false, error: "Quest not found" };
         }

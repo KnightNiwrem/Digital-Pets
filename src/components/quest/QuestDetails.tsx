@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Circle, Coins, Star, MapPin, User, Gift, AlertTriangle } from "lucide-react";
 import type { Quest, QuestProgress, QuestObjective, QuestReward } from "@/types/Quest";
 import type { Result } from "@/types";
+import { getItemById } from "@/data/items";
 
 interface QuestDetailsProps {
   quest: Quest | QuestProgress | null;
@@ -130,8 +131,11 @@ export function QuestDetails({
           return `${reward.amount} Gold`;
         case "experience":
           return `${reward.amount} EXP`;
-        case "item":
-          return `${reward.amount || 1}x ${reward.itemId}`;
+        case "item": {
+          const item = getItemById(reward.itemId!);
+          const itemName = item ? item.name : reward.itemId;
+          return `${reward.amount || 1}x ${itemName}`;
+        }
         case "unlock_location":
           return `Unlock ${reward.locationId}`;
         case "unlock_quest":
