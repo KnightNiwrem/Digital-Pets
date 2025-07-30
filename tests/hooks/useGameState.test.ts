@@ -142,7 +142,7 @@ describe("Enhanced Autosave Functionality", () => {
       }
       
       // Test clean poop triggers autosave (this should always work)
-      const cleanResult = PetSystem.cleanPoop(pet);
+      PetSystem.cleanPoop(pet);
       const cleanAutosaveSuccess = simulateAutosave(testGameState, "clean poop");
       expect(cleanAutosaveSuccess).toBe(true);
       
@@ -158,12 +158,12 @@ describe("Enhanced Autosave Functionality", () => {
     if (inventory && currentPet) {
       // First check what items are available in test inventory
       console.log("Inventory:", inventory);
-      console.log("Available items:", inventory.items?.map(item => item.id) || "No items array");
+      console.log("Available slots:", inventory.slots?.map((slot) => slot.item.id) || "No slots array");
       
       // Test using item triggers autosave - use an item that actually exists
-      const availableItem = inventory.items?.[0]; // Use the first available item if it exists
-      if (availableItem) {
-        const useResult = ItemSystem.useItem(inventory, currentPet, availableItem.id);
+      const availableSlot = inventory.slots?.[0]; // Use the first available slot if it exists
+      if (availableSlot) {
+        const useResult = ItemSystem.useItem(inventory, currentPet, availableSlot.item.id);
         if (useResult.success) {
           const useAutosaveSuccess = simulateAutosave(testGameState, "use item");
           expect(useAutosaveSuccess).toBe(true);
@@ -188,8 +188,8 @@ describe("Enhanced Autosave Functionality", () => {
       expect(sortAutosaveSuccess).toBe(true);
       
       // Test selling item triggers autosave - use an existing item
-      if (availableItem && availableItem.quantity > 0) {
-        const sellResult = ItemSystem.sellItem(inventory, availableItem.id, 1, 0.5);
+      if (availableSlot && availableSlot.quantity > 0) {
+        const sellResult = ItemSystem.sellItem(inventory, availableSlot.item.id, 1, 0.5);
         if (sellResult.success) {
           const sellAutosaveSuccess = simulateAutosave(testGameState, "sell item");
           expect(sellAutosaveSuccess).toBe(true);
@@ -215,7 +215,7 @@ describe("Enhanced Autosave Functionality", () => {
     const { world, currentPet } = testGameState;
     
     if (world && currentPet) {
-      console.log("Current location:", world.currentLocation);
+      console.log("Current location:", world.currentLocationId);
       console.log("Unlocked locations:", world.unlockedLocations);
       console.log("Pet energy:", currentPet.currentEnergy);
       
@@ -269,37 +269,66 @@ describe("Enhanced Autosave Functionality", () => {
     const { currentPet } = testGameState;
     
     if (currentPet) {
-      // Create mock battle results
+      // Create mock battle results with properly formed Battle interface
       const mockBattleResults = {
         id: "test-battle",
+        type: "wild" as const,
+        status: "victory" as const,
         playerPet: {
           id: currentPet.id,
           name: currentPet.name,
+          species: currentPet.species.name,
           currentHealth: 80,
           maxHealth: 100,
           attack: 10,
           defense: 8,
           speed: 12,
-          moves: []
+          accuracy: 100,
+          evasion: 100,
+          currentEnergy: currentPet.currentEnergy - 10, // Pet used some energy
+          maxEnergy: currentPet.maxEnergy,
+          statusEffects: [],
+          moves: [],
+          tempStatModifiers: {
+            attack: 0,
+            defense: 0,
+            speed: 0,
+            accuracy: 0,
+            evasion: 0
+          }
         },
         opponentPet: {
           id: "opponent-pet", 
           name: "WildPet",
+          species: "Wild",
           currentHealth: 0,
           maxHealth: 90,
           attack: 8,
           defense: 6,
           speed: 10,
-          moves: []
+          accuracy: 100,
+          evasion: 100,
+          currentEnergy: 0,
+          maxEnergy: 100,
+          statusEffects: [],
+          moves: [],
+          tempStatModifiers: {
+            attack: 0,
+            defense: 0,
+            speed: 0,
+            accuracy: 0,
+            evasion: 0
+          }
         },
-        isComplete: true,
-        winner: "player" as const,
+        currentTurn: 3,
         turns: [],
-        rewards: {
-          experience: 25,
-          gold: 10,
-          items: []
-        }
+        turnPhase: "end_turn" as const,
+        experience: 25,
+        goldReward: 10,
+        itemRewards: [],
+        startTime: Date.now() - 60000, // Battle started 1 minute ago
+        endTime: Date.now(),
+        location: "hometown"
       };
       
       // Import BattleSystem dynamically
