@@ -27,7 +27,7 @@ export class GameStateFactory {
 
       inventory: this.createStartingInventory(),
       world: this.createStartingWorld(),
-      quests: this.createEmptyQuestLog(),
+      questLog: this.createEmptyQuestLog(),
 
       currentBattle: null,
 

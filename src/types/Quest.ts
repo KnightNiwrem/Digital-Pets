@@ -114,7 +114,7 @@ export interface QuestEvent {
   questId: string;
   objectiveId?: string;
   timestamp: number;
-  data?: Record<string, string | number | boolean>;
+  data?: Record<string, string | number | boolean | string[]>;
 }
 
 // Quest constants
