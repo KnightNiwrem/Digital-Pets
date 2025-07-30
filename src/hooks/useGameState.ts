@@ -32,6 +32,13 @@ export interface UseGameStateReturn {
   treatPet: (medicineType: string) => Promise<Result<void>>;
   toggleSleep: () => Promise<Result<void>>;
 
+  // Item-based pet care actions
+  feedPetWithItem: (itemId: string) => Promise<Result<void>>;
+  giveDrinkWithItem: (itemId: string) => Promise<Result<void>>;
+  playWithItem: (itemId: string) => Promise<Result<void>>;
+  cleanWithItem: (itemId: string) => Promise<Result<void>>;
+  treatWithItem: (itemId: string) => Promise<Result<void>>;
+
   // Item actions
   useItem: (itemId: string) => Promise<Result<void>>;
   sellItem: (itemId: string, quantity: number) => Promise<Result<void>>;
@@ -272,6 +279,167 @@ export function useGameState(): UseGameStateReturn {
 
     return performPetAction(actionFn, actionName);
   }, [gameState, performPetAction]);
+
+  // Item-based pet care actions
+  const feedPetWithItem = useCallback(
+    async (itemId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.inventory) {
+        return { success: false, error: "No active pet or inventory" };
+      }
+
+      try {
+        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
+        if (result.success && result.data) {
+          setGameState(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              inventory: result.data!.inventory,
+              currentPet: result.data!.pet,
+            };
+          });
+
+          await triggerAutosave(`feed pet with ${itemId}`);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to feed pet with item";
+        console.error("Feed pet with item error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
+
+  const giveDrinkWithItem = useCallback(
+    async (itemId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.inventory) {
+        return { success: false, error: "No active pet or inventory" };
+      }
+
+      try {
+        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
+        if (result.success && result.data) {
+          setGameState(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              inventory: result.data!.inventory,
+              currentPet: result.data!.pet,
+            };
+          });
+
+          await triggerAutosave(`give drink with ${itemId}`);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to give drink with item";
+        console.error("Give drink with item error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
+
+  const playWithItem = useCallback(
+    async (itemId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.inventory) {
+        return { success: false, error: "No active pet or inventory" };
+      }
+
+      try {
+        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
+        if (result.success && result.data) {
+          setGameState(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              inventory: result.data!.inventory,
+              currentPet: result.data!.pet,
+            };
+          });
+
+          await triggerAutosave(`play with ${itemId}`);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to play with item";
+        console.error("Play with item error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
+
+  const cleanWithItem = useCallback(
+    async (itemId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.inventory) {
+        return { success: false, error: "No active pet or inventory" };
+      }
+
+      try {
+        // First use the cleaning item to clean the pet
+        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
+        if (result.success && result.data) {
+          // Then also trigger the poop cleaning effect
+          const cleanResult = PetSystem.cleanPoop(result.data.pet);
+          if (cleanResult.success) {
+            setGameState(prev => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                inventory: result.data!.inventory,
+                currentPet: result.data!.pet,
+              };
+            });
+
+            await triggerAutosave(`clean with ${itemId}`);
+            return { success: true };
+          }
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to clean with item";
+        console.error("Clean with item error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
+
+  const treatWithItem = useCallback(
+    async (itemId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.inventory) {
+        return { success: false, error: "No active pet or inventory" };
+      }
+
+      try {
+        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
+        if (result.success && result.data) {
+          setGameState(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              inventory: result.data!.inventory,
+              currentPet: result.data!.pet,
+            };
+          });
+
+          await triggerAutosave(`treat with ${itemId}`);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to treat with item";
+        console.error("Treat with item error:", error);
+        return { success: false, error: message };
+      }
+    },
+    [gameState, triggerAutosave]
+  );
 
   // Item action wrapper
   const performItemAction = useCallback(
@@ -647,6 +815,13 @@ export function useGameState(): UseGameStateReturn {
     cleanPoop,
     treatPet,
     toggleSleep,
+
+    // Item-based pet care actions
+    feedPetWithItem,
+    giveDrinkWithItem,
+    playWithItem,
+    cleanWithItem,
+    treatWithItem,
 
     // Item actions
     useItem,

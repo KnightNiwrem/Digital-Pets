@@ -22,11 +22,11 @@ export function GameScreen() {
     startNewGame,
     loadExistingGame,
     saveGame,
-    feedPet,
-    giveDrink,
-    playWithPet,
-    cleanPoop,
-    treatPet,
+    feedPetWithItem,
+    giveDrinkWithItem,
+    playWithItem,
+    cleanWithItem,
+    treatWithItem,
     toggleSleep,
     useItem,
     sellItem,
@@ -356,12 +356,13 @@ export function GameScreen() {
               <div>
                 <PetCarePanel
                   pet={gameState.currentPet}
+                  inventory={gameState.inventory}
                   isLoading={isLoading}
-                  onFeed={feedPet}
-                  onDrink={giveDrink}
-                  onPlay={playWithPet}
-                  onCleanPoop={cleanPoop}
-                  onTreat={treatPet}
+                  onFeedWithItem={feedPetWithItem}
+                  onDrinkWithItem={giveDrinkWithItem}
+                  onPlayWithItem={playWithItem}
+                  onCleanWithItem={cleanWithItem}
+                  onTreatWithItem={treatWithItem}
                   onToggleSleep={toggleSleep}
                 />
               </div>
