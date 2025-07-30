@@ -7,8 +7,11 @@ import { PetDisplay } from "@/components/pet/PetDisplay";
 import { PetCarePanel } from "@/components/pet/PetCarePanel";
 import { WorldScreen } from "@/components/world/WorldScreen";
 import { InventoryScreen } from "@/components/inventory/InventoryScreen";
+import { BattleScreen } from "@/components/battle/BattleScreen";
 import { useGameState } from "@/hooks/useGameState";
-import { Home, Map as MapIcon, Package } from "lucide-react";
+import { useBattleState } from "@/hooks/useBattleState";
+import type { BattleAction } from "@/types/Battle";
+import { Home, Map as MapIcon, Package, Sword } from "lucide-react";
 
 export function GameScreen() {
   const {
@@ -33,9 +36,20 @@ export function GameScreen() {
     storageInfo,
   } = useGameState();
 
+  // Battle state management
+  const {
+    currentBattle,
+    isLoading: battleLoading,
+    error: battleError,
+    startBattle,
+    executeAction,
+    endBattle,
+    applyBattleResults,
+  } = useBattleState();
+
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
-  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory">("pet");
+  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle">("pet");
 
   // World action handlers
   const handleTravel = async (destinationId: string) => {
@@ -96,6 +110,38 @@ export function GameScreen() {
     } else {
       console.error("Sale failed:", result.error);
     }
+  };
+
+  // Battle action handlers
+  const handleBattleStart = async (opponentId: string) => {
+    if (!gameState?.currentPet) return;
+
+    const result = await startBattle(gameState.currentPet, opponentId);
+    if (!result.success) {
+      console.error("Battle start failed:", result.error);
+    }
+  };
+
+  const handleBattleAction = async (action: BattleAction) => {
+    const result = await executeAction(action);
+    if (!result.success) {
+      console.error("Battle action failed:", result.error);
+    }
+
+    // If battle ended, apply results to pet
+    if (currentBattle && (currentBattle.status === "victory" || currentBattle.status === "defeat")) {
+      if (gameState?.currentPet) {
+        const applyResult = await applyBattleResults(gameState.currentPet);
+        if (applyResult.success) {
+          // In a full implementation, this would update the game state
+          console.log("Battle results applied to pet");
+        }
+      }
+    }
+  };
+
+  const handleBattleEnd = () => {
+    endBattle();
   };
 
   // Auto-load existing save on mount
@@ -203,6 +249,11 @@ export function GameScreen() {
 
       {/* Error Display */}
       {error && <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded text-red-800 text-sm">{error}</div>}
+      {battleError && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded text-red-800 text-sm">
+          Battle Error: {battleError}
+        </div>
+      )}
 
       {/* Game Paused Overlay */}
       {isPaused && (
@@ -249,6 +300,17 @@ export function GameScreen() {
             >
               <Package className="w-4 h-4 inline mr-2" />
               Inventory
+            </button>
+            <button
+              onClick={() => setActiveTab("battle")}
+              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "battle"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <Sword className="w-4 h-4 inline mr-2" />
+              Battle
             </button>
           </div>
 
@@ -297,6 +359,17 @@ export function GameScreen() {
               onUseItem={useItem}
               onSellItem={sellItem}
               onSortInventory={sortInventory}
+            />
+          )}
+
+          {activeTab === "battle" && (
+            <BattleScreen
+              pet={gameState.currentPet}
+              isLoading={battleLoading}
+              onBattleStart={handleBattleStart}
+              onBattleAction={handleBattleAction}
+              onBattleEnd={handleBattleEnd}
+              currentBattle={currentBattle || undefined}
             />
           )}
         </div>
