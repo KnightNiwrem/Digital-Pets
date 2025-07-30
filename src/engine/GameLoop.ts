@@ -37,6 +37,13 @@ export class GameLoop {
   }
 
   /**
+   * Update the game loop's internal state (for external state changes)
+   */
+  updateState(gameState: GameState): void {
+    this.gameState = gameState;
+  }
+
+  /**
    * Start the game loop
    */
   start(): void {
