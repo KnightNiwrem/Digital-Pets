@@ -254,7 +254,7 @@ export function GameScreen() {
 
   // Show game interface
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
+    <div className="container mx-auto p-4 max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">🐾 Digital Pets</h1>
@@ -286,67 +286,67 @@ export function GameScreen() {
       {gameState.currentPet ? (
         <div className="space-y-6">
           {/* Tab Navigation */}
-          <div className="flex space-x-4 border-b">
+          <div className="flex space-x-2 sm:space-x-4 border-b overflow-x-auto pb-0 scrollbar-hide">
             <button
               onClick={() => setActiveTab("pet")}
-              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                 activeTab === "pet"
                   ? "border-blue-500 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <Home className="w-4 h-4 inline mr-2" />
+              <Home className="w-4 h-4 inline mr-1 sm:mr-2" />
               Pet Care
             </button>
             <button
               onClick={() => setActiveTab("world")}
-              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                 activeTab === "world"
                   ? "border-blue-500 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <MapIcon className="w-4 h-4 inline mr-2" />
-              Explore World
+              <MapIcon className="w-4 h-4 inline mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Explore </span>World
             </button>
             <button
               onClick={() => setActiveTab("inventory")}
-              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                 activeTab === "inventory"
                   ? "border-blue-500 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <Package className="w-4 h-4 inline mr-2" />
+              <Package className="w-4 h-4 inline mr-1 sm:mr-2" />
               Inventory
             </button>
             <button
               onClick={() => setActiveTab("battle")}
-              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                 activeTab === "battle"
                   ? "border-blue-500 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <Sword className="w-4 h-4 inline mr-2" />
+              <Sword className="w-4 h-4 inline mr-1 sm:mr-2" />
               Battle
             </button>
             <button
               onClick={() => setActiveTab("quest")}
-              className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
+              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                 activeTab === "quest"
                   ? "border-blue-500 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <ScrollText className="w-4 h-4 inline mr-2" />
+              <ScrollText className="w-4 h-4 inline mr-1 sm:mr-2" />
               Quests
             </button>
           </div>
 
           {/* Tab Content */}
           {activeTab === "pet" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Pet Display */}
               <div>
                 <PetDisplay pet={gameState.currentPet} />

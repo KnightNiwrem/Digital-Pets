@@ -37,7 +37,7 @@ export function InventoryGrid({ inventory, selectedItem, activeCategory, onItemS
   };
 
   return (
-    <div className="grid grid-cols-8 gap-2 p-2">
+    <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 p-2">
       {gridSlots.map((slot, index) => (
         <ItemSlot
           key={index}
