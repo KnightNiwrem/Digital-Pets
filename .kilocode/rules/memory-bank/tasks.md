@@ -70,58 +70,68 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
 - **Status Moves**: focus, defend, quick_step, confusion_ray  
 - **Healing Moves**: recover
 
-### Shop Integration Implementation (Following Established Pattern)
+### Battle UI Components Implementation (Following Established Pattern)
 **Last performed:** January 15, 2025
 **Status:** ✅ COMPLETED
 **Files created/modified:**
-- `src/systems/WorldSystem.ts` - Added shop management methods
-- `src/components/world/ShopPanel.tsx` - Complete shop interface with buy/sell functionality
-- `src/components/world/ShopModal.tsx` - Modal dialog for shop interactions
-- `src/components/world/ActivitiesPanel.tsx` - Enhanced with shop buttons and UI
-- `src/components/world/WorldScreen.tsx` - Integrated shop modal and state management
-- `src/components/GameScreen.tsx` - Added shop handlers connecting to ItemSystem
-- `src/components/ui/badge.tsx` - Badge component for item rarity display
-- `src/components/ui/separator.tsx` - UI separator component
-- `tests/systems/WorldSystem.test.ts` - Added 5 comprehensive shop system tests
+- `src/components/battle/BattleScreen.tsx` - Main battle interface with opponent selection and flow
+- `src/components/battle/BattleField.tsx` - Combat visualization with health bars and battle log
+- `src/components/battle/MoveSelection.tsx` - Interactive move selection with energy validation
+- `src/components/battle/index.tsx` - Export file for battle components
+- `src/components/ui/progress.tsx` - Progress bar component for health/energy display
+- `src/hooks/useBattleState.ts` - React hook for battle state management
+- `src/data/pets.ts` - Pet species definitions for battle opponents  
+- `src/components/GameScreen.tsx` - Enhanced with battle tab integration
+- `tests/components/battle.test.ts` - Comprehensive unit tests (9 new tests)
 
 **Implementation Features:**
-- Complete shop interface with tabbed buy/sell layout
-- Real-time inventory and gold management
-- Item categorization with rarity badges and stock indicators
-- Modal-based shopping experience with responsive design
-- Integration with existing ItemSystem backend (buyItem/sellItem methods)
-- Shop availability based on current location
-- Dynamic pricing with configurable buy/sell ratios
-- Comprehensive error handling and user feedback
-- Stock management for limited vs unlimited items
+- Complete battle interface with opponent selection (3 difficulty levels)
+- Real-time combat visualization with health bars, energy tracking, and stats
+- Interactive move selection with energy cost validation and category badges
+- Battle flow management from start to victory/defeat/flee states
+- Battle log with damage/healing messages and turn-by-turn progression
+- Energy management with low energy warnings and move validation
+- Pet readiness checks (health and energy) before battle start
+- Full integration with existing BattleSystem backend (30 tests)
+- Tabbed interface integration alongside Pet Care/World/Inventory
 
 **Key Technical Achievements:**
-- 5 new test cases with comprehensive coverage of all shop mechanics
-- Full TypeScript compliance with strict typing
-- Follows established UI component patterns (shadcn/ui)
-- Complete integration with existing game state management
-- Production builds and linting pass
-- Now 265 total tests passing (260 + 5 new shop tests)
+- 9 new test cases with comprehensive coverage of battle UI and data structures
+- Full TypeScript compliance with strict typing and proper BattleAction interfaces
+- Follows established UI component patterns (shadcn/ui, existing game interface)
+- Complete integration with existing game state management (useGameState hook)
+- Production builds and linting pass cleanly
+- Now 274 total tests passing (265 existing + 9 new battle tests)
+
+**Battle System Features:**
+- **Opponent Selection**: Wild Beast (easy), Forest Guardian (medium), Arena Champion (hard)
+- **Combat Visualization**: Health/energy progress bars, battle stats display (ATK/DEF/SPD/ACC)
+- **Move System**: Interactive move selection with power/accuracy/energy cost display
+- **Battle Flow**: Turn-based progression with real-time status updates
+- **Battle Log**: Real-time feedback showing damage, healing, critical hits, status effects
+- **End States**: Victory/defeat/flee with appropriate messaging and return options
 
 **Integration Points:**
-- WorldSystem provides shop discovery and validation methods
-- ActivitiesPanel displays available shops with interactive buttons
-- ShopPanel backend integrates seamlessly with ItemSystem buy/sell functionality
-- UI components follow established design patterns from inventory system
-- Game state management extended to handle shop transactions
-- Visual design consistent with existing world exploration interface
+- BattleSystem provides complete turn-based combat mechanics and AI
+- GameScreen extended with battle tab and battle action handlers
+- useBattleState hook manages battle state and integrates with BattleSystem methods
+- UI components follow established patterns from world exploration and inventory systems
+- Error handling consistent with existing game error management
+- Real-time state updates synchronized with existing game loop architecture
 
-**Shop Data Available:**
-- Hometown General Store with 4 items (Apple, Water Bottle, Basic Medicine, Soap)
-- Shopkeeper Sam with dialogue system integration
-- Configurable item pricing and stock levels
-- Foundation ready for additional shops in new locations
+**Pet Species Data:**
+- Wild Beast: Common rarity, basic stats (ATK: 25, DEF: 20, HP: 100)
+- Forest Guardian: Uncommon rarity, improved stats (ATK: 35, DEF: 40, HP: 120)  
+- Arena Champion: Rare rarity, advanced stats (ATK: 45, DEF: 50, HP: 150)
+- Complete PetSpecies interfaces with growth rates and asset definitions
+- Proper Pet objects with all required properties (birthTime, lastCareTime, totalLifetime)
 
 **Important Notes:**
 - Successfully followed the established system implementation pattern
-- Shop system is fully functional and ready for content expansion
-- Foundation provides excellent base for more complex shop features
-- Integration with quest system ready for future development
+- Battle system backend was already complete (30 tests), UI implementation bridged the gap
+- Foundation provides excellent base for advanced battle features and content expansion
+- Integration with quest system and training facilities ready for future development
+- Complete user experience from battle selection through victory/defeat states
 
 ## Development Setup Tasks
 
@@ -424,10 +434,10 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
   - [x] Full coverage of shop functionality
 
 #### 4.3 Content Creation & Battle UI (Current)
-- [ ] **Battle UI Components** (`src/components/battle/`)
-  - [ ] Battle interface with move selection
-  - [ ] Combat visualization and feedback
-  - [ ] Turn-based UI flow
+- [x] **Battle UI Components** (`src/components/battle/`)
+  - [x] Battle interface with move selection
+  - [x] Combat visualization and feedback
+  - [x] Turn-based UI flow
 - [ ] **Pet Species** (`src/data/pets.ts`)
   - [ ] Define all 31 pet species across rarities
   - [ ] Create pet sprites and icons
