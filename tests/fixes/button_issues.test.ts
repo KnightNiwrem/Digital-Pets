@@ -3,6 +3,7 @@
 import { describe, it, expect } from "bun:test";
 import { PetSystem } from "@/systems/PetSystem";
 import { PetValidator } from "@/lib/utils";
+import { WILD_BEAST } from "@/data/pets";
 import type { Pet } from "@/types";
 
 // Helper to create a basic pet for testing
@@ -15,7 +16,7 @@ function createTestPet(): Pet {
   return {
     id: "test-pet",
     name: "Test Pet",
-    species: "fluffy",
+    species: WILD_BEAST,
     rarity: "common",
     birthTime: Date.now(),
     lastCareTime: Date.now(),
@@ -135,7 +136,7 @@ describe("Button Issues from Problem Statement", () => {
       // Wake up action should be allowed when pet is sleeping
       const result = PetSystem.wakePetUp(pet);
       expect(result.success).toBe(true);
-      expect(pet.state).toBe("idle"); // Should be awake now
+      expect(pet.state).toBe("idle" as any); // Should be awake now
     });
 
     it("should block sleep action when pet is already sleeping", () => {
@@ -161,7 +162,7 @@ describe("Button Issues from Problem Statement", () => {
       
       const result = PetSystem.putPetToSleep(pet);
       expect(result.success).toBe(true);
-      expect(pet.state).toBe("sleeping");
+      expect(pet.state).toBe("sleeping" as any);
     });
 
     it("should demonstrate the button logic issue with sleep/wake validation", () => {
@@ -169,13 +170,21 @@ describe("Button Issues from Problem Statement", () => {
       
       // Test when pet is awake - should be able to sleep
       pet.state = "idle";
-      const canSleepWhenIdle = !PetValidator.validateSleepAction(pet); // Current button logic
-      expect(canSleepWhenIdle).toBe(true); // This is correct - button should be enabled for "Sleep"
+      const canSleepWhenIdle = (pet.state as any) !== "sleeping" && !PetValidator.validateSleepAction(pet);
+      const canWakeWhenIdle = (pet.state as any) === "sleeping";
+      const canToggleSleepWhenIdle = canSleepWhenIdle || canWakeWhenIdle;
+      expect(canToggleSleepWhenIdle).toBe(true); // Button should be enabled for "Sleep"
       
-      // Test when pet is sleeping - current logic incorrectly disables button
+      // Test when pet is sleeping - should be able to wake up (this was the bug)
       pet.state = "sleeping";
-      const canSleepWhenSleeping = !PetValidator.validateSleepAction(pet); // Current button logic  
-      expect(canSleepWhenSleeping).toBe(false); // This is the BUG - button is disabled for "Wake Up"
+      const canSleepWhenSleeping = (pet.state as any) !== "sleeping" && !PetValidator.validateSleepAction(pet);
+      const canWakeWhenSleeping = (pet.state as any) === "sleeping";
+      const canToggleSleepWhenSleeping = canSleepWhenSleeping || canWakeWhenSleeping;
+      expect(canToggleSleepWhenSleeping).toBe(true); // FIXED: Button should be enabled for "Wake Up"
+      
+      // Verify the individual components of the logic
+      expect(canSleepWhenSleeping).toBe(false); // Can't sleep when already sleeping
+      expect(canWakeWhenSleeping).toBe(true); // Can wake when sleeping
       
       // But we should be able to wake up a sleeping pet
       const canWakeUp = PetSystem.wakePetUp(pet);

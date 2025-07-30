@@ -107,7 +107,10 @@ export function PetCarePanel({
     cleaningItems.length > 0;
   const canTreat =
     pet.health !== "healthy" && pet.state !== "exploring" && pet.state !== "sleeping" && medicineItems.length > 0;
-  const canSleep = !PetValidator.validateSleepAction(pet);
+  // Separate logic for sleep vs wake actions
+  const canSleep = pet.state !== "sleeping" && !PetValidator.validateSleepAction(pet);
+  const canWake = pet.state === "sleeping";
+  const canToggleSleep = canSleep || canWake;
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -312,7 +315,7 @@ export function PetCarePanel({
 
           <Button
             onClick={() => handleAction(pet.state === "sleeping" ? "Wake Up" : "Sleep", onToggleSleep)}
-            disabled={!canSleep || isLoading || actionLoading !== null}
+            disabled={!canToggleSleep || isLoading || actionLoading !== null}
             variant={pet.state === "sleeping" ? "secondary" : "default"}
             size="sm"
             className="w-full"
