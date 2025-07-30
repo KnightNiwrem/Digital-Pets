@@ -286,7 +286,7 @@ export function GameScreen() {
       {gameState.currentPet ? (
         <div className="space-y-6">
           {/* Tab Navigation */}
-          <div className="flex space-x-2 sm:space-x-4 border-b overflow-x-auto pb-0 scrollbar-hide">
+          <div className="flex flex-wrap gap-2 border-b pb-2">
             <button
               onClick={() => setActiveTab("pet")}
               className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
@@ -296,7 +296,7 @@ export function GameScreen() {
               }`}
             >
               <Home className="w-4 h-4 inline mr-1 sm:mr-2" />
-              Pet Care
+              Care
             </button>
             <button
               onClick={() => setActiveTab("world")}

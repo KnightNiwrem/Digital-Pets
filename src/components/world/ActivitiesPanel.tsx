@@ -223,7 +223,7 @@ export function ActivitiesPanel({
                           {!canStart && pet.currentEnergy < activity.energyCost
                             ? "No Energy"
                             : pet.state === "sleeping"
-                              ? "Pet Sleeping"
+                              ? "Sleeping"
                               : "Start"}
                         </Button>
                       </div>

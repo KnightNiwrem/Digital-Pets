@@ -82,13 +82,13 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between">
+            <div className="flex flex-col gap-3">
               <ItemCategoryTabs
                 activeCategory={activeCategory}
                 onCategoryChange={setActiveCategory}
                 inventory={inventory}
               />
-              <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
+              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
