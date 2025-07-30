@@ -242,13 +242,13 @@ const JUICE: ConsumableItem = {
   stackable: true,
 };
 
-const MAGIC_POTION: ConsumableItem = {
-  id: "magic_potion",
-  name: "Magic Potion",
-  description: "A mystical potion that restores health and energy.",
+const PROTEIN_SHAKE: ConsumableItem = {
+  id: "protein_shake",
+  name: "Protein Shake",
+  description: "A nutritious protein shake that provides hydration, energy, and promotes health.",
   type: "consumable",
   rarity: "rare",
-  icon: "item_magic_potion",
+  icon: "item_protein_shake",
   effects: [
     { type: "hydration", value: 40 },
     { type: "energy", value: 30 },
@@ -270,6 +270,21 @@ const MILK: ConsumableItem = {
     { type: "satiety", value: 12 },
   ],
   value: 10,
+  stackable: true,
+};
+
+const HERBAL_TEA: ConsumableItem = {
+  id: "herbal_tea",
+  name: "Herbal Tea",
+  description: "A soothing herbal tea that provides gentle hydration and relaxation.",
+  type: "consumable",
+  rarity: "uncommon",
+  icon: "item_herbal_tea",
+  effects: [
+    { type: "hydration", value: 32 },
+    { type: "happiness", value: 12 },
+  ],
+  value: 16,
   stackable: true,
 };
 
@@ -402,7 +417,7 @@ const ROPE_TOY: DurabilityItem = {
 const MUSIC_BOX: DurabilityItem = {
   id: "music_box",
   name: "Music Box",
-  description: "A magical music box that plays soothing melodies.",
+  description: "An elegant music box that plays soothing melodies.",
   type: "toy",
   rarity: "rare",
   icon: "item_music_box",
@@ -436,7 +451,7 @@ const TRAINING_COLLAR: DurabilityItem = {
 const LUCKY_CHARM: DurabilityItem = {
   id: "lucky_charm",
   name: "Lucky Charm",
-  description: "A mystical charm that brings good fortune to your pet.",
+  description: "A special charm that brings good fortune to your pet.",
   type: "equipment",
   rarity: "rare",
   icon: "item_lucky_charm",
@@ -500,7 +515,7 @@ const ANCIENT_RELIC: ConsumableItem = {
 const GROWTH_SEED: ConsumableItem = {
   id: "growth_seed",
   name: "Growth Seed",
-  description: "A magical seed that accelerates pet growth and development.",
+  description: "A rare seed with special nutrients that accelerates pet growth and development.",
   type: "special",
   rarity: "epic",
   icon: "item_growth_seed",
@@ -533,8 +548,9 @@ export const ITEMS: Item[] = [
 
   // Additional drink items
   JUICE,
-  MAGIC_POTION,
+  PROTEIN_SHAKE,
   MILK,
+  HERBAL_TEA,
 
   // Additional medicine items
   STRONG_MEDICINE,

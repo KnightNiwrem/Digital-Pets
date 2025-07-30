@@ -116,7 +116,7 @@ describe("Item Data Expansion", () => {
 
   describe("Item Functionality", () => {
     it("should find items by valid ID", () => {
-      const testIds = ["honey", "magic_potion", "crystal_fragment", "training_collar"];
+      const testIds = ["honey", "protein_shake", "crystal_fragment", "training_collar"];
       testIds.forEach(id => {
         const item = getItemById(id);
         expect(item).toBeDefined();
