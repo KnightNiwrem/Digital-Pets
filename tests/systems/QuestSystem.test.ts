@@ -206,8 +206,12 @@ describe("QuestSystem", () => {
     it("should prevent starting already active quest", () => {
       const questProgress: QuestProgress = {
         questId: petCareQuest.id,
+        name: petCareQuest.name,
+        description: petCareQuest.description,
+        type: petCareQuest.type,
         status: "active",
         objectives: petCareQuest.objectives.map(obj => ({ ...obj, currentAmount: 0, completed: false })),
+        rewards: petCareQuest.rewards,
         startTime: Date.now(),
         variables: {},
       };
@@ -233,8 +237,12 @@ describe("QuestSystem", () => {
       for (let i = 0; i < 10; i++) {
         const questProgress: QuestProgress = {
           questId: `fake_quest_${i}`,
+          name: `Fake Quest ${i}`,
+          description: "A fake quest for testing",
+          type: "collection",
           status: "active",
           objectives: [],
+          rewards: [],
           startTime: Date.now(),
           variables: {},
         };
@@ -254,13 +262,14 @@ describe("QuestSystem", () => {
       
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      expect(result.data?.type).toBe("start_quest");
-      expect(result.data?.questId).toBe(petCareQuest.id);
       
-      // Check quest was added to active quests
-      expect(gameState.questLog!.activeQuests).toHaveLength(1);
-      expect(gameState.questLog!.activeQuests[0].questId).toBe(petCareQuest.id);
-      expect(gameState.questLog!.activeQuests[0].status).toBe("active");
+      // Check that updated gameState is returned
+      const updatedGameState = result.data!;
+      expect(updatedGameState.questLog!.activeQuests).toHaveLength(1);
+      expect(updatedGameState.questLog!.activeQuests[0].questId).toBe(petCareQuest.id);
+      expect(updatedGameState.questLog!.activeQuests[0].status).toBe("active");
+      expect(updatedGameState.questLog!.activeQuests[0].name).toBe(petCareQuest.name);
+      expect(updatedGameState.questLog!.activeQuests[0].type).toBe(petCareQuest.type);
     });
 
     it("should initialize objectives correctly", () => {
@@ -396,7 +405,7 @@ describe("QuestSystem", () => {
         QuestSystem.updateObjectiveProgress(
           petCareQuest.id,
           objective.id,
-          objective.targetAmount,
+          objective.targetAmount || 1,
           gameState
         );
       }
@@ -413,14 +422,18 @@ describe("QuestSystem", () => {
 
   describe("completeQuest", () => {
     beforeEach(() => {
-      QuestSystem.startQuest(petCareQuest, gameState);
+      const startResult = QuestSystem.startQuest(petCareQuest, gameState);
+      if (startResult.success && startResult.data) {
+        // Update gameState with the started quest
+        gameState.questLog = startResult.data.questLog;
+      }
       
       // Complete all objectives
       for (const objective of petCareQuest.objectives) {
         QuestSystem.updateObjectiveProgress(
           petCareQuest.id,
           objective.id,
-          objective.targetAmount,
+          objective.targetAmount || 1,
           gameState
         );
       }
@@ -429,18 +442,18 @@ describe("QuestSystem", () => {
     it("should successfully complete quest", () => {
       const initialGold = gameState.inventory.gold;
       
-      const result = QuestSystem.completeQuest(petCareQuest, gameState);
+      const result = QuestSystem.completeQuest(gameState, petCareQuest.id);
       
       expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("complete_quest");
-      expect(result.data?.questId).toBe(petCareQuest.id);
+      expect(result.data).toBeDefined();
       
-      // Check quest moved from active to completed
-      expect(gameState.questLog!.activeQuests).toHaveLength(0);
-      expect(gameState.questLog!.completedQuests).toContain(petCareQuest.id);
+      // Check that updated gameState is returned
+      const updatedGameState = result.data!;
+      expect(updatedGameState.questLog!.activeQuests).toHaveLength(0);
+      expect(updatedGameState.questLog!.completedQuests).toContain(petCareQuest.id);
       
       // Check that gold didn't change (pet care quest doesn't give gold)
-      expect(gameState.inventory.gold).toBe(initialGold);
+      expect(updatedGameState.inventory.gold).toBe(initialGold);
     });
 
     it("should fail for quest with incomplete objectives", () => {
@@ -448,16 +461,19 @@ describe("QuestSystem", () => {
       gameState.questLog!.completedQuests.push("pet_care_basics");
       
       // Start a new quest and don't complete objectives
-      QuestSystem.startQuest(shopTutorialQuest, gameState);
+      const startResult = QuestSystem.startQuest(shopTutorialQuest, gameState);
+      if (startResult.success && startResult.data) {
+        gameState.questLog = startResult.data.questLog;
+      }
       
-      const result = QuestSystem.completeQuest(shopTutorialQuest, gameState);
+      const result = QuestSystem.completeQuest(gameState, shopTutorialQuest.id);
       
       expect(result.success).toBe(false);
       expect(result.error).toBe("Not all objectives are complete.");
     });
 
     it("should fail for non-active quest", () => {
-      const result = QuestSystem.completeQuest(shopTutorialQuest, gameState);
+      const result = QuestSystem.completeQuest(gameState, shopTutorialQuest.id);
       
       expect(result.success).toBe(false);
       expect(result.error).toBe("Quest is not active.");

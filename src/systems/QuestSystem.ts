@@ -80,7 +80,7 @@ export class QuestSystem {
   /**
    * Start a quest
    */
-  static startQuest(quest: Quest, gameState: GameState): Result<QuestAction> {
+  static startQuest(quest: Quest, gameState: GameState): Result<GameState> {
     const canStart = this.canStartQuest(quest, gameState);
     if (!canStart.success) {
       return {
@@ -94,8 +94,12 @@ export class QuestSystem {
     // Create quest progress
     const questProgress: QuestProgress = {
       questId: quest.id,
+      name: quest.name,
+      description: quest.description,
+      type: quest.type,
       status: "active",
       objectives: quest.objectives.map(obj => ({ ...obj, currentAmount: 0, completed: false })),
+      rewards: quest.rewards,
       startTime: Date.now(),
       variables: {},
     };
@@ -107,16 +111,38 @@ export class QuestSystem {
     questLog.availableQuests = questLog.availableQuests.filter(id => id !== quest.id);
 
     // Update game state
-    gameState.questLog = questLog;
+    const updatedGameState = { ...gameState, questLog };
 
-    const action: QuestAction = {
-      type: "start_quest",
-      questId: quest.id,
-      timestamp: Date.now(),
-      data: { npcId: quest.npcId, location: quest.location },
-    };
+    return { success: true, data: updatedGameState };
+  }
 
-    return { success: true, data: action };
+  /**
+   * Abandon a quest
+   */
+  static abandonQuest(gameState: GameState, questId: string): Result<GameState> {
+    const questLog = gameState.questLog || this.initializeQuestLog();
+
+    // Find the quest in active quests
+    const questIndex = questLog.activeQuests.findIndex(q => q.questId === questId);
+    if (questIndex === -1) {
+      return {
+        success: false,
+        error: "Quest is not active.",
+      };
+    }
+
+    // Remove from active quests
+    questLog.activeQuests.splice(questIndex, 1);
+
+    // Add to failed quests
+    if (!questLog.failedQuests.includes(questId)) {
+      questLog.failedQuests.push(questId);
+    }
+
+    // Update game state
+    const updatedGameState = { ...gameState, questLog };
+
+    return { success: true, data: updatedGameState };
   }
 
   /**
@@ -154,10 +180,12 @@ export class QuestSystem {
     }
 
     // Update progress
-    objective.currentAmount = Math.min(objective.currentAmount + amount, objective.targetAmount);
+    const currentAmount = objective.currentAmount || 0;
+    const targetAmount = objective.targetAmount || 1;
+    objective.currentAmount = Math.min(currentAmount + amount, targetAmount);
 
     // Check if objective is now complete
-    if (objective.currentAmount >= objective.targetAmount) {
+    if (objective.currentAmount >= targetAmount) {
       objective.completed = true;
     }
 
@@ -187,9 +215,9 @@ export class QuestSystem {
   /**
    * Complete a quest and distribute rewards
    */
-  static completeQuest(quest: Quest, gameState: GameState): Result<QuestAction> {
+  static completeQuest(gameState: GameState, questId: string): Result<GameState> {
     const questLog = gameState.questLog || this.initializeQuestLog();
-    const questProgressIndex = questLog.activeQuests.findIndex(q => q.questId === quest.id);
+    const questProgressIndex = questLog.activeQuests.findIndex(q => q.questId === questId);
 
     if (questProgressIndex === -1) {
       return {
@@ -212,24 +240,17 @@ export class QuestSystem {
     questLog.activeQuests.splice(questProgressIndex, 1);
 
     // Add to completed quests
-    questLog.completedQuests.push(quest.id);
+    questLog.completedQuests.push(questId);
     questProgress.status = "completed";
     questProgress.completeTime = Date.now();
 
     // Distribute rewards
-    this.distributeRewards(quest.rewards, gameState);
+    this.distributeRewards(questProgress.rewards, gameState);
 
     // Update game state
-    gameState.questLog = questLog;
+    const updatedGameState = { ...gameState, questLog };
 
-    const action: QuestAction = {
-      type: "complete_quest",
-      questId: quest.id,
-      timestamp: Date.now(),
-      data: { rewards: quest.rewards.map(r => `${r.type}:${r.amount}`) },
-    };
-
-    return { success: true, data: action };
+    return { success: true, data: updatedGameState };
   }
 
   /**
@@ -263,12 +284,15 @@ export class QuestSystem {
               questId: quest.id,
               objectiveId: objective.id,
               timestamp: Date.now(),
-              data: { progress: objective.currentAmount, target: objective.targetAmount },
+              data: {
+                progress: objective.currentAmount || 0,
+                target: objective.targetAmount || 1,
+              },
             });
 
             // Check if quest is now complete
             if (this.isQuestComplete(quest.id, gameState)) {
-              const completeResult = this.completeQuest(quest, gameState);
+              const completeResult = this.completeQuest(gameState, quest.id);
               if (completeResult.success) {
                 events.push({
                   type: "quest_completed",
@@ -416,11 +440,14 @@ export class QuestSystem {
         }
         break;
 
-      case "reach_level":
-        if (actionType === "level_up" && Number(actionData.newLevel) >= objective.targetAmount) {
-          return objective.targetAmount - objective.currentAmount; // Complete objective fully
+      case "reach_level": {
+        const targetLevel = objective.targetAmount || 1;
+        const currentAmount = objective.currentAmount || 0;
+        if (actionType === "level_up" && Number(actionData.newLevel) >= targetLevel) {
+          return targetLevel - currentAmount; // Complete objective fully
         }
         break;
+      }
 
       case "complete_quest":
         if (actionType === "quest_completed" && actionData.questId === objective.questId) {

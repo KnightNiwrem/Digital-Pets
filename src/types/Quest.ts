@@ -26,8 +26,8 @@ export interface QuestObjective {
   questId?: string;
 
   // Progress tracking
-  targetAmount: number;
-  currentAmount: number;
+  targetAmount?: number;
+  currentAmount?: number;
   completed: boolean;
 }
 
@@ -85,8 +85,12 @@ export interface Quest {
 
 export interface QuestProgress {
   questId: string;
+  name: string; // Quest name for display
+  description: string; // Quest description for display
+  type: QuestType; // Quest type for display
   status: QuestStatus;
   objectives: QuestObjective[];
+  rewards: QuestReward[]; // Quest rewards for display
   startTime?: number;
   completeTime?: number;
   variables?: Record<string, string | number | boolean>; // for complex quest state
