@@ -434,10 +434,10 @@ This document defines repetitive tasks and workflows for the Digital Pets projec
   - [x] Full coverage of shop functionality
 
 #### 4.3 Content Creation & Battle UI (Current)
-- [ ] **Battle UI Components** (`src/components/battle/`)
-  - [ ] Battle interface with move selection
-  - [ ] Combat visualization and feedback
-  - [ ] Turn-based UI flow
+- [x] **Battle UI Components** (`src/components/battle/`)
+  - [x] Battle interface with move selection
+  - [x] Combat visualization and feedback
+  - [x] Turn-based UI flow
 - [ ] **Pet Species** (`src/data/pets.ts`)
   - [ ] Define all 31 pet species across rarities
   - [ ] Create pet sprites and icons
