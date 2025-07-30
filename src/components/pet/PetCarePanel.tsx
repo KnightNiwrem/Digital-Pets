@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Pet, Result } from "@/types";
+import { PetValidator } from "@/lib/utils";
 
 interface PetCarePanelProps {
   pet: Pet;
@@ -57,13 +58,13 @@ export function PetCarePanel({
     }
   };
 
-  // Check if actions are available
-  const canFeed = pet.health !== "sick" && pet.satiety < 100;
-  const canDrink = pet.health !== "sick" && pet.hydration < 100;
-  const canPlay = pet.health !== "sick" && pet.currentEnergy >= 10 && pet.happiness < 100;
-  const canClean = pet.poopTicksLeft <= 0; // Pet has pooped
-  const canTreat = pet.health !== "healthy";
-  const canSleep = pet.state !== "travelling";
+  // Check if actions are available using proper validation
+  const canFeed = pet.satiety < 100 && !PetValidator.validateCareAction(pet, "feed");
+  const canDrink = pet.hydration < 100 && !PetValidator.validateCareAction(pet, "drink");
+  const canPlay = pet.happiness < 100 && !PetValidator.validateCareAction(pet, "play", 10);
+  const canClean = pet.poopTicksLeft <= 0 && pet.state !== "exploring" && pet.state !== "sleeping" && pet.state !== "travelling";
+  const canTreat = pet.health !== "healthy" && pet.state !== "exploring" && pet.state !== "sleeping";
+  const canSleep = !PetValidator.validateSleepAction(pet);
 
   return (
     <Card className="w-full max-w-md mx-auto">
