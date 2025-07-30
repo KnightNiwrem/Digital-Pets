@@ -4,7 +4,7 @@ export type PetRarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
 export type HealthState = "healthy" | "injured" | "sick";
 
-export type PetState = "idle" | "sleeping" | "travelling";
+export type PetState = "idle" | "sleeping" | "travelling" | "exploring";
 
 export interface PetSpecies {
   id: string;

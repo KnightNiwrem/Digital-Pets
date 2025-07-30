@@ -553,8 +553,14 @@ export function useGameState(): UseGameStateReturn {
       if (result.success && result.data) {
         setGameState(prev => {
           if (!prev) return null;
+
+          // Reset pet state to idle when cancelling activity
+          const updatedPet =
+            prev.currentPet?.state === "exploring" ? { ...prev.currentPet, state: "idle" as const } : prev.currentPet;
+
           return {
             ...prev,
+            currentPet: updatedPet,
             world: result.data!,
           };
         });
