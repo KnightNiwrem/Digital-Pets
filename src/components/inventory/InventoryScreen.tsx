@@ -58,7 +58,7 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
   const availableSlots = inventory.maxSlots - inventory.slots.length;
 
   return (
-    <div className="flex h-full gap-4">
+    <div className="flex flex-col lg:flex-row h-full gap-4">
       {/* Main inventory panel */}
       <div className="flex-1 space-y-4">
         {/* Header with gold and stats */}
@@ -82,18 +82,18 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:justify-between">
               <ItemCategoryTabs
                 activeCategory={activeCategory}
                 onCategoryChange={setActiveCategory}
                 inventory={inventory}
               />
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleSort("name")}
-                  className={sortBy === "name" ? "bg-secondary" : ""}
+                  className={`text-xs whitespace-nowrap ${sortBy === "name" ? "bg-secondary" : ""}`}
                 >
                   Name
                 </Button>
@@ -101,7 +101,7 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
                   variant="outline"
                   size="sm"
                   onClick={() => handleSort("value")}
-                  className={sortBy === "value" ? "bg-secondary" : ""}
+                  className={`text-xs whitespace-nowrap ${sortBy === "value" ? "bg-secondary" : ""}`}
                 >
                   Value
                 </Button>
@@ -109,11 +109,11 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
                   variant="outline"
                   size="sm"
                   onClick={() => handleSort("rarity")}
-                  className={sortBy === "rarity" ? "bg-secondary" : ""}
+                  className={`text-xs whitespace-nowrap ${sortBy === "rarity" ? "bg-secondary" : ""}`}
                 >
                   Rarity
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="text-xs">
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
@@ -136,7 +136,7 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
 
       {/* Item details side panel */}
       {selectedItem && (
-        <div className="w-80">
+        <div className="w-full lg:w-80">
           <ItemDetailsPanel
             slot={selectedItem}
             pet={pet}
