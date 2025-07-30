@@ -38,6 +38,10 @@ export function GameScreen() {
     getAvailableQuests,
     getActiveQuests,
     getCompletedQuests,
+    startTravel,
+    startActivity,
+    cancelActivity,
+    applyBattleResults: applyGameStateBattleResults,
     isPaused,
     hasExistingSave,
     storageInfo,
@@ -51,52 +55,55 @@ export function GameScreen() {
     startBattle,
     executeAction,
     endBattle,
-    applyBattleResults,
   } = useBattleState();
 
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
   const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle" | "quest">("pet");
 
-  // World action handlers
+  // World action handlers - now using enhanced autosave from useGameState
   const handleTravel = async (destinationId: string) => {
     if (!gameState?.currentPet || !gameState?.world) return;
 
-    const { WorldSystem } = await import("@/systems/WorldSystem");
-    const result = WorldSystem.startTravel(gameState.world, gameState.currentPet, destinationId);
-
-    if (result.success) {
-      // Update the game state through the existing game loop
-      // This is a simplified approach - in practice, this would be handled by the GameLoop
-      console.log("Travel started:", result.message);
-    } else {
-      console.error("Travel failed:", result.error);
+    try {
+      const result = await startTravel(destinationId);
+      if (result.success) {
+        console.log("Travel started successfully");
+      } else {
+        console.error("Travel failed:", result.error);
+      }
+    } catch (error) {
+      console.error("Travel error:", error);
     }
   };
 
   const handleStartActivity = async (activityId: string) => {
     if (!gameState?.currentPet || !gameState?.world) return;
 
-    const { WorldSystem } = await import("@/systems/WorldSystem");
-    const result = WorldSystem.startActivity(gameState.world, gameState.currentPet, activityId);
-
-    if (result.success) {
-      console.log("Activity started:", result.message);
-    } else {
-      console.error("Activity failed:", result.error);
+    try {
+      const result = await startActivity(activityId);
+      if (result.success) {
+        console.log("Activity started successfully");
+      } else {
+        console.error("Activity failed:", result.error);
+      }
+    } catch (error) {
+      console.error("Activity error:", error);
     }
   };
 
   const handleCancelActivity = async () => {
     if (!gameState?.currentPet || !gameState?.world) return;
 
-    const { WorldSystem } = await import("@/systems/WorldSystem");
-    const result = WorldSystem.cancelActivity(gameState.world, gameState.currentPet.id);
-
-    if (result.success) {
-      console.log("Activity cancelled:", result.message);
-    } else {
-      console.error("Cancel failed:", result.error);
+    try {
+      const result = await cancelActivity();
+      if (result.success) {
+        console.log("Activity cancelled successfully");
+      } else {
+        console.error("Cancel activity failed:", result.error);
+      }
+    } catch (error) {
+      console.error("Cancel activity error:", error);
     }
   };
 
@@ -135,13 +142,18 @@ export function GameScreen() {
       console.error("Battle action failed:", result.error);
     }
 
-    // If battle ended, apply results to pet
+    // If battle ended, apply results to pet with enhanced autosave
     if (currentBattle && (currentBattle.status === "victory" || currentBattle.status === "defeat")) {
       if (gameState?.currentPet) {
-        const applyResult = await applyBattleResults(gameState.currentPet);
-        if (applyResult.success) {
-          // In a full implementation, this would update the game state
-          console.log("Battle results applied to pet");
+        try {
+          const applyResult = await applyGameStateBattleResults(currentBattle);
+          if (applyResult.success) {
+            console.log("Battle results applied to pet and game saved");
+          } else {
+            console.error("Failed to apply battle results:", applyResult.error);
+          }
+        } catch (error) {
+          console.error("Battle result application error:", error);
         }
       }
     }
