@@ -11,13 +11,6 @@ import type {
 } from "@/types/Quest";
 import type { Result, GameState } from "@/types";
 
-export interface QuestSystemState {
-  questLog: QuestLog;
-  completedQuestIds: string[];
-  activeQuestIds: string[];
-  availableQuestIds: string[];
-}
-
 export interface QuestAction {
   type: "start_quest" | "complete_quest" | "update_objective" | "fail_quest";
   questId: string;
@@ -353,11 +346,21 @@ export class QuestSystem {
 
       case "item_owned": {
         if (!requirement.itemId) break;
-        const hasItem = gameState.inventory?.slots?.some(slot => slot.item.id === requirement.itemId);
-        if (!hasItem) {
+        const requiredQuantity = requirement.value || 1;
+
+        // Sum up all quantities of the required item across inventory slots
+        const totalQuantity =
+          gameState.inventory?.slots?.reduce((total, slot) => {
+            if (slot.item.id === requirement.itemId) {
+              return total + slot.quantity;
+            }
+            return total;
+          }, 0) || 0;
+
+        if (totalQuantity < requiredQuantity) {
           return {
             success: false,
-            error: `Requires item: ${requirement.itemId}.`,
+            error: `Requires ${requiredQuantity} of item: ${requirement.itemId}. You have ${totalQuantity}.`,
           };
         }
         break;
