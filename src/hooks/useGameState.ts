@@ -290,14 +290,17 @@ export function useGameState(): UseGameStateReturn {
       try {
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          setGameState(prev => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              inventory: result.data!.inventory,
-              currentPet: result.data!.pet,
-            };
-          });
+          const updatedGameState = {
+            ...gameState,
+            inventory: result.data.inventory,
+            currentPet: result.data.pet,
+          };
+
+          // Update both React state and GameLoop internal state
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
           await triggerAutosave(`feed pet with ${itemId}`);
           return { success: true };
@@ -321,14 +324,17 @@ export function useGameState(): UseGameStateReturn {
       try {
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          setGameState(prev => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              inventory: result.data!.inventory,
-              currentPet: result.data!.pet,
-            };
-          });
+          const updatedGameState = {
+            ...gameState,
+            inventory: result.data.inventory,
+            currentPet: result.data.pet,
+          };
+
+          // Update both React state and GameLoop internal state
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
           await triggerAutosave(`give drink with ${itemId}`);
           return { success: true };
@@ -352,14 +358,17 @@ export function useGameState(): UseGameStateReturn {
       try {
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          setGameState(prev => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              inventory: result.data!.inventory,
-              currentPet: result.data!.pet,
-            };
-          });
+          const updatedGameState = {
+            ...gameState,
+            inventory: result.data.inventory,
+            currentPet: result.data.pet,
+          };
+
+          // Update both React state and GameLoop internal state
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
           await triggerAutosave(`play with ${itemId}`);
           return { success: true };
@@ -387,14 +396,17 @@ export function useGameState(): UseGameStateReturn {
           // Then also trigger the poop cleaning effect
           const cleanResult = PetSystem.cleanPoop(result.data.pet);
           if (cleanResult.success) {
-            setGameState(prev => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                inventory: result.data!.inventory,
-                currentPet: result.data!.pet,
-              };
-            });
+            const updatedGameState = {
+              ...gameState,
+              inventory: result.data.inventory,
+              currentPet: result.data.pet,
+            };
+
+            // Update both React state and GameLoop internal state
+            setGameState(updatedGameState);
+            if (gameLoopRef.current) {
+              gameLoopRef.current.updateState(updatedGameState);
+            }
 
             await triggerAutosave(`clean with ${itemId}`);
             return { success: true };
@@ -419,14 +431,17 @@ export function useGameState(): UseGameStateReturn {
       try {
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          setGameState(prev => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              inventory: result.data!.inventory,
-              currentPet: result.data!.pet,
-            };
-          });
+          const updatedGameState = {
+            ...gameState,
+            inventory: result.data.inventory,
+            currentPet: result.data.pet,
+          };
+
+          // Update both React state and GameLoop internal state
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
           await triggerAutosave(`treat with ${itemId}`);
           return { success: true };
