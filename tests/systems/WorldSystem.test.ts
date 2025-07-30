@@ -456,4 +456,49 @@ describe("WorldSystem", () => {
       }
     });
   });
+
+  describe("Shop System", () => {
+    it("should get available shops at current location", () => {
+      const shops = WorldSystem.getAvailableShops(worldState);
+      
+      expect(shops).toHaveLength(1);
+      expect(shops[0].id).toBe("hometown_general_store");
+      expect(shops[0].name).toBe("General Store");
+      expect(shops[0].keeper).toBe("shopkeeper_sam");
+      expect(shops[0].items).toHaveLength(4);
+    });
+
+    it("should return empty array when no shops available", () => {
+      const noShopsWorld = {
+        ...worldState,
+        currentLocationId: "nonexistent_location",
+      };
+      
+      const shops = WorldSystem.getAvailableShops(noShopsWorld);
+      
+      expect(shops).toHaveLength(0);
+    });
+
+    it("should get specific shop by ID", () => {
+      const shop = WorldSystem.getShopById(worldState, "hometown_general_store");
+      
+      expect(shop).toBeDefined();
+      expect(shop?.id).toBe("hometown_general_store");
+      expect(shop?.name).toBe("General Store");
+    });
+
+    it("should return undefined for non-existent shop ID", () => {
+      const shop = WorldSystem.getShopById(worldState, "nonexistent_shop");
+      
+      expect(shop).toBeUndefined();
+    });
+
+    it("should check if shop is available", () => {
+      const isAvailable = WorldSystem.isShopAvailable(worldState, "hometown_general_store");
+      const isNotAvailable = WorldSystem.isShopAvailable(worldState, "nonexistent_shop");
+      
+      expect(isAvailable).toBe(true);
+      expect(isNotAvailable).toBe(false);
+    });
+  });
 });

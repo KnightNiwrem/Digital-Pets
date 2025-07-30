@@ -26,6 +26,7 @@ export function GameScreen() {
     toggleSleep,
     useItem,
     sellItem,
+    buyItem,
     sortInventory,
     isPaused,
     hasExistingSave,
@@ -75,6 +76,25 @@ export function GameScreen() {
       console.log("Activity cancelled:", result.message);
     } else {
       console.error("Cancel failed:", result.error);
+    }
+  };
+
+  // Shop action handlers
+  const handleBuyItem = async (itemId: string, quantity: number, price: number) => {
+    const result = await buyItem(itemId, quantity);
+    if (result.success) {
+      console.log(`Bought ${quantity}x ${itemId} for ${price * quantity} gold`);
+    } else {
+      console.error("Purchase failed:", result.error);
+    }
+  };
+
+  const handleSellItem = async (itemId: string, quantity: number, price: number) => {
+    const result = await sellItem(itemId, quantity);
+    if (result.success) {
+      console.log(`Sold ${quantity}x ${itemId} for ${price * quantity} gold`);
+    } else {
+      console.error("Sale failed:", result.error);
     }
   };
 
@@ -260,9 +280,12 @@ export function GameScreen() {
             <WorldScreen
               pet={gameState.currentPet}
               worldState={gameState.world}
+              inventory={gameState.inventory}
               onTravel={handleTravel}
               onStartActivity={handleStartActivity}
               onCancelActivity={handleCancelActivity}
+              onBuyItem={handleBuyItem}
+              onSellItem={handleSellItem}
               disabled={isLoading || isPaused}
             />
           )}
