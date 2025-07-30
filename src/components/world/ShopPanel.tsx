@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Coins, Package } from "lucide-react";
-import type { Shop, Pet, Inventory } from "@/types";
+import type { Shop, Pet, Inventory, Item, InventorySlot } from "@/types";
 import { getItemById } from "@/data/items";
 interface ShopPanelProps {
   shop: Shop;
@@ -17,13 +17,7 @@ interface ShopPanelProps {
   disabled?: boolean;
 }
 
-export function ShopPanel({
-  shop,
-  inventory,
-  onBuyItem,
-  onSellItem,
-  disabled = false,
-}: ShopPanelProps) {
+export function ShopPanel({ shop, inventory, onBuyItem, onSellItem, disabled = false }: ShopPanelProps) {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
 
   return (
@@ -65,16 +59,12 @@ export function ShopPanel({
         {/* Buy Tab */}
         {activeTab === "buy" && (
           <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-600 uppercase tracking-wide">
-              Available Items
-            </h4>
+            <h4 className="font-medium text-sm text-gray-600 uppercase tracking-wide">Available Items</h4>
             {shop.items.length === 0 ? (
-              <div className="text-center text-gray-500 py-4">
-                No items available
-              </div>
+              <div className="text-center text-gray-500 py-4">No items available</div>
             ) : (
               <div className="space-y-2">
-                {shop.items.map((shopItem) => {
+                {shop.items.map(shopItem => {
                   const item = getItemById(shopItem.itemId);
                   if (!item) return null;
 
@@ -89,7 +79,7 @@ export function ShopPanel({
                       stock={shopItem.stock}
                       canAfford={canAfford}
                       inStock={inStock}
-                      onBuy={(quantity) => onBuyItem(item.id, quantity, shopItem.price)}
+                      onBuy={quantity => onBuyItem(item.id, quantity, shopItem.price)}
                       disabled={disabled || !canAfford || !inStock}
                     />
                   );
@@ -102,16 +92,12 @@ export function ShopPanel({
         {/* Sell Tab */}
         {activeTab === "sell" && (
           <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-600 uppercase tracking-wide">
-              Your Items
-            </h4>
+            <h4 className="font-medium text-sm text-gray-600 uppercase tracking-wide">Your Items</h4>
             {inventory.slots.length === 0 ? (
-              <div className="text-center text-gray-500 py-4">
-                No items to sell
-              </div>
+              <div className="text-center text-gray-500 py-4">No items to sell</div>
             ) : (
               <div className="space-y-2">
-                {inventory.slots.map((slot) => {
+                {inventory.slots.map(slot => {
                   const sellPrice = Math.floor(slot.item.value * 0.5); // 50% of value
 
                   return (
@@ -119,7 +105,7 @@ export function ShopPanel({
                       key={slot.slotIndex}
                       slot={slot}
                       sellPrice={sellPrice}
-                      onSell={(quantity) => onSellItem(slot.item.id, quantity, sellPrice)}
+                      onSell={quantity => onSellItem(slot.item.id, quantity, sellPrice)}
                       disabled={disabled}
                     />
                   );
@@ -135,7 +121,7 @@ export function ShopPanel({
 
 // Sub-component for shop items (buying)
 interface ShopItemRowProps {
-  item: any;
+  item: Item;
   price: number;
   stock: number;
   canAfford: boolean;
@@ -144,15 +130,7 @@ interface ShopItemRowProps {
   disabled: boolean;
 }
 
-function ShopItemRow({
-  item,
-  price,
-  stock,
-  canAfford,
-  inStock,
-  onBuy,
-  disabled,
-}: ShopItemRowProps) {
+function ShopItemRow({ item, price, stock, canAfford, inStock, onBuy, disabled }: ShopItemRowProps) {
   return (
     <div className="flex items-center justify-between p-3 border rounded-lg">
       <div className="flex-1">
@@ -169,12 +147,7 @@ function ShopItemRow({
           {stock === -1 && <span>Unlimited stock</span>}
         </div>
       </div>
-      <Button
-        size="sm"
-        onClick={() => onBuy(1)}
-        disabled={disabled || !canAfford || !inStock}
-        className="ml-4"
-      >
+      <Button size="sm" onClick={() => onBuy(1)} disabled={disabled || !canAfford || !inStock} className="ml-4">
         <Coins className="h-4 w-4 mr-1" />
         Buy
       </Button>
@@ -184,18 +157,13 @@ function ShopItemRow({
 
 // Sub-component for inventory items (selling)
 interface InventoryItemRowProps {
-  slot: any;
+  slot: InventorySlot;
   sellPrice: number;
   onSell: (quantity: number) => void;
   disabled: boolean;
 }
 
-function InventoryItemRow({
-  slot,
-  sellPrice,
-  onSell,
-  disabled,
-}: InventoryItemRowProps) {
+function InventoryItemRow({ slot, sellPrice, onSell, disabled }: InventoryItemRowProps) {
   return (
     <div className="flex items-center justify-between p-3 border rounded-lg">
       <div className="flex-1">
@@ -216,13 +184,7 @@ function InventoryItemRow({
           <span>Value: {slot.item.value} gold</span>
         </div>
       </div>
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => onSell(1)}
-        disabled={disabled}
-        className="ml-4"
-      >
+      <Button size="sm" variant="outline" onClick={() => onSell(1)} disabled={disabled} className="ml-4">
         <Package className="h-4 w-4 mr-1" />
         Sell
       </Button>

@@ -15,15 +15,7 @@ interface ShopModalProps {
   onSellItem: (itemId: string, quantity: number, price: number) => void;
 }
 
-export function ShopModal({
-  shop,
-  pet,
-  inventory,
-  isOpen,
-  onClose,
-  onBuyItem,
-  onSellItem,
-}: ShopModalProps) {
+export function ShopModal({ shop, pet, inventory, isOpen, onClose, onBuyItem, onSellItem }: ShopModalProps) {
   if (!isOpen) {
     return null;
   }
@@ -36,16 +28,11 @@ export function ShopModal({
             <h2 className="text-xl font-semibold">{shop.name}</h2>
             <p className="text-sm text-gray-600">Shopkeeper: {shop.keeper}</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            className="ml-4"
-          >
+          <Button variant="outline" size="sm" onClick={onClose} className="ml-4">
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
           <div className="p-4">
             <ShopPanel

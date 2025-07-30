@@ -117,9 +117,7 @@ export function ActivitiesPanel({
         {/* Available Shops */}
         {!isTravel && availableShops.length > 0 && (
           <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-600 uppercase tracking-wide">
-              Shops & Services
-            </h4>
+            <h4 className="font-medium text-sm text-gray-600 uppercase tracking-wide">Shops & Services</h4>
             <div className="space-y-2">
               {availableShops.map(shop => (
                 <div key={shop.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
@@ -134,12 +132,7 @@ export function ActivitiesPanel({
                         Keeper: {shop.keeper} • {shop.items.length} items available
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => onOpenShop?.(shop.id)}
-                      disabled={disabled}
-                      className="ml-3"
-                    >
+                    <Button size="sm" onClick={() => onOpenShop?.(shop.id)} disabled={disabled} className="ml-3">
                       <Gift className="w-4 h-4 mr-1" />
                       Shop
                     </Button>
