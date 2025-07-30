@@ -2,11 +2,12 @@
 
 import { useCallback } from "react";
 import { WorldSystem } from "@/systems/WorldSystem";
-import type { Pet, WorldState, GameState, Location, Activity } from "@/types";
+import type { Pet, WorldState, GameState, Location, Activity, Inventory } from "@/types";
 
 interface UseWorldStateProps {
   pet: Pet | null;
   worldState: WorldState;
+  inventory: Inventory;
   updateGameState: (updater: (prev: GameState) => GameState) => void;
   disabled?: boolean;
 }
@@ -36,6 +37,7 @@ interface UseWorldStateReturn {
 export function useWorldState({
   pet,
   worldState,
+  inventory,
   updateGameState,
   disabled = false,
 }: UseWorldStateProps): UseWorldStateReturn {
@@ -65,7 +67,8 @@ export function useWorldState({
         };
       }
     },
-    [pet, worldState, updateGameState, disabled]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pet, worldState, inventory, updateGameState, disabled]
   );
 
   const startActivity = useCallback(
@@ -74,7 +77,7 @@ export function useWorldState({
         return { success: false, error: "Cannot start activity at this time" };
       }
 
-      const result = WorldSystem.startActivity(worldState, pet, activityId);
+      const result = WorldSystem.startActivity(worldState, pet, activityId, inventory);
 
       if (result.success && result.data) {
         updateGameState((prev: GameState) => ({
@@ -94,7 +97,8 @@ export function useWorldState({
         };
       }
     },
-    [pet, worldState, updateGameState, disabled]
+
+    [pet, worldState, inventory, updateGameState, disabled]
   );
 
   const cancelActivity = useCallback(async () => {

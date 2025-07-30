@@ -2,11 +2,13 @@
 
 import { describe, it, expect, beforeEach } from "bun:test";
 import { WorldSystem } from "@/systems/WorldSystem";
-import type { WorldState, Pet, PetSpecies } from "@/types";
+import { ItemSystem } from "@/systems/ItemSystem";
+import type { WorldState, Pet, PetSpecies, Inventory } from "@/types";
 
 describe("WorldSystem", () => {
   let mockPet: Pet;
   let worldState: WorldState;
+  let testInventory: Inventory;
 
   // Test helper to create a standard test pet
   function createTestPet(overrides: Partial<Pet> = {}): Pet {
@@ -70,6 +72,9 @@ describe("WorldSystem", () => {
     
     // Initialize world state
     worldState = WorldSystem.initializeWorldState();
+    
+    // Create test inventory
+    testInventory = ItemSystem.createInventory();
   });
 
   describe("World Initialization", () => {
@@ -240,7 +245,7 @@ describe("WorldSystem", () => {
         },
       };
 
-      const result = WorldSystem.startActivity(travellingWorld, mockPet, "hometown_foraging");
+      const result = WorldSystem.startActivity(travellingWorld, mockPet, "hometown_foraging", testInventory);
       
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot start activity while travelling");
@@ -248,7 +253,7 @@ describe("WorldSystem", () => {
 
     it("should fail to start activity when pet sleeping", () => {
       const sleepingPet = { ...mockPet, state: "sleeping" as const };
-      const result = WorldSystem.startActivity(worldState, sleepingPet, "hometown_foraging");
+      const result = WorldSystem.startActivity(worldState, sleepingPet, "hometown_foraging", testInventory);
       
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot start activity while pet is sleeping");
@@ -256,7 +261,7 @@ describe("WorldSystem", () => {
 
     it("should fail to start activity when insufficient energy", () => {
       const lowEnergyPet = { ...mockPet, currentEnergy: 5 }; // Need 10 for foraging
-      const result = WorldSystem.startActivity(worldState, lowEnergyPet, "hometown_foraging");
+      const result = WorldSystem.startActivity(worldState, lowEnergyPet, "hometown_foraging", testInventory);
       
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet doesn't have enough energy for this activity");
@@ -274,14 +279,14 @@ describe("WorldSystem", () => {
         }],
       };
 
-      const result = WorldSystem.startActivity(busyWorld, mockPet, "hometown_foraging");
+      const result = WorldSystem.startActivity(busyWorld, mockPet, "hometown_foraging", testInventory);
       
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet is already doing an activity");
     });
 
     it("should successfully start activity when requirements met", () => {
-      const result = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging");
+      const result = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
       
       expect(result.success).toBe(true);
       if (result.success && result.data) {

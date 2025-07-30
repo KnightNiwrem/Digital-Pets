@@ -5,6 +5,8 @@ import { GAME_CONSTANTS } from "@/types";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
+import { ItemSystem } from "@/systems/ItemSystem";
+import { getItemById } from "@/data/items";
 
 export class GameLoop {
   private static instance: GameLoop | null = null;
@@ -266,7 +268,14 @@ export class GameLoop {
 
         case "item":
           if (reward.id) {
-            // TODO: Add item to inventory when ItemSystem is implemented
+            // Add item to inventory using ItemSystem
+            const item = getItemById(reward.id);
+            if (item) {
+              const addResult = ItemSystem.addItem(this.gameState.inventory, item, reward.amount);
+              if (addResult.success) {
+                this.gameState.inventory = addResult.data!;
+              }
+            }
             actions.push({
               type: "item_earned",
               payload: { itemId: reward.id, amount: reward.amount, source: "activity" },

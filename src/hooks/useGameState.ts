@@ -512,7 +512,12 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = WorldSystem.startActivity(gameState.world, gameState.currentPet, activityId);
+        const result = WorldSystem.startActivity(
+          gameState.world,
+          gameState.currentPet,
+          activityId,
+          gameState.inventory
+        );
         if (result.success && result.data) {
           setGameState(prev => {
             if (!prev) return null;

@@ -2,8 +2,10 @@
 
 import type { WorldState, TravelState, Location, Activity, ActiveActivity, ActivityReward, Shop } from "@/types/World";
 import type { Pet } from "@/types/Pet";
+import type { Inventory } from "@/types/Item";
 import type { Result } from "@/types";
 import { PetValidator, EnergyManager } from "@/lib/utils";
+import { ItemSystem } from "@/systems/ItemSystem";
 import { LOCATIONS, getLocationById, getStartingLocation } from "@/data/locations";
 
 export class WorldSystem {
@@ -207,7 +209,8 @@ export class WorldSystem {
   static startActivity(
     worldState: WorldState,
     pet: Pet,
-    activityId: string
+    activityId: string,
+    inventory: Inventory
   ): Result<{ worldState: WorldState; pet: Pet }> {
     // Check if pet is travelling
     if (worldState.travelState) {
@@ -251,7 +254,10 @@ export class WorldSystem {
             }
             break;
           case "item":
-            // TODO: Check inventory for required items
+            // Check inventory for required items
+            if (!ItemSystem.hasItem(inventory, req.value as string, 1)) {
+              return { success: false, error: `Requires ${req.value}` };
+            }
             break;
         }
       }
