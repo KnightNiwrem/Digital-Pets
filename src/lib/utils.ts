@@ -33,6 +33,13 @@ export class PetValidator {
   }
 
   /**
+   * Check if pet is exploring and cannot perform other actions
+   */
+  static isExploring(pet: Pet): boolean {
+    return pet.state === "exploring";
+  }
+
+  /**
    * Check if pet is travelling and cannot perform location-based actions
    */
   static isTravelling(pet: Pet): boolean {
@@ -60,6 +67,15 @@ export class PetValidator {
       return actionMessages[actionType];
     }
 
+    if (this.isExploring(pet)) {
+      const actionMessages = {
+        feed: "Cannot feed pet while exploring. Wait for activity to complete or cancel it.",
+        drink: "Cannot give drinks while exploring. Wait for activity to complete or cancel it.",
+        play: "Cannot play while exploring. Wait for activity to complete or cancel it.",
+      };
+      return actionMessages[actionType];
+    }
+
     if (actionType === "play" && !this.hasEnoughEnergy(pet, energyCost)) {
       return "Pet doesn't have enough energy to play.";
     }
@@ -79,6 +95,10 @@ export class PetValidator {
       return "Pet cannot sleep while travelling.";
     }
 
+    if (this.isExploring(pet)) {
+      return "Pet cannot sleep while exploring. Wait for activity to complete or cancel it.";
+    }
+
     return null;
   }
 
@@ -94,6 +114,10 @@ export class PetValidator {
       return "Pet cannot perform activities while travelling.";
     }
 
+    if (this.isExploring(pet)) {
+      return "Pet is already engaged in an activity. Complete or cancel current activity first.";
+    }
+
     if (!this.hasEnoughEnergy(pet, energyCost)) {
       return "Pet has insufficient energy for this activity.";
     }
@@ -107,6 +131,10 @@ export class PetValidator {
   static validateBattleAction(pet: Pet, energyCost: number): string | null {
     if (this.isSick(pet)) {
       return "Pet is too sick to battle.";
+    }
+
+    if (this.isExploring(pet)) {
+      return "Pet cannot battle while exploring. Wait for activity to complete or cancel it.";
     }
 
     if (!this.hasEnoughEnergy(pet, energyCost)) {

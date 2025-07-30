@@ -211,7 +211,7 @@ export class GameStorage {
       "metadata",
       "inventory",
       "world",
-      "quests",
+      "questLog",
       "playerStats",
       "settings",
       "metrics",

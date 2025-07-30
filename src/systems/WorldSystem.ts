@@ -244,6 +244,10 @@ export class WorldSystem {
       return { success: false, error: "Cannot start activity while pet is sleeping" };
     }
 
+    if (PetValidator.isExploring(pet)) {
+      return { success: false, error: "Pet is already engaged in an activity" };
+    }
+
     // Check activity requirements
     if (activity.requirements) {
       for (const req of activity.requirements) {
@@ -279,6 +283,7 @@ export class WorldSystem {
 
     const updatedPet: Pet = {
       ...pet,
+      state: "exploring",
       lastCareTime: Date.now(),
     };
 

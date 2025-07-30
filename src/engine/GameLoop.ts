@@ -210,6 +210,12 @@ export class GameLoop {
       if (activityResult.data.rewards.length > 0) {
         stateChanges.push("activities_completed");
         this.processActivityRewards(activityResult.data.rewards, actions, stateChanges);
+
+        // Reset pet state to idle if it was exploring and no more activities
+        if (this.gameState.currentPet?.state === "exploring" && this.gameState.world.activeActivities.length === 0) {
+          this.gameState.currentPet.state = "idle";
+          stateChanges.push("pet_state_reset_to_idle");
+        }
       }
     }
   }
@@ -480,6 +486,7 @@ export class GameLoop {
     }
 
     // Process active activities
+    const hadActivities = gameState.world.activeActivities.length > 0;
     gameState.world.activeActivities = gameState.world.activeActivities.filter(activity => {
       activity.ticksRemaining -= actualTicksToProcess;
 
@@ -491,6 +498,12 @@ export class GameLoop {
 
       return true; // Keep ongoing activity
     });
+
+    // Reset pet state to idle if it was exploring and no more activities
+    if (hadActivities && gameState.currentPet?.state === "exploring" && gameState.world.activeActivities.length === 0) {
+      gameState.currentPet.state = "idle";
+      majorEvents.push("pet_state_reset_to_idle");
+    }
 
     // Update metrics
     gameState.metrics.totalTicks += actualTicksToProcess;
