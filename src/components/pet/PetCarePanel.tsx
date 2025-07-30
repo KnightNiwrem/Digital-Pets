@@ -99,8 +99,14 @@ export function PetCarePanel({
   const canFeed = pet.satiety < 100 && !PetValidator.validateCareAction(pet, "feed") && foodItems.length > 0;
   const canDrink = pet.hydration < 100 && !PetValidator.validateCareAction(pet, "drink") && drinkItems.length > 0;
   const canPlay = pet.happiness < 100 && !PetValidator.validateCareAction(pet, "play", 10) && happinessItems.length > 0;
-  const canClean = pet.poopTicksLeft <= 0 && pet.state !== "exploring" && pet.state !== "sleeping" && pet.state !== "travelling" && cleaningItems.length > 0;
-  const canTreat = pet.health !== "healthy" && pet.state !== "exploring" && pet.state !== "sleeping" && medicineItems.length > 0;
+  const canClean =
+    pet.poopTicksLeft <= 0 &&
+    pet.state !== "exploring" &&
+    pet.state !== "sleeping" &&
+    pet.state !== "travelling" &&
+    cleaningItems.length > 0;
+  const canTreat =
+    pet.health !== "healthy" && pet.state !== "exploring" && pet.state !== "sleeping" && medicineItems.length > 0;
   const canSleep = !PetValidator.validateSleepAction(pet);
 
   return (
@@ -133,7 +139,7 @@ export function PetCarePanel({
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">🍖 Feed Pet</span>
                 <span className="text-xs text-muted-foreground">
-                  {foodItems.length} food item{foodItems.length !== 1 ? 's' : ''} available
+                  {foodItems.length} food item{foodItems.length !== 1 ? "s" : ""} available
                 </span>
               </div>
               {canFeed ? (
@@ -174,7 +180,7 @@ export function PetCarePanel({
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">💧 Give Drink</span>
                 <span className="text-xs text-muted-foreground">
-                  {drinkItems.length} drink item{drinkItems.length !== 1 ? 's' : ''} available
+                  {drinkItems.length} drink item{drinkItems.length !== 1 ? "s" : ""} available
                 </span>
               </div>
               {canDrink ? (
@@ -205,7 +211,11 @@ export function PetCarePanel({
                 </div>
               ) : (
                 <Button disabled variant="outline" size="sm" className="w-full">
-                  {drinkItems.length === 0 ? "No Drink Items" : pet.hydration >= 100 ? "Pet Hydrated" : "Cannot Give Drink"}
+                  {drinkItems.length === 0
+                    ? "No Drink Items"
+                    : pet.hydration >= 100
+                      ? "Pet Hydrated"
+                      : "Cannot Give Drink"}
                 </Button>
               )}
             </div>
@@ -215,7 +225,7 @@ export function PetCarePanel({
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">🎾 Play with Pet</span>
                 <span className="text-xs text-muted-foreground">
-                  {happinessItems.length} toy/fun item{happinessItems.length !== 1 ? 's' : ''} available
+                  {happinessItems.length} toy/fun item{happinessItems.length !== 1 ? "s" : ""} available
                 </span>
               </div>
               {canPlay ? (
@@ -256,7 +266,7 @@ export function PetCarePanel({
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">🧹 Clean Pet</span>
                 <span className="text-xs text-muted-foreground">
-                  {cleaningItems.length} cleaning item{cleaningItems.length !== 1 ? 's' : ''} available
+                  {cleaningItems.length} cleaning item{cleaningItems.length !== 1 ? "s" : ""} available
                 </span>
               </div>
               {canClean ? (
@@ -272,9 +282,7 @@ export function PetCarePanel({
                     >
                       <span className="flex items-center gap-2">
                         <span>{item.name}</span>
-                        <span className="text-xs text-yellow-600">
-                          Clean Pet
-                        </span>
+                        <span className="text-xs text-yellow-600">Clean Pet</span>
                       </span>
                       {actionLoading === `Clean with ${item.name}` ? "..." : "Use"}
                     </Button>
@@ -287,7 +295,11 @@ export function PetCarePanel({
                 </div>
               ) : (
                 <Button disabled variant="outline" size="sm" className="w-full">
-                  {cleaningItems.length === 0 ? "No Cleaning Items" : pet.poopTicksLeft > 0 ? "No Poop to Clean" : "Cannot Clean"}
+                  {cleaningItems.length === 0
+                    ? "No Cleaning Items"
+                    : pet.poopTicksLeft > 0
+                      ? "No Poop to Clean"
+                      : "Cannot Clean"}
                 </Button>
               )}
             </div>
@@ -322,7 +334,7 @@ export function PetCarePanel({
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">💊 Treat Pet</span>
                 <span className="text-xs text-muted-foreground">
-                  {medicineItems.length} medicine item{medicineItems.length !== 1 ? 's' : ''} available
+                  {medicineItems.length} medicine item{medicineItems.length !== 1 ? "s" : ""} available
                 </span>
               </div>
               <div className="grid grid-cols-1 gap-2">
@@ -338,8 +350,11 @@ export function PetCarePanel({
                     <span className="flex items-center gap-2">
                       <span>{item.name}</span>
                       <span className="text-xs text-green-600">
-                        {item.effects.find(e => e.type === "cure") ? "Cure Disease" : 
-                         item.effects.find(e => e.type === "health") ? `+${item.effects.find(e => e.type === "health")?.value} Health` : ""}
+                        {item.effects.find(e => e.type === "cure")
+                          ? "Cure Disease"
+                          : item.effects.find(e => e.type === "health")
+                            ? `+${item.effects.find(e => e.type === "health")?.value} Health`
+                            : ""}
                       </span>
                     </span>
                     {actionLoading === `Treat with ${item.name}` ? "..." : "Use"}

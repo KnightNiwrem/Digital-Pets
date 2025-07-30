@@ -288,6 +288,7 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
           const updatedGameState = {
@@ -322,6 +323,7 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
           const updatedGameState = {
@@ -356,6 +358,7 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
           const updatedGameState = {
@@ -391,6 +394,7 @@ export function useGameState(): UseGameStateReturn {
 
       try {
         // First use the cleaning item to clean the pet
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
           // Then also trigger the poop cleaning effect
@@ -429,6 +433,7 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
           const updatedGameState = {
