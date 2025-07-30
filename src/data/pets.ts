@@ -28,7 +28,7 @@ export const FOREST_GUARDIAN: PetSpecies = {
   id: "forest_guardian",
   name: "Forest Guardian",
   rarity: "uncommon",
-  description: "A mystical creature that protects the forest.",
+  description: "A large, protective bear-like creature with moss-green fur that serves as a forest caretaker.",
   baseStats: {
     attack: 35,
     defense: 40,
@@ -74,7 +74,8 @@ export const WATER_SPRITE: PetSpecies = {
   id: "water_sprite",
   name: "Water Sprite",
   rarity: "common",
-  description: "A gentle water elemental that loves to play in streams. One of the three starter pets.",
+  description:
+    "A small amphibious creature with bright blue skin that loves to swim in streams. One of the three starter pets.",
   baseStats: {
     attack: 20,
     defense: 25,
@@ -96,7 +97,8 @@ export const FLAME_PUP: PetSpecies = {
   id: "flame_pup",
   name: "Flame Pup",
   rarity: "common",
-  description: "A playful fire elemental with a warm heart. One of the three starter pets.",
+  description:
+    "A warm-hearted canine with bright reddish-orange fur that thrives in hot climates. One of the three starter pets.",
   baseStats: {
     attack: 30,
     defense: 15,
@@ -163,7 +165,7 @@ export const WIND_WISP: PetSpecies = {
   id: "wind_wisp",
   name: "Wind Wisp",
   rarity: "common",
-  description: "An ethereal creature that floats on air currents.",
+  description: "A lightweight bird-like creature with downy feathers that glides gracefully on air currents.",
   baseStats: {
     attack: 25,
     defense: 15,
@@ -207,7 +209,8 @@ export const CLOUD_SHEEP: PetSpecies = {
   id: "cloud_sheep",
   name: "Cloud Sheep",
   rarity: "common",
-  description: "A fluffy creature that brings gentle rains and soft breezes.",
+  description:
+    "A fluffy white sheep with incredibly thick wool that helps predict weather changes through static buildup.",
   baseStats: {
     attack: 22,
     defense: 30,
@@ -274,7 +277,7 @@ export const CRYSTAL_CAT: PetSpecies = {
   id: "crystal_cat",
   name: "Crystal Cat",
   rarity: "uncommon",
-  description: "A feline with crystalline fur that sparkles in moonlight.",
+  description: "A feline with translucent fur that has a unique refractive quality, creating beautiful light patterns.",
   baseStats: {
     attack: 32,
     defense: 35,
@@ -362,7 +365,7 @@ export const SHADOW_FOX: PetSpecies = {
   id: "shadow_fox",
   name: "Shadow Fox",
   rarity: "uncommon",
-  description: "A mysterious fox that can blend with shadows and move unseen.",
+  description: "A dark-furred fox with exceptional camouflage abilities and silent movement through dense undergrowth.",
   baseStats: {
     attack: 35,
     defense: 28,
@@ -384,7 +387,7 @@ export const IRON_BEAR: PetSpecies = {
   id: "iron_bear",
   name: "Iron Bear",
   rarity: "uncommon",
-  description: "A powerful bear with metallic fur and incredible strength.",
+  description: "A powerful bear with dark grey fur and incredible strength, known for its resilient constitution.",
   baseStats: {
     attack: 42,
     defense: 45,
@@ -406,7 +409,7 @@ export const STARLIGHT_DEER: PetSpecies = {
   id: "starlight_deer",
   name: "Starlight Deer",
   rarity: "uncommon",
-  description: "An elegant deer whose antlers glow with celestial light.",
+  description: "An elegant deer with white antlers that have bioluminescent properties, creating a soft glow at night.",
   baseStats: {
     attack: 30,
     defense: 32,
@@ -428,7 +431,8 @@ export const PRISM_BIRD: PetSpecies = {
   id: "prism_bird",
   name: "Prism Bird",
   rarity: "uncommon",
-  description: "A beautiful bird whose feathers refract light into rainbow patterns.",
+  description:
+    "A beautiful bird with iridescent feathers that create rainbow patterns when light hits them at different angles.",
   baseStats: {
     attack: 36,
     defense: 30,
@@ -451,7 +455,7 @@ export const THUNDER_LION: PetSpecies = {
   id: "thunder_lion",
   name: "Thunder Lion",
   rarity: "rare",
-  description: "A majestic lion whose roar can summon lightning from the sky.",
+  description: "A majestic lion with a deep, booming roar that can be heard for miles across the savanna.",
   baseStats: {
     attack: 55,
     defense: 40,
@@ -473,7 +477,8 @@ export const GLACIER_MAMMOTH: PetSpecies = {
   id: "glacier_mammoth",
   name: "Glacier Mammoth",
   rarity: "rare",
-  description: "An ancient mammoth with tusks of pure ice and incredible endurance.",
+  description:
+    "An ancient mammoth species with incredibly thick fur and massive curved tusks, adapted to extreme cold.",
   baseStats: {
     attack: 50,
     defense: 60,
@@ -495,7 +500,7 @@ export const PHOENIX_CHICK: PetSpecies = {
   id: "phoenix_chick",
   name: "Phoenix Chick",
   rarity: "rare",
-  description: "A young phoenix with the power of rebirth and eternal flames.",
+  description: "A young bird with brilliant red and orange plumage that resembles flickering flames in sunlight.",
   baseStats: {
     attack: 48,
     defense: 35,
@@ -517,7 +522,7 @@ export const VOID_SERPENT: PetSpecies = {
   id: "void_serpent",
   name: "Void Serpent",
   rarity: "rare",
-  description: "A mysterious serpent that exists between dimensions.",
+  description: "A mysterious deep-cave serpent with dark scales and bioluminescent markings along its spine.",
   baseStats: {
     attack: 52,
     defense: 45,
@@ -539,7 +544,8 @@ export const CELESTIAL_WHALE: PetSpecies = {
   id: "celestial_whale",
   name: "Celestial Whale",
   rarity: "rare",
-  description: "A gentle giant that swims through the cosmos carrying stardust.",
+  description:
+    "A gentle giant whale with star-like white spots across its dark blue skin, found in the deepest ocean trenches.",
   baseStats: {
     attack: 40,
     defense: 65,
@@ -562,7 +568,8 @@ export const COSMIC_DRAGON: PetSpecies = {
   id: "cosmic_dragon",
   name: "Cosmic Dragon",
   rarity: "epic",
-  description: "A dragon born from cosmic energy with power over space and time.",
+  description:
+    "A large reptilian creature with dark scales patterned like a night sky, dwelling in high mountain peaks.",
   baseStats: {
     attack: 70,
     defense: 55,
@@ -584,7 +591,7 @@ export const SPIRIT_GUARDIAN: PetSpecies = {
   id: "spirit_guardian",
   name: "Spirit Guardian",
   rarity: "epic",
-  description: "An ancient protector spirit with wisdom spanning millennia.",
+  description: "An ancient, wise creature with pale markings that has protected sacred groves for centuries.",
   baseStats: {
     attack: 60,
     defense: 70,
@@ -606,7 +613,7 @@ export const NIGHTMARE_STALLION: PetSpecies = {
   id: "nightmare_stallion",
   name: "Nightmare Stallion",
   rarity: "epic",
-  description: "A dark horse wreathed in shadow flames with incredible speed.",
+  description: "A powerful dark horse with a jet-black coat and remarkable speed, known for its wild temperament.",
   baseStats: {
     attack: 65,
     defense: 50,
@@ -628,7 +635,7 @@ export const DIVINE_PHOENIX: PetSpecies = {
   id: "divine_phoenix",
   name: "Divine Phoenix",
   rarity: "epic",
-  description: "A mature phoenix blessed by divine light with resurrection powers.",
+  description: "A mature bird of prey with brilliant golden and crimson plumage that shimmers with incredible beauty.",
   baseStats: {
     attack: 68,
     defense: 45,
@@ -651,7 +658,8 @@ export const WORLD_TREE_SPIRIT: PetSpecies = {
   id: "world_tree_spirit",
   name: "World Tree Spirit",
   rarity: "legendary",
-  description: "The living essence of the World Tree that connects all realms.",
+  description:
+    "A magnificent creature resembling an ancient tree with living bark and moss, representing the pinnacle of forest wisdom.",
   baseStats: {
     attack: 80,
     defense: 90,
@@ -673,7 +681,8 @@ export const ETERNAL_DRAGON: PetSpecies = {
   id: "eternal_dragon",
   name: "Eternal Dragon",
   rarity: "legendary",
-  description: "An immortal dragon that has existed since the dawn of creation.",
+  description:
+    "An enormous reptilian creature with ancient scarred hide and tremendous size, believed to be centuries old.",
   baseStats: {
     attack: 90,
     defense: 70,
@@ -695,7 +704,8 @@ export const PRIMORDIAL_GOD_BEAST: PetSpecies = {
   id: "primordial_god_beast",
   name: "Primordial God Beast",
   rarity: "legendary",
-  description: "The first creature ever created, possessing unlimited potential.",
+  description:
+    "A legendary creature of unmatched power and perfect balance, representing the ultimate achievement in pet companionship.",
   baseStats: {
     attack: 75,
     defense: 75,
