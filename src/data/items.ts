@@ -162,13 +162,371 @@ const BAIT: ConsumableItem = {
   type: "consumable",
   rarity: "common",
   icon: "item_bait",
-  effects: [], // used during fishing for better success rates
+  effects: [{ type: "fishing_bonus", value: 10 }], // used during fishing for better success rates
   value: 5,
+  stackable: true,
+};
+
+// Additional Food Items
+const HONEY: ConsumableItem = {
+  id: "honey",
+  name: "Golden Honey",
+  description: "Sweet honey that provides energy and happiness to pets.",
+  type: "consumable",
+  rarity: "uncommon",
+  icon: "item_honey",
+  effects: [
+    { type: "satiety", value: 20 },
+    { type: "happiness", value: 15 },
+    { type: "energy", value: 10 },
+  ],
+  value: 18,
+  stackable: true,
+};
+
+const MEAT: ConsumableItem = {
+  id: "meat",
+  name: "Fresh Meat",
+  description: "High-quality meat that provides substantial nutrition.",
+  type: "consumable",
+  rarity: "uncommon",
+  icon: "item_meat",
+  effects: [{ type: "satiety", value: 45 }],
+  value: 25,
+  stackable: true,
+};
+
+const MUSHROOM: ConsumableItem = {
+  id: "mushroom",
+  name: "Forest Mushroom",
+  description: "A nutritious mushroom found in deep forests.",
+  type: "consumable",
+  rarity: "common",
+  icon: "item_mushroom",
+  effects: [
+    { type: "satiety", value: 18 },
+    { type: "happiness", value: 8 },
+  ],
+  value: 12,
+  stackable: true,
+};
+
+const CAKE: ConsumableItem = {
+  id: "cake",
+  name: "Birthday Cake",
+  description: "A special celebratory cake that brings great joy.",
+  type: "consumable",
+  rarity: "rare",
+  icon: "item_cake",
+  effects: [
+    { type: "satiety", value: 35 },
+    { type: "happiness", value: 40 },
+  ],
+  value: 40,
+  stackable: true,
+};
+
+// Additional Drink Items
+const JUICE: ConsumableItem = {
+  id: "juice",
+  name: "Fruit Juice",
+  description: "Refreshing fruit juice that hydrates and energizes.",
+  type: "consumable",
+  rarity: "common",
+  icon: "item_juice",
+  effects: [
+    { type: "hydration", value: 25 },
+    { type: "happiness", value: 10 },
+  ],
+  value: 12,
+  stackable: true,
+};
+
+const PROTEIN_SHAKE: ConsumableItem = {
+  id: "protein_shake",
+  name: "Protein Shake",
+  description: "A nutritious protein shake that provides hydration, energy, and promotes health.",
+  type: "consumable",
+  rarity: "rare",
+  icon: "item_protein_shake",
+  effects: [
+    { type: "hydration", value: 40 },
+    { type: "energy", value: 30 },
+    { type: "health", value: 1 },
+  ],
+  value: 60,
+  stackable: true,
+};
+
+const MILK: ConsumableItem = {
+  id: "milk",
+  name: "Fresh Milk",
+  description: "Nutritious milk that provides hydration and some satiety.",
+  type: "consumable",
+  rarity: "common",
+  icon: "item_milk",
+  effects: [
+    { type: "hydration", value: 28 },
+    { type: "satiety", value: 12 },
+  ],
+  value: 10,
+  stackable: true,
+};
+
+const HERBAL_TEA: ConsumableItem = {
+  id: "herbal_tea",
+  name: "Herbal Tea",
+  description: "A soothing herbal tea that provides gentle hydration and relaxation.",
+  type: "consumable",
+  rarity: "uncommon",
+  icon: "item_herbal_tea",
+  effects: [
+    { type: "hydration", value: 32 },
+    { type: "happiness", value: 12 },
+  ],
+  value: 16,
+  stackable: true,
+};
+
+// Additional Medicine Items
+const STRONG_MEDICINE: ConsumableItem = {
+  id: "strong_medicine",
+  name: "Strong Medicine",
+  description: "Powerful medicine that can cure serious illnesses.",
+  type: "medicine",
+  rarity: "uncommon",
+  icon: "item_strong_medicine",
+  effects: [
+    { type: "health", value: 2 },
+    { type: "cure", value: 2 },
+  ],
+  value: 45,
+  stackable: true,
+};
+
+const VITAMIN: ConsumableItem = {
+  id: "vitamin",
+  name: "Health Vitamin",
+  description: "Daily vitamin that boosts health and energy.",
+  type: "medicine",
+  rarity: "common",
+  icon: "item_vitamin",
+  effects: [
+    { type: "health", value: 1 },
+    { type: "energy", value: 15 },
+  ],
+  value: 20,
+  stackable: true,
+};
+
+const ANTIDOTE: ConsumableItem = {
+  id: "antidote",
+  name: "Universal Antidote",
+  description: "Cures any poison or disease affecting your pet.",
+  type: "medicine",
+  rarity: "rare",
+  icon: "item_antidote",
+  effects: [
+    { type: "cure", value: 3 },
+    { type: "health", value: 1 },
+  ],
+  value: 75,
+  stackable: true,
+};
+
+// Additional Hygiene Items
+const SHAMPOO: ConsumableItem = {
+  id: "shampoo",
+  name: "Pet Shampoo",
+  description: "Special shampoo that cleans and freshens your pet.",
+  type: "hygiene",
+  rarity: "common",
+  icon: "item_shampoo",
+  effects: [
+    { type: "clean", value: 2 },
+    { type: "happiness", value: 8 },
+  ],
+  value: 15,
+  stackable: true,
+};
+
+const PERFUME: ConsumableItem = {
+  id: "perfume",
+  name: "Floral Perfume",
+  description: "Lovely perfume that makes your pet smell wonderful.",
+  type: "hygiene",
+  rarity: "uncommon",
+  icon: "item_perfume",
+  effects: [
+    { type: "clean", value: 1 },
+    { type: "happiness", value: 20 },
+  ],
+  value: 30,
+  stackable: true,
+};
+
+// Additional Toys and Equipment
+const FEATHER_TOY: DurabilityItem = {
+  id: "feather_toy",
+  name: "Feather Wand",
+  description: "A fun feather toy that pets love to chase and play with.",
+  type: "toy",
+  rarity: "common",
+  icon: "item_feather_toy",
+  effects: [{ type: "happiness", value: 20 }],
+  value: 20,
+  stackable: false,
+  maxDurability: 8,
+  currentDurability: 8,
+  durabilityLossPerUse: 1,
+};
+
+const PUZZLE_TOY: DurabilityItem = {
+  id: "puzzle_toy",
+  name: "Puzzle Toy",
+  description: "An intelligent toy that challenges and entertains pets.",
+  type: "toy",
+  rarity: "uncommon",
+  icon: "item_puzzle_toy",
+  effects: [
+    { type: "happiness", value: 25 },
+    { type: "energy", value: -5 }, // requires energy to play
+  ],
+  value: 35,
+  stackable: false,
+  maxDurability: 12,
+  currentDurability: 12,
+  durabilityLossPerUse: 1,
+};
+
+const ROPE_TOY: DurabilityItem = {
+  id: "rope_toy",
+  name: "Rope Toy",
+  description: "A durable rope toy perfect for tugging and chewing.",
+  type: "toy",
+  rarity: "common",
+  icon: "item_rope_toy",
+  effects: [{ type: "happiness", value: 18 }],
+  value: 15,
+  stackable: false,
+  maxDurability: 15,
+  currentDurability: 15,
+  durabilityLossPerUse: 1,
+};
+
+const MUSIC_BOX: DurabilityItem = {
+  id: "music_box",
+  name: "Music Box",
+  description: "An elegant music box that plays soothing melodies.",
+  type: "toy",
+  rarity: "rare",
+  icon: "item_music_box",
+  effects: [
+    { type: "happiness", value: 35 },
+    { type: "energy", value: 10 }, // relaxing music restores energy
+  ],
+  value: 80,
+  stackable: false,
+  maxDurability: 20,
+  currentDurability: 20,
+  durabilityLossPerUse: 1,
+};
+
+// Equipment and Tools
+const TRAINING_COLLAR: DurabilityItem = {
+  id: "training_collar",
+  name: "Training Collar",
+  description: "Special collar that helps pets focus during training.",
+  type: "equipment",
+  rarity: "uncommon",
+  icon: "item_training_collar",
+  effects: [{ type: "training_bonus", value: 15 }],
+  value: 50,
+  stackable: false,
+  maxDurability: 25,
+  currentDurability: 25,
+  durabilityLossPerUse: 1,
+};
+
+const LUCKY_CHARM: DurabilityItem = {
+  id: "lucky_charm",
+  name: "Lucky Charm",
+  description: "A special charm that brings good fortune to your pet.",
+  type: "equipment",
+  rarity: "rare",
+  icon: "item_lucky_charm",
+  effects: [{ type: "luck_bonus", value: 20 }],
+  value: 100,
+  stackable: false,
+  maxDurability: 30,
+  currentDurability: 30,
+  durabilityLossPerUse: 1,
+};
+
+const EXPLORATION_PACK: DurabilityItem = {
+  id: "exploration_pack",
+  name: "Explorer's Pack",
+  description: "A sturdy pack that helps pets carry more items while exploring.",
+  type: "equipment",
+  rarity: "uncommon",
+  icon: "item_exploration_pack",
+  effects: [{ type: "exploration_bonus", value: 25 }],
+  value: 65,
+  stackable: false,
+  maxDurability: 20,
+  currentDurability: 20,
+  durabilityLossPerUse: 1,
+};
+
+// Special Items
+const CRYSTAL_FRAGMENT: ConsumableItem = {
+  id: "crystal_fragment",
+  name: "Crystal Fragment",
+  description: "A rare crystal fragment with mysterious properties.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_crystal_fragment",
+  effects: [
+    { type: "energy", value: 50 },
+    { type: "happiness", value: 25 },
+    { type: "health", value: 1 },
+  ],
+  value: 200,
+  stackable: true,
+};
+
+const ANCIENT_RELIC: ConsumableItem = {
+  id: "ancient_relic",
+  name: "Ancient Relic",
+  description: "A mysterious artifact from an ancient civilization.",
+  type: "special",
+  rarity: "legendary",
+  icon: "item_ancient_relic",
+  effects: [
+    { type: "satiety", value: 100 },
+    { type: "hydration", value: 100 },
+    { type: "happiness", value: 100 },
+    { type: "energy", value: 100 },
+  ],
+  value: 500,
+  stackable: true,
+};
+
+const GROWTH_SEED: ConsumableItem = {
+  id: "growth_seed",
+  name: "Growth Seed",
+  description: "A rare seed with special nutrients that accelerates pet growth and development.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_growth_seed",
+  effects: [{ type: "growth_bonus", value: 1 }],
+  value: 150,
   stackable: true,
 };
 
 // Export all items
 export const ITEMS: Item[] = [
+  // Basic items (original 12)
   APPLE,
   BERRY,
   FISH,
@@ -181,6 +539,43 @@ export const ITEMS: Item[] = [
   BALL,
   FISHING_ROD,
   BAIT,
+
+  // Additional food items
+  HONEY,
+  MEAT,
+  MUSHROOM,
+  CAKE,
+
+  // Additional drink items
+  JUICE,
+  PROTEIN_SHAKE,
+  MILK,
+  HERBAL_TEA,
+
+  // Additional medicine items
+  STRONG_MEDICINE,
+  VITAMIN,
+  ANTIDOTE,
+
+  // Additional hygiene items
+  SHAMPOO,
+  PERFUME,
+
+  // Additional toys
+  FEATHER_TOY,
+  PUZZLE_TOY,
+  ROPE_TOY,
+  MUSIC_BOX,
+
+  // Equipment
+  TRAINING_COLLAR,
+  LUCKY_CHARM,
+  EXPLORATION_PACK,
+
+  // Special items
+  CRYSTAL_FRAGMENT,
+  ANCIENT_RELIC,
+  GROWTH_SEED,
 ];
 
 // Helper function to get item by ID

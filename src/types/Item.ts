@@ -1,11 +1,23 @@
 // Item system types and interfaces
 
-export type ItemType = "consumable" | "toy" | "medicine" | "hygiene" | "energy_booster" | "equipment";
+export type ItemType = "consumable" | "toy" | "medicine" | "hygiene" | "energy_booster" | "equipment" | "special";
 
 export type ItemRarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
 export interface ItemEffect {
-  type: "satiety" | "hydration" | "happiness" | "energy" | "health" | "cure" | "clean";
+  type:
+    | "satiety"
+    | "hydration"
+    | "happiness"
+    | "energy"
+    | "health"
+    | "cure"
+    | "clean"
+    | "fishing_bonus"
+    | "training_bonus"
+    | "luck_bonus"
+    | "exploration_bonus"
+    | "growth_bonus";
   value: number;
   duration?: number; // for temporary effects
 }
@@ -22,7 +34,7 @@ export interface BaseItem {
 }
 
 export interface ConsumableItem extends BaseItem {
-  type: "consumable" | "medicine" | "hygiene" | "energy_booster";
+  type: "consumable" | "medicine" | "hygiene" | "energy_booster" | "special";
   stackable: true;
 }
 
@@ -66,6 +78,7 @@ export const ITEM_CATEGORIES = {
   HYGIENE: "hygiene",
   ENERGY: "energy",
   EQUIPMENT: "equipment",
+  SPECIAL: "special",
 } as const;
 
 export type ItemCategory = (typeof ITEM_CATEGORIES)[keyof typeof ITEM_CATEGORIES];
