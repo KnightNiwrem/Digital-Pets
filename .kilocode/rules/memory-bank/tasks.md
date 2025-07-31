@@ -2,6 +2,87 @@
 
 This document defines repetitive tasks and workflows for the Digital Pets project.
 
+## 🚨 URGENT PRODUCTION FIXES (CRITICAL PRIORITY)
+
+### Fix Quest System Reward Distribution - BLOCKING PRODUCTION
+**Discovered:** January 2025 - System Verification
+**Priority:** CRITICAL - Must fix before production launch
+**Impact:** Quest completion doesn't award rewards to players (major gameplay issue)
+**Estimated Time:** 30-60 minutes
+
+**Files to modify:**
+- `/src/systems/QuestSystem.ts` - Fix reward distribution in distributeRewards() method
+- Add import for `getItemById` from `/src/data/items.ts`
+- `/tests/systems/QuestSystem.test.ts` - Add tests for reward distribution
+
+**Issues Found:**
+1. **Incomplete Item Rewards** (Lines 466-469): Contains outdated comment "Note: Item creation will need integration with ItemSystem" but ItemSystem is fully functional
+2. **Missing Experience Rewards** (Lines 478-481): Contains comment "Experience system not yet implemented" but playerStats.experience exists
+
+**Required Code Changes:**
+
+**Fix #1 - Item Rewards (Lines 466-469):**
+```typescript
+case "item":
+  if (reward.itemId && gameState.inventory) {
+    const item = getItemById(reward.itemId);
+    if (item) {
+      const addResult = ItemSystem.addItem(gameState.inventory, item, reward.amount);
+      if (addResult.success) {
+        gameState.inventory = addResult.data!;
+      }
+    }
+  }
+  break;
+```
+
+**Fix #2 - Experience Rewards (Lines 478-481):**
+```typescript
+case "experience":
+  gameState.playerStats.experience += reward.amount;
+  break;
+```
+
+**Fix #3 - Add Missing Import (Top of file):**
+```typescript
+import { getItemById } from '../data/items';
+```
+
+**Testing Requirements:**
+- Verify quest completion awards item rewards to inventory
+- Verify quest completion increases player experience
+- Test with multiple reward types in single quest
+- Ensure existing gold and location rewards still work
+
+**Validation Commands:**
+```bash
+bun run typecheck  # Ensure TypeScript compilation
+bun test tests/systems/QuestSystem.test.ts  # Run quest system tests
+bun test  # Run full test suite
+bun run build  # Verify production build
+```
+
+### Fix Game Loop Documentation Cleanup - LOW PRIORITY
+**Discovered:** January 2025 - System Verification
+**Priority:** LOW - Documentation cleanup only
+**Impact:** None (no functional impact)
+**Estimated Time:** 15 minutes
+
+**Files to modify:**
+- `/src/engine/GameLoop.ts` - Remove placeholder and update documentation
+
+**Issues Found:**
+1. **Placeholder Implementation** (Lines 238-241): processBattleTick() contains placeholder comment
+2. **Stale Documentation** (Line 507): Comment says ItemSystem needs implementation but it exists
+
+**Recommended Actions:**
+1. **Complete or remove** processBattleTick() placeholder implementation
+2. **Remove stale comment** about ItemSystem implementation in offline progression
+3. **Document decision** about battle tick processing (if intentionally unused)
+
+**Note:** These are non-blocking documentation issues that don't affect functionality.
+
+
 ## Fix UI Display Issues (ID vs Name)
 **Last performed:** December 2024 - Issue #49
 **Files to modify:**
