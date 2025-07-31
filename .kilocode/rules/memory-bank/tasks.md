@@ -83,6 +83,47 @@ bun run build  # Verify production build
 **Note:** These are non-blocking documentation issues that don't affect functionality.
 
 
+## Fix Battle System Progression Issues
+**Last performed:** January 2025 - Issue #51
+**Files modified:**
+- `src/types/Pet.ts` - Added "battling" to PetState type
+- `src/systems/BattleSystem.ts` - Changed battle status from "waiting" to "in_progress" for immediate progression
+- `src/hooks/useGameState.ts` - Added setPetBattling() and setPetIdleFromBattle() functions for state management
+- `src/components/GameScreen.tsx` - Integrated pet state changes in battle start/end handlers
+- `tests/systems/BattleSystem.test.ts` - Updated tests to expect "in_progress" status
+- `tests/systems/BattlePetState.test.ts` - Added comprehensive pet state validation tests
+
+**Issues Fixed:**
+1. **Battle Progression**: Battles were stuck in "Battle is starting" screen - fixed by starting with "in_progress" status
+2. **Pet State Management**: Pets didn't change to "battling" state during battles - added proper state management functions
+3. **State Validation**: Non-idle pets could enter battles inappropriately - validation was already present but now thoroughly tested
+4. **Battle End State Reset**: Pets didn't return to "idle" after battles - implemented proper state reset
+
+**Steps:**
+1. Add "battling" to PetState type union in Pet.ts
+2. Change battle initialization status from "waiting" to "in_progress" in BattleSystem.ts
+3. Add setPetBattling() and setPetIdleFromBattle() functions to useGameState hook
+4. Integrate state management functions in GameScreen battle handlers
+5. Update existing tests to reflect new expected behavior
+6. Create comprehensive pet state validation tests
+7. Manual testing to verify battle progression and pet state changes
+8. Verify all tests pass (409+ tests) and code quality checks pass
+
+**Important notes:**
+- The BattleSystem already had proper validation to prevent non-idle pets from battling
+- Battle progression issue was simply due to starting status being "waiting" instead of "in_progress"
+- Pet state management required new functions in useGameState and proper integration in UI handlers
+- Comprehensive testing ensures all edge cases are covered (sleeping, travelling, exploring, battling pets)
+- Manual testing confirmed battle system works: move selection, combat mechanics, AI opponents, battle log
+
+**Testing commands:**
+```bash
+bun run typecheck  # Ensure TypeScript compilation
+bun run lint       # Check code style and rules
+bun test           # Run full test suite (409+ tests)
+bun run build      # Verify production build
+```
+
 ## Fix UI Display Issues (ID vs Name)
 **Last performed:** December 2024 - Issue #49
 **Files to modify:**

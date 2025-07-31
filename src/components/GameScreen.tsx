@@ -44,6 +44,8 @@ export function GameScreen() {
     startActivity,
     cancelActivity,
     applyBattleResults: applyGameStateBattleResults,
+    setPetBattling,
+    setPetIdleFromBattle,
     isPaused,
     hasExistingSave,
     storageInfo,
@@ -137,7 +139,13 @@ export function GameScreen() {
     if (!gameState?.currentPet) return;
 
     const result = await startBattle(gameState.currentPet, opponentId);
-    if (!result.success) {
+    if (result.success) {
+      // Set pet state to battling when battle starts successfully
+      const setPetStateResult = await setPetBattling();
+      if (!setPetStateResult.success) {
+        console.error("Failed to set pet state to battling:", setPetStateResult.error);
+      }
+    } else {
       console.error("Battle start failed:", result.error);
     }
   };
@@ -165,7 +173,12 @@ export function GameScreen() {
     }
   };
 
-  const handleBattleEnd = () => {
+  const handleBattleEnd = async () => {
+    // Reset pet state to idle when battle ends
+    const setPetStateResult = await setPetIdleFromBattle();
+    if (!setPetStateResult.success) {
+      console.error("Failed to set pet state to idle after battle:", setPetStateResult.error);
+    }
     endBattle();
   };
 

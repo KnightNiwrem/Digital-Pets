@@ -60,6 +60,8 @@ export interface UseGameStateReturn {
 
   // Battle actions
   applyBattleResults: (battleResults: Battle) => Promise<Result<void>>;
+  setPetBattling: () => Promise<Result<void>>;
+  setPetIdleFromBattle: () => Promise<Result<void>>;
 
   // Game loop control
   pauseGame: () => void;
@@ -820,6 +822,58 @@ export function useGameState(): UseGameStateReturn {
     [gameState, triggerAutosave]
   );
 
+  const setPetBattling = useCallback(async (): Promise<Result<void>> => {
+    if (!gameState?.currentPet) {
+      return { success: false, error: "No active pet" };
+    }
+
+    try {
+      setGameState(prev => {
+        if (!prev?.currentPet) return prev;
+        return {
+          ...prev,
+          currentPet: {
+            ...prev.currentPet,
+            state: "battling",
+          },
+        };
+      });
+
+      await triggerAutosave("set pet battling");
+      return { success: true };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to set pet battling";
+      console.error("Set pet battling error:", error);
+      return { success: false, error: message };
+    }
+  }, [gameState, triggerAutosave]);
+
+  const setPetIdleFromBattle = useCallback(async (): Promise<Result<void>> => {
+    if (!gameState?.currentPet) {
+      return { success: false, error: "No active pet" };
+    }
+
+    try {
+      setGameState(prev => {
+        if (!prev?.currentPet) return prev;
+        return {
+          ...prev,
+          currentPet: {
+            ...prev.currentPet,
+            state: "idle",
+          },
+        };
+      });
+
+      await triggerAutosave("set pet idle from battle");
+      return { success: true };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to set pet idle";
+      console.error("Set pet idle error:", error);
+      return { success: false, error: message };
+    }
+  }, [gameState, triggerAutosave]);
+
   // Game loop control
   const pauseGame = useCallback(() => {
     if (gameLoopRef.current) {
@@ -882,6 +936,8 @@ export function useGameState(): UseGameStateReturn {
 
     // Battle actions
     applyBattleResults,
+    setPetBattling,
+    setPetIdleFromBattle,
 
     // Game loop control
     pauseGame,

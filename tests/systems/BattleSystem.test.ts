@@ -104,7 +104,7 @@ describe("BattleSystem", () => {
       
       const battle = result.data!;
       expect(battle.type).toBe("wild");
-      expect(battle.status).toBe("waiting");
+      expect(battle.status).toBe("in_progress"); // Changed from "waiting" to "in_progress" for immediate battle progression
       expect(battle.playerPet.name).toBe("TestPet");
       expect(battle.opponentPet.name).toBe("Opponent");
       expect(battle.currentTurn).toBe(1);
@@ -404,7 +404,7 @@ describe("BattleSystem", () => {
 
       const result = BattleSystem.checkBattleEnd(battle);
 
-      expect(result.status).toBe("waiting"); // Original status maintained
+      expect(result.status).toBe("in_progress"); // Original status maintained (now starts as "in_progress")
       expect(result.endTime).toBeUndefined();
     });
   });
