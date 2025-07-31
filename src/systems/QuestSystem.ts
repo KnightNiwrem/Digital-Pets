@@ -10,6 +10,8 @@ import type {
   QuestEvent,
 } from "@/types/Quest";
 import type { Result, GameState } from "@/types";
+import { getItemById } from "@/data/items";
+import { ItemSystem } from "@/systems/ItemSystem";
 
 export interface QuestAction {
   type: "start_quest" | "complete_quest" | "update_objective" | "fail_quest";
@@ -464,8 +466,13 @@ export class QuestSystem {
       switch (reward.type) {
         case "item":
           if (reward.itemId && gameState.inventory) {
-            // Note: Item creation will need integration with ItemSystem
-            // For now, just track that reward should be given
+            const item = getItemById(reward.itemId);
+            if (item) {
+              const addResult = ItemSystem.addItem(gameState.inventory, item, reward.amount);
+              if (addResult.success) {
+                gameState.inventory = addResult.data!;
+              }
+            }
           }
           break;
 
@@ -476,8 +483,7 @@ export class QuestSystem {
           break;
 
         case "experience":
-          // Note: Experience system not yet implemented
-          // Track that experience should be awarded
+          gameState.playerStats.experience += reward.amount;
           break;
 
         case "unlock_location":
