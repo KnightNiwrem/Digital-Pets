@@ -8,6 +8,7 @@ import { ItemSystem } from "@/systems/ItemSystem";
 import type { InventorySlot, DurabilityItem } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
 import { ITEM_CONSTANTS } from "@/types/Item";
+import { ItemPricing, GameMath } from "@/lib/utils";
 import { X, Play, Coins, AlertTriangle, Info, Minus, Plus } from "lucide-react";
 
 interface ItemDetailsPanelProps {
@@ -72,7 +73,7 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
       .join(", ");
   };
 
-  const sellValue = Math.floor(item.value * 0.5);
+  const sellValue = ItemPricing.getStandardSellPrice(item.value);
 
   return (
     <Card className="h-fit">
@@ -176,7 +177,7 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSellQuantity(Math.max(1, sellQuantity - 1))}
+                  onClick={() => setSellQuantity(GameMath.adjustQuantity(sellQuantity, -1, 1, quantity))}
                   disabled={sellQuantity <= 1}
                 >
                   <Minus className="h-3 w-3" />
@@ -185,7 +186,7 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSellQuantity(Math.min(quantity, sellQuantity + 1))}
+                  onClick={() => setSellQuantity(GameMath.adjustQuantity(sellQuantity, 1, 1, quantity))}
                   disabled={sellQuantity >= quantity}
                 >
                   <Plus className="h-3 w-3" />

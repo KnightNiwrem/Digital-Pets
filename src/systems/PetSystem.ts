@@ -149,11 +149,11 @@ export class PetSystem {
     }
 
     for (const effect of healthEffects) {
-      if (effect.type === "cure" && pet.health !== "healthy") {
+      if (effect.type === "cure" && PetValidator.isUnhealthy(pet)) {
         pet.health = "healthy";
         treated = true;
       } else if (effect.type === "health" && pet.currentHealth < pet.maxHealth) {
-        pet.currentHealth = Math.min(pet.maxHealth, pet.currentHealth + effect.value);
+        pet.currentHealth = GameMath.addToStat(pet.currentHealth, effect.value, pet.maxHealth);
         treated = true;
       }
     }
@@ -227,11 +227,11 @@ export class PetSystem {
     const changes: string[] = [];
 
     // Decrement hidden counters
-    pet.satietyTicksLeft = Math.max(0, pet.satietyTicksLeft - 1);
-    pet.hydrationTicksLeft = Math.max(0, pet.hydrationTicksLeft - 1);
-    pet.happinessTicksLeft = Math.max(0, pet.happinessTicksLeft - 1);
-    pet.poopTicksLeft = Math.max(0, pet.poopTicksLeft - 1);
-    pet.sickByPoopTicksLeft = Math.max(0, pet.sickByPoopTicksLeft - 1);
+    pet.satietyTicksLeft = GameMath.subtractEnergy(pet.satietyTicksLeft, 1);
+    pet.hydrationTicksLeft = GameMath.subtractEnergy(pet.hydrationTicksLeft, 1);
+    pet.happinessTicksLeft = GameMath.subtractEnergy(pet.happinessTicksLeft, 1);
+    pet.poopTicksLeft = GameMath.subtractEnergy(pet.poopTicksLeft, 1);
+    pet.sickByPoopTicksLeft = GameMath.subtractEnergy(pet.sickByPoopTicksLeft, 1);
 
     // Update displayed stats
     const prevSatiety = pet.satiety;
@@ -254,7 +254,7 @@ export class PetSystem {
     }
 
     // Handle sickness from uncleaned poop
-    if (pet.sickByPoopTicksLeft === 0 && pet.health === "healthy") {
+    if (pet.sickByPoopTicksLeft === 0 && PetValidator.isHealthy(pet)) {
       pet.health = "sick";
       pet.sickByPoopTicksLeft = PET_CONSTANTS.SICK_BY_POOP_TICKS;
       changes.push("pet_sick_from_poop");
@@ -262,22 +262,22 @@ export class PetSystem {
 
     // Handle life changes
     const lifeChanges = this.calculateLifeChanges(pet);
-    pet.life = Math.max(0, Math.min(PET_CONSTANTS.MAX_LIFE, pet.life + lifeChanges.total));
+    pet.life = GameMath.clamp(pet.life + lifeChanges.total, 0, PET_CONSTANTS.MAX_LIFE);
 
     if (lifeChanges.total !== 0) {
       changes.push(lifeChanges.total > 0 ? "life_recovered" : "life_decreased");
     }
 
     // Handle death
-    if (pet.life === 0) {
+    if (PetValidator.isDead(pet)) {
       changes.push("pet_died");
     }
 
     // Handle energy recovery during sleep
-    if (pet.state === "sleeping") {
+    if (PetValidator.isSleeping(pet)) {
       const energyRecovery = this.calculateEnergyRecovery(pet);
       const prevEnergy = pet.currentEnergy;
-      pet.currentEnergy = Math.min(pet.maxEnergy, pet.currentEnergy + energyRecovery);
+      pet.currentEnergy = GameMath.addToStat(pet.currentEnergy, energyRecovery, pet.maxEnergy);
 
       if (pet.currentEnergy !== prevEnergy) {
         changes.push("energy_recovered");
@@ -341,7 +341,7 @@ export class PetSystem {
    * Calculate energy recovery for a sleeping pet
    */
   private static calculateEnergyRecovery(pet: Pet): number {
-    if (pet.state !== "sleeping") return 0;
+    if (!PetValidator.isSleeping(pet)) return 0;
 
     // Base recovery of 1 energy per tick while sleeping
     let recovery = 1;
@@ -401,17 +401,17 @@ export class PetSystem {
     if (pet.satiety < 20) needs.push("food");
     if (pet.hydration < 20) needs.push("water");
     if (pet.happiness < 20) needs.push("attention");
-    if (pet.currentEnergy < 20) needs.push("rest");
+    if (PetValidator.hasLowEnergy(pet)) needs.push("rest");
 
     // Check health warnings
-    if (pet.health !== "healthy") warnings.push(`Pet is ${pet.health}`);
+    if (PetValidator.isUnhealthy(pet)) warnings.push(`Pet is ${pet.health}`);
     if (pet.poopTicksLeft === 0) warnings.push("Pet needs cleaning");
     if (pet.sickByPoopTicksLeft < 1000) warnings.push("Pet may get sick from uncleaned area");
-    if (pet.life < PET_CONSTANTS.MAX_LIFE * 0.2) warnings.push("Pet's life is critically low");
+    if (PetValidator.hasCriticalLife(pet)) warnings.push("Pet's life is critically low");
 
     // Determine overall status
     let overall: "excellent" | "good" | "fair" | "poor" | "critical";
-    if (pet.life === 0) {
+    if (PetValidator.isDead(pet)) {
       overall = "critical";
     } else if (warnings.length > 2 || needs.length > 2) {
       overall = "poor";

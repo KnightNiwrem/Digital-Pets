@@ -7,6 +7,7 @@ import { BattleField } from "./BattleField";
 import { MoveSelection } from "./MoveSelection";
 import type { Pet } from "@/types/Pet";
 import type { Battle, BattleAction } from "@/types/Battle";
+import { PetValidator } from "@/lib/utils";
 
 interface BattleScreenProps {
   pet: Pet;
@@ -57,13 +58,13 @@ export function BattleScreen({
                 </div>
 
                 {/* Battle Readiness Check */}
-                {pet.currentEnergy < 20 && (
+                {PetValidator.hasLowEnergy(pet) && (
                   <div className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
                     ⚠️ Your pet has low energy. Consider resting before battle.
                   </div>
                 )}
 
-                {pet.health !== "healthy" && (
+                {PetValidator.isUnhealthy(pet) && (
                   <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
                     🏥 Your pet is not healthy. Consider treatment before battle.
                   </div>
@@ -115,7 +116,7 @@ export function BattleScreen({
 
                 <Button
                   onClick={() => onBattleStart(selectedOpponent)}
-                  disabled={isLoading || pet.currentEnergy < 20}
+                  disabled={isLoading || PetValidator.hasLowEnergy(pet)}
                   className="w-full"
                   size="lg"
                 >

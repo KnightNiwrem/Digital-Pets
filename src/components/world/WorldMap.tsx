@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Zap, Lock } from "lucide-react";
 import type { Pet, WorldState } from "@/types";
 import { WorldSystem } from "@/systems/WorldSystem";
+import { PetValidator, GameMath } from "@/lib/utils";
 
 interface WorldMapProps {
   pet: Pet;
@@ -88,7 +89,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
                 style={{ width: `${travelProgress}%` }}
               />
             </div>
-            <div className="text-xs text-orange-600 mt-1">{Math.round(travelProgress)}% complete</div>
+            <div className="text-xs text-orange-600 mt-1">{GameMath.roundToPercentage(travelProgress)}% complete</div>
           </div>
         )}
 
@@ -106,9 +107,9 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
               <div className="space-y-2">
                 {availableDestinations.map(destination => {
                   const connection = currentLocation.connections.find(c => c.destinationId === destination.id);
-                  const energyCost = connection ? Math.floor(connection.travelTime / 4) : 0;
+                  const energyCost = connection ? GameMath.convertTicksToEnergyCost(connection.travelTime) : 0;
                   const canAfford = pet.currentEnergy >= energyCost;
-                  const travelTime = connection ? Math.ceil(connection.travelTime / 4) : 0;
+                  const travelTime = connection ? GameMath.convertTicksToMinutes(connection.travelTime) : 0;
 
                   return (
                     <div key={destination.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
@@ -131,7 +132,7 @@ export function WorldMap({ pet, worldState, onTravel, disabled = false }: WorldM
                         <Button
                           size="sm"
                           onClick={() => onTravel(destination.id)}
-                          disabled={disabled || !canAfford || pet.state === "sleeping"}
+                          disabled={disabled || !canAfford || PetValidator.isSleeping(pet)}
                           className="ml-3"
                         >
                           {!canAfford ? "No Energy" : "Travel"}

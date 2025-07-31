@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn, GameMath } from "@/lib/utils";
 
 interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value: number;
@@ -8,7 +8,7 @@ interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(({ className, value, max = 100, ...props }, ref) => {
-  const percentage = Math.min(Math.max(value, 0), max);
+  const percentage = GameMath.clamp(value, 0, max);
 
   return (
     <div ref={ref} className={cn("relative h-2 w-full overflow-hidden rounded-full bg-gray-200", className)} {...props}>

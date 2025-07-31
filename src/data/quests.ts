@@ -934,29 +934,3 @@ export const quests = QUESTS;
 export function getQuestById(id: string): Quest | undefined {
   return QUESTS.find(quest => quest.id === id);
 }
-
-export function getQuestsByLocation(locationId: string): Quest[] {
-  return QUESTS.filter(quest => quest.location === locationId);
-}
-
-export function getQuestsByNpc(npcId: string): Quest[] {
-  return QUESTS.filter(quest => quest.npcId === npcId);
-}
-
-export function getMainQuests(): Quest[] {
-  return QUESTS.filter(quest => quest.isMainQuest).sort((a, b) => {
-    if (a.chapter !== b.chapter) {
-      return (a.chapter || 0) - (b.chapter || 0);
-    }
-    return (a.order || 0) - (b.order || 0);
-  });
-}
-
-export function getSideQuests(): Quest[] {
-  return QUESTS.filter(quest => !quest.isMainQuest).sort((a, b) => {
-    if (a.chapter !== b.chapter) {
-      return (a.chapter || 0) - (b.chapter || 0);
-    }
-    return (a.order || 0) - (b.order || 0);
-  });
-}

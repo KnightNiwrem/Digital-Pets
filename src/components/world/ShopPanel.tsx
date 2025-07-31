@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Coins, Package } from "lucide-react";
 import type { Shop, Pet, Inventory, Item, InventorySlot } from "@/types";
 import { getItemById } from "@/data/items";
+import { ItemPricing } from "@/lib/utils";
 interface ShopPanelProps {
   shop: Shop;
   pet: Pet;
@@ -98,7 +99,7 @@ export function ShopPanel({ shop, inventory, onBuyItem, onSellItem, disabled = f
             ) : (
               <div className="space-y-2">
                 {inventory.slots.map(slot => {
-                  const sellPrice = Math.floor(slot.item.value * 0.5); // 50% of value
+                  const sellPrice = ItemPricing.getStandardSellPrice(slot.item.value);
 
                   return (
                     <InventoryItemRow

@@ -3,7 +3,7 @@
 import type { Battle, BattleAction, BattlePet, BattleResult, BattleTurn, BattleType, BattleMove } from "@/types/Battle";
 import type { Pet, Move } from "@/types/Pet";
 import type { Result } from "@/types/index";
-import { EnergyManager } from "@/lib/utils";
+import { EnergyManager, PetValidator, GameMath } from "@/lib/utils";
 import { getMoveById, getStarterMoves } from "@/data/moves";
 
 // Import constants
@@ -69,7 +69,7 @@ export class BattleSystem {
         return { success: false, error: "Your pet is too tired to battle - needs at least 20 energy" };
       }
 
-      if (playerPet.state !== "idle") {
+      if (!PetValidator.isIdle(playerPet)) {
         return { success: false, error: "Your pet is busy and cannot battle right now" };
       }
 
@@ -257,7 +257,7 @@ export class BattleSystem {
       const isCritical = Math.random() < CRITICAL_HIT_CHANCE;
       const finalDamage = isCritical ? Math.floor(damage * CRITICAL_HIT_MULTIPLIER) : damage;
 
-      defender.currentHealth = Math.max(0, defender.currentHealth - finalDamage);
+      defender.currentHealth = GameMath.subtractEnergy(defender.currentHealth, finalDamage);
 
       if (isCritical) {
         results.push({
@@ -298,8 +298,8 @@ export class BattleSystem {
 
       switch (effect.type) {
         case "heal": {
-          const healAmount = Math.floor(target.maxHealth * (effect.value / 100));
-          target.currentHealth = Math.min(target.maxHealth, target.currentHealth + healAmount);
+          const healAmount = GameMath.calculatePercentageHeal(target.maxHealth, effect.value);
+          target.currentHealth = GameMath.addToStat(target.currentHealth, healAmount, target.maxHealth);
           results.push({
             type: "heal",
             targetId: target.id,
@@ -370,7 +370,7 @@ export class BattleSystem {
 
       // Apply health changes
       const healthLoss = battle.playerPet.maxHealth - battle.playerPet.currentHealth;
-      updatedPet.currentHealth = Math.max(0, updatedPet.currentHealth - healthLoss);
+      updatedPet.currentHealth = GameMath.subtractEnergy(updatedPet.currentHealth, healthLoss);
 
       // Apply energy changes
       updatedPet.currentEnergy = Math.max(0, battle.playerPet.currentEnergy);
@@ -499,18 +499,15 @@ export class BattleSystem {
     const baseAttack = attacker.attack + attacker.tempStatModifiers.attack;
     const baseDefense = defender.defense + defender.tempStatModifiers.defense;
 
-    // Damage formula: ((Attack / Defense) * MovePower * Random(0.85-1.15))
-    const attackDefenseRatio = baseAttack / Math.max(1, baseDefense);
-    const randomFactor = 0.85 + Math.random() * 0.3; // 0.85 to 1.15
-
-    return Math.max(1, Math.floor(attackDefenseRatio * move.power * randomFactor));
+    // Use the centralized damage calculation from GameMath
+    return GameMath.calculateDamage(baseAttack, baseDefense, move.power, false);
   }
 
   private static calculateAccuracy(attacker: BattlePet, defender: BattlePet, moveAccuracy: number): number {
     const attackerAccuracy = attacker.accuracy + attacker.tempStatModifiers.accuracy;
     const defenderEvasion = defender.evasion + defender.tempStatModifiers.evasion;
 
-    return Math.max(5, Math.min(100, moveAccuracy + (attackerAccuracy - defenderEvasion) / 10));
+    return GameMath.clamp(moveAccuracy + (attackerAccuracy - defenderEvasion) / 10, 5, 100);
   }
 
   private static applyStatModifier(pet: BattlePet, stat: string, value: number): void {
@@ -528,7 +525,7 @@ export class BattleSystem {
       effect.duration--;
 
       if (effect.tickDamage && effect.tickDamage > 0) {
-        pet.currentHealth = Math.max(0, pet.currentHealth - effect.tickDamage);
+        pet.currentHealth = GameMath.subtractEnergy(pet.currentHealth, effect.tickDamage);
         results.push({
           type: "damage",
           targetId: pet.id,

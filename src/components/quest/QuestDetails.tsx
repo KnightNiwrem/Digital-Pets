@@ -9,6 +9,7 @@ import type { Quest, QuestProgress, QuestObjective, QuestReward } from "@/types/
 import type { Result } from "@/types";
 import { getItemById } from "@/data/items";
 import { getNpcById } from "@/data/locations";
+import { QuestUtils, GameMath } from "@/lib/utils";
 
 interface QuestDetailsProps {
   quest: Quest | QuestProgress | null;
@@ -66,14 +67,8 @@ export function QuestDetails({
     }
   };
 
-  const calculateProgress = () => {
-    if (!isActive) return 0;
-    const completedObjectives = questObjectives.filter(obj => obj.completed).length;
-    return questObjectives.length > 0 ? (completedObjectives / questObjectives.length) * 100 : 0;
-  };
-
   const canComplete = () => {
-    return isActive && questObjectives.every(obj => obj.completed);
+    return isActive && QuestUtils.isQuestComplete({ objectives: questObjectives });
   };
 
   const renderObjective = (objective: QuestObjective) => {
@@ -154,7 +149,7 @@ export function QuestDetails({
     );
   };
 
-  const progress = calculateProgress();
+  const progress = isActive ? QuestUtils.calculateQuestProgress({ objectives: questObjectives }) : 0;
 
   return (
     <div className="space-y-6">
@@ -193,7 +188,7 @@ export function QuestDetails({
         <div>
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>Overall Progress</span>
-            <span>{Math.round(progress)}%</span>
+            <span>{GameMath.roundToPercentage(progress)}%</span>
           </div>
           <Progress value={progress} className="h-3" />
         </div>

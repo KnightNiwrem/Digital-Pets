@@ -1,6 +1,6 @@
 // Move definitions for battle system
 
-import type { BattleMove, MoveCategory } from "@/types/Battle";
+import type { BattleMove } from "@/types/Battle";
 
 // Basic physical attacks
 const TACKLE: BattleMove = {
@@ -249,17 +249,7 @@ export function getMoveById(id: string): BattleMove | undefined {
   return MOVES.find(move => move.id === id);
 }
 
-// Helper function to get moves by category
-export function getMovesByCategory(category: MoveCategory): BattleMove[] {
-  return MOVES.filter(move => move.category === category);
-}
-
 // Helper function to get starter moves (basic moves for new pets)
 export function getStarterMoves(): BattleMove[] {
   return [TACKLE, SCRATCH, FOCUS, DEFEND];
-}
-
-// Helper function to get moves by power level
-export function getMovesByPowerLevel(minPower: number, maxPower: number): BattleMove[] {
-  return MOVES.filter(move => move.power >= minPower && move.power <= maxPower);
 }

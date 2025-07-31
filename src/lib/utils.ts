@@ -47,10 +47,87 @@ export class PetValidator {
   }
 
   /**
+   * Check if pet is healthy
+   */
+  static isHealthy(pet: Pet): boolean {
+    return pet.health === "healthy";
+  }
+
+  /**
+   * Check if pet is unhealthy (injured or sick)
+   */
+  static isUnhealthy(pet: Pet): boolean {
+    return pet.health !== "healthy";
+  }
+
+  /**
+   * Check if pet is injured
+   */
+  static isInjured(pet: Pet): boolean {
+    return pet.health === "injured";
+  }
+
+  /**
+   * Check if pet is idle and can perform actions
+   */
+  static isIdle(pet: Pet): boolean {
+    return pet.state === "idle";
+  }
+
+  /**
+   * Check if pet is busy (not idle)
+   */
+  static isBusy(pet: Pet): boolean {
+    return pet.state !== "idle";
+  }
+
+  /**
    * Check if pet has sufficient energy for an action
    */
   static hasEnoughEnergy(pet: Pet, requiredEnergy: number): boolean {
     return pet.currentEnergy >= requiredEnergy;
+  }
+
+  /**
+   * Check if pet is dead
+   */
+  static isDead(pet: Pet): boolean {
+    return pet.life <= 0;
+  }
+
+  /**
+   * Check if pet is alive
+   */
+  static isAlive(pet: Pet): boolean {
+    return pet.life > 0;
+  }
+
+  /**
+   * Check if pet has full energy
+   */
+  static hasFullEnergy(pet: Pet): boolean {
+    return pet.currentEnergy >= pet.maxEnergy;
+  }
+
+  /**
+   * Check if pet has low energy
+   */
+  static hasLowEnergy(pet: Pet, threshold: number = 20): boolean {
+    return pet.currentEnergy < threshold;
+  }
+
+  /**
+   * Get pet's energy as a percentage
+   */
+  static getEnergyPercentage(pet: Pet): number {
+    return (pet.currentEnergy / pet.maxEnergy) * 100;
+  }
+
+  /**
+   * Check if pet has critically low life
+   */
+  static hasCriticalLife(pet: Pet, threshold: number = 0.2): boolean {
+    return pet.life < 1000000 * threshold; // Using PET_CONSTANTS.MAX_LIFE value
   }
 
   /**
@@ -248,6 +325,31 @@ export class GameMath {
   static calculateAccuracy(baseAccuracy: number, attackerAccuracy: number, defenderEvasion: number): number {
     return this.clamp(baseAccuracy + (attackerAccuracy - defenderEvasion) / 10, 5, 100);
   }
+
+  // UI and display utilities
+  static roundToPercentage(progress: number): number {
+    return Math.round(progress);
+  }
+
+  static probabilityToPercentage(probability: number): number {
+    return Math.round(probability * 100);
+  }
+
+  static convertTicksToMinutes(ticks: number): number {
+    return Math.ceil(ticks / 4);
+  }
+
+  static convertTicksToEnergyCost(ticks: number): number {
+    return Math.floor(ticks / 4);
+  }
+
+  static adjustQuantity(current: number, change: number, min: number, max: number): number {
+    return this.clamp(current + change, min, max);
+  }
+
+  static limitArrayDisplay(arrayLength: number, maxDisplay: number): number {
+    return Math.min(arrayLength, maxDisplay);
+  }
 }
 
 /**
@@ -299,4 +401,246 @@ export class EnergyManager {
     PLAY: "Pet doesn't have enough energy to play",
     GENERAL: (action: string) => `Pet doesn't have enough energy for ${action}`,
   } as const;
+}
+
+// Import Item type from the proper location
+import type { Item, Inventory } from "@/types/Item";
+
+/**
+ * Utility class for inventory operations
+ * Centralizes common inventory filtering and processing patterns
+ */
+export class InventoryUtils {
+  /**
+   * Filter inventory items by effect type
+   */
+  static getItemsByEffectType(inventory: Inventory, effectType: string): Item[] {
+    return inventory.slots
+      .filter(slot => slot.item.effects.some(effect => effect.type === effectType))
+      .map(slot => slot.item);
+  }
+
+  /**
+   * Get food items (satiety effect)
+   */
+  static getFoodItems(inventory: Inventory): Item[] {
+    return this.getItemsByEffectType(inventory, "satiety");
+  }
+
+  /**
+   * Get drink items (hydration effect)
+   */
+  static getDrinkItems(inventory: Inventory): Item[] {
+    return this.getItemsByEffectType(inventory, "hydration");
+  }
+
+  /**
+   * Get happiness items (happiness effect)
+   */
+  static getHappinessItems(inventory: Inventory): Item[] {
+    return this.getItemsByEffectType(inventory, "happiness");
+  }
+
+  /**
+   * Get cleaning items (clean effect)
+   */
+  static getCleaningItems(inventory: Inventory): Item[] {
+    return this.getItemsByEffectType(inventory, "clean");
+  }
+
+  /**
+   * Get medicine items (cure or health effects)
+   */
+  static getMedicineItems(inventory: Inventory): Item[] {
+    return inventory.slots
+      .filter(slot => slot.item.effects.some(effect => effect.type === "cure" || effect.type === "health"))
+      .map(slot => slot.item);
+  }
+
+  /**
+   * Get effect value from item
+   */
+  static getEffectValue(item: Item, effectType: string): number {
+    const effect = item.effects.find(e => e.type === effectType);
+    return effect?.value || 0;
+  }
+}
+
+/**
+ * Utility class for quest operations
+ * Centralizes common quest calculation patterns
+ */
+export class QuestUtils {
+  /**
+   * Calculate quest completion progress as percentage
+   */
+  static calculateQuestProgress(quest: { objectives: Array<{ completed: boolean }> }): number {
+    if (!quest.objectives || quest.objectives.length === 0) return 0;
+    const completedObjectives = quest.objectives.filter(obj => obj.completed).length;
+    return Math.round((completedObjectives / quest.objectives.length) * 100);
+  }
+
+  /**
+   * Get completed objectives count
+   */
+  static getCompletedObjectivesCount(quest: { objectives: Array<{ completed: boolean }> }): number {
+    return quest.objectives.filter(obj => obj.completed).length;
+  }
+
+  /**
+   * Check if all objectives are completed
+   */
+  static isQuestComplete(quest: { objectives: Array<{ completed: boolean }> }): boolean {
+    return quest.objectives.every(obj => obj.completed);
+  }
+}
+
+/**
+ * Utility class for item pricing calculations
+ * Centralizes common pricing operations
+ */
+export class ItemPricing {
+  /**
+   * Calculate sell price as percentage of item value
+   */
+  static calculateSellPrice(itemValue: number, sellPercentage: number = 0.5): number {
+    return Math.floor(itemValue * sellPercentage);
+  }
+
+  /**
+   * Get standard sell price (50% of item value)
+   */
+  static getStandardSellPrice(itemValue: number): number {
+    return this.calculateSellPrice(itemValue, 0.5);
+  }
+}
+
+/**
+ * Utility class for text formatting operations
+ * Centralizes common text manipulation patterns
+ */
+export class TextUtils {
+  /**
+   * Add plural suffix based on count
+   */
+  static pluralize(word: string, count: number, suffix: string = "s"): string {
+    return `${word}${count !== 1 ? suffix : ""}`;
+  }
+
+  /**
+   * Create item count description with pluralization
+   */
+  static formatItemCount(count: number, itemType: string): string {
+    return `${count} ${this.pluralize(itemType, count)} available`;
+  }
+}
+
+/**
+ * Utility class for item effect operations
+ * Centralizes common item effect checking patterns
+ */
+export class ItemEffectUtils {
+  /**
+   * Check if item has specific effect type
+   */
+  static hasEffectType(item: { effects: Array<{ type: string }> }, effectType: string): boolean {
+    return item.effects.some(effect => effect.type === effectType);
+  }
+
+  /**
+   * Check if item has any of the specified effect types
+   */
+  static hasAnyEffectType(item: { effects: Array<{ type: string }> }, effectTypes: string[]): boolean {
+    return item.effects.some(effect => effectTypes.includes(effect.type));
+  }
+
+  /**
+   * Get effect value from item
+   */
+  static getEffectValue(item: { effects: Array<{ type: string; value?: number }> }, effectType: string): number {
+    const effect = item.effects.find(e => e.type === effectType);
+    return effect?.value || 0;
+  }
+}
+
+/**
+ * Utility class for error handling operations
+ * Centralizes common error handling patterns
+ */
+export class ErrorHandler {
+  /**
+   * Handle caught errors with consistent logging and response format
+   */
+  static handleCatchError(
+    error: unknown,
+    defaultMessage: string,
+    logPrefix: string
+  ): { success: false; error: string } {
+    const message = error instanceof Error ? error.message : defaultMessage;
+    console.error(`${logPrefix} error:`, error);
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Game state validation utilities
+ */
+export class GameStateValidator {
+  /**
+   * Validates that gameState has currentPet and optionally world
+   */
+  static validateGameState(
+    gameState: { currentPet?: unknown; world?: unknown } | null | undefined,
+    requiresWorld = false
+  ): boolean {
+    if (!gameState?.currentPet) return false;
+    if (requiresWorld && !gameState?.world) return false;
+    return true;
+  }
+
+  /**
+   * Validates gameState with early return if invalid
+   */
+  static requireGameState(
+    gameState: { currentPet?: unknown; world?: unknown } | null | undefined,
+    requiresWorld = false
+  ): boolean {
+    return this.validateGameState(gameState, requiresWorld);
+  }
+}
+
+/**
+ * Action handler utilities for consistent logging and error handling
+ */
+export class ActionHandler {
+  /**
+   * Executes an async action with consistent error handling and result logging
+   */
+  static async executeWithLogging<T>(
+    actionName: string,
+    actionFn: () => Promise<{ success: boolean; error?: string; data?: T }>,
+    successMessage?: string
+  ): Promise<{ success: boolean; error?: string; data?: T }> {
+    try {
+      const result = await actionFn();
+      if (result.success) {
+        if (successMessage) {
+          console.log(successMessage);
+        }
+      } else {
+        console.error(`${actionName} failed:`, result.error);
+      }
+      return result;
+    } catch (error) {
+      return ErrorHandler.handleCatchError(error, `${actionName} failed`, actionName);
+    }
+  }
+
+  /**
+   * Logs successful purchase/sale transactions
+   */
+  static logTransaction(action: "bought" | "sold", quantity: number, itemId: string, totalPrice: number): void {
+    const actionText = action === "bought" ? "Bought" : "Sold";
+    console.log(`${actionText} ${quantity}x ${itemId} for ${totalPrice} gold`);
+  }
 }

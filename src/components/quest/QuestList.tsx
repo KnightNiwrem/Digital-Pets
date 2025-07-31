@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Clock, MapPin, User, Trophy, Heart } from "lucide-react";
 import type { Quest, QuestProgress } from "@/types/Quest";
+import { QuestUtils, GameMath } from "@/lib/utils";
 
 interface QuestListProps {
   tab: "available" | "active" | "completed";
@@ -56,12 +57,6 @@ export function QuestList({
       default:
         return "bg-gray-100 text-gray-800";
     }
-  };
-
-  const calculateQuestProgress = (quest: QuestProgress) => {
-    const completedObjectives = quest.objectives.filter(obj => obj.completed).length;
-    const totalObjectives = quest.objectives.length;
-    return totalObjectives > 0 ? (completedObjectives / totalObjectives) * 100 : 0;
   };
 
   const isQuestSelected = (quest: Quest | QuestProgress) => {
@@ -139,7 +134,7 @@ export function QuestList({
     }
 
     return activeQuests.map(questProgress => {
-      const progress = calculateQuestProgress(questProgress);
+      const progress = QuestUtils.calculateQuestProgress(questProgress);
       return (
         <div
           key={questProgress.questId}
@@ -165,7 +160,7 @@ export function QuestList({
           <div className="mb-2">
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Progress</span>
-              <span>{Math.round(progress)}%</span>
+              <span>{GameMath.roundToPercentage(progress)}%</span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
@@ -173,8 +168,8 @@ export function QuestList({
           {/* Objectives Summary */}
           <div className="text-xs text-gray-500">
             <span>
-              {questProgress.objectives.filter(obj => obj.completed).length}/{questProgress.objectives.length}{" "}
-              objectives completed
+              {QuestUtils.getCompletedObjectivesCount(questProgress)}/{questProgress.objectives.length} objectives
+              completed
             </span>
           </div>
         </div>

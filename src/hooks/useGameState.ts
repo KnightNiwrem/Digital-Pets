@@ -12,6 +12,7 @@ import { ItemSystem } from "@/systems/ItemSystem";
 import { QuestSystem } from "@/systems/QuestSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { QUESTS } from "@/data/quests";
+import { PetValidator, ErrorHandler } from "@/lib/utils";
 
 export interface UseGameStateReturn {
   // State
@@ -273,8 +274,8 @@ export function useGameState(): UseGameStateReturn {
     }
 
     const pet = gameState.currentPet;
-    const actionFn = pet.state === "sleeping" ? PetSystem.wakePetUp : PetSystem.putPetToSleep;
-    const actionName = pet.state === "sleeping" ? "wake pet" : "put pet to sleep";
+    const actionFn = PetValidator.isSleeping(pet) ? PetSystem.wakePetUp : PetSystem.putPetToSleep;
+    const actionName = PetValidator.isSleeping(pet) ? "wake pet" : "put pet to sleep";
 
     return performPetAction(actionFn, actionName);
   }, [gameState, performPetAction]);
@@ -307,9 +308,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to feed pet with item";
-        console.error("Feed pet with item error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to feed pet with item", "Feed pet with item");
       }
     },
     [gameState, triggerAutosave]
@@ -342,9 +341,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to give drink with item";
-        console.error("Give drink with item error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to give drink with item", "Give drink with item");
       }
     },
     [gameState, triggerAutosave]
@@ -377,9 +374,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to play with item";
-        console.error("Play with item error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to play with item", "Play with item");
       }
     },
     [gameState, triggerAutosave]
@@ -417,9 +412,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to clean with item";
-        console.error("Clean with item error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to clean with item", "Clean with item");
       }
     },
     [gameState, triggerAutosave]
@@ -452,9 +445,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to treat with item";
-        console.error("Treat with item error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to treat with item", "Treat with item");
       }
     },
     [gameState, triggerAutosave]
@@ -575,9 +566,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to start quest";
-        console.error("Start quest error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to start quest", "Start quest");
       }
     },
     [gameState, triggerAutosave]
@@ -602,9 +591,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to abandon quest";
-        console.error("Abandon quest error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to abandon quest", "Abandon quest");
       }
     },
     [gameState, triggerAutosave]
@@ -629,9 +616,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to complete quest";
-        console.error("Complete quest error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to complete quest", "Complete quest");
       }
     },
     [gameState, triggerAutosave]
@@ -691,9 +676,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to start travel";
-        console.error("Start travel error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to start travel", "Start travel");
       }
     },
     [gameState, triggerAutosave, gameLoopRef]
@@ -736,9 +719,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to start activity";
-        console.error("Start activity error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to start activity", "Start activity");
       }
     },
     [gameState, triggerAutosave, gameLoopRef]
@@ -780,9 +761,7 @@ export function useGameState(): UseGameStateReturn {
       }
       return { success: false, error: result.error };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to cancel activity";
-      console.error("Cancel activity error:", error);
-      return { success: false, error: message };
+      return ErrorHandler.handleCatchError(error, "Failed to cancel activity", "Cancel activity");
     }
   }, [gameState, triggerAutosave, gameLoopRef]);
 
@@ -814,9 +793,7 @@ export function useGameState(): UseGameStateReturn {
         }
         return { success: false, error: result.error };
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to apply battle results";
-        console.error("Apply battle results error:", error);
-        return { success: false, error: message };
+        return ErrorHandler.handleCatchError(error, "Failed to apply battle results", "Apply battle results");
       }
     },
     [gameState, triggerAutosave]
@@ -842,9 +819,7 @@ export function useGameState(): UseGameStateReturn {
       await triggerAutosave("set pet battling");
       return { success: true };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to set pet battling";
-      console.error("Set pet battling error:", error);
-      return { success: false, error: message };
+      return ErrorHandler.handleCatchError(error, "Failed to set pet battling", "Set pet battling");
     }
   }, [gameState, triggerAutosave]);
 
@@ -868,9 +843,7 @@ export function useGameState(): UseGameStateReturn {
       await triggerAutosave("set pet idle from battle");
       return { success: true };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to set pet idle";
-      console.error("Set pet idle error:", error);
-      return { success: false, error: message };
+      return ErrorHandler.handleCatchError(error, "Failed to set pet idle", "Set pet idle");
     }
   }, [gameState, triggerAutosave]);
 

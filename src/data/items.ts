@@ -1,6 +1,6 @@
 // Item definitions for the game
 
-import type { Item, ItemType, ItemRarity, ConsumableItem, DurabilityItem } from "@/types/Item";
+import type { Item, ConsumableItem, DurabilityItem } from "@/types/Item";
 
 // Food items
 const APPLE: ConsumableItem = {
@@ -908,12 +908,12 @@ export function getItemById(id: string): Item | undefined {
 }
 
 // Helper function to get items by type
-export function getItemsByType(type: ItemType): Item[] {
+export function getItemsByType(type: string): Item[] {
   return ITEMS.filter(item => item.type === type);
 }
 
 // Helper function to get items by rarity
-export function getItemsByRarity(rarity: ItemRarity): Item[] {
+export function getItemsByRarity(rarity: string): Item[] {
   return ITEMS.filter(item => item.rarity === rarity);
 }
 

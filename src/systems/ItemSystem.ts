@@ -265,14 +265,14 @@ export class ItemSystem {
    */
   static validateItemUsage(pet: Pet, item: Item): Result<void> {
     // Dead pets can't use items
-    if (pet.life <= 0) {
+    if (PetValidator.isDead(pet)) {
       return { success: false, error: "Cannot use items on a deceased pet" };
     }
 
     // Check item type specific conditions
     switch (item.type) {
       case "medicine":
-        if (pet.health === "healthy") {
+        if (PetValidator.isHealthy(pet)) {
           return { success: false, error: "Pet doesn't need medicine - already healthy" };
         }
         break;
@@ -293,7 +293,7 @@ export class ItemSystem {
         break;
 
       case "energy_booster":
-        if (pet.currentEnergy >= pet.maxEnergy) {
+        if (PetValidator.hasFullEnergy(pet)) {
           return { success: false, error: "Pet already has full energy" };
         }
         break;
@@ -363,7 +363,7 @@ export class ItemSystem {
             updatedPet.happiness = GameMath.calculateHappinessDisplay(updatedPet.happinessTicksLeft);
             // Using toy costs energy
             if (item.type === "toy") {
-              updatedPet.currentEnergy = Math.max(0, updatedPet.currentEnergy - 10);
+              updatedPet.currentEnergy = GameMath.subtractEnergy(updatedPet.currentEnergy, 10);
             }
             messages.push(`Increased happiness by ${actualIncrease}`);
           }
@@ -371,19 +371,19 @@ export class ItemSystem {
         }
 
         case "energy":
-          updatedPet.currentEnergy = Math.min(updatedPet.maxEnergy, updatedPet.currentEnergy + effect.value);
+          updatedPet.currentEnergy = GameMath.addToStat(updatedPet.currentEnergy, effect.value, updatedPet.maxEnergy);
           messages.push(`Restored ${effect.value} energy`);
           break;
 
         case "health":
-          if (updatedPet.health === "injured") {
+          if (PetValidator.isInjured(updatedPet)) {
             updatedPet.health = "healthy";
             messages.push("Healed injuries");
           }
           break;
 
         case "cure":
-          if (updatedPet.health === "sick") {
+          if (PetValidator.isSick(updatedPet)) {
             updatedPet.health = "healthy";
             messages.push("Cured illness");
           }

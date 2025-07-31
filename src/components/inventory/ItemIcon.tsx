@@ -1,6 +1,6 @@
 // Item icon component for displaying item visuals
 
-import { cn } from "@/lib/utils";
+import { cn, ItemEffectUtils } from "@/lib/utils";
 import type { Item } from "@/types/Item";
 import { Apple, Droplets, Heart, Pill, Sparkles, Zap, CircleDot, Fish, Utensils } from "lucide-react";
 
@@ -46,10 +46,10 @@ export function ItemIcon({ item, className }: ItemIconProps) {
   const getTypeIcon = () => {
     switch (item.type) {
       case "consumable":
-        if (item.effects.some(effect => effect.type === "satiety")) {
+        if (ItemEffectUtils.hasEffectType(item, "satiety")) {
           return <Apple className="text-red-500" />;
         }
-        if (item.effects.some(effect => effect.type === "hydration")) {
+        if (ItemEffectUtils.hasEffectType(item, "hydration")) {
           return <Droplets className="text-blue-500" />;
         }
         return <CircleDot className="text-gray-500" />;

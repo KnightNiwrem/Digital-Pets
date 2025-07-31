@@ -14,6 +14,7 @@ import { useBattleState } from "@/hooks/useBattleState";
 import type { BattleAction } from "@/types/Battle";
 import type { PetSpecies } from "@/types/Pet";
 import { getStarterPets } from "@/data/pets";
+import { GameStateValidator, ActionHandler } from "@/lib/utils";
 import { Home, Map as MapIcon, Package, Sword, ScrollText } from "lucide-react";
 
 export function GameScreen() {
@@ -71,66 +72,43 @@ export function GameScreen() {
 
   // World action handlers - now using enhanced autosave from useGameState
   const handleTravel = async (destinationId: string) => {
-    if (!gameState?.currentPet || !gameState?.world) return;
+    if (!GameStateValidator.requireGameState(gameState, true)) return;
 
-    try {
-      const result = await startTravel(destinationId);
-      if (result.success) {
-        console.log("Travel started successfully");
-      } else {
-        console.error("Travel failed:", result.error);
-      }
-    } catch (error) {
-      console.error("Travel error:", error);
-    }
+    await ActionHandler.executeWithLogging("Travel", () => startTravel(destinationId), "Travel started successfully");
   };
 
   const handleStartActivity = async (activityId: string) => {
-    if (!gameState?.currentPet || !gameState?.world) return;
+    if (!GameStateValidator.requireGameState(gameState, true)) return;
 
-    try {
-      const result = await startActivity(activityId);
-      if (result.success) {
-        console.log("Activity started successfully");
-      } else {
-        console.error("Activity failed:", result.error);
-      }
-    } catch (error) {
-      console.error("Activity error:", error);
-    }
+    await ActionHandler.executeWithLogging(
+      "Activity",
+      () => startActivity(activityId),
+      "Activity started successfully"
+    );
   };
 
   const handleCancelActivity = async () => {
-    if (!gameState?.currentPet || !gameState?.world) return;
+    if (!GameStateValidator.requireGameState(gameState, true)) return;
 
-    try {
-      const result = await cancelActivity();
-      if (result.success) {
-        console.log("Activity cancelled successfully");
-      } else {
-        console.error("Cancel activity failed:", result.error);
-      }
-    } catch (error) {
-      console.error("Cancel activity error:", error);
-    }
+    await ActionHandler.executeWithLogging(
+      "Cancel Activity",
+      () => cancelActivity(),
+      "Activity cancelled successfully"
+    );
   };
 
   // Shop action handlers
   const handleBuyItem = async (itemId: string, quantity: number, price: number) => {
-    const result = await buyItem(itemId, quantity);
+    const result = await ActionHandler.executeWithLogging("Purchase", () => buyItem(itemId, quantity));
     if (result.success) {
-      console.log(`Bought ${quantity}x ${itemId} for ${price * quantity} gold`);
-    } else {
-      console.error("Purchase failed:", result.error);
+      ActionHandler.logTransaction("bought", quantity, itemId, price * quantity);
     }
   };
 
   const handleSellItem = async (itemId: string, quantity: number, price: number) => {
-    const result = await sellItem(itemId, quantity);
+    const result = await ActionHandler.executeWithLogging("Sale", () => sellItem(itemId, quantity));
     if (result.success) {
-      console.log(`Sold ${quantity}x ${itemId} for ${price * quantity} gold`);
-    } else {
-      console.error("Sale failed:", result.error);
+      ActionHandler.logTransaction("sold", quantity, itemId, price * quantity);
     }
   };
 

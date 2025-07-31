@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toast } from "@/components/ui/toast";
-import type { Pet, Result, Inventory, Item } from "@/types";
-import { PetValidator } from "@/lib/utils";
+import type { Pet, Result, Inventory } from "@/types";
+import { PetValidator, InventoryUtils, TextUtils, ItemEffectUtils } from "@/lib/utils";
 
 interface PetCarePanelProps {
   pet: Pet;
@@ -35,37 +35,6 @@ export function PetCarePanel({
     null
   );
 
-  // Helper functions to get available items for each action type
-  const getFoodItems = (): Item[] => {
-    return inventory.slots
-      .filter(slot => slot.item.effects.some(effect => effect.type === "satiety"))
-      .map(slot => slot.item);
-  };
-
-  const getDrinkItems = (): Item[] => {
-    return inventory.slots
-      .filter(slot => slot.item.effects.some(effect => effect.type === "hydration"))
-      .map(slot => slot.item);
-  };
-
-  const getHappinessItems = (): Item[] => {
-    return inventory.slots
-      .filter(slot => slot.item.effects.some(effect => effect.type === "happiness"))
-      .map(slot => slot.item);
-  };
-
-  const getCleaningItems = (): Item[] => {
-    return inventory.slots
-      .filter(slot => slot.item.effects.some(effect => effect.type === "clean"))
-      .map(slot => slot.item);
-  };
-
-  const getMedicineItems = (): Item[] => {
-    return inventory.slots
-      .filter(slot => slot.item.effects.some(effect => effect.type === "cure" || effect.type === "health"))
-      .map(slot => slot.item);
-  };
-
   // Helper to handle actions with loading states and feedback
   const handleAction = async (actionName: string, action: () => Promise<Result<void>>) => {
     setActionLoading(actionName);
@@ -94,12 +63,12 @@ export function PetCarePanel({
     setToastMessage(null);
   };
 
-  // Check if actions are available using proper validation and item availability
-  const foodItems = getFoodItems();
-  const drinkItems = getDrinkItems();
-  const happinessItems = getHappinessItems();
-  const cleaningItems = getCleaningItems();
-  const medicineItems = getMedicineItems();
+  // Use utility functions instead of duplicated filtering logic
+  const foodItems = InventoryUtils.getFoodItems(inventory);
+  const drinkItems = InventoryUtils.getDrinkItems(inventory);
+  const happinessItems = InventoryUtils.getHappinessItems(inventory);
+  const cleaningItems = InventoryUtils.getCleaningItems(inventory);
+  const medicineItems = InventoryUtils.getMedicineItems(inventory);
 
   const canFeed = pet.satiety < 100 && !PetValidator.validateCareAction(pet, "feed") && foodItems.length > 0;
   const canDrink = pet.hydration < 100 && !PetValidator.validateCareAction(pet, "drink") && drinkItems.length > 0;
@@ -111,10 +80,13 @@ export function PetCarePanel({
     pet.state !== "travelling" &&
     cleaningItems.length > 0;
   const canTreat =
-    pet.health !== "healthy" && pet.state !== "exploring" && pet.state !== "sleeping" && medicineItems.length > 0;
+    PetValidator.isUnhealthy(pet) &&
+    !PetValidator.isExploring(pet) &&
+    !PetValidator.isSleeping(pet) &&
+    medicineItems.length > 0;
   // Separate logic for sleep vs wake actions
   const canSleep = pet.state !== "sleeping" && !PetValidator.validateSleepAction(pet);
-  const canWake = pet.state === "sleeping";
+  const canWake = PetValidator.isSleeping(pet);
   const canToggleSleep = canSleep || canWake;
 
   return (
@@ -146,7 +118,7 @@ export function PetCarePanel({
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">🍖 Feed Pet</span>
                   <span className="text-xs text-muted-foreground">
-                    {foodItems.length} food item{foodItems.length !== 1 ? "s" : ""} available
+                    {TextUtils.formatItemCount(foodItems.length, "food item")}
                   </span>
                 </div>
                 {canFeed ? (
@@ -163,7 +135,7 @@ export function PetCarePanel({
                         <span className="flex items-center gap-2">
                           <span>{item.name}</span>
                           <span className="text-xs text-green-600">
-                            +{item.effects.find(e => e.type === "satiety")?.value || 0} Satiety
+                            +{InventoryUtils.getEffectValue(item, "satiety")} Satiety
                           </span>
                         </span>
                         {actionLoading === `Feed ${item.name}` ? "..." : "Use"}
@@ -187,7 +159,7 @@ export function PetCarePanel({
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">💧 Give Drink</span>
                   <span className="text-xs text-muted-foreground">
-                    {drinkItems.length} drink item{drinkItems.length !== 1 ? "s" : ""} available
+                    {TextUtils.formatItemCount(drinkItems.length, "drink item")}
                   </span>
                 </div>
                 {canDrink ? (
@@ -204,7 +176,7 @@ export function PetCarePanel({
                         <span className="flex items-center gap-2">
                           <span>{item.name}</span>
                           <span className="text-xs text-blue-600">
-                            +{item.effects.find(e => e.type === "hydration")?.value || 0} Hydration
+                            +{InventoryUtils.getEffectValue(item, "hydration")} Hydration
                           </span>
                         </span>
                         {actionLoading === `Give ${item.name}` ? "..." : "Use"}
@@ -232,7 +204,7 @@ export function PetCarePanel({
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">🎾 Play with Pet</span>
                   <span className="text-xs text-muted-foreground">
-                    {happinessItems.length} toy/fun item{happinessItems.length !== 1 ? "s" : ""} available
+                    {TextUtils.formatItemCount(happinessItems.length, "toy/fun item")}
                   </span>
                 </div>
                 {canPlay ? (
@@ -249,7 +221,7 @@ export function PetCarePanel({
                         <span className="flex items-center gap-2">
                           <span>{item.name}</span>
                           <span className="text-xs text-purple-600">
-                            +{item.effects.find(e => e.type === "happiness")?.value || 0} Happiness
+                            +{InventoryUtils.getEffectValue(item, "happiness")} Happiness
                           </span>
                         </span>
                         {actionLoading === `Play with ${item.name}` ? "..." : "Use"}
@@ -273,7 +245,7 @@ export function PetCarePanel({
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">🧹 Clean Pet</span>
                   <span className="text-xs text-muted-foreground">
-                    {cleaningItems.length} cleaning item{cleaningItems.length !== 1 ? "s" : ""} available
+                    {TextUtils.formatItemCount(cleaningItems.length, "cleaning item")}
                   </span>
                 </div>
                 {canClean ? (
@@ -318,15 +290,15 @@ export function PetCarePanel({
             <h3 className="font-semibold text-sm">Rest</h3>
 
             <Button
-              onClick={() => handleAction(pet.state === "sleeping" ? "Wake Up" : "Sleep", onToggleSleep)}
+              onClick={() => handleAction(PetValidator.isSleeping(pet) ? "Wake Up" : "Sleep", onToggleSleep)}
               disabled={!canToggleSleep || isLoading || actionLoading !== null}
-              variant={pet.state === "sleeping" ? "secondary" : "default"}
+              variant={PetValidator.isSleeping(pet) ? "secondary" : "default"}
               size="sm"
               className="w-full"
             >
               {actionLoading === "Sleep" || actionLoading === "Wake Up"
                 ? "..."
-                : pet.state === "sleeping"
+                : PetValidator.isSleeping(pet)
                   ? "☀️ Wake Up"
                   : "😴 Sleep"}
             </Button>
@@ -341,7 +313,7 @@ export function PetCarePanel({
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">💊 Treat Pet</span>
                   <span className="text-xs text-muted-foreground">
-                    {medicineItems.length} medicine item{medicineItems.length !== 1 ? "s" : ""} available
+                    {TextUtils.formatItemCount(medicineItems.length, "medicine item")}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 gap-2">
@@ -357,11 +329,9 @@ export function PetCarePanel({
                       <span className="flex items-center gap-2">
                         <span>{item.name}</span>
                         <span className="text-xs text-green-600">
-                          {item.effects.find(e => e.type === "cure")
+                          {ItemEffectUtils.hasEffectType(item, "cure")
                             ? "Cure Disease"
-                            : item.effects.find(e => e.type === "health")
-                              ? `+${item.effects.find(e => e.type === "health")?.value} Health`
-                              : ""}
+                            : `+${ItemEffectUtils.getEffectValue(item, "health")} Health`}
                         </span>
                       </span>
                       {actionLoading === `Treat with ${item.name}` ? "..." : "Use"}
@@ -377,7 +347,7 @@ export function PetCarePanel({
             <p className="text-sm text-muted-foreground">
               Current State: <span className="font-medium">{pet.state}</span>
             </p>
-            {pet.state === "travelling" && (
+            {PetValidator.isTravelling(pet) && (
               <p className="text-xs text-amber-600 mt-1">Pet is travelling - limited actions available</p>
             )}
           </div>
@@ -396,7 +366,7 @@ export function PetCarePanel({
             </div>
             <div className="p-1 bg-muted rounded">
               <div className="font-medium">Health</div>
-              <div className={`${pet.health === "healthy" ? "text-green-600" : "text-red-600"}`}>{pet.health}</div>
+              <div className={`${PetValidator.isHealthy(pet) ? "text-green-600" : "text-red-600"}`}>{pet.health}</div>
             </div>
           </div>
 

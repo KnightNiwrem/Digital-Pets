@@ -7,6 +7,7 @@ import type { Pet, WorldState } from "@/types";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { getItemById } from "@/data/items";
 import { getNpcById } from "@/data/locations";
+import { PetValidator, GameMath } from "@/lib/utils";
 
 interface ActivitiesPanelProps {
   pet: Pet;
@@ -90,7 +91,9 @@ export function ActivitiesPanel({
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-green-700">Progress</span>
-                <span className="text-green-800 font-medium">{Math.round(activityProgress.progress)}%</span>
+                <span className="text-green-800 font-medium">
+                  {GameMath.roundToPercentage(activityProgress.progress)}%
+                </span>
               </div>
               <div className="w-full bg-green-200 rounded-full h-2">
                 <div
@@ -158,8 +161,11 @@ export function ActivitiesPanel({
               <div className="space-y-3">
                 {availableActivities.map(activity => {
                   const IconComponent = ACTIVITY_ICONS[activity.type] || TreePine;
-                  const canStart = pet.currentEnergy >= activity.energyCost && pet.state !== "sleeping" && !disabled;
-                  const duration = Math.ceil(activity.duration / 4); // Convert to minutes
+                  const canStart =
+                    PetValidator.hasEnoughEnergy(pet, activity.energyCost) &&
+                    !PetValidator.isSleeping(pet) &&
+                    !disabled;
+                  const duration = GameMath.convertTicksToMinutes(activity.duration);
 
                   return (
                     <div key={activity.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
@@ -189,7 +195,7 @@ export function ActivitiesPanel({
                             <div className="text-xs text-gray-500">
                               <span className="font-medium">Rewards: </span>
                               {activity.rewards.slice(0, 3).map((reward, index) => {
-                                const chance = Math.round(reward.probability * 100);
+                                const chance = GameMath.probabilityToPercentage(reward.probability);
                                 let rewardText = "";
 
                                 switch (reward.type) {
@@ -210,7 +216,7 @@ export function ActivitiesPanel({
                                 return (
                                   <span key={index}>
                                     {rewardText}
-                                    {index < Math.min(activity.rewards.length, 3) - 1 ? ", " : ""}
+                                    {index < GameMath.limitArrayDisplay(activity.rewards.length, 3) - 1 ? ", " : ""}
                                   </span>
                                 );
                               })}
@@ -225,9 +231,9 @@ export function ActivitiesPanel({
                           disabled={!canStart}
                           className="ml-3"
                         >
-                          {!canStart && pet.currentEnergy < activity.energyCost
+                          {!canStart && !PetValidator.hasEnoughEnergy(pet, activity.energyCost)
                             ? "No Energy"
-                            : pet.state === "sleeping"
+                            : PetValidator.isSleeping(pet)
                               ? "Sleeping"
                               : "Start"}
                         </Button>
@@ -241,15 +247,17 @@ export function ActivitiesPanel({
         )}
 
         {/* Energy Warning */}
-        {!hasActiveActivity && !isTravel && availableActivities.some(a => a.energyCost > pet.currentEnergy) && (
-          <div className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg">
-            ⚡ Some activities require more energy than your pet currently has. Let them rest or use energy items to
-            restore energy.
-          </div>
-        )}
+        {!hasActiveActivity &&
+          !isTravel &&
+          availableActivities.some(a => !PetValidator.hasEnoughEnergy(pet, a.energyCost)) && (
+            <div className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg">
+              ⚡ Some activities require more energy than your pet currently has. Let them rest or use energy items to
+              restore energy.
+            </div>
+          )}
 
         {/* Pet Sleeping Warning */}
-        {pet.state === "sleeping" && !hasActiveActivity && (
+        {PetValidator.isSleeping(pet) && !hasActiveActivity && (
           <div className="text-xs text-blue-600 bg-blue-50 p-3 rounded-lg">
             😴 Your pet is sleeping and cannot start new activities. Wake them up to begin exploring!
           </div>
