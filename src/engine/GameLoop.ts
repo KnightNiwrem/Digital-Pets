@@ -211,18 +211,23 @@ export class GameLoop {
     // Process activities using WorldSystem
     const activityResult = WorldSystem.processActivitiesTick(this.gameState.world);
     if (activityResult.success && activityResult.data) {
+      const hadActivitiesCompleted = activityResult.data.rewards.length > 0;
       this.gameState.world = activityResult.data.worldState;
 
       // Process rewards from completed activities
-      if (activityResult.data.rewards.length > 0) {
+      if (hadActivitiesCompleted) {
         stateChanges.push("activities_completed");
         this.processActivityRewards(activityResult.data.rewards, actions, stateChanges);
+      }
 
-        // Reset pet state to idle if it was exploring and no more activities
-        if (this.gameState.currentPet?.state === "exploring" && this.gameState.world.activeActivities.length === 0) {
-          this.gameState.currentPet.state = "idle";
-          stateChanges.push("pet_state_reset_to_idle");
-        }
+      // Reset pet state to idle if it was exploring and activities completed but no more remain
+      if (
+        hadActivitiesCompleted &&
+        this.gameState.currentPet?.state === "exploring" &&
+        this.gameState.world.activeActivities.length === 0
+      ) {
+        this.gameState.currentPet.state = "idle";
+        stateChanges.push("pet_state_reset_to_idle");
       }
     }
   }
