@@ -80,7 +80,7 @@ export class BattleSystem {
       const battle: Battle = {
         id: `battle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: battleType,
-        status: "waiting",
+        status: "in_progress", // Changed from "waiting" to "in_progress" to show move selection immediately
         playerPet: battlePlayerPet,
         opponentPet: battleOpponentPet,
         currentTurn: 1,
