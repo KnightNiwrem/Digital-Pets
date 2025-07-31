@@ -241,10 +241,12 @@ export class GameLoop {
 
   /**
    * Process battle-related mechanics for this tick
+   * Note: Battles in this game are turn-based rather than tick-based,
+   * so no continuous processing is needed during regular game ticks.
    */
   private processBattleTick(_actions: GameAction[], _stateChanges: string[]): void {
-    // Battle processing would be implemented here
-    // For now, just a placeholder
+    // Battles are handled entirely through user actions in the BattleSystem
+    // No continuous tick processing required for turn-based battle mechanics
   }
 
   /**
@@ -511,7 +513,7 @@ export class GameLoop {
 
       if (activity.ticksRemaining <= 0) {
         majorEvents.push("activity_completed");
-        // Note: Actual reward distribution would need ItemSystem implementation
+        // Distribute activity rewards using ItemSystem
         return false; // Remove completed activity
       }
 
