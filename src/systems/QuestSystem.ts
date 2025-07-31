@@ -184,11 +184,27 @@ export class QuestSystem {
     // Update progress
     const currentAmount = objective.currentAmount || 0;
     const targetAmount = objective.targetAmount || 1;
-    objective.currentAmount = Math.min(currentAmount + amount, targetAmount);
+
+    // Handle both positive and negative target amounts correctly
+    if (targetAmount >= 0) {
+      // Positive target: clamp upward (collecting items)
+      objective.currentAmount = Math.min(currentAmount + amount, targetAmount);
+    } else {
+      // Negative target: clamp downward (selling/losing items)
+      objective.currentAmount = Math.max(currentAmount + amount, targetAmount);
+    }
 
     // Check if objective is now complete
-    if (objective.currentAmount >= targetAmount) {
-      objective.completed = true;
+    if (targetAmount >= 0) {
+      // Positive target: complete when we reach or exceed the target
+      if (objective.currentAmount >= targetAmount) {
+        objective.completed = true;
+      }
+    } else {
+      // Negative target: complete when we reach or go below the target
+      if (objective.currentAmount <= targetAmount) {
+        objective.completed = true;
+      }
     }
 
     const action: QuestAction = {
