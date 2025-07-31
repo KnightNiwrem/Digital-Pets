@@ -3,8 +3,9 @@
 import type { Item, Inventory, InventorySlot, ItemUsage, DurabilityItem } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
 import type { Result } from "@/types";
-import { PetValidator } from "@/lib/utils";
+import { PetValidator, GameMath } from "@/lib/utils";
 import { ITEM_CONSTANTS } from "@/types/Item";
+import { PET_CONSTANTS } from "@/types/Pet";
 import { getItemById } from "@/data/items";
 
 export class ItemSystem {
@@ -332,27 +333,42 @@ export class ItemSystem {
 
     for (const effect of item.effects) {
       switch (effect.type) {
-        case "satiety":
-          updatedPet.satiety = Math.min(100, updatedPet.satiety + effect.value);
-          updatedPet.satietyTicksLeft = Math.min(updatedPet.satietyTicksLeft + effect.value * 10, 1000);
-          messages.push(`Restored ${effect.value} satiety`);
-          break;
-
-        case "hydration":
-          updatedPet.hydration = Math.min(100, updatedPet.hydration + effect.value);
-          updatedPet.hydrationTicksLeft = Math.min(updatedPet.hydrationTicksLeft + effect.value * 10, 1000);
-          messages.push(`Restored ${effect.value} hydration`);
-          break;
-
-        case "happiness":
-          updatedPet.happiness = Math.min(100, updatedPet.happiness + effect.value);
-          updatedPet.happinessTicksLeft = Math.min(updatedPet.happinessTicksLeft + effect.value * 10, 1000);
-          // Using toy costs energy
-          if (item.type === "toy") {
-            updatedPet.currentEnergy = Math.max(0, updatedPet.currentEnergy - 10);
+        case "satiety": {
+          const actualIncrease = Math.min(effect.value, 100 - updatedPet.satiety);
+          if (actualIncrease > 0) {
+            const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.SATIETY);
+            updatedPet.satietyTicksLeft = GameMath.addToStat(updatedPet.satietyTicksLeft, tickIncrease, 15000);
+            updatedPet.satiety = GameMath.calculateSatietyDisplay(updatedPet.satietyTicksLeft);
+            messages.push(`Restored ${actualIncrease} satiety`);
           }
-          messages.push(`Increased happiness by ${effect.value}`);
           break;
+        }
+
+        case "hydration": {
+          const actualIncrease = Math.min(effect.value, 100 - updatedPet.hydration);
+          if (actualIncrease > 0) {
+            const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION);
+            updatedPet.hydrationTicksLeft = GameMath.addToStat(updatedPet.hydrationTicksLeft, tickIncrease, 12000);
+            updatedPet.hydration = GameMath.calculateHydrationDisplay(updatedPet.hydrationTicksLeft);
+            messages.push(`Restored ${actualIncrease} hydration`);
+          }
+          break;
+        }
+
+        case "happiness": {
+          const actualIncrease = Math.min(effect.value, 100 - updatedPet.happiness);
+          if (actualIncrease > 0) {
+            const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
+            updatedPet.happinessTicksLeft = GameMath.addToStat(updatedPet.happinessTicksLeft, tickIncrease, 18000);
+            updatedPet.happiness = GameMath.calculateHappinessDisplay(updatedPet.happinessTicksLeft);
+            // Using toy costs energy
+            if (item.type === "toy") {
+              updatedPet.currentEnergy = Math.max(0, updatedPet.currentEnergy - 10);
+            }
+            messages.push(`Increased happiness by ${actualIncrease}`);
+          }
+          break;
+        }
 
         case "energy":
           updatedPet.currentEnergy = Math.min(updatedPet.maxEnergy, updatedPet.currentEnergy + effect.value);

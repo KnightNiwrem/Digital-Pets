@@ -32,9 +32,9 @@ describe("ItemSystem", () => {
       species: testSpecies,
       rarity: "common",
       growthStage: 1,
-      satiety: 50,
-      hydration: 50,
-      happiness: 50,
+      satiety: 5,  // Math.ceil(500 / 100) = 5
+      hydration: 7, // Math.ceil(500 / 80) = 7
+      happiness: 5, // Math.ceil(500 / 120) = 5
       satietyTicksLeft: 500,
       hydrationTicksLeft: 500,
       happinessTicksLeft: 500,
@@ -316,12 +316,12 @@ describe("ItemSystem", () => {
       it("should apply satiety effects correctly", () => {
         const result = ItemSystem.applyItemEffects(testPet, apple);
         expect(result.success).toBe(true);
-        expect(result.data!.satiety).toBe(75); // 50 + 25
-        expect(result.data!.satietyTicksLeft).toBe(750); // 500 + (25 * 10)
+        expect(result.data!.satiety).toBe(30); // Math.ceil((500 + 25*100) / 100) = 30
+        expect(result.data!.satietyTicksLeft).toBe(3000); // 500 + (25 * 100)
       });
 
       it("should cap satiety at maximum", () => {
-        const fullPet = { ...testPet, satiety: 90 };
+        const fullPet = { ...testPet, satiety: 90, satietyTicksLeft: 9000 };
         const result = ItemSystem.applyItemEffects(fullPet, apple);
         expect(result.success).toBe(true);
         expect(result.data!.satiety).toBe(100); // capped at 100
@@ -330,7 +330,7 @@ describe("ItemSystem", () => {
       it("should apply happiness effects and consume energy for toys", () => {
         const result = ItemSystem.applyItemEffects(testPet, ball);
         expect(result.success).toBe(true);
-        expect(result.data!.happiness).toBe(80); // 50 + 30
+        expect(result.data!.happiness).toBe(35); // Math.ceil((500 + 30*120) / 120) = 35
         expect(result.data!.currentEnergy).toBe(40); // 50 - 10
       });
 
@@ -371,7 +371,7 @@ describe("ItemSystem", () => {
       it("should successfully use consumable item", () => {
         const result = ItemSystem.useItem(testInventory, testPet, "apple");
         expect(result.success).toBe(true);
-        expect(result.data!.pet.satiety).toBe(75);
+        expect(result.data!.pet.satiety).toBe(30);
         expect(result.data!.inventory.slots[0].quantity).toBe(2); // reduced from 3
         expect(result.data!.usage.success).toBe(true);
       });
@@ -379,7 +379,7 @@ describe("ItemSystem", () => {
       it("should successfully use durability item", () => {
         const result = ItemSystem.useItem(testInventory, testPet, "ball");
         expect(result.success).toBe(true);
-        expect(result.data!.pet.happiness).toBe(80);
+        expect(result.data!.pet.happiness).toBe(35);
         expect(result.data!.pet.currentEnergy).toBe(40);
         
         // Check durability reduced
