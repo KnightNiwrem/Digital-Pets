@@ -20,7 +20,7 @@ export interface UseGameStateReturn {
   error: string | null;
 
   // Game management
-  startNewGame: (starterPetName?: string) => Promise<void>;
+  startNewGame: (starterPetName?: string, starterSpeciesId?: string) => Promise<void>;
   loadExistingGame: () => Promise<void>;
   saveGame: () => Promise<Result<void>>;
 
@@ -156,16 +156,13 @@ export function useGameState(): UseGameStateReturn {
   );
 
   // Game management functions
-  const startNewGame = useCallback(async (starterPetName = "Buddy"): Promise<void> => {
+  const startNewGame = useCallback(async (starterPetName = "Buddy", starterSpeciesId?: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Create new game state with starter pet
-      const newGameState = GameStateFactory.createTestGame();
-      if (newGameState.currentPet) {
-        newGameState.currentPet.name = starterPetName;
-      }
+      // Create new game state with proper starter pet
+      const newGameState = GameStateFactory.createNewGameWithStarter(starterPetName, starterSpeciesId);
 
       // Initialize game loop
       if (gameLoopRef.current) {

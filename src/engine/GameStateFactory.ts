@@ -5,6 +5,7 @@ import { GAME_CONSTANTS, DEFAULT_GAME_SETTINGS, DEFAULT_PLAYER_STATS } from "@/t
 import { WorldSystem } from "@/systems/WorldSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { getItemById } from "@/data/items";
+import { getStarterPets } from "@/data/pets";
 
 export class GameStateFactory {
   /**
@@ -71,6 +72,28 @@ export class GameStateFactory {
       achievements: {},
       notifications: [],
     };
+  }
+
+  /**
+   * Create a new game state with a specific starter pet
+   */
+  static createNewGameWithStarter(starterPetName: string = "Buddy", starterSpeciesId?: string): GameState {
+    const starterPets = getStarterPets();
+
+    // Find the specified starter pet species, or default to the first one
+    let chosenSpecies = starterPets[0]; // Default to Wild Beast
+    if (starterSpeciesId) {
+      const foundSpecies = starterPets.find(species => species.id === starterSpeciesId);
+      if (foundSpecies) {
+        chosenSpecies = foundSpecies;
+      }
+    }
+
+    // Create the starter pet
+    const starterPet = this.createStarterPet(chosenSpecies, starterPetName);
+
+    // Create and return the new game state
+    return this.createNewGame(starterPet);
   }
 
   /**

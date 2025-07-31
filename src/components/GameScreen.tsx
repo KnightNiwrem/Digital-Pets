@@ -12,6 +12,8 @@ import { QuestScreen } from "@/components/quest/QuestScreen";
 import { useGameState } from "@/hooks/useGameState";
 import { useBattleState } from "@/hooks/useBattleState";
 import type { BattleAction } from "@/types/Battle";
+import type { PetSpecies } from "@/types/Pet";
+import { getStarterPets } from "@/data/pets";
 import { Home, Map as MapIcon, Package, Sword, ScrollText } from "lucide-react";
 
 export function GameScreen() {
@@ -59,7 +61,11 @@ export function GameScreen() {
 
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
+  const [selectedStarter, setSelectedStarter] = useState<PetSpecies | null>(null);
   const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle" | "quest">("pet");
+
+  // Get starter pets
+  const starterPets = getStarterPets();
 
   // World action handlers - now using enhanced autosave from useGameState
   const handleTravel = async (destinationId: string) => {
@@ -171,8 +177,10 @@ export function GameScreen() {
   }, [hasExistingSave, gameStarted, loadExistingGame]);
 
   const handleNewGame = async () => {
+    if (!selectedStarter) return;
+
     setGameStarted(true);
-    await startNewGame(petName);
+    await startNewGame(petName, selectedStarter.id);
   };
 
   const handleLoadGame = async () => {
@@ -222,6 +230,39 @@ export function GameScreen() {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-center">Start New Game</h3>
 
+                  {/* Starter Pet Selection */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">Choose Your Starter Pet:</label>
+                    <div className="grid grid-cols-1 gap-3">
+                      {starterPets.map(species => (
+                        <div
+                          key={species.id}
+                          onClick={() => setSelectedStarter(species)}
+                          className={`p-3 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                            selectedStarter?.id === species.id
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="text-2xl">🐾</div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-sm">{species.name}</h4>
+                              <p className="text-xs text-gray-600 mt-1">{species.description}</p>
+                              <div className="flex gap-2 mt-2 text-xs">
+                                <span className="px-2 py-1 bg-gray-100 rounded">ATK: {species.baseStats.attack}</span>
+                                <span className="px-2 py-1 bg-gray-100 rounded">DEF: {species.baseStats.defense}</span>
+                                <span className="px-2 py-1 bg-gray-100 rounded">SPD: {species.baseStats.speed}</span>
+                                <span className="px-2 py-1 bg-gray-100 rounded">HP: {species.baseStats.health}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pet Name Input */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Pet Name:</label>
                     <input
@@ -234,7 +275,12 @@ export function GameScreen() {
                     />
                   </div>
 
-                  <Button onClick={handleNewGame} className="w-full" size="lg" disabled={!petName.trim()}>
+                  <Button
+                    onClick={handleNewGame}
+                    className="w-full"
+                    size="lg"
+                    disabled={!petName.trim() || !selectedStarter}
+                  >
                     Start New Adventure
                   </Button>
                 </div>
