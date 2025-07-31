@@ -518,6 +518,12 @@ export class GameLoop {
       return true; // Keep ongoing activity
     });
 
+    // Reset pet state to idle if it was exploring and activities completed but no more remain
+    if (hadActivities && gameState.world.activeActivities.length === 0 && gameState.currentPet?.state === "exploring") {
+      gameState.currentPet.state = "idle";
+      majorEvents.push("pet_state_reset_to_idle");
+    }
+
     // Reset pet state to idle if it was exploring and no more activities
     if (hadActivities && gameState.currentPet?.state === "exploring" && gameState.world.activeActivities.length === 0) {
       gameState.currentPet.state = "idle";
