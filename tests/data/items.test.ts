@@ -13,7 +13,7 @@ describe("Item Data Expansion", () => {
   describe("Total Item Count", () => {
     it("should have significantly more items than the original 12", () => {
       expect(ITEMS.length).toBeGreaterThan(30);
-      expect(ITEMS.length).toBeLessThanOrEqual(50); // reasonable upper bound
+      expect(ITEMS.length).toBeLessThanOrEqual(60); // increased upper bound for maritime items
     });
 
     it("should have variety across all item types", () => {
@@ -209,7 +209,7 @@ describe("Item Data Expansion", () => {
 
       expect(minDurability).toBeGreaterThan(0);
       expect(maxDurability).toBeGreaterThan(minDurability);
-      expect(maxDurability).toBeLessThanOrEqual(50); // reasonable upper bound
+      expect(maxDurability).toBeLessThanOrEqual(100); // increased for maritime equipment
     });
 
     it("should have appropriate value progression within categories", () => {

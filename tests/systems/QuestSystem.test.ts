@@ -877,6 +877,180 @@ describe("QuestSystem", () => {
     });
   });
 
+  // The Great Discovery Quest Chain Extended Tests
+  describe("The Great Discovery Quest Chain - Parts 3 & 4", () => {
+    it("should have valid quest chain structure for parts 3 and 4", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+
+      expect(part3).toBeDefined();
+      expect(part4).toBeDefined();
+
+      // Check quest chain progression
+      expect(part3?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "the_great_discovery_part2" })
+      );
+      expect(part4?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "the_great_discovery_part3" })
+      );
+
+      // Check that part3 unlocks part4
+      expect(part3?.rewards).toContainEqual(
+        expect.objectContaining({ type: "unlock_quest", questId: "the_great_discovery_part4" })
+      );
+    });
+
+    it("should have escalating rewards for final quest parts", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+
+      // Part 3 should have significant rewards
+      expect(part3?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "experience", amount: 100 }),
+          expect.objectContaining({ type: "item", itemId: "energy_crystal", amount: 3 }),
+          expect.objectContaining({ type: "item", itemId: "ancient_key", amount: 1 }),
+          expect.objectContaining({ type: "gold", amount: 200 }),
+        ])
+      );
+
+      // Part 4 should have legendary rewards
+      expect(part4?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "experience", amount: 150 }),
+          expect.objectContaining({ type: "item", itemId: "legendary_artifact", amount: 1 }),
+          expect.objectContaining({ type: "item", itemId: "ancient_potion", amount: 2 }),
+          expect.objectContaining({ type: "item", itemId: "mystic_charm", amount: 1 }),
+          expect.objectContaining({ type: "gold", amount: 500 }),
+        ])
+      );
+    });
+
+    it("should have appropriate quest objectives for ancient ruins exploration", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+      
+      // Part 3 objectives
+      expect(part3?.objectives).toHaveLength(4);
+      expect(part3?.objectives[0].type).toBe("visit_location");
+      expect(part3?.objectives[0].locationId).toBe("ancient_ruins");
+      expect(part3?.objectives[1].type).toBe("collect_item");
+      expect(part3?.objectives[1].itemId).toBe("ancient_relic");
+      expect(part3?.objectives[1].targetAmount).toBe(5);
+      
+      // Part 4 objectives (finale)
+      expect(part4?.objectives).toHaveLength(4);
+      expect(part4?.objectives[0].type).toBe("collect_item");
+      expect(part4?.objectives[0].itemId).toBe("guardian_essence");
+      expect(part4?.objectives[0].targetAmount).toBe(5);
+      expect(part4?.objectives[3].itemId).toBe("legendary_artifact");
+    });
+
+    it("should have correct NPCs and locations for parts 3 and 4", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+
+      expect(part3?.npcId).toBe("archaeologist_vera");
+      expect(part3?.location).toBe("ancient_ruins");
+      expect(part4?.npcId).toBe("guardian_spirit_aeon");
+      expect(part4?.location).toBe("ancient_ruins");
+
+      // Should be main quest with proper chapter progression
+      expect(part3?.isMainQuest).toBe(true);
+      expect(part3?.chapter).toBe(4);
+      expect(part3?.order).toBe(1);
+      expect(part4?.isMainQuest).toBe(true);
+      expect(part4?.chapter).toBe(4);
+      expect(part4?.order).toBe(2);
+    });
+  });
+
+  // Coastal Harbor Quest Chain Tests
+  describe("Coastal Harbor Quest Chain", () => {
+    it("should have valid harbor quest structure", () => {
+      const harborIntegration = getQuestById("harbor_integration");
+      const tradingApprentice = getQuestById("trading_apprentice");
+      const masterAngler = getQuestById("master_angler");
+      const deepSeaExpedition = getQuestById("deep_sea_expedition");
+
+      expect(harborIntegration).toBeDefined();
+      expect(tradingApprentice).toBeDefined();
+      expect(masterAngler).toBeDefined();
+      expect(deepSeaExpedition).toBeDefined();
+
+      // Check quest chain progression
+      expect(tradingApprentice?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "harbor_integration" })
+      );
+      expect(deepSeaExpedition?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "master_angler" })
+      );
+      expect(deepSeaExpedition?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "trading_apprentice" })
+      );
+    });
+
+    it("should have appropriate maritime rewards", () => {
+      const harborIntegration = getQuestById("harbor_integration");
+      const deepSeaExpedition = getQuestById("deep_sea_expedition");
+
+      // Harbor integration should provide navigation tools
+      expect(harborIntegration?.rewards).toContainEqual(
+        expect.objectContaining({ type: "item", itemId: "navigation_compass" })
+      );
+
+      // Deep sea expedition should have legendary rewards
+      expect(deepSeaExpedition?.rewards).toContainEqual(
+        expect.objectContaining({ type: "item", itemId: "legendary_artifact" })
+      );
+      expect(deepSeaExpedition?.rewards).toContainEqual(
+        expect.objectContaining({ type: "item", itemId: "pearl", amount: 5 })
+      );
+      expect(deepSeaExpedition?.rewards).toContainEqual(
+        expect.objectContaining({ type: "gold", amount: 500 })
+      );
+    });
+
+    it("should have correct maritime quest objectives", () => {
+      const masterAngler = getQuestById("master_angler");
+      const tradingApprentice = getQuestById("trading_apprentice");
+      
+      // Master angler should focus on deep sea fishing
+      expect(masterAngler?.objectives[0].itemId).toBe("exotic_fish");
+      expect(masterAngler?.objectives[0].targetAmount).toBe(8);
+      expect(masterAngler?.objectives[1].itemId).toBe("pearl");
+      
+      // Trading apprentice should focus on trade activities
+      expect(tradingApprentice?.objectives[0].itemId).toBe("trade_permit");
+      expect(tradingApprentice?.objectives[1].itemId).toBe("exotic_spice");
+      expect(tradingApprentice?.objectives[2].itemId).toBe("pearl");
+    });
+
+    it("should have correct NPCs and locations for harbor quests", () => {
+      const harborIntegration = getQuestById("harbor_integration");
+      const tradingApprentice = getQuestById("trading_apprentice");
+      const masterAngler = getQuestById("master_angler");
+      const deepSeaExpedition = getQuestById("deep_sea_expedition");
+
+      expect(harborIntegration?.npcId).toBe("harbor_master_thaddeus");
+      expect(harborIntegration?.location).toBe("coastal_harbor");
+      
+      expect(tradingApprentice?.npcId).toBe("merchant_captain_elena");
+      expect(tradingApprentice?.location).toBe("coastal_harbor");
+      
+      expect(masterAngler?.npcId).toBe("fishmonger_barnabus");
+      expect(masterAngler?.location).toBe("coastal_harbor");
+      
+      expect(deepSeaExpedition?.npcId).toBe("harbor_master_thaddeus");
+      expect(deepSeaExpedition?.location).toBe("coastal_harbor");
+
+      // Check chapter progression
+      expect(deepSeaExpedition?.isMainQuest).toBe(true);
+      expect(deepSeaExpedition?.chapter).toBe(5);
+      expect(deepSeaExpedition?.order).toBe(1);
+    });
+  });
+
   describe("Negative targetAmount handling", () => {
     let gameState: GameState;
     let miningTutorialQuest: Quest;

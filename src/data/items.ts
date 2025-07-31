@@ -579,6 +579,111 @@ const ANCIENT_RELIC: ConsumableItem = {
   stackable: true,
 };
 
+// Ancient Ruins items for end-game content
+const ANCIENT_KEY: ConsumableItem = {
+  id: "ancient_key",
+  name: "Ancient Key",
+  description: "A crystalline key that unlocks the deepest chambers of ancient ruins.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_ancient_key",
+  effects: [{ type: "energy", value: 50 }],
+  value: 300,
+  stackable: true,
+};
+
+const WISDOM_SCROLL: ConsumableItem = {
+  id: "wisdom_scroll",
+  name: "Wisdom Scroll",
+  description: "An ancient scroll containing profound knowledge that enhances understanding.",
+  type: "special",
+  rarity: "rare",
+  icon: "item_wisdom_scroll",
+  effects: [
+    { type: "experience_bonus", value: 25 },
+    { type: "happiness", value: 30 },
+  ],
+  value: 120,
+  stackable: true,
+};
+
+const LEGENDARY_ARTIFACT: ConsumableItem = {
+  id: "legendary_artifact",
+  name: "Legendary Artifact",
+  description: "An incredibly rare artifact of immense power from the dawn of civilization.",
+  type: "special",
+  rarity: "legendary",
+  icon: "item_legendary_artifact",
+  effects: [
+    { type: "satiety", value: 150 },
+    { type: "hydration", value: 150 },
+    { type: "happiness", value: 150 },
+    { type: "energy", value: 150 },
+    { type: "experience_bonus", value: 100 },
+  ],
+  value: 1000,
+  stackable: true,
+};
+
+const GUARDIAN_ESSENCE: ConsumableItem = {
+  id: "guardian_essence",
+  name: "Guardian Essence",
+  description: "A glowing essence extracted from ancient guardians, pulsing with protective energy.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_guardian_essence",
+  effects: [
+    { type: "energy", value: 75 },
+    { type: "happiness", value: 50 },
+  ],
+  value: 250,
+  stackable: true,
+};
+
+const ANCIENT_POTION: ConsumableItem = {
+  id: "ancient_potion",
+  name: "Ancient Potion",
+  description: "A potent elixir brewed using secrets from a lost civilization.",
+  type: "medicine",
+  rarity: "legendary",
+  icon: "item_ancient_potion",
+  effects: [
+    { type: "full_heal", value: 1 },
+    { type: "satiety", value: 100 },
+    { type: "hydration", value: 100 },
+    { type: "energy", value: 100 },
+  ],
+  value: 400,
+  stackable: true,
+};
+
+const MYSTIC_CHARM: DurabilityItem = {
+  id: "mystic_charm",
+  name: "Mystic Charm",
+  description: "A mystical amulet that provides ongoing benefits to its bearer.",
+  type: "equipment",
+  rarity: "epic",
+  icon: "item_mystic_charm",
+  effects: [{ type: "happiness_boost", value: 15 }],
+  value: 300,
+  stackable: false,
+  maxDurability: 50,
+  currentDurability: 50,
+  durabilityLossPerUse: 1,
+};
+
+const ENERGY_CRYSTAL: ConsumableItem = {
+  id: "energy_crystal",
+  name: "Energy Crystal",
+  description: "A crystal that radiates pure energy, perfect for restoring vitality.",
+  type: "special",
+  rarity: "rare",
+  icon: "item_energy_crystal",
+  effects: [{ type: "energy", value: 100 }],
+  value: 150,
+  stackable: true,
+};
+
 const GROWTH_SEED: ConsumableItem = {
   id: "growth_seed",
   name: "Growth Seed",
@@ -588,6 +693,133 @@ const GROWTH_SEED: ConsumableItem = {
   icon: "item_growth_seed",
   effects: [{ type: "growth_bonus", value: 1 }],
   value: 150,
+  stackable: true,
+};
+
+// Coastal Harbor maritime items
+const EXOTIC_FISH: ConsumableItem = {
+  id: "exotic_fish",
+  name: "Exotic Fish",
+  description: "A rare deep-sea fish with vibrant colors and exceptional nutritional value.",
+  type: "consumable",
+  rarity: "rare",
+  icon: "item_exotic_fish",
+  effects: [
+    { type: "satiety", value: 70 },
+    { type: "happiness", value: 40 },
+  ],
+  value: 85,
+  stackable: true,
+};
+
+const PEARL: ConsumableItem = {
+  id: "pearl",
+  name: "Ocean Pearl",
+  description: "A lustrous pearl from the deep ocean, said to bring good fortune.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_pearl",
+  effects: [
+    { type: "happiness", value: 60 },
+    { type: "luck_bonus", value: 10 },
+  ],
+  value: 200,
+  stackable: true,
+};
+
+const NAVIGATION_COMPASS: DurabilityItem = {
+  id: "navigation_compass",
+  name: "Navigation Compass",
+  description: "A precision compass used by skilled navigators for long sea voyages.",
+  type: "equipment",
+  rarity: "rare",
+  icon: "item_navigation_compass",
+  effects: [{ type: "exploration_bonus", value: 20 }],
+  value: 180,
+  stackable: false,
+  maxDurability: 100,
+  currentDurability: 100,
+  durabilityLossPerUse: 2,
+};
+
+const SEA_SALT: ConsumableItem = {
+  id: "sea_salt",
+  name: "Sea Salt",
+  description: "Pure sea salt harvested from coastal waters, perfect for food preparation.",
+  type: "special",
+  rarity: "common",
+  icon: "item_sea_salt",
+  effects: [{ type: "satiety", value: 10 }],
+  value: 15,
+  stackable: true,
+};
+
+const KELP_SUPPLEMENT: ConsumableItem = {
+  id: "kelp_supplement",
+  name: "Kelp Supplement",
+  description: "Nutritious kelp supplement rich in vitamins and minerals from the sea.",
+  type: "medicine",
+  rarity: "uncommon",
+  icon: "item_kelp_supplement",
+  effects: [
+    { type: "health", value: 30 },
+    { type: "hydration", value: 25 },
+  ],
+  value: 35,
+  stackable: true,
+};
+
+const MARITIME_ROPE: ConsumableItem = {
+  id: "maritime_rope",
+  name: "Maritime Rope",
+  description: "Strong rope used in ship operations, useful for various activities.",
+  type: "special",
+  rarity: "common",
+  icon: "item_rope",
+  effects: [{ type: "exploration_bonus", value: 5 }],
+  value: 20,
+  stackable: true,
+};
+
+const SHIP_TOOLS: DurabilityItem = {
+  id: "ship_tools",
+  name: "Ship Maintenance Tools",
+  description: "A set of specialized tools for ship repair and maintenance work.",
+  type: "equipment",
+  rarity: "uncommon",
+  icon: "item_ship_tools",
+  effects: [{ type: "training_bonus", value: 15 }],
+  value: 60,
+  stackable: false,
+  maxDurability: 80,
+  currentDurability: 80,
+  durabilityLossPerUse: 3,
+};
+
+const TRADE_PERMIT: ConsumableItem = {
+  id: "trade_permit",
+  name: "Trade Permit",
+  description: "An official document allowing participation in high-value trade negotiations.",
+  type: "special",
+  rarity: "rare",
+  icon: "item_trade_permit",
+  effects: [{ type: "luck_bonus", value: 25 }],
+  value: 100,
+  stackable: true,
+};
+
+const EXOTIC_SPICE: ConsumableItem = {
+  id: "exotic_spice",
+  name: "Exotic Spice",
+  description: "Rare spices from distant lands that enhance the flavor of any meal.",
+  type: "consumable",
+  rarity: "uncommon",
+  icon: "item_exotic_spice",
+  effects: [
+    { type: "satiety", value: 15 },
+    { type: "happiness", value: 30 },
+  ],
+  value: 45,
   stackable: true,
 };
 
@@ -649,7 +881,25 @@ export const ITEMS: Item[] = [
   // Special items
   CRYSTAL_FRAGMENT,
   ANCIENT_RELIC,
+  ANCIENT_KEY,
+  WISDOM_SCROLL,
+  LEGENDARY_ARTIFACT,
+  GUARDIAN_ESSENCE,
+  ANCIENT_POTION,
+  MYSTIC_CHARM,
+  ENERGY_CRYSTAL,
   GROWTH_SEED,
+
+  // Maritime items
+  EXOTIC_FISH,
+  PEARL,
+  NAVIGATION_COMPASS,
+  SEA_SALT,
+  KELP_SUPPLEMENT,
+  MARITIME_ROPE,
+  SHIP_TOOLS,
+  TRADE_PERMIT,
+  EXOTIC_SPICE,
 ];
 
 // Helper function to get item by ID
