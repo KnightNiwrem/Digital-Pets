@@ -12,6 +12,17 @@ describe("Location Data Validation", () => {
       expect(location?.name).toBe("Hometown");
     });
 
+    it("should return mountain village location", () => {
+      const location = getLocationById("mountain_village");
+      expect(location).toBeDefined();
+      expect(location?.id).toBe("mountain_village");
+      expect(location?.name).toBe("Mountain Village");
+      expect(location?.type).toBe("town");
+      expect(location?.activities).toHaveLength(3);
+      expect(location?.shops).toHaveLength(2);
+      expect(location?.npcs).toHaveLength(3);
+    });
+
     it("should return undefined for invalid location ID", () => {
       const location = getLocationById("invalid_location");
       expect(location).toBeUndefined();
@@ -33,6 +44,23 @@ describe("Location Data Validation", () => {
       expect(npc?.id).toBe("shopkeeper_sam");
       expect(npc?.name).toBe("Sam");
       expect(npc?.description).toBe("The friendly owner of the general store");
+    });
+
+    it("should return NPC data for mountain village NPCs", () => {
+      const blacksmith = getNpcById("blacksmith_thor");
+      expect(blacksmith).toBeDefined();
+      expect(blacksmith?.id).toBe("blacksmith_thor");
+      expect(blacksmith?.name).toBe("Thor the Blacksmith");
+      
+      const guide = getNpcById("mining_guide_elena");
+      expect(guide).toBeDefined();
+      expect(guide?.id).toBe("mining_guide_elena");
+      expect(guide?.name).toBe("Elena the Mining Guide");
+      
+      const elder = getNpcById("village_elder_magnus");
+      expect(elder).toBeDefined();
+      expect(elder?.id).toBe("village_elder_magnus");
+      expect(elder?.name).toBe("Elder Magnus");
     });
 
     it("should return NPC data for valid forest_ranger", () => {
@@ -73,6 +101,17 @@ describe("Location Data Validation", () => {
         expect(dest.id).toBeDefined();
         expect(dest.name).toBeDefined();
       });
+    });
+
+    it("should return available destinations from forest path including mountain village", () => {
+      const destinations = getAvailableDestinations("forest_path");
+      expect(destinations).toBeDefined();
+      expect(destinations.length).toBe(3);
+      
+      const destinationIds = destinations.map(dest => dest.id);
+      expect(destinationIds).toContain("hometown");
+      expect(destinationIds).toContain("riverside");
+      expect(destinationIds).toContain("mountain_village");
     });
 
     it("should return empty array for invalid location", () => {

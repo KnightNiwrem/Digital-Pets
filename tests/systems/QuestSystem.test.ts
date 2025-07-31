@@ -822,4 +822,205 @@ describe("QuestSystem", () => {
       expect(result.data!.world.unlockedLocations.length).toBe(initialLocations.length + 1);
     });
   });
+
+  // Mountain Village Quest Chain Tests
+  describe("Mountain Village Quest Chain", () => {
+    it("should have valid quest chain structure", () => {
+      const part1 = getQuestById("the_great_discovery_part1");
+      const part2 = getQuestById("the_great_discovery_part2");
+      const miningTutorial = getQuestById("mountain_mining_tutorial");
+      const safetyLesson = getQuestById("mining_safety_lesson");
+
+      expect(part1).toBeDefined();
+      expect(part2).toBeDefined();
+      expect(miningTutorial).toBeDefined();
+      expect(safetyLesson).toBeDefined();
+
+      // Check quest chain progression
+      expect(part2?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "the_great_discovery_part1" })
+      );
+      expect(safetyLesson?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "mountain_mining_tutorial" })
+      );
+    });
+
+    it("should have appropriate rewards for quest difficulty", () => {
+      const part1 = getQuestById("the_great_discovery_part1");
+      const part2 = getQuestById("the_great_discovery_part2");
+
+      // Part 1 should have meaningful rewards
+      expect(part1?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "experience", amount: 50 }),
+          expect.objectContaining({ type: "item", itemId: "ancient_relic" }),
+          expect.objectContaining({ type: "gold", amount: 100 }),
+        ])
+      );
+
+      // Part 2 should unlock location and have greater rewards
+      expect(part2?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "unlock_location", locationId: "ancient_ruins" }),
+          expect.objectContaining({ type: "experience", amount: 75 }),
+        ])
+      );
+    });
+
+    it("should have valid quest objectives", () => {
+      const miningTutorial = getQuestById("mountain_mining_tutorial");
+      
+      expect(miningTutorial?.objectives).toHaveLength(3);
+      expect(miningTutorial?.objectives[0].type).toBe("collect_item");
+      expect(miningTutorial?.objectives[0].itemId).toBe("pickaxe");
+      expect(miningTutorial?.objectives[1].itemId).toBe("iron_ore");
+    });
+  });
+
+  describe("Negative targetAmount handling", () => {
+    let gameState: GameState;
+    let miningTutorialQuest: Quest;
+
+    beforeEach(() => {
+      gameState = createMockGameState();
+      miningTutorialQuest = getQuestById("mountain_mining_tutorial")!;
+      
+      // Meet the quest requirements
+      gameState.questLog = QuestSystem.initializeQuestLog();
+      gameState.questLog.completedQuests.push("fishing_lesson");
+      if (gameState.currentPet) {
+        gameState.currentPet.growthStage = 10; // High enough for level requirement
+      }
+      
+      // Start the mining tutorial quest
+      const startResult = QuestSystem.startQuest(miningTutorialQuest, gameState);
+      if (startResult.success && startResult.data) {
+        gameState.questLog = startResult.data.questLog;
+      }
+    });
+
+    it("should handle positive targetAmount correctly", () => {
+      // Test the first objective (buy pickaxe) - positive target
+      const buyPickaxeObjective = miningTutorialQuest.objectives[0];
+      expect(buyPickaxeObjective.targetAmount).toBe(1);
+      
+      // Update progress incrementally
+      let result = QuestSystem.updateObjectiveProgress(
+        miningTutorialQuest.id,
+        buyPickaxeObjective.id,
+        1,
+        gameState
+      );
+      
+      expect(result.success).toBe(true);
+      
+      // Check progress
+      const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      const objective = questProgress!.objectives.find(obj => obj.id === buyPickaxeObjective.id);
+      
+      expect(objective!.currentAmount).toBe(1);
+      expect(objective!.completed).toBe(true);
+    });
+
+    it("should handle negative targetAmount correctly (selling items)", () => { 
+      // Test the sell_ore objective - negative target
+      const sellOreObjective = miningTutorialQuest.objectives[2];
+      expect(sellOreObjective.targetAmount).toBe(-3);
+      expect(sellOreObjective.currentAmount).toBe(0);
+      
+      // Simulate selling items incrementally
+      // First sale: -1 item
+      let result = QuestSystem.updateObjectiveProgress(
+        miningTutorialQuest.id,
+        sellOreObjective.id,
+        -1, // amount is negative when selling
+        gameState
+      );
+      
+      expect(result.success).toBe(true);
+      
+      let questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      let objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
+      
+      expect(objective!.currentAmount).toBe(-1);
+      expect(objective!.completed).toBe(false); // Should not be complete yet
+
+      // Second sale: -1 item (total -2)
+      result = QuestSystem.updateObjectiveProgress(
+        miningTutorialQuest.id,
+        sellOreObjective.id,
+        -1,
+        gameState
+      );
+      
+      expect(result.success).toBe(true);
+      
+      questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
+      
+      expect(objective!.currentAmount).toBe(-2);
+      expect(objective!.completed).toBe(false); // Still not complete
+
+      // Third sale: -1 item (total -3, should complete)
+      result = QuestSystem.updateObjectiveProgress(
+        miningTutorialQuest.id,
+        sellOreObjective.id,
+        -1,
+        gameState
+      );
+      
+      expect(result.success).toBe(true);
+      
+      questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
+      
+      expect(objective!.currentAmount).toBe(-3);
+      expect(objective!.completed).toBe(true); // Now should be complete
+    });
+
+    it("should not allow progress beyond negative target", () => {
+      // Test that selling more than required doesn't go beyond target
+      const sellOreObjective = miningTutorialQuest.objectives[2];
+      
+      // Try to sell 5 items at once (more than the target of -3)
+      const result = QuestSystem.updateObjectiveProgress(
+        miningTutorialQuest.id,
+        sellOreObjective.id,
+        -5, // selling 5 items
+        gameState
+      );
+      
+      expect(result.success).toBe(true);
+      
+      const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      const objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
+      
+      // Should be clamped to the target (-3), not go to -5
+      expect(objective!.currentAmount).toBe(-3);
+      expect(objective!.completed).toBe(true);
+    });
+
+    it("should not allow progress beyond positive target", () => {
+      // Test existing behavior for positive targets
+      const ironOreObjective = miningTutorialQuest.objectives[1];
+      expect(ironOreObjective.targetAmount).toBe(5);
+      
+      // Try to collect 10 items at once (more than the target of 5)
+      const result = QuestSystem.updateObjectiveProgress(
+        miningTutorialQuest.id,
+        ironOreObjective.id,
+        10,
+        gameState
+      );
+      
+      expect(result.success).toBe(true);
+      
+      const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      const objective = questProgress!.objectives.find(obj => obj.id === ironOreObjective.id);
+      
+      // Should be clamped to the target (5), not go to 10
+      expect(objective!.currentAmount).toBe(5);
+      expect(objective!.completed).toBe(true);
+    });
+  });
 });
