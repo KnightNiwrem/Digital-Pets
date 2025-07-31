@@ -579,6 +579,111 @@ const ANCIENT_RELIC: ConsumableItem = {
   stackable: true,
 };
 
+// Ancient Ruins items for end-game content
+const ANCIENT_KEY: ConsumableItem = {
+  id: "ancient_key",
+  name: "Ancient Key",
+  description: "A crystalline key that unlocks the deepest chambers of ancient ruins.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_ancient_key",
+  effects: [{ type: "energy", value: 50 }],
+  value: 300,
+  stackable: true,
+};
+
+const WISDOM_SCROLL: ConsumableItem = {
+  id: "wisdom_scroll",
+  name: "Wisdom Scroll",
+  description: "An ancient scroll containing profound knowledge that enhances understanding.",
+  type: "special",
+  rarity: "rare",
+  icon: "item_wisdom_scroll",
+  effects: [
+    { type: "experience_bonus", value: 25 },
+    { type: "happiness", value: 30 },
+  ],
+  value: 120,
+  stackable: true,
+};
+
+const LEGENDARY_ARTIFACT: ConsumableItem = {
+  id: "legendary_artifact",
+  name: "Legendary Artifact",
+  description: "An incredibly rare artifact of immense power from the dawn of civilization.",
+  type: "special",
+  rarity: "legendary",
+  icon: "item_legendary_artifact",
+  effects: [
+    { type: "satiety", value: 150 },
+    { type: "hydration", value: 150 },
+    { type: "happiness", value: 150 },
+    { type: "energy", value: 150 },
+    { type: "experience_bonus", value: 100 },
+  ],
+  value: 1000,
+  stackable: true,
+};
+
+const GUARDIAN_ESSENCE: ConsumableItem = {
+  id: "guardian_essence",
+  name: "Guardian Essence",
+  description: "A glowing essence extracted from ancient guardians, pulsing with protective energy.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_guardian_essence",
+  effects: [
+    { type: "energy", value: 75 },
+    { type: "happiness", value: 50 },
+  ],
+  value: 250,
+  stackable: true,
+};
+
+const ANCIENT_POTION: ConsumableItem = {
+  id: "ancient_potion",
+  name: "Ancient Potion",
+  description: "A potent elixir brewed using secrets from a lost civilization.",
+  type: "medicine",
+  rarity: "legendary",
+  icon: "item_ancient_potion",
+  effects: [
+    { type: "full_heal", value: 1 },
+    { type: "satiety", value: 100 },
+    { type: "hydration", value: 100 },
+    { type: "energy", value: 100 },
+  ],
+  value: 400,
+  stackable: true,
+};
+
+const MYSTIC_CHARM: DurabilityItem = {
+  id: "mystic_charm",
+  name: "Mystic Charm",
+  description: "A mystical amulet that provides ongoing benefits to its bearer.",
+  type: "equipment",
+  rarity: "epic",
+  icon: "item_mystic_charm",
+  effects: [{ type: "happiness_boost", value: 15 }],
+  value: 300,
+  stackable: false,
+  maxDurability: 50,
+  currentDurability: 50,
+  durabilityLossPerUse: 1,
+};
+
+const ENERGY_CRYSTAL: ConsumableItem = {
+  id: "energy_crystal",
+  name: "Energy Crystal",
+  description: "A crystal that radiates pure energy, perfect for restoring vitality.",
+  type: "special",
+  rarity: "rare",
+  icon: "item_energy_crystal",
+  effects: [{ type: "energy", value: 100 }],
+  value: 150,
+  stackable: true,
+};
+
 const GROWTH_SEED: ConsumableItem = {
   id: "growth_seed",
   name: "Growth Seed",
@@ -649,6 +754,13 @@ export const ITEMS: Item[] = [
   // Special items
   CRYSTAL_FRAGMENT,
   ANCIENT_RELIC,
+  ANCIENT_KEY,
+  WISDOM_SCROLL,
+  LEGENDARY_ARTIFACT,
+  GUARDIAN_ESSENCE,
+  ANCIENT_POTION,
+  MYSTIC_CHARM,
+  ENERGY_CRYSTAL,
   GROWTH_SEED,
 ];
 

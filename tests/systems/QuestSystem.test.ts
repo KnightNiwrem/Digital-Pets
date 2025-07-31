@@ -877,6 +877,94 @@ describe("QuestSystem", () => {
     });
   });
 
+  // The Great Discovery Quest Chain Extended Tests
+  describe("The Great Discovery Quest Chain - Parts 3 & 4", () => {
+    it("should have valid quest chain structure for parts 3 and 4", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+
+      expect(part3).toBeDefined();
+      expect(part4).toBeDefined();
+
+      // Check quest chain progression
+      expect(part3?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "the_great_discovery_part2" })
+      );
+      expect(part4?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "the_great_discovery_part3" })
+      );
+
+      // Check that part3 unlocks part4
+      expect(part3?.rewards).toContainEqual(
+        expect.objectContaining({ type: "unlock_quest", questId: "the_great_discovery_part4" })
+      );
+    });
+
+    it("should have escalating rewards for final quest parts", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+
+      // Part 3 should have significant rewards
+      expect(part3?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "experience", amount: 100 }),
+          expect.objectContaining({ type: "item", itemId: "energy_crystal", amount: 3 }),
+          expect.objectContaining({ type: "item", itemId: "ancient_key", amount: 1 }),
+          expect.objectContaining({ type: "gold", amount: 200 }),
+        ])
+      );
+
+      // Part 4 should have legendary rewards
+      expect(part4?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "experience", amount: 150 }),
+          expect.objectContaining({ type: "item", itemId: "legendary_artifact", amount: 1 }),
+          expect.objectContaining({ type: "item", itemId: "ancient_potion", amount: 2 }),
+          expect.objectContaining({ type: "item", itemId: "mystic_charm", amount: 1 }),
+          expect.objectContaining({ type: "gold", amount: 500 }),
+        ])
+      );
+    });
+
+    it("should have appropriate quest objectives for ancient ruins exploration", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+      
+      // Part 3 objectives
+      expect(part3?.objectives).toHaveLength(4);
+      expect(part3?.objectives[0].type).toBe("visit_location");
+      expect(part3?.objectives[0].locationId).toBe("ancient_ruins");
+      expect(part3?.objectives[1].type).toBe("collect_item");
+      expect(part3?.objectives[1].itemId).toBe("ancient_relic");
+      expect(part3?.objectives[1].targetAmount).toBe(5);
+      
+      // Part 4 objectives (finale)
+      expect(part4?.objectives).toHaveLength(4);
+      expect(part4?.objectives[0].type).toBe("collect_item");
+      expect(part4?.objectives[0].itemId).toBe("guardian_essence");
+      expect(part4?.objectives[0].targetAmount).toBe(5);
+      expect(part4?.objectives[3].itemId).toBe("legendary_artifact");
+    });
+
+    it("should have correct NPCs and locations for parts 3 and 4", () => {
+      const part3 = getQuestById("the_great_discovery_part3");
+      const part4 = getQuestById("the_great_discovery_part4");
+
+      expect(part3?.npcId).toBe("archaeologist_vera");
+      expect(part3?.location).toBe("ancient_ruins");
+      expect(part4?.npcId).toBe("guardian_spirit_aeon");
+      expect(part4?.location).toBe("ancient_ruins");
+
+      // Should be main quest with proper chapter progression
+      expect(part3?.isMainQuest).toBe(true);
+      expect(part3?.chapter).toBe(4);
+      expect(part3?.order).toBe(1);
+      expect(part4?.isMainQuest).toBe(true);
+      expect(part4?.chapter).toBe(4);
+      expect(part4?.order).toBe(2);
+    });
+  });
+
   describe("Negative targetAmount handling", () => {
     let gameState: GameState;
     let miningTutorialQuest: Quest;

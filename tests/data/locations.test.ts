@@ -23,6 +23,30 @@ describe("Location Data Validation", () => {
       expect(location?.npcs).toHaveLength(3);
     });
 
+    it("should return ancient ruins location", () => {
+      const location = getLocationById("ancient_ruins");
+      expect(location).toBeDefined();
+      expect(location?.id).toBe("ancient_ruins");
+      expect(location?.name).toBe("Ancient Ruins");
+      expect(location?.type).toBe("ruins");
+      expect(location?.activities).toBeDefined();
+      expect(location?.activities.length).toBe(3);
+      expect(location?.npcs.length).toBe(3);
+      expect(location?.shops.length).toBe(1);
+      
+      // Check unlock requirements
+      expect(location?.unlockRequirements).toBeDefined();
+      expect(location?.unlockRequirements?.length).toBe(1);
+      expect(location?.unlockRequirements?.[0].type).toBe("quest_completed");
+      expect(location?.unlockRequirements?.[0].value).toBe("the_great_discovery_part2");
+      
+      // Check activities are unique to ruins
+      const activityIds = location?.activities.map(a => a.id);
+      expect(activityIds).toContain("artifact_hunting");
+      expect(activityIds).toContain("puzzle_solving");
+      expect(activityIds).toContain("guardian_challenge");
+    });
+
     it("should return undefined for invalid location ID", () => {
       const location = getLocationById("invalid_location");
       expect(location).toBeUndefined();
@@ -77,6 +101,23 @@ describe("Location Data Validation", () => {
       expect(npc?.id).toBe("angler_joe");
       expect(npc?.name).toBe("Joe the Angler");
       expect(npc?.description).toBe("An experienced fisherman who knows all the best spots");
+    });
+
+    it("should return NPC data for ancient ruins NPCs", () => {
+      const archaeologist = getNpcById("archaeologist_vera");
+      expect(archaeologist).toBeDefined();
+      expect(archaeologist?.id).toBe("archaeologist_vera");
+      expect(archaeologist?.name).toBe("Dr. Vera Cross");
+      
+      const guardian = getNpcById("guardian_spirit_aeon");
+      expect(guardian).toBeDefined();
+      expect(guardian?.id).toBe("guardian_spirit_aeon");
+      expect(guardian?.name).toBe("Aeon the Guardian");
+      
+      const treasureHunter = getNpcById("treasure_hunter_zara");
+      expect(treasureHunter).toBeDefined();
+      expect(treasureHunter?.id).toBe("treasure_hunter_zara");
+      expect(treasureHunter?.name).toBe("Zara the Treasure Hunter");
     });
 
     it("should return undefined for invalid NPC ID", () => {

@@ -483,8 +483,214 @@ const MOUNTAIN_VILLAGE: Location = {
   background: "bg_mountain_village",
 };
 
+// Ancient Ruins - End-game exploration area unlocked by mountain village quest chain
+const ANCIENT_RUINS: Location = {
+  id: "ancient_ruins",
+  name: "Ancient Ruins",
+  type: "ruins" as LocationType,
+  description:
+    "Mysterious ruins from a forgotten civilization, filled with ancient technology and guarded secrets. The air hums with otherworldly energy.",
+  activities: [
+    {
+      id: "artifact_hunting",
+      name: "Hunt for Artifacts",
+      type: "foraging",
+      description: "Search through ancient chambers for valuable relics and artifacts",
+      energyCost: 25,
+      duration: 60, // 15 minutes
+      rewards: [
+        { type: "item", id: "ancient_relic", amount: 1, probability: 0.4 },
+        { type: "item", id: "crystal_fragment", amount: 2, probability: 0.6 },
+        { type: "item", id: "precious_gem", amount: 1, probability: 0.3 },
+        { type: "experience", amount: 15, probability: 1.0 },
+        { type: "gold", amount: 50, probability: 0.5 },
+      ],
+    },
+    {
+      id: "puzzle_solving",
+      name: "Solve Ancient Puzzles",
+      type: "training",
+      description: "Decipher ancient mechanisms and unlock hidden chambers",
+      energyCost: 30,
+      duration: 90, // 22.5 minutes
+      rewards: [
+        { type: "experience", amount: 25, probability: 1.0 },
+        { type: "item", id: "ancient_key", amount: 1, probability: 0.2 },
+        { type: "item", id: "wisdom_scroll", amount: 1, probability: 0.3 },
+        { type: "gold", amount: 75, probability: 0.4 },
+      ],
+    },
+    {
+      id: "guardian_challenge",
+      name: "Challenge Ancient Guardians",
+      type: "training",
+      description: "Face the spectral guardians that protect the ruins' deepest secrets",
+      energyCost: 40,
+      duration: 120, // 30 minutes
+      rewards: [
+        { type: "experience", amount: 40, probability: 1.0 },
+        { type: "item", id: "legendary_artifact", amount: 1, probability: 0.1 },
+        { type: "item", id: "guardian_essence", amount: 1, probability: 0.5 },
+        { type: "gold", amount: 100, probability: 0.6 },
+      ],
+    },
+  ],
+  shops: [
+    {
+      id: "artifact_exchange",
+      name: "Ancient Artifact Exchange",
+      description: "A mystical shop where ancient knowledge can be traded for powerful items",
+      keeper: "treasure_hunter_zara",
+      items: [
+        { itemId: "ancient_potion", price: 200, stock: 2 },
+        { itemId: "mystic_charm", price: 150, stock: 3 },
+        { itemId: "energy_crystal", price: 100, stock: 5 },
+        { itemId: "wisdom_scroll", price: 80, stock: 4 },
+      ],
+    },
+  ],
+  npcs: [
+    {
+      id: "archaeologist_vera",
+      name: "Dr. Vera Cross",
+      description: "A brilliant archaeologist studying the ruins' connection to the digital pet world's origins",
+      sprite: "npc_archaeologist",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Fascinating! Another seeker of ancient truths. These ruins hold secrets that could rewrite our understanding of this world's very nature.",
+          responses: [
+            {
+              id: "ask_about_ruins",
+              text: "What have you discovered here?",
+              nextNodeId: "ruins_discovery",
+            },
+            {
+              id: "ask_about_origin",
+              text: "What do you mean about our world's nature?",
+              nextNodeId: "world_origin",
+            },
+            {
+              id: "offer_help",
+              text: "How can I help your research?",
+              nextNodeId: "research_help",
+            },
+          ],
+        },
+        {
+          id: "ruins_discovery",
+          text: "These structures predate any known civilization by millennia. The technology here... it's beyond anything we understand. Almost as if it was designed to create and maintain entire digital ecosystems.",
+        },
+        {
+          id: "world_origin",
+          text: "I believe this entire world - our pets, the environments, even us - was created by the beings who built these ruins. We're living in their greatest masterpiece.",
+        },
+        {
+          id: "research_help",
+          text: "If you're serious about helping, I need someone brave enough to venture into the deepest chambers. The guardians there protect knowledge I desperately need to unlock.",
+        },
+      ],
+      quests: ["the_great_discovery_part3"],
+    },
+    {
+      id: "guardian_spirit_aeon",
+      name: "Aeon the Guardian",
+      description: "An ancient spectral entity bound to protect the ruins' most sacred knowledge",
+      sprite: "npc_guardian_spirit",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Mortal child... you tread upon sacred ground. Few have proven worthy to hear the ancient truths. What brings you to this hallowed place?",
+          responses: [
+            {
+              id: "seek_knowledge",
+              text: "I seek the truth about this world.",
+              nextNodeId: "ancient_wisdom",
+            },
+            {
+              id: "show_respect",
+              text: "I come with reverence for the ancients.",
+              nextNodeId: "respectful_approach",
+            },
+            {
+              id: "ask_about_purpose",
+              text: "What is your purpose here?",
+              nextNodeId: "guardian_duty",
+            },
+          ],
+        },
+        {
+          id: "ancient_wisdom",
+          text: "Truth... yes, the truth is what all seekers desire. But are you prepared for the weight of absolute knowledge? The creators of this realm embedded their consciousness into its very fabric.",
+        },
+        {
+          id: "respectful_approach",
+          text: "Your respect is noted, young one. The ancients valued wisdom above all else. They created this world as a sanctuary - a place where life could flourish in perfect harmony.",
+        },
+        {
+          id: "guardian_duty",
+          text: "I am the keeper of the final revelation. When the time comes for this world to face its greatest choice, I will guide the worthy to understand their true destiny.",
+        },
+      ],
+      quests: ["the_great_discovery_part4"],
+    },
+    {
+      id: "treasure_hunter_zara",
+      name: "Zara the Treasure Hunter",
+      description: "A skilled adventurer who has spent years mapping the ruins and collecting its treasures",
+      sprite: "npc_treasure_hunter",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Well, well! Another treasure seeker drawn to these ancient halls. But be warned - these ruins don't give up their secrets easily.",
+          responses: [
+            {
+              id: "ask_about_treasures",
+              text: "What treasures have you found?",
+              nextNodeId: "treasure_knowledge",
+            },
+            {
+              id: "ask_for_tips",
+              text: "Any advice for exploring safely?",
+              nextNodeId: "exploration_tips",
+            },
+            {
+              id: "browse_goods",
+              text: "What do you have for trade?",
+              nextNodeId: "trading_offer",
+            },
+          ],
+        },
+        {
+          id: "treasure_knowledge",
+          text: "Oh, the things I've seen! Artifacts that glow with inner light, crystals that sing ancient melodies, and scrolls written in languages that somehow you just... understand.",
+        },
+        {
+          id: "exploration_tips",
+          text: "Rule one: never go into the deep chambers alone. Rule two: if the walls start glowing, back away slowly. Rule three: always carry extra energy potions - the guardians don't mess around.",
+        },
+        {
+          id: "trading_offer",
+          text: "I've got some rare finds I'm willing to part with... for the right price. These ancient potions and charms can give you an edge against the ruins' challenges.",
+        },
+      ],
+      quests: [],
+      shop: "artifact_exchange",
+    },
+  ],
+  connections: [
+    {
+      destinationId: "mountain_village",
+      travelTime: 45, // 11.25 minutes
+    },
+  ],
+  unlockRequirements: [{ type: "quest_completed", value: "the_great_discovery_part2" }],
+  sprite: "location_ancient_ruins",
+  background: "bg_ancient_ruins",
+};
+
 // Export all locations
-export const LOCATIONS: Location[] = [HOMETOWN, FOREST_PATH, RIVERSIDE, MOUNTAIN_VILLAGE];
+export const LOCATIONS: Location[] = [HOMETOWN, FOREST_PATH, RIVERSIDE, MOUNTAIN_VILLAGE, ANCIENT_RUINS];
 
 // Helper function to get location by ID
 export function getLocationById(id: string): Location | undefined {

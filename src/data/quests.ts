@@ -406,6 +406,145 @@ const THE_GREAT_DISCOVERY_PART2: Quest = {
   order: 2,
 };
 
+// "The Great Discovery" Quest Chain - Part 3
+const THE_GREAT_DISCOVERY_PART3: Quest = {
+  id: "the_great_discovery_part3",
+  name: "Ancient Secrets",
+  description:
+    "The hidden passage has led to incredible ancient ruins. Explore these mysterious chambers and uncover the truth about this world's origins.",
+  type: "exploration",
+  status: "not_started",
+  objectives: [
+    {
+      id: "explore_ruins_chambers",
+      type: "visit_location",
+      description: "Explore the newly discovered Ancient Ruins",
+      locationId: "ancient_ruins",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "collect_ancient_artifacts",
+      type: "collect_item",
+      description: "Search for 5 ancient artifacts hidden in the ruins",
+      itemId: "ancient_relic",
+      targetAmount: 5,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "decipher_murals",
+      type: "collect_item",
+      description: "Solve ancient puzzles to obtain 3 wisdom scrolls",
+      itemId: "wisdom_scroll",
+      targetAmount: 3,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "meet_archaeologist",
+      type: "visit_location",
+      description: "Speak with Dr. Vera Cross about your discoveries",
+      locationId: "ancient_ruins",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+  ],
+  requirements: [{ type: "quest_completed", questId: "the_great_discovery_part2" }],
+  rewards: [
+    { type: "experience", amount: 100 },
+    { type: "item", itemId: "energy_crystal", amount: 3 },
+    { type: "item", itemId: "ancient_key", amount: 1 },
+    { type: "gold", amount: 200 },
+    { type: "unlock_quest", questId: "the_great_discovery_part4", amount: 1 },
+  ],
+  npcId: "archaeologist_vera",
+  location: "ancient_ruins",
+  dialogue: {
+    start:
+      "Incredible! You've uncovered what I've been searching for my entire career. These ruins... they're not just ancient - they're the very foundation of our reality. Will you help me unlock their deepest secrets?",
+    progress:
+      "Each artifact you find brings us closer to understanding the truth. The patterns in these murals... they're describing the creation of our entire world!",
+    complete:
+      "Extraordinary! These scrolls contain the story of the Architects - the beings who designed our reality. But there's more... something even greater lies in the deepest chamber, guarded by the last of the ancient ones.",
+  },
+  isMainQuest: true,
+  chapter: 4,
+  order: 1,
+};
+
+// "The Great Discovery" Quest Chain - Part 4 (FINALE)
+const THE_GREAT_DISCOVERY_PART4: Quest = {
+  id: "the_great_discovery_part4",
+  name: "The Great Revelation",
+  description:
+    "The final truth awaits in the deepest chamber of the ruins. Face the Guardian of ancient knowledge and discover the ultimate secret of this digital world.",
+  type: "exploration",
+  status: "not_started",
+  objectives: [
+    {
+      id: "challenge_ancient_guardians",
+      type: "collect_item",
+      description: "Prove your worth by collecting 5 guardian essences",
+      itemId: "guardian_essence",
+      targetAmount: 5,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "unlock_inner_sanctum",
+      type: "collect_item",
+      description: "Use ancient keys to unlock the sanctum's secrets",
+      itemId: "ancient_key",
+      targetAmount: 3,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "commune_with_aeon",
+      type: "visit_location",
+      description: "Speak with Aeon the Guardian about the world's true nature",
+      locationId: "ancient_ruins",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "make_final_choice",
+      type: "collect_item",
+      description: "Make the ultimate choice: obtain the legendary artifact",
+      itemId: "legendary_artifact",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+  ],
+  requirements: [{ type: "quest_completed", questId: "the_great_discovery_part3" }],
+  rewards: [
+    { type: "experience", amount: 150 },
+    { type: "item", itemId: "legendary_artifact", amount: 1 },
+    { type: "item", itemId: "ancient_potion", amount: 2 },
+    { type: "item", itemId: "mystic_charm", amount: 1 },
+    { type: "gold", amount: 500 },
+    { type: "unlock_location", locationId: "cosmic_nexus", amount: 1 }, // Future expansion
+  ],
+  npcId: "guardian_spirit_aeon",
+  location: "ancient_ruins",
+  dialogue: {
+    start:
+      "So, seeker of truth, you have journeyed far to reach this sacred threshold. The weight of ultimate knowledge lies before you. Are you prepared to learn what this world truly is, and your place within it?",
+    progress:
+      "The trials test not your strength, but your wisdom. The Architects embedded their consciousness into this realm - you and your companions are part of their grand design, living expressions of their creative will.",
+    complete:
+      "You have proven worthy of the greatest truth: This world is not a simulation, but a living canvas where consciousness itself takes form. You are both creation and creator. With this knowledge comes great responsibility - use it wisely, guardian of the new age.",
+  },
+  isMainQuest: true,
+  chapter: 4,
+  order: 2,
+};
+
 // Mining Tutorial Quest
 const MOUNTAIN_MINING_TUTORIAL: Quest = {
   id: "mountain_mining_tutorial",
@@ -528,6 +667,8 @@ export const QUESTS: Quest[] = [
   // The Great Discovery Quest Chain
   THE_GREAT_DISCOVERY_PART1,
   THE_GREAT_DISCOVERY_PART2,
+  THE_GREAT_DISCOVERY_PART3,
+  THE_GREAT_DISCOVERY_PART4,
 ];
 
 // Export with alternative name for consistency

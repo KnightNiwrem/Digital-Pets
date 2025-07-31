@@ -27,7 +27,10 @@ export interface ItemEffect {
     | "exploration_bonus"
     | "growth_bonus"
     | "mining_bonus"
-    | "crafting_material";
+    | "crafting_material"
+    | "experience_bonus"
+    | "happiness_boost"
+    | "full_heal";
   value: number;
   duration?: number; // for temporary effects
 }

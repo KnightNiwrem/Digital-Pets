@@ -1,6 +1,6 @@
 // World system types and interfaces
 
-export type LocationType = "town" | "city" | "forest" | "beach" | "mountain" | "cave" | "desert";
+export type LocationType = "town" | "city" | "forest" | "beach" | "mountain" | "cave" | "desert" | "ruins";
 
 export type ActivityType = "foraging" | "fishing" | "mining" | "shop" | "training" | "battle" | "quest";
 
