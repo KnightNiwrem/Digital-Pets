@@ -721,7 +721,7 @@ const COASTAL_HARBOR: Location = {
       duration: 60, // 15 minutes
       rewards: [
         { type: "experience", amount: 15, probability: 1.0 },
-        { type: "item", id: "rope", amount: 1, probability: 0.4 },
+        { type: "item", id: "maritime_rope", amount: 1, probability: 0.4 },
         { type: "item", id: "ship_tools", amount: 1, probability: 0.3 },
         { type: "gold", amount: 40, probability: 0.7 },
       ],

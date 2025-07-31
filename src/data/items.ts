@@ -769,8 +769,8 @@ const KELP_SUPPLEMENT: ConsumableItem = {
   stackable: true,
 };
 
-const ROPE: ConsumableItem = {
-  id: "rope",
+const MARITIME_ROPE: ConsumableItem = {
+  id: "maritime_rope",
   name: "Maritime Rope",
   description: "Strong rope used in ship operations, useful for various activities.",
   type: "special",
@@ -896,7 +896,7 @@ export const ITEMS: Item[] = [
   NAVIGATION_COMPASS,
   SEA_SALT,
   KELP_SUPPLEMENT,
-  ROPE,
+  MARITIME_ROPE,
   SHIP_TOOLS,
   TRADE_PERMIT,
   EXOTIC_SPICE,
