@@ -44,6 +44,13 @@ export class GameLoop {
   }
 
   /**
+   * Get current game state (for testing and debugging)
+   */
+  getCurrentGameState(): GameState | null {
+    return this.gameState;
+  }
+
+  /**
    * Start the game loop
    */
   start(): void {

@@ -668,11 +668,18 @@ export function useGameState(): UseGameStateReturn {
         if (result.success && result.data) {
           setGameState(prev => {
             if (!prev) return null;
-            return {
+            const newState = {
               ...prev,
               world: result.data!.worldState,
               currentPet: result.data!.pet,
             };
+
+            // CRITICAL FIX: Update GameLoop state immediately to prevent race condition
+            if (gameLoopRef.current) {
+              gameLoopRef.current.updateState(newState);
+            }
+
+            return newState;
           });
 
           // Trigger autosave after world state change
@@ -687,7 +694,7 @@ export function useGameState(): UseGameStateReturn {
         return { success: false, error: message };
       }
     },
-    [gameState, triggerAutosave]
+    [gameState, triggerAutosave, gameLoopRef]
   );
 
   const startActivity = useCallback(
@@ -706,11 +713,18 @@ export function useGameState(): UseGameStateReturn {
         if (result.success && result.data) {
           setGameState(prev => {
             if (!prev) return null;
-            return {
+            const newState = {
               ...prev,
               world: result.data!.worldState,
               currentPet: result.data!.pet,
             };
+
+            // CRITICAL FIX: Update GameLoop state immediately to prevent race condition
+            if (gameLoopRef.current) {
+              gameLoopRef.current.updateState(newState);
+            }
+
+            return newState;
           });
 
           // Trigger autosave after world state change
@@ -725,7 +739,7 @@ export function useGameState(): UseGameStateReturn {
         return { success: false, error: message };
       }
     },
-    [gameState, triggerAutosave]
+    [gameState, triggerAutosave, gameLoopRef]
   );
 
   const cancelActivity = useCallback(async (): Promise<Result<void>> => {
@@ -743,11 +757,18 @@ export function useGameState(): UseGameStateReturn {
           const updatedPet =
             prev.currentPet?.state === "exploring" ? { ...prev.currentPet, state: "idle" as const } : prev.currentPet;
 
-          return {
+          const newState = {
             ...prev,
             currentPet: updatedPet,
             world: result.data!,
           };
+
+          // CRITICAL FIX: Update GameLoop state immediately to prevent race condition
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(newState);
+          }
+
+          return newState;
         });
 
         // Trigger autosave after world state change
@@ -761,7 +782,7 @@ export function useGameState(): UseGameStateReturn {
       console.error("Cancel activity error:", error);
       return { success: false, error: message };
     }
-  }, [gameState, triggerAutosave]);
+  }, [gameState, triggerAutosave, gameLoopRef]);
 
   // Battle actions
   const applyBattleResults = useCallback(

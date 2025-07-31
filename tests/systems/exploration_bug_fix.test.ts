@@ -1,189 +1,329 @@
-// Test for exploration state bug fix
-// Verifies that pets in "exploring" state are not reset to "idle" prematurely during autosave
+// Test for exploration bug fix - pet state reset issue
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 import { WorldSystem } from "@/systems/WorldSystem";
-import type { GameState, Pet, PetSpecies } from "@/types";
+import type { GameState } from "@/types";
 
-describe("Exploration State Bug Fix", () => {
-  let gameState: GameState;
+// Mock localStorage
+const mockLocalStorage = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(globalThis, "localStorage", {
+  value: mockLocalStorage,
+});
+
+describe("Exploration Bug Fix Tests", () => {
   let gameLoop: GameLoop;
-
-  // Test helper to create a standard test pet
-  function createTestPet(overrides: Partial<Pet> = {}): Pet {
-    const testSpecies: PetSpecies = {
-      id: "test_species",
-      name: "Test Pet",
-      rarity: "common",
-      description: "A pet for testing",
-      baseStats: { attack: 10, defense: 8, speed: 12, health: 50 },
-      growthRates: { attack: 1.1, defense: 1.1, speed: 1.1, health: 1.2, energy: 1.1 },
-      sprite: "test.png",
-      icon: "test_icon.png",
-    };
-
-    return {
-      id: "test_pet_1",
-      name: "Buddy",
-      species: testSpecies,
-      rarity: "common",
-      growthStage: 5,
-      satiety: 100,
-      hydration: 100,
-      happiness: 100,
-      satietyTicksLeft: 2000,
-      hydrationTicksLeft: 1600,
-      happinessTicksLeft: 2400,
-      poopTicksLeft: 100,
-      sickByPoopTicksLeft: 17280,
-      life: 1000000,
-      maxEnergy: 120,
-      currentEnergy: 100,
-      health: "healthy",
-      state: "idle",
-      attack: 15,
-      defense: 12,
-      speed: 18,
-      maxHealth: 60,
-      currentHealth: 60,
-      moves: [],
-      birthTime: Date.now() - 86400000,
-      lastCareTime: Date.now(),
-      totalLifetime: 5760,
-      ...overrides,
-    };
-  }
+  let gameState: GameState;
 
   beforeEach(() => {
-    gameState = GameStateFactory.createNewGame();
-    gameState.currentPet = createTestPet();
-    gameState.currentPet.currentEnergy = 100; // Ensure pet has energy
+    mockLocalStorage.clear();
 
+    // Initialize fresh game state
+    gameState = GameStateFactory.createNewGameWithStarter("TestPet", "water_starter");
     gameLoop = GameLoop.getInstance();
     gameLoop.initialize(gameState);
   });
 
-  it("should keep pet in exploring state while activity is ongoing", () => {
-    // Start an activity (foraging in hometown)
-    const result = WorldSystem.startActivity(
-      gameState.world,
-      gameState.currentPet!,
-      "hometown_foraging",
-      gameState.inventory
-    );
+  afterEach(() => {
+    gameLoop.stop();
+  });
 
-    expect(result.success).toBe(true);
-    expect(result.data?.pet.state).toBe("exploring");
+  describe("Activity State Persistence", () => {
+    test("should maintain pet exploring state after starting activity", () => {
+      // Ensure pet has enough energy and move to forest_path where activities are available
+      gameState.currentPet!.currentEnergy = 100;
+      gameState.currentPet!.growthStage = 5; // High enough level for travel
+      
+      // First travel to forest_path
+      const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
+      expect(travelResult.success).toBe(true);
+      
+      // Complete travel by processing ticks
+      let currentWorldState = travelResult.data!.worldState;
+      const travelDuration = currentWorldState.travelState!.totalTravelTime;
+      for (let i = 0; i < travelDuration; i++) {
+        const tickResult = WorldSystem.processTravelTick(currentWorldState);
+        if (tickResult.success && tickResult.data) {
+          currentWorldState = tickResult.data;
+        }
+      }
+      
+      // Update game state with completed travel
+      gameState.world = currentWorldState;
+      gameState.currentPet = travelResult.data!.pet;
+      gameState.currentPet.state = "idle"; // Reset from travelling to idle
 
-    // Update game state with the result
-    gameState.world = result.data!.worldState;
-    gameState.currentPet = result.data!.pet;
-    gameLoop.updateState(gameState);
+      // Now start activity at forest_path
+      const result = WorldSystem.startActivity(
+        gameState.world,
+        gameState.currentPet!,
+        "forest_foraging",
+        gameState.inventory
+      );
 
-    // Verify activity is active and pet is exploring
-    expect(gameState.world.activeActivities.length).toBe(1);
-    expect(gameState.currentPet!.state).toBe("exploring");
+      expect(result.success).toBe(true);
+      expect(result.data?.pet.state).toBe("exploring");
+      expect(result.data?.worldState.activeActivities).toHaveLength(1);
 
-    // Process several ticks while activity is still ongoing
-    const activity = gameState.world.activeActivities[0];
-    const initialTicksRemaining = activity.ticksRemaining;
+      // Update game loop state to match (simulating the fix)
+      const updatedGameState = {
+        ...gameState,
+        world: result.data!.worldState,
+        currentPet: result.data!.pet,
+      };
+      gameLoop.updateState(updatedGameState);
 
-    // Process ticks less than the total duration
-    for (let i = 0; i < Math.min(5, initialTicksRemaining - 1); i++) {
+      // Verify GameLoop has the updated state
+      expect(gameLoop.getCurrentGameState()?.currentPet?.state).toBe("exploring");
+      expect(gameLoop.getCurrentGameState()?.world.activeActivities).toHaveLength(1);
+    });
+
+    test("should not reset pet state to idle immediately after starting activity", () => {
+      // Ensure pet has enough energy and move to forest_path
+      gameState.currentPet!.currentEnergy = 100;
+      gameState.currentPet!.growthStage = 5;
+      
+      // Travel to forest_path and complete travel
+      const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
+      let currentWorldState = travelResult.data!.worldState;
+      const travelDuration = currentWorldState.travelState!.totalTravelTime;
+      for (let i = 0; i < travelDuration; i++) {
+        const tickResult = WorldSystem.processTravelTick(currentWorldState);
+        if (tickResult.success && tickResult.data) {
+          currentWorldState = tickResult.data;
+        }
+      }
+      gameState.world = currentWorldState;
+      gameState.currentPet = travelResult.data!.pet;
+      gameState.currentPet.state = "idle";
+
+      // Start activity
+      const result = WorldSystem.startActivity(
+        gameState.world,
+        gameState.currentPet!,
+        "forest_foraging",
+        gameState.inventory
+      );
+
+      // Update game loop state (simulating the fix)
+      const updatedGameState = {
+        ...gameState,
+        world: result.data!.worldState,
+        currentPet: result.data!.pet,
+      };
+      gameLoop.updateState(updatedGameState);
+
+      // Process one tick (should NOT complete activity immediately)
       gameLoop.tick();
-    }
 
-    // Pet should still be in exploring state
-    expect(gameState.currentPet!.state).toBe("exploring");
-    expect(gameState.world.activeActivities.length).toBe(1);
-  });
+      const currentState = gameLoop.getCurrentGameState();
+      expect(currentState?.currentPet?.state).toBe("exploring");
+      expect(currentState?.world.activeActivities).toHaveLength(1);
+    });
 
-  it("should reset pet to idle only when exploration activity completes", () => {
-    // Start an activity with short duration for testing
-    const result = WorldSystem.startActivity(
-      gameState.world,
-      gameState.currentPet!,
-      "hometown_foraging",
-      gameState.inventory
-    );
+    test("should properly reset pet state only when activity actually completes", () => {
+      // Ensure pet has enough energy
+      gameState.currentPet!.currentEnergy = 100;
 
-    expect(result.success).toBe(true);
+      // Start activity with very short duration (1 tick for testing)
+      const shortActivity = {
+        id: "test_short_activity",
+        name: "Quick Test",
+        type: "foraging" as const,
+        description: "Test activity",
+        energyCost: 10,
+        duration: 1, // 1 tick duration
+        rewards: [{ type: "gold" as const, amount: 5, probability: 1.0 }],
+      };
 
-    // Update game state
-    gameState.world = result.data!.worldState;
-    gameState.currentPet = result.data!.pet;
-    gameLoop.updateState(gameState);
+      // Add short activity to current location
+      const currentLocation = WorldSystem.getCurrentLocation(gameState.world);
+      if (currentLocation) {
+        currentLocation.activities.push(shortActivity);
+      }
 
-    expect(gameState.currentPet!.state).toBe("exploring");
+      const result = WorldSystem.startActivity(
+        gameState.world,
+        gameState.currentPet!,
+        "test_short_activity",
+        gameState.inventory
+      );
 
-    const activity = gameState.world.activeActivities[0];
-    const totalTicks = activity.ticksRemaining;
+      // Update game loop state (simulating the fix)
+      const updatedGameState = {
+        ...gameState,
+        world: result.data!.worldState,
+        currentPet: result.data!.pet,
+      };
+      gameLoop.updateState(updatedGameState);
 
-    // Process all ticks to complete the activity
-    for (let i = 0; i < totalTicks; i++) {
+      // Verify activity started
+      expect(gameLoop.getCurrentGameState()?.currentPet?.state).toBe("exploring");
+      expect(gameLoop.getCurrentGameState()?.world.activeActivities).toHaveLength(1);
+
+      // Process one tick - activity should complete
       gameLoop.tick();
-    }
 
-    // Now pet should be back to idle and no active activities
-    expect(gameState.currentPet!.state).toBe("idle");
-    expect(gameState.world.activeActivities.length).toBe(0);
+      const finalState = gameLoop.getCurrentGameState();
+      expect(finalState?.currentPet?.state).toBe("idle"); // Should reset to idle after completion
+      expect(finalState?.world.activeActivities).toHaveLength(0); // Activity should be removed
+    });
+
+    test("should maintain activity state across multiple ticks until completion", () => {
+      // Ensure pet has enough energy and move to forest_path
+      gameState.currentPet!.currentEnergy = 100;
+      gameState.currentPet!.growthStage = 5;
+      
+      // Travel to forest_path and complete travel
+      const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
+      let currentWorldState = travelResult.data!.worldState;
+      const travelDuration = currentWorldState.travelState!.totalTravelTime;
+      for (let i = 0; i < travelDuration; i++) {
+        const tickResult = WorldSystem.processTravelTick(currentWorldState);
+        if (tickResult.success && tickResult.data) {
+          currentWorldState = tickResult.data;
+        }
+      }
+      gameState.world = currentWorldState;
+      gameState.currentPet = travelResult.data!.pet;
+      gameState.currentPet.state = "idle";
+
+      // Start activity with longer duration
+      const result = WorldSystem.startActivity(
+        gameState.world,
+        gameState.currentPet!,
+        "forest_foraging", // 30 tick duration
+        gameState.inventory
+      );
+
+      // Update game loop state (simulating the fix)
+      const updatedGameState = {
+        ...gameState,
+        world: result.data!.worldState,
+        currentPet: result.data!.pet,
+      };
+      gameLoop.updateState(updatedGameState);
+
+      // Process multiple ticks (but not all 30)
+      for (let i = 0; i < 10; i++) {
+        gameLoop.tick();
+      }
+
+      const currentState = gameLoop.getCurrentGameState();
+      expect(currentState?.currentPet?.state).toBe("exploring");
+      expect(currentState?.world.activeActivities).toHaveLength(1);
+      expect(currentState?.world.activeActivities[0].ticksRemaining).toBe(20); // 30 - 10 = 20
+    });
   });
 
-  it("should handle multiple activities correctly without premature state reset", () => {
-    // This test ensures the fix handles the global activity check correctly
-    // Start an activity
-    const result = WorldSystem.startActivity(
-      gameState.world,
-      gameState.currentPet!,
-      "hometown_foraging",
-      gameState.inventory
-    );
+  describe("Travel State Persistence", () => {
+    test("should maintain pet travelling state after starting travel", () => {
+      // Ensure pet has enough energy and is at required level
+      gameState.currentPet!.currentEnergy = 100;
+      gameState.currentPet!.growthStage = 5; // High enough level
 
-    expect(result.success).toBe(true);
-    gameState.world = result.data!.worldState;
-    gameState.currentPet = result.data!.pet;
-    gameLoop.updateState(gameState);
+      // Start travel
+      const result = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
 
-    expect(gameState.currentPet!.state).toBe("exploring");
-    expect(gameState.world.activeActivities.length).toBe(1);
+      expect(result.success).toBe(true);
+      expect(result.data?.pet.state).toBe("travelling");
+      expect(result.data?.worldState.travelState).toBeDefined();
 
-    // Process one tick (activity should still be ongoing)
-    gameLoop.tick();
+      // Update game loop state (simulating the fix)
+      const updatedGameState = {
+        ...gameState,
+        world: result.data!.worldState,
+        currentPet: result.data!.pet,
+      };
+      gameLoop.updateState(updatedGameState);
 
-    // Verify pet is still exploring
-    expect(gameState.currentPet!.state).toBe("exploring");
-    expect(gameState.world.activeActivities.length).toBe(1);
+      // Verify GameLoop has the updated state
+      expect(gameLoop.getCurrentGameState()?.currentPet?.state).toBe("travelling");
+      expect(gameLoop.getCurrentGameState()?.world.travelState).toBeDefined();
+    });
 
-    // The activity should have decreased ticks remaining but not completed
-    const remainingTicks = gameState.world.activeActivities[0]?.ticksRemaining;
-    expect(remainingTicks).toBeGreaterThan(0);
+    test("should not reset travel state immediately after starting", () => {
+      // Ensure pet has enough energy and is at required level
+      gameState.currentPet!.currentEnergy = 100;
+      gameState.currentPet!.growthStage = 5;
+
+      // Start travel
+      const result = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
+
+      // Update game loop state (simulating the fix)
+      const updatedGameState = {
+        ...gameState,
+        world: result.data!.worldState,
+        currentPet: result.data!.pet,
+      };
+      gameLoop.updateState(updatedGameState);
+
+      // Process one tick (should NOT complete travel immediately)
+      gameLoop.tick();
+
+      const currentState = gameLoop.getCurrentGameState();
+      expect(currentState?.currentPet?.state).toBe("travelling");
+      expect(currentState?.world.travelState).toBeDefined();
+    });
   });
 
-  it("should not reset pet state when processing rewards without completing activities", () => {
-    // This test specifically targets the old bug where the pet state was reset
-    // when processing rewards, even if activities weren't completed
+  describe("State Synchronization", () => {
+    test("should synchronize React state changes with GameLoop state immediately", () => {
+      // Ensure pet has enough energy and move to forest_path
+      gameState.currentPet!.currentEnergy = 100;
+      gameState.currentPet!.growthStage = 5;
+      
+      // Travel to forest_path and complete travel
+      const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
+      let currentWorldState = travelResult.data!.worldState;
+      const travelDuration = currentWorldState.travelState!.totalTravelTime;
+      for (let i = 0; i < travelDuration; i++) {
+        const tickResult = WorldSystem.processTravelTick(currentWorldState);
+        if (tickResult.success && tickResult.data) {
+          currentWorldState = tickResult.data;
+        }
+      }
+      gameState.world = currentWorldState;
+      gameState.currentPet = travelResult.data!.pet;
+      gameState.currentPet.state = "idle";
 
-    const result = WorldSystem.startActivity(
-      gameState.world,
-      gameState.currentPet!,
-      "hometown_foraging",
-      gameState.inventory
-    );
+      // Simulate React state update (like in useGameState hook)
+      const result = WorldSystem.startActivity(
+        gameState.world,
+        gameState.currentPet!,
+        "forest_foraging",
+        gameState.inventory
+      );
 
-    gameState.world = result.data!.worldState;
-    gameState.currentPet = result.data!.pet;
-    gameLoop.updateState(gameState);
+      const newReactState = {
+        ...gameState,
+        world: result.data!.worldState,
+        currentPet: result.data!.pet,
+      };
 
-    expect(gameState.currentPet!.state).toBe("exploring");
+      // This is the critical fix - immediate synchronization
+      gameLoop.updateState(newReactState);
 
-    // Manually process one tick to ensure the activity progresses but doesn't complete
-    // This simulates the autosave scenario that was causing the bug
-    gameLoop.tick();
-
-    // The key assertion: pet should still be exploring
-    expect(gameState.currentPet!.state).toBe("exploring");
-    expect(gameState.world.activeActivities.length).toBe(1);
+      // Verify synchronization worked
+      const gameLoopState = gameLoop.getCurrentGameState();
+      expect(gameLoopState?.currentPet?.state).toBe(newReactState.currentPet?.state);
+      expect(gameLoopState?.world.activeActivities).toEqual(newReactState.world.activeActivities);
+    });
   });
 });
