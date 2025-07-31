@@ -62,7 +62,20 @@ describe("Item Data Expansion", () => {
 
     it("should have new equipment items", () => {
       const equipmentItems = getItemsByType("equipment");
-      expect(equipmentItems.length).toBeGreaterThanOrEqual(3); // at least 3 equipment items
+      expect(equipmentItems.length).toBeGreaterThanOrEqual(4); // at least 4 equipment items (including pickaxe)
+    });
+
+    it("should have mining materials", () => {
+      const materialItems = getItemsByType("material");
+      expect(materialItems.length).toBeGreaterThanOrEqual(4); // at least 4 material items
+      
+      // Check for specific mining items
+      const miningItems = ["iron_ore", "silver_ore", "gold_ore", "precious_gem"];
+      miningItems.forEach(itemId => {
+        const item = getItemById(itemId);
+        expect(item).toBeDefined();
+        expect(item?.type).toBe("material");
+      });
     });
 
     it("should have special items", () => {

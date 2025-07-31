@@ -478,6 +478,73 @@ const EXPLORATION_PACK: DurabilityItem = {
   durabilityLossPerUse: 1,
 };
 
+// Mining Items
+const PICKAXE: DurabilityItem = {
+  id: "pickaxe",
+  name: "Mining Pickaxe",
+  description: "A sturdy pickaxe essential for mining operations in the mountains.",
+  type: "equipment",
+  rarity: "common",
+  icon: "item_pickaxe",
+  effects: [{ type: "mining_bonus", value: 20 }],
+  value: 75,
+  stackable: false,
+  maxDurability: 25,
+  currentDurability: 25,
+  durabilityLossPerUse: 1,
+};
+
+const IRON_ORE: ConsumableItem = {
+  id: "iron_ore",
+  name: "Iron Ore",
+  description: "Raw iron ore found in mountain mines. Valuable for crafting equipment.",
+  type: "material",
+  rarity: "common",
+  icon: "item_iron_ore",
+  effects: [{ type: "crafting_material", value: 1 }],
+  value: 25,
+  stackable: true,
+};
+
+const SILVER_ORE: ConsumableItem = {
+  id: "silver_ore",
+  name: "Silver Ore",
+  description: "Precious silver ore with a lustrous shine. Highly valued by traders.",
+  type: "material",
+  rarity: "uncommon",
+  icon: "item_silver_ore",
+  effects: [{ type: "crafting_material", value: 2 }],
+  value: 45,
+  stackable: true,
+};
+
+const GOLD_ORE: ConsumableItem = {
+  id: "gold_ore",
+  name: "Gold Ore",
+  description: "Rare and valuable gold ore. The dream of every miner.",
+  type: "material",
+  rarity: "rare",
+  icon: "item_gold_ore",
+  effects: [{ type: "crafting_material", value: 3 }],
+  value: 80,
+  stackable: true,
+};
+
+const PRECIOUS_GEM: ConsumableItem = {
+  id: "precious_gem",
+  name: "Precious Gem",
+  description: "A beautiful, multi-faceted gem that sparkles in the light.",
+  type: "material",
+  rarity: "epic",
+  icon: "item_precious_gem",
+  effects: [
+    { type: "crafting_material", value: 5 },
+    { type: "happiness", value: 15 }, // pets love shiny things
+  ],
+  value: 120,
+  stackable: true,
+};
+
 // Special Items
 const CRYSTAL_FRAGMENT: ConsumableItem = {
   id: "crystal_fragment",
@@ -571,6 +638,13 @@ export const ITEMS: Item[] = [
   TRAINING_COLLAR,
   LUCKY_CHARM,
   EXPLORATION_PACK,
+
+  // Mining items
+  PICKAXE,
+  IRON_ORE,
+  SILVER_ORE,
+  GOLD_ORE,
+  PRECIOUS_GEM,
 
   // Special items
   CRYSTAL_FRAGMENT,

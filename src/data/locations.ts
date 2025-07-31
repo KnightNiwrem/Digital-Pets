@@ -156,6 +156,11 @@ const FOREST_PATH: Location = {
       travelTime: 80, // 20 minutes
       requirements: [{ type: "level", value: 5 }],
     },
+    {
+      destinationId: "mountain_village",
+      travelTime: 120, // 30 minutes to mountain
+      requirements: [{ type: "level", value: 8 }],
+    },
   ],
   unlockRequirements: [{ type: "level", value: 2 }],
   sprite: "location_forest",
@@ -253,8 +258,233 @@ const RIVERSIDE: Location = {
   background: "bg_riverside",
 };
 
+// Mining and high-altitude area
+const MOUNTAIN_VILLAGE: Location = {
+  id: "mountain_village",
+  name: "Mountain Village",
+  type: "town" as LocationType,
+  description:
+    "A hardy mountain village built around ancient mining operations. The air is thin but the people are resilient.",
+  activities: [
+    {
+      id: "mountain_mining",
+      name: "Mine for Ore",
+      type: "mining",
+      description: "Dig deep into the mountain veins to extract valuable ores and gems",
+      energyCost: 35,
+      duration: 90, // 22.5 minutes - more time-consuming than other activities
+      rewards: [
+        { type: "item", id: "iron_ore", amount: 1, probability: 0.7 },
+        { type: "item", id: "silver_ore", amount: 1, probability: 0.4 },
+        { type: "item", id: "gold_ore", amount: 1, probability: 0.2 },
+        { type: "item", id: "precious_gem", amount: 1, probability: 0.1 },
+        { type: "item", id: "crystal_fragment", amount: 1, probability: 0.05 },
+        { type: "gold", amount: 25, probability: 0.6 },
+      ],
+      requirements: [{ type: "item", value: "pickaxe" }],
+    },
+    {
+      id: "mountain_climbing",
+      name: "Mountain Climbing Training",
+      type: "training",
+      description: "Train your pet's endurance and strength on the challenging mountain terrain",
+      energyCost: 30,
+      duration: 75, // 18.75 minutes
+      rewards: [
+        { type: "experience", amount: 20, probability: 1.0 },
+        { type: "item", id: "crystal_fragment", amount: 1, probability: 0.15 },
+      ],
+    },
+    {
+      id: "mountain_rest",
+      name: "Rest at High Altitude",
+      type: "foraging",
+      description: "Rest in the crisp mountain air and enjoy the spectacular views",
+      energyCost: -15, // restores energy
+      duration: 45,
+      rewards: [
+        { type: "experience", amount: 8, probability: 1.0 },
+        { type: "item", id: "herb", amount: 1, probability: 0.3 }, // mountain herbs
+      ],
+    },
+  ],
+  shops: [
+    {
+      id: "mountain_blacksmith",
+      name: "Mountain Blacksmith",
+      description: "A skilled forge specializing in mining equipment and metal goods",
+      keeper: "blacksmith_thor",
+      items: [
+        { itemId: "pickaxe", price: 75, stock: 3 },
+        { itemId: "training_collar", price: 120, stock: 2 },
+        { itemId: "strong_medicine", price: 40, stock: 4 },
+        { itemId: "energy_drink", price: 30, stock: 10 },
+      ],
+    },
+    {
+      id: "mountain_trading_post",
+      name: "Mining Supplies & Trading Post",
+      description: "A general store catering to miners and travelers",
+      keeper: "mining_guide_elena",
+      items: [
+        { itemId: "meat", price: 35, stock: 8 },
+        { itemId: "protein_shake", price: 25, stock: 6 },
+        { itemId: "exploration_pack", price: 65, stock: 2 },
+        { itemId: "rope_toy", price: 20, stock: 5 },
+      ],
+    },
+  ],
+  npcs: [
+    {
+      id: "blacksmith_thor",
+      name: "Thor the Blacksmith",
+      description: "A burly blacksmith with arms like tree trunks and eyes that gleam with the fire of his forge",
+      sprite: "npc_blacksmith",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Welcome to my forge, traveler! The mountains forge both metal and character. What brings you to our village?",
+          responses: [
+            {
+              id: "buy_equipment",
+              text: "I need mining equipment.",
+              nextNodeId: "equipment_sales",
+            },
+            {
+              id: "ask_about_mining",
+              text: "Tell me about mining here.",
+              nextNodeId: "mining_advice",
+            },
+            {
+              id: "ask_about_village",
+              text: "What's the history of this village?",
+              nextNodeId: "village_history",
+            },
+          ],
+        },
+        {
+          id: "equipment_sales",
+          text: "Aye, good tools are essential for safe mining! My pickaxes are the finest in the region - they'll serve you well in the deep tunnels.",
+        },
+        {
+          id: "mining_advice",
+          text: "The mountain's been generous to us for generations. But she demands respect - never go into the deep tunnels without proper equipment, and always listen for the mountain's warnings.",
+        },
+        {
+          id: "village_history",
+          text: "This village was founded by my great-grandfather when he discovered the first silver vein. We've been mining these mountains for over a century, following the old ways and respecting the mountain spirits.",
+        },
+      ],
+      quests: ["mountain_mining_tutorial", "the_great_discovery_part2"],
+      shop: "mountain_blacksmith",
+    },
+    {
+      id: "mining_guide_elena",
+      name: "Elena the Mining Guide",
+      description: "A weathered mountain woman with keen eyes and an encyclopedic knowledge of the local terrain",
+      sprite: "npc_mining_guide",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Another newcomer to the mountains! I can see it in your eyes - the call of the deep places. But are you prepared for what lies beneath?",
+          responses: [
+            {
+              id: "ask_guidance",
+              text: "I need guidance for mining.",
+              nextNodeId: "mining_guidance",
+            },
+            {
+              id: "buy_supplies",
+              text: "I need supplies for my journey.",
+              nextNodeId: "supply_sales",
+            },
+            {
+              id: "ask_about_tunnels",
+              text: "What lies in the deep tunnels?",
+              nextNodeId: "deep_tunnels",
+            },
+          ],
+        },
+        {
+          id: "mining_guidance",
+          text: "Listen well: the mountain has three levels. Surface mining for beginners, deep veins for the experienced, and the ancient tunnels... those are for heroes only.",
+        },
+        {
+          id: "supply_sales",
+          text: "Smart thinking! Preparation is the difference between a successful expedition and a rescue mission. Take a look at what I have in stock.",
+        },
+        {
+          id: "deep_tunnels",
+          text: "The ancient tunnels run deeper than any mine we've ever dug. Strange lights flicker there, and sometimes... sometimes you hear whispers in languages older than memory.",
+        },
+      ],
+      quests: ["mining_safety_lesson"],
+      shop: "mountain_trading_post",
+    },
+    {
+      id: "village_elder_magnus",
+      name: "Elder Magnus",
+      description: "An ancient man with silver hair and eyes that hold the wisdom of the mountains",
+      sprite: "npc_elder",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Young one, I sense great purpose in you. The mountains whisper of changing times - of discoveries that will reshape our understanding of this world.",
+          responses: [
+            {
+              id: "ask_about_whispers",
+              text: "What do the mountains whisper?",
+              nextNodeId: "mountain_prophecy",
+            },
+            {
+              id: "ask_about_discovery",
+              text: "What kind of discoveries?",
+              nextNodeId: "ancient_secrets",
+            },
+            {
+              id: "respectful_farewell",
+              text: "Thank you for your wisdom, Elder.",
+              nextNodeId: "blessing",
+            },
+          ],
+        },
+        {
+          id: "mountain_prophecy",
+          text: "They speak of lights in the forest, of tremors in the deep places, and of a chosen one who will uncover the truth about our world's creation. Perhaps... perhaps that one is you.",
+        },
+        {
+          id: "ancient_secrets",
+          text: "Long ago, before the first mines were dug, this land held secrets beyond imagination. Ancient ruins lie hidden, waiting for one brave enough to seek them out.",
+        },
+        {
+          id: "blessing",
+          text: "May the mountain spirits guide your path, young traveler. Remember - true strength comes not from the treasures you find, but from the courage to seek them.",
+        },
+      ],
+      quests: ["the_great_discovery_part1"],
+    },
+  ],
+  connections: [
+    {
+      destinationId: "forest_path",
+      travelTime: 120, // 30 minutes - longer journey to mountain
+    },
+    {
+      destinationId: "ancient_ruins",
+      travelTime: 100, // 25 minutes to ruins
+      requirements: [{ type: "quest_completed", value: "the_great_discovery_part2" }],
+    },
+  ],
+  unlockRequirements: [
+    { type: "level", value: 8 },
+    { type: "quest_completed", value: "fishing_lesson" },
+  ],
+  sprite: "location_mountain_village",
+  background: "bg_mountain_village",
+};
+
 // Export all locations
-export const LOCATIONS: Location[] = [HOMETOWN, FOREST_PATH, RIVERSIDE];
+export const LOCATIONS: Location[] = [HOMETOWN, FOREST_PATH, RIVERSIDE, MOUNTAIN_VILLAGE];
 
 // Helper function to get location by ID
 export function getLocationById(id: string): Location | undefined {

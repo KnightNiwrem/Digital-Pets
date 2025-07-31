@@ -822,4 +822,58 @@ describe("QuestSystem", () => {
       expect(result.data!.world.unlockedLocations.length).toBe(initialLocations.length + 1);
     });
   });
+
+  // Mountain Village Quest Chain Tests
+  describe("Mountain Village Quest Chain", () => {
+    it("should have valid quest chain structure", () => {
+      const part1 = getQuestById("the_great_discovery_part1");
+      const part2 = getQuestById("the_great_discovery_part2");
+      const miningTutorial = getQuestById("mountain_mining_tutorial");
+      const safetyLesson = getQuestById("mining_safety_lesson");
+
+      expect(part1).toBeDefined();
+      expect(part2).toBeDefined();
+      expect(miningTutorial).toBeDefined();
+      expect(safetyLesson).toBeDefined();
+
+      // Check quest chain progression
+      expect(part2?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "the_great_discovery_part1" })
+      );
+      expect(safetyLesson?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "mountain_mining_tutorial" })
+      );
+    });
+
+    it("should have appropriate rewards for quest difficulty", () => {
+      const part1 = getQuestById("the_great_discovery_part1");
+      const part2 = getQuestById("the_great_discovery_part2");
+
+      // Part 1 should have meaningful rewards
+      expect(part1?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "experience", amount: 50 }),
+          expect.objectContaining({ type: "item", itemId: "ancient_relic" }),
+          expect.objectContaining({ type: "gold", amount: 100 }),
+        ])
+      );
+
+      // Part 2 should unlock location and have greater rewards
+      expect(part2?.rewards).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: "unlock_location", locationId: "ancient_ruins" }),
+          expect.objectContaining({ type: "experience", amount: 75 }),
+        ])
+      );
+    });
+
+    it("should have valid quest objectives", () => {
+      const miningTutorial = getQuestById("mountain_mining_tutorial");
+      
+      expect(miningTutorial?.objectives).toHaveLength(3);
+      expect(miningTutorial?.objectives[0].type).toBe("collect_item");
+      expect(miningTutorial?.objectives[0].itemId).toBe("pickaxe");
+      expect(miningTutorial?.objectives[1].itemId).toBe("iron_ore");
+    });
+  });
 });
