@@ -2,7 +2,39 @@
 
 This document defines repetitive tasks and workflows for the Digital Pets project.
 
-## Core Implementation Pattern
+## Fix UI Display Issues (ID vs Name)
+**Last performed:** December 2024 - Issue #49
+**Files to modify:**
+- `/src/data/locations.ts` - Add utility functions for data lookups
+- `/src/components/world/ActivitiesPanel.tsx` - Fix shopkeeper and item displays
+- `/src/components/world/ShopModal.tsx` - Fix shopkeeper displays
+- `/src/components/quest/QuestDialog.tsx` - Fix NPC displays
+- `/src/components/quest/QuestDetails.tsx` - Fix quest giver displays
+- `/tests/data/locations.test.ts` - Add tests for new utility functions
+
+**Steps:**
+1. Identify all instances where IDs are displayed instead of names using grep/search
+2. Create utility functions (`getNpcById`, etc.) in data files for proper lookups
+3. Update UI components to use these utilities instead of displaying raw IDs
+4. Handle TypeScript type safety (optional fields, null checks)
+5. Fix linting issues (case block declarations, prettier formatting)
+6. Write comprehensive unit tests for new utility functions
+7. Verify all tests pass and linting is clean
+
+**Important notes:**
+- Look for patterns like `{shop.keeper}`, `{reward.id}`, `{quest.npcId}` in components
+- Use existing utilities like `getItemById()` as examples
+- Ensure proper fallbacks for undefined values (e.g., `item?.name || itemId`)
+- Wrap case statements with braces to avoid variable declaration errors
+- Test edge cases like empty strings and invalid IDs
+
+**Testing commands:**
+```bash
+bun run typecheck  # Ensure TypeScript compilation
+bun run lint       # Check code style and rules
+bun test           # Run full test suite
+bun run build      # Verify production build
+```
 
 All major game systems follow this established pattern:
 

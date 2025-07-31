@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { ShopPanel } from "./ShopPanel";
+import { getNpcById } from "@/data/locations";
 import type { Shop, Pet, Inventory } from "@/types";
 
 interface ShopModalProps {
@@ -26,7 +27,7 @@ export function ShopModal({ shop, pet, inventory, isOpen, onClose, onBuyItem, on
         <div className="flex items-center justify-between p-4 border-b">
           <div>
             <h2 className="text-xl font-semibold">{shop.name}</h2>
-            <p className="text-sm text-gray-600">Shopkeeper: {shop.keeper}</p>
+            <p className="text-sm text-gray-600">Shopkeeper: {getNpcById(shop.keeper)?.name || shop.keeper}</p>
           </div>
           <Button variant="outline" size="sm" onClick={onClose} className="ml-4">
             <X className="h-4 w-4" />
