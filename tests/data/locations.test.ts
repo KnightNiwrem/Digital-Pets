@@ -47,6 +47,30 @@ describe("Location Data Validation", () => {
       expect(activityIds).toContain("guardian_challenge");
     });
 
+    it("should return coastal harbor location", () => {
+      const location = getLocationById("coastal_harbor");
+      expect(location).toBeDefined();
+      expect(location?.id).toBe("coastal_harbor");
+      expect(location?.name).toBe("Coastal Harbor");
+      expect(location?.type).toBe("beach");
+      expect(location?.activities).toBeDefined();
+      expect(location?.activities.length).toBe(3);
+      expect(location?.npcs.length).toBe(3);
+      expect(location?.shops.length).toBe(2);
+      
+      // Check unlock requirements
+      expect(location?.unlockRequirements).toBeDefined();
+      expect(location?.unlockRequirements?.length).toBe(1);
+      expect(location?.unlockRequirements?.[0].type).toBe("quest_completed");
+      expect(location?.unlockRequirements?.[0].value).toBe("the_great_discovery_part3");
+      
+      // Check maritime activities
+      const activityIds = location?.activities.map(a => a.id);
+      expect(activityIds).toContain("deep_sea_fishing");
+      expect(activityIds).toContain("ship_maintenance");
+      expect(activityIds).toContain("trade_negotiations");
+    });
+
     it("should return undefined for invalid location ID", () => {
       const location = getLocationById("invalid_location");
       expect(location).toBeUndefined();
@@ -118,6 +142,23 @@ describe("Location Data Validation", () => {
       expect(treasureHunter).toBeDefined();
       expect(treasureHunter?.id).toBe("treasure_hunter_zara");
       expect(treasureHunter?.name).toBe("Zara the Treasure Hunter");
+    });
+
+    it("should return NPC data for coastal harbor NPCs", () => {
+      const harborMaster = getNpcById("harbor_master_thaddeus");
+      expect(harborMaster).toBeDefined();
+      expect(harborMaster?.id).toBe("harbor_master_thaddeus");
+      expect(harborMaster?.name).toBe("Harbor Master Thaddeus");
+      
+      const merchantCaptain = getNpcById("merchant_captain_elena");
+      expect(merchantCaptain).toBeDefined();
+      expect(merchantCaptain?.id).toBe("merchant_captain_elena");
+      expect(merchantCaptain?.name).toBe("Captain Elena Stormwind");
+      
+      const fishmonger = getNpcById("fishmonger_barnabus");
+      expect(fishmonger).toBeDefined();
+      expect(fishmonger?.id).toBe("fishmonger_barnabus");
+      expect(fishmonger?.name).toBe("Barnabus the Fishmonger");
     });
 
     it("should return undefined for invalid NPC ID", () => {

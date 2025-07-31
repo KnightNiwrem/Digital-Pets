@@ -652,6 +652,239 @@ const MINING_SAFETY_LESSON: Quest = {
   order: 2,
 };
 
+// Coastal Harbor Quests
+const HARBOR_INTEGRATION: Quest = {
+  id: "harbor_integration",
+  name: "Harbor Integration",
+  description: "Harbor Master Thaddeus wants to introduce you to the maritime way of life.",
+  type: "exploration",
+  status: "not_started",
+  objectives: [
+    {
+      id: "visit_harbor",
+      type: "visit_location",
+      description: "Explore the Coastal Harbor and meet the harbor master",
+      locationId: "coastal_harbor",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "try_ship_maintenance",
+      type: "collect_item",
+      description: "Help with ship maintenance to earn 2 ship tools",
+      itemId: "ship_tools",
+      targetAmount: 2,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "meet_merchants",
+      type: "visit_location",
+      description: "Speak with the local merchants and traders",
+      locationId: "coastal_harbor",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+  ],
+  requirements: [{ type: "quest_completed", questId: "the_great_discovery_part3" }],
+  rewards: [
+    { type: "experience", amount: 30 },
+    { type: "item", itemId: "navigation_compass", amount: 1 },
+    { type: "gold", amount: 80 },
+  ],
+  npcId: "harbor_master_thaddeus",
+  location: "coastal_harbor",
+  dialogue: {
+    start:
+      "So you're the adventurer who's been making waves around here! The harbor life is different from the mountains - here we work with the tides and winds. Let me show you the ropes.",
+    progress:
+      "Good work! You're picking up the maritime ways quickly. The sea rewards those who respect her power and understand her rhythms.",
+    complete:
+      "Welcome to the harbor community! You've proven yourself capable on land and sea. The merchants are already talking about working with you.",
+  },
+  isMainQuest: false,
+  chapter: 4,
+  order: 1,
+};
+
+const TRADING_APPRENTICE: Quest = {
+  id: "trading_apprentice",
+  name: "Trading Apprentice",
+  description: "Captain Elena Stormwind offers to teach you the art of maritime trade.",
+  type: "exploration",
+  status: "not_started",
+  objectives: [
+    {
+      id: "learn_trade_basics",
+      type: "collect_item",
+      description: "Participate in trade negotiations to earn 3 trade permits",
+      itemId: "trade_permit",
+      targetAmount: 3,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "collect_exotic_goods",
+      type: "collect_item",
+      description: "Acquire 5 exotic spices through your trading activities",
+      itemId: "exotic_spice",
+      targetAmount: 5,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "successful_deal",
+      type: "collect_item",
+      description: "Complete a major deal by obtaining 2 ocean pearls",
+      itemId: "pearl",
+      targetAmount: 2,
+      currentAmount: 0,
+      completed: false,
+    },
+  ],
+  requirements: [{ type: "quest_completed", questId: "harbor_integration" }],
+  rewards: [
+    { type: "experience", amount: 50 },
+    { type: "item", itemId: "pearl", amount: 1 },
+    { type: "item", itemId: "exotic_fish", amount: 3 },
+    { type: "gold", amount: 200 },
+  ],
+  npcId: "merchant_captain_elena",
+  location: "coastal_harbor",
+  dialogue: {
+    start:
+      "I see potential in you, young trader! The art of commerce is about more than just buying and selling - it's about understanding value, building relationships, and reading the market winds.",
+    progress:
+      "Excellent! You're developing a trader's instincts. Remember, every successful deal should benefit both parties - that's how you build lasting partnerships.",
+    complete:
+      "Outstanding work! You've mastered the fundamentals of maritime trade. With skills like these, you could captain your own merchant vessel someday.",
+  },
+  isMainQuest: false,
+  chapter: 4,
+  order: 2,
+};
+
+const MASTER_ANGLER: Quest = {
+  id: "master_angler",
+  name: "Master Angler",
+  description: "Barnabus the Fishmonger challenges you to master the art of deep sea fishing.",
+  type: "exploration",
+  status: "not_started",
+  objectives: [
+    {
+      id: "deep_sea_fishing",
+      type: "collect_item",
+      description: "Catch 8 exotic fish from the deep waters",
+      itemId: "exotic_fish",
+      targetAmount: 8,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "rare_catch",
+      type: "collect_item",
+      description: "Find 3 ocean pearls while fishing",
+      itemId: "pearl",
+      targetAmount: 3,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "kelp_harvest",
+      type: "collect_item",
+      description: "Harvest materials to create 5 kelp supplements",
+      itemId: "kelp_supplement",
+      targetAmount: 5,
+      currentAmount: 0,
+      completed: false,
+    },
+  ],
+  requirements: [{ type: "quest_completed", questId: "fishing_lesson" }],
+  rewards: [
+    { type: "experience", amount: 40 },
+    { type: "item", itemId: "fishing_rod", amount: 1 }, // upgraded fishing rod
+    { type: "item", itemId: "exotic_fish", amount: 5 },
+    { type: "gold", amount: 120 },
+  ],
+  npcId: "fishmonger_barnabus",
+  location: "coastal_harbor",
+  dialogue: {
+    start:
+      "Ah, a fellow fishing enthusiast! The shallow waters have taught you well, but the deep sea... that's where the real treasures swim. Are you ready for the ultimate angling challenge?",
+    progress:
+      "Impressive catches! You're showing the patience and skill of a true deep sea angler. The ocean's finest secrets are within your reach.",
+    complete:
+      "Magnificent! You've mastered the deep waters like few before you. The sea herself has blessed your lines - you're now a true Master Angler!",
+  },
+  isMainQuest: false,
+  chapter: 4,
+  order: 3,
+};
+
+const DEEP_SEA_EXPEDITION: Quest = {
+  id: "deep_sea_expedition",
+  name: "Deep Sea Expedition",
+  description: "Harbor Master Thaddeus organizes a major expedition to explore the deepest ocean trenches.",
+  type: "exploration",
+  status: "not_started",
+  objectives: [
+    {
+      id: "expedition_preparation",
+      type: "collect_item",
+      description: "Gather supplies: 10 sea salt, 5 rope, and 3 navigation compasses",
+      itemId: "sea_salt",
+      targetAmount: 10,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "deep_exploration",
+      type: "visit_location",
+      description: "Lead the expedition into the deepest waters",
+      locationId: "coastal_harbor",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+    {
+      id: "treasure_discovery",
+      type: "collect_item",
+      description: "Discover the legendary treasure: 1 legendary artifact from the deep",
+      itemId: "legendary_artifact",
+      targetAmount: 1,
+      currentAmount: 0,
+      completed: false,
+    },
+  ],
+  requirements: [
+    { type: "quest_completed", questId: "master_angler" },
+    { type: "quest_completed", questId: "trading_apprentice" },
+    { type: "level", value: 20 },
+  ],
+  rewards: [
+    { type: "experience", amount: 100 },
+    { type: "item", itemId: "legendary_artifact", amount: 1 },
+    { type: "item", itemId: "pearl", amount: 5 },
+    { type: "item", itemId: "exotic_fish", amount: 10 },
+    { type: "gold", amount: 500 },
+  ],
+  npcId: "harbor_master_thaddeus",
+  location: "coastal_harbor",
+  dialogue: {
+    start:
+      "The time has come for the greatest maritime adventure in decades! Ancient charts speak of treasures in the deepest trenches. Will you lead our expedition into the unknown?",
+    progress:
+      "The expedition is legendary already! Tales of your discoveries will be told in every port from here to the Northern Reaches.",
+    complete:
+      "By Neptune's beard! You've accomplished what mariners have dreamed of for centuries. The treasures you've found will make this harbor the envy of the seven seas!",
+  },
+  isMainQuest: true,
+  chapter: 5,
+  order: 1,
+};
+
 // Export all quests
 export const QUESTS: Quest[] = [
   PET_CARE_BASICS,
@@ -669,6 +902,11 @@ export const QUESTS: Quest[] = [
   THE_GREAT_DISCOVERY_PART2,
   THE_GREAT_DISCOVERY_PART3,
   THE_GREAT_DISCOVERY_PART4,
+  // Coastal Harbor Quests
+  HARBOR_INTEGRATION,
+  TRADING_APPRENTICE,
+  MASTER_ANGLER,
+  DEEP_SEA_EXPEDITION,
 ];
 
 // Export with alternative name for consistency

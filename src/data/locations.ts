@@ -689,8 +689,235 @@ const ANCIENT_RUINS: Location = {
   background: "bg_ancient_ruins",
 };
 
+// Coastal Harbor - Advanced trading hub with maritime activities
+const COASTAL_HARBOR: Location = {
+  id: "coastal_harbor",
+  name: "Coastal Harbor",
+  type: "beach" as LocationType,
+  description:
+    "A bustling maritime trading hub where merchants from distant lands gather. The harbor is filled with exotic goods and the sound of creaking ships.",
+  activities: [
+    {
+      id: "deep_sea_fishing",
+      name: "Deep Sea Fishing",
+      type: "fishing",
+      description: "Venture into deeper waters for rare and exotic fish species",
+      energyCost: 35,
+      duration: 80, // 20 minutes
+      rewards: [
+        { type: "item", id: "exotic_fish", amount: 1, probability: 0.4 },
+        { type: "item", id: "pearl", amount: 1, probability: 0.2 },
+        { type: "item", id: "rare_fish", amount: 2, probability: 0.6 },
+        { type: "experience", amount: 20, probability: 1.0 },
+        { type: "gold", amount: 60, probability: 0.5 },
+      ],
+    },
+    {
+      id: "ship_maintenance",
+      name: "Ship Maintenance Work",
+      type: "training",
+      description: "Help maintain the harbor's ships and improve your practical skills",
+      energyCost: 25,
+      duration: 60, // 15 minutes
+      rewards: [
+        { type: "experience", amount: 15, probability: 1.0 },
+        { type: "item", id: "rope", amount: 1, probability: 0.4 },
+        { type: "item", id: "ship_tools", amount: 1, probability: 0.3 },
+        { type: "gold", amount: 40, probability: 0.7 },
+      ],
+    },
+    {
+      id: "trade_negotiations",
+      name: "Trade Negotiations",
+      type: "foraging",
+      description: "Assist merchants with trade deals and learn about exotic goods",
+      energyCost: 20,
+      duration: 45, // 11.25 minutes
+      rewards: [
+        { type: "experience", amount: 12, probability: 1.0 },
+        { type: "item", id: "trade_permit", amount: 1, probability: 0.3 },
+        { type: "item", id: "exotic_spice", amount: 1, probability: 0.4 },
+        { type: "gold", amount: 80, probability: 0.6 },
+      ],
+    },
+  ],
+  shops: [
+    {
+      id: "exotic_goods_emporium",
+      name: "Exotic Goods Emporium",
+      description: "A shop specializing in rare items from across the seven seas",
+      keeper: "merchant_captain_elena",
+      items: [
+        { itemId: "exotic_fish", price: 80, stock: 8 },
+        { itemId: "pearl", price: 150, stock: 3 },
+        { itemId: "navigation_compass", price: 200, stock: 2 },
+        { itemId: "sea_salt", price: 25, stock: 15 },
+      ],
+    },
+    {
+      id: "fishmongers_market",
+      name: "Fresh Catch Market",
+      description: "The best seafood in the region, brought in daily by local fishermen",
+      keeper: "fishmonger_barnabus",
+      items: [
+        { itemId: "fish", price: 20, stock: -1 },
+        { itemId: "rare_fish", price: 45, stock: 12 },
+        { itemId: "exotic_fish", price: 85, stock: 6 },
+        { itemId: "kelp_supplement", price: 35, stock: 8 },
+      ],
+    },
+  ],
+  npcs: [
+    {
+      id: "harbor_master_thaddeus",
+      name: "Harbor Master Thaddeus",
+      description: "A weathered sea captain who oversees all harbor operations with an iron fist and a kind heart",
+      sprite: "npc_harbor_master",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Welcome to our harbor, landlubber! This port has seen traders from every corner of the world. What brings you to our bustling waters?",
+          responses: [
+            {
+              id: "ask_about_harbor",
+              text: "Tell me about this harbor.",
+              nextNodeId: "harbor_history",
+            },
+            {
+              id: "seek_work",
+              text: "I'm looking for work around the docks.",
+              nextNodeId: "harbor_work",
+            },
+            {
+              id: "ask_about_ships",
+              text: "What ships come through here?",
+              nextNodeId: "ship_tales",
+            },
+          ],
+        },
+        {
+          id: "harbor_history",
+          text: "This harbor's been the crossroads of trade for three centuries. Ships from the Eastern Kingdoms, the Southern Archipelago, even the mysterious Northern Reaches dock here.",
+        },
+        {
+          id: "harbor_work",
+          text: "Always need good hands around here! Ships need constant maintenance, and the merchants can always use help with their negotiations. Hard work, but it pays well.",
+        },
+        {
+          id: "ship_tales",
+          text: "Ah, the stories I could tell! Merchant vessels laden with silks and spices, fishing boats returning with legendary catches, and sometimes... ships carrying far stranger cargo.",
+        },
+      ],
+      quests: ["harbor_integration", "deep_sea_expedition"],
+    },
+    {
+      id: "merchant_captain_elena",
+      name: "Captain Elena Stormwind",
+      description: "A renowned merchant captain whose ship 'Sea Phoenix' has traveled to every known port in the world",
+      sprite: "npc_merchant_captain",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Greetings, fellow traveler! I've sailed the seven seas and traded with peoples from every known land. Perhaps you'd be interested in some of my exotic wares?",
+          responses: [
+            {
+              id: "browse_goods",
+              text: "What exotic goods do you have?",
+              nextNodeId: "exotic_inventory",
+            },
+            {
+              id: "ask_about_travels",
+              text: "Tell me about your travels.",
+              nextNodeId: "travel_stories",
+            },
+            {
+              id: "trade_inquiry",
+              text: "I'm interested in learning about trade.",
+              nextNodeId: "trade_wisdom",
+            },
+          ],
+        },
+        {
+          id: "exotic_inventory",
+          text: "My ship carries treasures from distant shores: pearls from the Deep Coral Reefs, navigation tools crafted by the finest artisans, and spices that can transform any meal into a feast.",
+        },
+        {
+          id: "travel_stories",
+          text: "I've weathered storms that could sink mountains, traded with island peoples who speak in song, and discovered markets floating on the backs of great sea creatures. The world is vast and full of wonders!",
+        },
+        {
+          id: "trade_wisdom",
+          text: "Good trade isn't just about buying low and selling high - it's about understanding what people truly need and finding ways to bring it to them. Relationships matter more than gold in this business.",
+        },
+      ],
+      quests: ["trading_apprentice"],
+      shop: "exotic_goods_emporium",
+    },
+    {
+      id: "fishmonger_barnabus",
+      name: "Barnabus the Fishmonger",
+      description:
+        "A jolly fishmonger with an encyclopedic knowledge of sea life and the best fish recipes in the harbor",
+      sprite: "npc_fishmonger",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Fresh catch today, friend! I've got fish so fresh they were swimming this morning. Looking for something special for your companion?",
+          responses: [
+            {
+              id: "buy_fish",
+              text: "What's the freshest catch today?",
+              nextNodeId: "daily_catch",
+            },
+            {
+              id: "ask_fishing_advice",
+              text: "Any tips for deep sea fishing?",
+              nextNodeId: "fishing_wisdom",
+            },
+            {
+              id: "ask_about_recipes",
+              text: "Do you know any good fish recipes?",
+              nextNodeId: "cooking_advice",
+            },
+          ],
+        },
+        {
+          id: "daily_catch",
+          text: "Today's special is the exotic rainbow fish - caught in waters so deep they never see sunlight! Rich in nutrients and your pet will love the unique flavor.",
+        },
+        {
+          id: "fishing_wisdom",
+          text: "Deep waters hold the best fish, but they're trickier to catch. Use strong line, be patient, and always respect the sea. She'll reward those who understand her moods.",
+        },
+        {
+          id: "cooking_advice",
+          text: "The secret to great fish is simple preparation! Fresh herbs, a touch of sea salt, and never overcook. Let the natural flavors shine through.",
+        },
+      ],
+      quests: ["master_angler"],
+      shop: "fishmongers_market",
+    },
+  ],
+  connections: [
+    {
+      destinationId: "riverside",
+      travelTime: 50, // 12.5 minutes
+    },
+  ],
+  unlockRequirements: [{ type: "quest_completed", value: "the_great_discovery_part3" }],
+  sprite: "location_coastal_harbor",
+  background: "bg_coastal_harbor",
+};
+
 // Export all locations
-export const LOCATIONS: Location[] = [HOMETOWN, FOREST_PATH, RIVERSIDE, MOUNTAIN_VILLAGE, ANCIENT_RUINS];
+export const LOCATIONS: Location[] = [
+  HOMETOWN,
+  FOREST_PATH,
+  RIVERSIDE,
+  MOUNTAIN_VILLAGE,
+  ANCIENT_RUINS,
+  COASTAL_HARBOR,
+];
 
 // Helper function to get location by ID
 export function getLocationById(id: string): Location | undefined {

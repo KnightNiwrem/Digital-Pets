@@ -696,6 +696,133 @@ const GROWTH_SEED: ConsumableItem = {
   stackable: true,
 };
 
+// Coastal Harbor maritime items
+const EXOTIC_FISH: ConsumableItem = {
+  id: "exotic_fish",
+  name: "Exotic Fish",
+  description: "A rare deep-sea fish with vibrant colors and exceptional nutritional value.",
+  type: "consumable",
+  rarity: "rare",
+  icon: "item_exotic_fish",
+  effects: [
+    { type: "satiety", value: 70 },
+    { type: "happiness", value: 40 },
+  ],
+  value: 85,
+  stackable: true,
+};
+
+const PEARL: ConsumableItem = {
+  id: "pearl",
+  name: "Ocean Pearl",
+  description: "A lustrous pearl from the deep ocean, said to bring good fortune.",
+  type: "special",
+  rarity: "epic",
+  icon: "item_pearl",
+  effects: [
+    { type: "happiness", value: 60 },
+    { type: "luck_bonus", value: 10 },
+  ],
+  value: 200,
+  stackable: true,
+};
+
+const NAVIGATION_COMPASS: DurabilityItem = {
+  id: "navigation_compass",
+  name: "Navigation Compass",
+  description: "A precision compass used by skilled navigators for long sea voyages.",
+  type: "equipment",
+  rarity: "rare",
+  icon: "item_navigation_compass",
+  effects: [{ type: "exploration_bonus", value: 20 }],
+  value: 180,
+  stackable: false,
+  maxDurability: 100,
+  currentDurability: 100,
+  durabilityLossPerUse: 2,
+};
+
+const SEA_SALT: ConsumableItem = {
+  id: "sea_salt",
+  name: "Sea Salt",
+  description: "Pure sea salt harvested from coastal waters, perfect for food preparation.",
+  type: "special",
+  rarity: "common",
+  icon: "item_sea_salt",
+  effects: [{ type: "satiety", value: 10 }],
+  value: 15,
+  stackable: true,
+};
+
+const KELP_SUPPLEMENT: ConsumableItem = {
+  id: "kelp_supplement",
+  name: "Kelp Supplement",
+  description: "Nutritious kelp supplement rich in vitamins and minerals from the sea.",
+  type: "medicine",
+  rarity: "uncommon",
+  icon: "item_kelp_supplement",
+  effects: [
+    { type: "health", value: 30 },
+    { type: "hydration", value: 25 },
+  ],
+  value: 35,
+  stackable: true,
+};
+
+const ROPE: ConsumableItem = {
+  id: "rope",
+  name: "Maritime Rope",
+  description: "Strong rope used in ship operations, useful for various activities.",
+  type: "special",
+  rarity: "common",
+  icon: "item_rope",
+  effects: [{ type: "exploration_bonus", value: 5 }],
+  value: 20,
+  stackable: true,
+};
+
+const SHIP_TOOLS: DurabilityItem = {
+  id: "ship_tools",
+  name: "Ship Maintenance Tools",
+  description: "A set of specialized tools for ship repair and maintenance work.",
+  type: "equipment",
+  rarity: "uncommon",
+  icon: "item_ship_tools",
+  effects: [{ type: "training_bonus", value: 15 }],
+  value: 60,
+  stackable: false,
+  maxDurability: 80,
+  currentDurability: 80,
+  durabilityLossPerUse: 3,
+};
+
+const TRADE_PERMIT: ConsumableItem = {
+  id: "trade_permit",
+  name: "Trade Permit",
+  description: "An official document allowing participation in high-value trade negotiations.",
+  type: "special",
+  rarity: "rare",
+  icon: "item_trade_permit",
+  effects: [{ type: "luck_bonus", value: 25 }],
+  value: 100,
+  stackable: true,
+};
+
+const EXOTIC_SPICE: ConsumableItem = {
+  id: "exotic_spice",
+  name: "Exotic Spice",
+  description: "Rare spices from distant lands that enhance the flavor of any meal.",
+  type: "consumable",
+  rarity: "uncommon",
+  icon: "item_exotic_spice",
+  effects: [
+    { type: "satiety", value: 15 },
+    { type: "happiness", value: 30 },
+  ],
+  value: 45,
+  stackable: true,
+};
+
 // Export all items
 export const ITEMS: Item[] = [
   // Basic items (original 12)
@@ -762,6 +889,17 @@ export const ITEMS: Item[] = [
   MYSTIC_CHARM,
   ENERGY_CRYSTAL,
   GROWTH_SEED,
+
+  // Maritime items
+  EXOTIC_FISH,
+  PEARL,
+  NAVIGATION_COMPASS,
+  SEA_SALT,
+  KELP_SUPPLEMENT,
+  ROPE,
+  SHIP_TOOLS,
+  TRADE_PERMIT,
+  EXOTIC_SPICE,
 ];
 
 // Helper function to get item by ID

@@ -965,6 +965,92 @@ describe("QuestSystem", () => {
     });
   });
 
+  // Coastal Harbor Quest Chain Tests
+  describe("Coastal Harbor Quest Chain", () => {
+    it("should have valid harbor quest structure", () => {
+      const harborIntegration = getQuestById("harbor_integration");
+      const tradingApprentice = getQuestById("trading_apprentice");
+      const masterAngler = getQuestById("master_angler");
+      const deepSeaExpedition = getQuestById("deep_sea_expedition");
+
+      expect(harborIntegration).toBeDefined();
+      expect(tradingApprentice).toBeDefined();
+      expect(masterAngler).toBeDefined();
+      expect(deepSeaExpedition).toBeDefined();
+
+      // Check quest chain progression
+      expect(tradingApprentice?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "harbor_integration" })
+      );
+      expect(deepSeaExpedition?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "master_angler" })
+      );
+      expect(deepSeaExpedition?.requirements).toContainEqual(
+        expect.objectContaining({ type: "quest_completed", questId: "trading_apprentice" })
+      );
+    });
+
+    it("should have appropriate maritime rewards", () => {
+      const harborIntegration = getQuestById("harbor_integration");
+      const deepSeaExpedition = getQuestById("deep_sea_expedition");
+
+      // Harbor integration should provide navigation tools
+      expect(harborIntegration?.rewards).toContainEqual(
+        expect.objectContaining({ type: "item", itemId: "navigation_compass" })
+      );
+
+      // Deep sea expedition should have legendary rewards
+      expect(deepSeaExpedition?.rewards).toContainEqual(
+        expect.objectContaining({ type: "item", itemId: "legendary_artifact" })
+      );
+      expect(deepSeaExpedition?.rewards).toContainEqual(
+        expect.objectContaining({ type: "item", itemId: "pearl", amount: 5 })
+      );
+      expect(deepSeaExpedition?.rewards).toContainEqual(
+        expect.objectContaining({ type: "gold", amount: 500 })
+      );
+    });
+
+    it("should have correct maritime quest objectives", () => {
+      const masterAngler = getQuestById("master_angler");
+      const tradingApprentice = getQuestById("trading_apprentice");
+      
+      // Master angler should focus on deep sea fishing
+      expect(masterAngler?.objectives[0].itemId).toBe("exotic_fish");
+      expect(masterAngler?.objectives[0].targetAmount).toBe(8);
+      expect(masterAngler?.objectives[1].itemId).toBe("pearl");
+      
+      // Trading apprentice should focus on trade activities
+      expect(tradingApprentice?.objectives[0].itemId).toBe("trade_permit");
+      expect(tradingApprentice?.objectives[1].itemId).toBe("exotic_spice");
+      expect(tradingApprentice?.objectives[2].itemId).toBe("pearl");
+    });
+
+    it("should have correct NPCs and locations for harbor quests", () => {
+      const harborIntegration = getQuestById("harbor_integration");
+      const tradingApprentice = getQuestById("trading_apprentice");
+      const masterAngler = getQuestById("master_angler");
+      const deepSeaExpedition = getQuestById("deep_sea_expedition");
+
+      expect(harborIntegration?.npcId).toBe("harbor_master_thaddeus");
+      expect(harborIntegration?.location).toBe("coastal_harbor");
+      
+      expect(tradingApprentice?.npcId).toBe("merchant_captain_elena");
+      expect(tradingApprentice?.location).toBe("coastal_harbor");
+      
+      expect(masterAngler?.npcId).toBe("fishmonger_barnabus");
+      expect(masterAngler?.location).toBe("coastal_harbor");
+      
+      expect(deepSeaExpedition?.npcId).toBe("harbor_master_thaddeus");
+      expect(deepSeaExpedition?.location).toBe("coastal_harbor");
+
+      // Check chapter progression
+      expect(deepSeaExpedition?.isMainQuest).toBe(true);
+      expect(deepSeaExpedition?.chapter).toBe(5);
+      expect(deepSeaExpedition?.order).toBe(1);
+    });
+  });
+
   describe("Negative targetAmount handling", () => {
     let gameState: GameState;
     let miningTutorialQuest: Quest;
