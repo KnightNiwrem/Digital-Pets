@@ -9,7 +9,7 @@ import type { Quest, QuestProgress, QuestObjective, QuestReward } from "@/types/
 import type { Result } from "@/types";
 import { getItemById } from "@/data/items";
 import { getNpcById } from "@/data/locations";
-import { QuestUtils, GameMath } from "@/lib/utils";
+import { QuestUtils, GameMath, UIUtils } from "@/lib/utils";
 
 interface QuestDetailsProps {
   quest: Quest | QuestProgress | null;
@@ -49,23 +49,6 @@ export function QuestDetails({
   const questNpcId = "npcId" in quest ? quest.npcId : undefined;
   const questLocation = "location" in quest ? quest.location : undefined;
   const isMainQuest = "isMainQuest" in quest ? quest.isMainQuest : false;
-
-  const getQuestTypeColor = (type: string) => {
-    switch (type) {
-      case "story":
-        return "bg-yellow-100 text-yellow-800";
-      case "exploration":
-        return "bg-green-100 text-green-800";
-      case "collection":
-        return "bg-blue-100 text-blue-800";
-      case "battle":
-        return "bg-red-100 text-red-800";
-      case "care":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   const canComplete = () => {
     return isActive && QuestUtils.isQuestComplete({ objectives: questObjectives });
@@ -122,23 +105,12 @@ export function QuestDetails({
     };
 
     const getRewardText = () => {
-      switch (reward.type) {
-        case "gold":
-          return `${reward.amount} Gold`;
-        case "experience":
-          return `${reward.amount} EXP`;
-        case "item": {
-          const item = getItemById(reward.itemId!);
-          const itemName = item ? item.name : reward.itemId;
-          return `${reward.amount || 1}x ${itemName}`;
-        }
-        case "unlock_location":
-          return `Unlock ${reward.locationId}`;
-        case "unlock_quest":
-          return `Unlock Quest: ${reward.questId}`;
-        default:
-          return "Unknown Reward";
+      if (reward.type === "item") {
+        const item = getItemById(reward.itemId!);
+        const itemName = item ? item.name : reward.itemId;
+        return `${reward.amount || 1}x ${itemName}`;
       }
+      return UIUtils.formatRewardText(reward);
     };
 
     return (
@@ -157,7 +129,7 @@ export function QuestDetails({
       <div>
         <div className="flex items-start justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-800">{questName}</h2>
-          <Badge className={`${getQuestTypeColor(questType)} text-xs`}>{questType}</Badge>
+          <Badge className={`${UIUtils.getQuestTypeColor(questType)} text-xs`}>{questType}</Badge>
         </div>
         {isMainQuest && (
           <Badge variant="outline" className="mb-2">

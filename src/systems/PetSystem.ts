@@ -2,7 +2,7 @@
 
 import type { Pet, PetCareAction, ItemEffect, Result } from "@/types";
 import { PET_CONSTANTS } from "@/types";
-import { PetValidator, GameMath, EnergyManager } from "@/lib/utils";
+import { PetValidator, GameMath, EnergyManager, StatUpdateUtils } from "@/lib/utils";
 
 export class PetSystem {
   /**
@@ -17,20 +17,23 @@ export class PetSystem {
       };
     }
 
-    const actualIncrease = Math.min(satietyValue, 100 - pet.satiety);
+    const updateResult = StatUpdateUtils.updateStat(
+      pet,
+      "satiety",
+      satietyValue,
+      PET_CONSTANTS.STAT_MULTIPLIER.SATIETY,
+      15000
+    );
 
-    if (actualIncrease <= 0) {
+    if (updateResult.actualIncrease <= 0) {
       return {
         success: false,
         error: "Pet is not hungry right now.",
       };
     }
 
-    // Convert display value back to ticks
-    const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.SATIETY);
-    pet.satietyTicksLeft = GameMath.addToStat(pet.satietyTicksLeft, tickIncrease, 15000); // Cap at ~62 hours
-    pet.satiety = GameMath.calculateSatietyDisplay(pet.satietyTicksLeft);
-    pet.lastCareTime = Date.now();
+    const updatedPet = updateResult.updatedPet;
+    Object.assign(pet, updatedPet);
 
     const action: PetCareAction = {
       type: "feed",
@@ -52,19 +55,23 @@ export class PetSystem {
       };
     }
 
-    const actualIncrease = Math.min(hydrationValue, 100 - pet.hydration);
+    const updateResult = StatUpdateUtils.updateStat(
+      pet,
+      "hydration",
+      hydrationValue,
+      PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION,
+      12000
+    );
 
-    if (actualIncrease <= 0) {
+    if (updateResult.actualIncrease <= 0) {
       return {
         success: false,
         error: "Pet is not dehydrated right now.",
       };
     }
 
-    const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.HYDRATION);
-    pet.hydrationTicksLeft = GameMath.addToStat(pet.hydrationTicksLeft, tickIncrease, 12000); // Cap at ~50 hours
-    pet.hydration = GameMath.calculateHydrationDisplay(pet.hydrationTicksLeft);
-    pet.lastCareTime = Date.now();
+    const updatedPet = updateResult.updatedPet;
+    Object.assign(pet, updatedPet);
 
     const action: PetCareAction = {
       type: "drink",
@@ -86,20 +93,24 @@ export class PetSystem {
       };
     }
 
-    const actualIncrease = Math.min(happinessValue, 100 - pet.happiness);
+    const updateResult = StatUpdateUtils.updateStat(
+      pet,
+      "happiness",
+      happinessValue,
+      PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS,
+      18000
+    );
 
-    if (actualIncrease <= 0) {
+    if (updateResult.actualIncrease <= 0) {
       return {
         success: false,
         error: "Pet is already very happy.",
       };
     }
 
-    const tickIncrease = GameMath.displayValueToTicks(actualIncrease, PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS);
-    pet.happinessTicksLeft = GameMath.addToStat(pet.happinessTicksLeft, tickIncrease, 18000); // Cap at ~75 hours
-    pet.happiness = GameMath.calculateHappinessDisplay(pet.happinessTicksLeft);
+    const updatedPet = updateResult.updatedPet;
+    Object.assign(pet, updatedPet);
     EnergyManager.deductEnergy(pet, energyCost);
-    pet.lastCareTime = Date.now();
 
     const action: PetCareAction = {
       type: "play",

@@ -8,7 +8,7 @@ import { ItemSystem } from "@/systems/ItemSystem";
 import type { InventorySlot, DurabilityItem } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
 import { ITEM_CONSTANTS } from "@/types/Item";
-import { ItemPricing, GameMath } from "@/lib/utils";
+import { ItemPricing, GameMath, UIUtils, ItemEffectUtils } from "@/lib/utils";
 import { X, Play, Coins, AlertTriangle, Info, Minus, Plus } from "lucide-react";
 
 interface ItemDetailsPanelProps {
@@ -31,48 +31,6 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
   // Check if item can be used
   const canUseResult = ItemSystem.validateItemUsage(pet, item);
 
-  const getRarityColor = () => {
-    switch (item.rarity) {
-      case "common":
-        return "text-gray-600";
-      case "uncommon":
-        return "text-green-600";
-      case "rare":
-        return "text-blue-600";
-      case "epic":
-        return "text-purple-600";
-      case "legendary":
-        return "text-yellow-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  const getEffectDescription = () => {
-    return item.effects
-      .map(effect => {
-        switch (effect.type) {
-          case "satiety":
-            return `+${effect.value} Satiety`;
-          case "hydration":
-            return `+${effect.value} Hydration`;
-          case "happiness":
-            return `+${effect.value} Happiness`;
-          case "energy":
-            return `+${effect.value} Energy`;
-          case "health":
-            return "Heals injuries";
-          case "cure":
-            return "Cures illness";
-          case "clean":
-            return "Cleans pet";
-          default:
-            return effect.type;
-        }
-      })
-      .join(", ");
-  };
-
   const sellValue = ItemPricing.getStandardSellPrice(item.value);
 
   return (
@@ -85,7 +43,7 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
             </div>
             <div>
               <CardTitle className="text-lg">{item.name}</CardTitle>
-              <p className={`text-sm font-medium capitalize ${getRarityColor()}`}>
+              <p className={`text-sm font-medium capitalize ${UIUtils.getRarityColor(item.rarity)}`}>
                 {item.rarity} {item.type}
               </p>
             </div>
@@ -106,7 +64,7 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
         {item.effects.length > 0 && (
           <div>
             <h4 className="text-sm font-medium mb-2">Effects</h4>
-            <p className="text-sm text-green-600">{getEffectDescription()}</p>
+            <p className="text-sm text-green-600">{ItemEffectUtils.getEffectDescription(item.effects)}</p>
           </div>
         )}
 

@@ -7,7 +7,7 @@ import type { Pet, WorldState } from "@/types";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { getItemById } from "@/data/items";
 import { getNpcById } from "@/data/locations";
-import { PetValidator, GameMath } from "@/lib/utils";
+import { PetValidator, GameMath, UIUtils } from "@/lib/utils";
 
 interface ActivitiesPanelProps {
   pet: Pet;
@@ -195,22 +195,15 @@ export function ActivitiesPanel({
                             <div className="text-xs text-gray-500">
                               <span className="font-medium">Rewards: </span>
                               {activity.rewards.slice(0, 3).map((reward, index) => {
-                                const chance = GameMath.probabilityToPercentage(reward.probability);
+                                // Enhanced reward text with item name lookup
                                 let rewardText = "";
-
-                                switch (reward.type) {
-                                  case "gold":
-                                    rewardText = `${reward.amount} gold (${chance}%)`;
-                                    break;
-                                  case "item": {
-                                    const item = reward.id ? getItemById(reward.id) : null;
-                                    const itemName = item?.name || reward.id || "Unknown Item";
-                                    rewardText = `${itemName} (${chance}%)`;
-                                    break;
-                                  }
-                                  case "experience":
-                                    rewardText = `${reward.amount} exp (${chance}%)`;
-                                    break;
+                                if (reward.type === "item") {
+                                  const item = reward.id ? getItemById(reward.id) : null;
+                                  const itemName = item?.name || reward.id || "Unknown Item";
+                                  const chance = GameMath.probabilityToPercentage(reward.probability);
+                                  rewardText = `${itemName} (${chance}%)`;
+                                } else {
+                                  rewardText = UIUtils.formatActivityRewardText(reward);
                                 }
 
                                 return (

@@ -135,7 +135,7 @@ export function PetCarePanel({
                         <span className="flex items-center gap-2">
                           <span>{item.name}</span>
                           <span className="text-xs text-green-600">
-                            +{InventoryUtils.getEffectValue(item, "satiety")} Satiety
+                            +{ItemEffectUtils.getEffectValue(item, "satiety")} Satiety
                           </span>
                         </span>
                         {actionLoading === `Feed ${item.name}` ? "..." : "Use"}
@@ -176,7 +176,7 @@ export function PetCarePanel({
                         <span className="flex items-center gap-2">
                           <span>{item.name}</span>
                           <span className="text-xs text-blue-600">
-                            +{InventoryUtils.getEffectValue(item, "hydration")} Hydration
+                            +{ItemEffectUtils.getEffectValue(item, "hydration")} Hydration
                           </span>
                         </span>
                         {actionLoading === `Give ${item.name}` ? "..." : "Use"}
@@ -221,7 +221,7 @@ export function PetCarePanel({
                         <span className="flex items-center gap-2">
                           <span>{item.name}</span>
                           <span className="text-xs text-purple-600">
-                            +{InventoryUtils.getEffectValue(item, "happiness")} Happiness
+                            +{ItemEffectUtils.getEffectValue(item, "happiness")} Happiness
                           </span>
                         </span>
                         {actionLoading === `Play with ${item.name}` ? "..." : "Use"}

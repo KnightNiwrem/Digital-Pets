@@ -456,14 +456,6 @@ export class InventoryUtils {
       .filter(slot => slot.item.effects.some(effect => effect.type === "cure" || effect.type === "health"))
       .map(slot => slot.item);
   }
-
-  /**
-   * Get effect value from item
-   */
-  static getEffectValue(item: Item, effectType: string): number {
-    const effect = item.effects.find(e => e.type === effectType);
-    return effect?.value || 0;
-  }
 }
 
 /**
@@ -561,6 +553,34 @@ export class ItemEffectUtils {
     const effect = item.effects.find(e => e.type === effectType);
     return effect?.value || 0;
   }
+
+  /**
+   * Get effect description for display
+   */
+  static getEffectDescription(effects: Array<{ type: string; value?: number }>): string {
+    return effects
+      .map(effect => {
+        switch (effect.type) {
+          case "satiety":
+            return `+${effect.value} Satiety`;
+          case "hydration":
+            return `+${effect.value} Hydration`;
+          case "happiness":
+            return `+${effect.value} Happiness`;
+          case "energy":
+            return `+${effect.value} Energy`;
+          case "health":
+            return "Heals injuries";
+          case "cure":
+            return "Cures illness";
+          case "clean":
+            return "Cleans pet";
+          default:
+            return effect.type;
+        }
+      })
+      .join(", ");
+  }
 }
 
 /**
@@ -579,6 +599,148 @@ export class ErrorHandler {
     const message = error instanceof Error ? error.message : defaultMessage;
     console.error(`${logPrefix} error:`, error);
     return { success: false, error: message };
+  }
+}
+
+/**
+ * Utility class for UI display formatting
+ * Centralizes common UI formatting patterns
+ */
+export class UIUtils {
+  /**
+   * Get rarity color class for items/pets
+   */
+  static getRarityColor(rarity: string): string {
+    switch (rarity) {
+      case "common":
+        return "text-gray-600";
+      case "uncommon":
+        return "text-green-600";
+      case "rare":
+        return "text-blue-600";
+      case "epic":
+        return "text-purple-600";
+      case "legendary":
+        return "text-yellow-600";
+      default:
+        return "text-gray-600";
+    }
+  }
+
+  /**
+   * Get quest type color class
+   */
+  static getQuestTypeColor(type: string): string {
+    switch (type) {
+      case "story":
+        return "bg-yellow-100 text-yellow-800";
+      case "exploration":
+        return "bg-green-100 text-green-800";
+      case "collection":
+        return "bg-blue-100 text-blue-800";
+      case "battle":
+        return "bg-red-100 text-red-800";
+      case "care":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  }
+
+  /**
+   * Format reward text for display
+   */
+  static formatRewardText(reward: {
+    type: string;
+    amount?: number;
+    itemId?: string;
+    locationId?: string;
+    questId?: string;
+  }): string {
+    switch (reward.type) {
+      case "gold":
+        return `${reward.amount} Gold`;
+      case "experience":
+        return `${reward.amount} EXP`;
+      case "item": {
+        // Import getItemById dynamically to avoid circular dependencies
+        const itemName = reward.itemId || "Unknown Item";
+        return `${reward.amount || 1}x ${itemName}`;
+      }
+      case "unlock_location":
+        return `Unlock ${reward.locationId}`;
+      case "unlock_quest":
+        return `Unlock Quest: ${reward.questId}`;
+      default:
+        return "Unknown Reward";
+    }
+  }
+
+  /**
+   * Format activity reward text with probability
+   */
+  static formatActivityRewardText(reward: { type: string; amount?: number; id?: string; probability: number }): string {
+    const chance = GameMath.probabilityToPercentage(reward.probability);
+
+    switch (reward.type) {
+      case "gold":
+        return `${reward.amount} gold (${chance}%)`;
+      case "item":
+        return `${reward.id || "Unknown Item"} (${chance}%)`;
+      case "experience":
+        return `${reward.amount} exp (${chance}%)`;
+      default:
+        return `${reward.type} (${chance}%)`;
+    }
+  }
+}
+
+/**
+ * Centralized stat update utilities
+ * Consolidates the duplicate stat update logic from PetSystem and ItemSystem
+ */
+export class StatUpdateUtils {
+  /**
+   * Update pet stat with display value conversion and limits
+   */
+  static updateStat(
+    pet: Pet,
+    statType: "satiety" | "hydration" | "happiness",
+    value: number,
+    multiplier: number,
+    maxTicks: number
+  ): { actualIncrease: number; updatedPet: Pet } {
+    const currentDisplayValue = pet[statType];
+    const actualIncrease = Math.min(value, 100 - currentDisplayValue);
+
+    if (actualIncrease <= 0) {
+      return { actualIncrease: 0, updatedPet: pet };
+    }
+
+    const tickIncrease = GameMath.displayValueToTicks(actualIncrease, multiplier);
+
+    const updatedPet: Pet = {
+      ...pet,
+      lastCareTime: Date.now(),
+    };
+
+    // Update display value based on stat type
+    switch (statType) {
+      case "satiety":
+        updatedPet.satietyTicksLeft = GameMath.addToStat(pet.satietyTicksLeft, tickIncrease, maxTicks);
+        updatedPet.satiety = GameMath.calculateSatietyDisplay(updatedPet.satietyTicksLeft);
+        break;
+      case "hydration":
+        updatedPet.hydrationTicksLeft = GameMath.addToStat(pet.hydrationTicksLeft, tickIncrease, maxTicks);
+        updatedPet.hydration = GameMath.calculateHydrationDisplay(updatedPet.hydrationTicksLeft);
+        break;
+      case "happiness":
+        updatedPet.happinessTicksLeft = GameMath.addToStat(pet.happinessTicksLeft, tickIncrease, maxTicks);
+        updatedPet.happiness = GameMath.calculateHappinessDisplay(updatedPet.happinessTicksLeft);
+        break;
+    }
+
+    return { actualIncrease, updatedPet };
   }
 }
 
