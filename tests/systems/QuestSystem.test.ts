@@ -610,4 +610,216 @@ describe("QuestSystem", () => {
       expect(completedQuests).toEqual([petCareQuest.id]);
     });
   });
+
+  describe("Quest Reward Distribution", () => {
+    // Mock quest with various reward types for testing
+    const mockQuestWithRewards: Quest = {
+      id: "reward_test_quest",
+      name: "Reward Test Quest",
+      description: "A quest for testing reward distribution",
+      type: "story",
+      status: "not_started",
+      objectives: [
+        {
+          id: "test_objective",
+          type: "care_action",
+          description: "Test objective",
+          careAction: "feed",
+          targetAmount: 1,
+          currentAmount: 0,
+          completed: false,
+        },
+      ],
+      requirements: [],
+      rewards: [
+        { type: "gold", amount: 50 },
+        { type: "experience", amount: 100 },
+        { type: "item", itemId: "apple", amount: 3 },
+        { type: "item", itemId: "water_bottle", amount: 2 },
+      ],
+      npcId: "test_npc",
+      location: "hometown",
+      dialogue: {
+        start: "Test start",
+        progress: "Test progress",
+        complete: "Test complete",
+      },
+      isMainQuest: false,
+      chapter: 1,
+      order: 1,
+    };
+
+    beforeEach(() => {
+      // Start the mock quest and complete its objectives
+      QuestSystem.startQuest(mockQuestWithRewards, gameState);
+      const questProgress = gameState.questLog!.activeQuests[0];
+      questProgress.objectives[0].currentAmount = 1;
+      questProgress.objectives[0].completed = true;
+    });
+
+    it("should distribute gold rewards correctly", () => {
+      const initialGold = gameState.inventory.gold;
+      
+      const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
+      
+      expect(result.success).toBe(true);
+      expect(result.data!.inventory.gold).toBe(initialGold + 50);
+    });
+
+    it("should distribute experience rewards correctly", () => {
+      const initialExperience = gameState.playerStats.experience;
+      
+      const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
+      
+      expect(result.success).toBe(true);
+      expect(result.data!.playerStats.experience).toBe(initialExperience + 100);
+    });
+
+    it("should distribute item rewards correctly", () => {
+      const initialAppleCount = gameState.inventory.slots.find(slot => slot.item.id === "apple")?.quantity || 0;
+      const initialWaterBottleCount = gameState.inventory.slots.find(slot => slot.item.id === "water_bottle")?.quantity || 0;
+      
+      const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
+      
+      expect(result.success).toBe(true);
+      
+      const updatedInventory = result.data!.inventory;
+      const appleSlot = updatedInventory.slots.find(slot => slot.item.id === "apple");
+      const waterBottleSlot = updatedInventory.slots.find(slot => slot.item.id === "water_bottle");
+      
+      expect(appleSlot?.quantity).toBe(initialAppleCount + 3);
+      expect(waterBottleSlot?.quantity).toBe(initialWaterBottleCount + 2);
+    });
+
+    it("should distribute multiple reward types in single quest completion", () => {
+      const initialGold = gameState.inventory.gold;
+      const initialExperience = gameState.playerStats.experience;
+      const initialAppleCount = gameState.inventory.slots.find(slot => slot.item.id === "apple")?.quantity || 0;
+      
+      const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
+      
+      expect(result.success).toBe(true);
+      
+      const updatedGameState = result.data!;
+      
+      // Check all reward types were distributed correctly
+      expect(updatedGameState.inventory.gold).toBe(initialGold + 50);
+      expect(updatedGameState.playerStats.experience).toBe(initialExperience + 100);
+      
+      const appleSlot = updatedGameState.inventory.slots.find(slot => slot.item.id === "apple");
+      expect(appleSlot?.quantity).toBe(initialAppleCount + 3);
+    });
+
+    it("should handle item rewards for non-existent items gracefully", () => {
+      // Use a fresh gameState to avoid conflicts with other tests
+      const freshGameState = createMockGameState();
+      
+      const questWithInvalidItem: Quest = {
+        id: "invalid_item_quest",
+        name: "Invalid Item Test Quest",
+        description: "A quest for testing invalid item rewards",
+        type: "story",
+        status: "not_started",
+        objectives: [
+          {
+            id: "test_objective",
+            type: "care_action",
+            description: "Test objective",
+            careAction: "feed",
+            targetAmount: 1,
+            currentAmount: 0,
+            completed: false,
+          },
+        ],
+        requirements: [],
+        rewards: [
+          { type: "gold", amount: 25 },
+          { type: "item", itemId: "nonexistent_item", amount: 1 },
+        ],
+        npcId: "test_npc",
+        location: "hometown",
+        dialogue: {
+          start: "Test start",
+          progress: "Test progress",
+          complete: "Test complete",
+        },
+        isMainQuest: false,
+        chapter: 1,
+        order: 1,
+      };
+
+      const startResult = QuestSystem.startQuest(questWithInvalidItem, freshGameState);
+      expect(startResult.success).toBe(true);
+      
+      const updatedGameState = startResult.data!;
+      const questProgress = updatedGameState.questLog!.activeQuests.find(q => q.questId === questWithInvalidItem.id);
+      expect(questProgress).toBeDefined();
+      questProgress!.objectives[0].currentAmount = 1;
+      questProgress!.objectives[0].completed = true;
+
+      const initialGold = updatedGameState.inventory.gold;
+      
+      const result = QuestSystem.completeQuest(updatedGameState, questWithInvalidItem.id);
+      
+      expect(result.success).toBe(true);
+      // Gold should still be awarded even if item reward fails
+      expect(result.data!.inventory.gold).toBe(initialGold + 25);
+    });
+
+    it("should handle location unlock rewards correctly", () => {
+      // Use a fresh gameState to avoid conflicts with other tests
+      const freshGameState = createMockGameState();
+      
+      const questWithLocationReward: Quest = {
+        id: "location_unlock_quest",
+        name: "Location Unlock Test Quest",
+        description: "A quest for testing location unlock rewards",
+        type: "story",
+        status: "not_started",
+        objectives: [
+          {
+            id: "test_objective",
+            type: "care_action",
+            description: "Test objective",
+            careAction: "feed",
+            targetAmount: 1,
+            currentAmount: 0,
+            completed: false,
+          },
+        ],
+        requirements: [],
+        rewards: [
+          { type: "unlock_location", locationId: "riverside", amount: 1 },
+          { type: "gold", amount: 20 },
+        ],
+        npcId: "test_npc",
+        location: "hometown",
+        dialogue: {
+          start: "Test start",
+          progress: "Test progress",
+          complete: "Test complete",
+        },
+        isMainQuest: false,
+        chapter: 1,
+        order: 1,
+      };
+
+      const startResult = QuestSystem.startQuest(questWithLocationReward, freshGameState);
+      expect(startResult.success).toBe(true);
+      
+      const updatedGameState = startResult.data!;
+      const questProgress = updatedGameState.questLog!.activeQuests.find(q => q.questId === questWithLocationReward.id);
+      expect(questProgress).toBeDefined();
+      questProgress!.objectives[0].currentAmount = 1;
+      questProgress!.objectives[0].completed = true;
+
+      const initialLocations = [...updatedGameState.world.unlockedLocations];
+      
+      const result = QuestSystem.completeQuest(updatedGameState, questWithLocationReward.id);
+      
+      expect(result.success).toBe(true);
+      expect(result.data!.world.unlockedLocations).toContain("riverside");
+      expect(result.data!.world.unlockedLocations.length).toBe(initialLocations.length + 1);
+    });
+  });
 });
