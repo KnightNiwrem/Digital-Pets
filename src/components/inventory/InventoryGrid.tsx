@@ -1,7 +1,8 @@
 // Inventory grid component displaying items in a grid layout
 
+import { useMemo } from "react";
 import { ItemSlot } from "./ItemSlot";
-import { ItemSystem } from "@/systems/ItemSystem";
+import { InventoryViewModelService } from "@/services/InventoryViewModelService";
 import type { Inventory, InventorySlot } from "@/types/Item";
 
 interface InventoryGridProps {
@@ -12,41 +13,54 @@ interface InventoryGridProps {
 }
 
 export function InventoryGrid({ inventory, selectedItem, activeCategory, onItemSelect }: InventoryGridProps) {
-  // Filter items by category
-  const getFilteredSlots = () => {
-    if (activeCategory === "all") {
-      return inventory.slots;
-    }
+  // Create view model for contiguous display
+  const viewModel = useMemo(
+    () => InventoryViewModelService.createViewModel(inventory, activeCategory),
+    [inventory, activeCategory]
+  );
 
-    const categories = ItemSystem.getItemsByCategory(inventory);
-    return categories[activeCategory] || [];
+  // Validate selected item is still visible in current filter
+  const validatedSelectedItem = useMemo(
+    () => InventoryViewModelService.validateSelectedItem(selectedItem, viewModel),
+    [selectedItem, viewModel]
+  );
+
+  const handleSlotClick = (displayIndex: number) => {
+    const displaySlot = viewModel.displaySlots[displayIndex];
+
+    if (displaySlot) {
+      // Check if this item is currently selected by comparing original indices
+      const isCurrentlySelected = validatedSelectedItem?.slotIndex === displaySlot.slotIndex;
+      onItemSelect(isCurrentlySelected ? null : displaySlot);
+    }
   };
 
-  const filteredSlots = getFilteredSlots();
-
-  // Create grid layout with empty slots
-  const gridSlots = Array.from({ length: inventory.maxSlots }, (_, index) => {
-    const slot = filteredSlots.find(s => s.slotIndex === index);
-    return slot || null;
-  });
-
-  const handleSlotClick = (slot: InventorySlot | null) => {
-    if (slot) {
-      onItemSelect(selectedItem?.slotIndex === slot.slotIndex ? null : slot);
-    }
+  // Helper to determine if display slot is selected
+  const isSlotSelected = (displayIndex: number): boolean => {
+    if (!validatedSelectedItem) return false;
+    const displaySlot = viewModel.displaySlots[displayIndex];
+    return displaySlot?.slotIndex === validatedSelectedItem.slotIndex;
   };
 
   return (
-    <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 p-2">
-      {gridSlots.map((slot, index) => (
-        <ItemSlot
-          key={index}
-          slot={slot}
-          isSelected={selectedItem?.slotIndex === slot?.slotIndex}
-          isEmpty={!slot}
-          onClick={() => handleSlotClick(slot)}
-        />
-      ))}
+    <div className="space-y-2">
+      {/* Show filter info */}
+      <div className="text-sm text-muted-foreground">
+        Showing {viewModel.totalItems} items
+        {activeCategory !== "all" && ` in ${activeCategory}`}
+      </div>
+
+      <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 p-2">
+        {viewModel.displaySlots.map((slot, displayIndex) => (
+          <ItemSlot
+            key={`display-${displayIndex}`}
+            slot={slot}
+            isSelected={isSlotSelected(displayIndex)}
+            isEmpty={!slot}
+            onClick={() => handleSlotClick(displayIndex)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
