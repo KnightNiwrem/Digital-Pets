@@ -55,8 +55,6 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
     }
   };
 
-  const availableSlots = inventory.maxSlots - inventory.slots.length;
-
   return (
     <div className="flex flex-col lg:flex-row h-full gap-4">
       {/* Main inventory panel */}
@@ -77,7 +75,6 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
                 <span>
                   {inventory.slots.length}/{inventory.maxSlots} slots
                 </span>
-                <span className="text-green-600">{availableSlots} free</span>
               </div>
             </div>
           </CardHeader>

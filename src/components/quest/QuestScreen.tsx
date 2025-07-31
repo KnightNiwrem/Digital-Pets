@@ -76,18 +76,20 @@ export function QuestScreen({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
       {/* Quest Navigation Tabs */}
       <div className="lg:col-span-3">
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 flex-wrap">
           <Button
             onClick={() => setSelectedTab("available")}
             className={getTabButtonClass("available")}
             variant="ghost"
           >
             <Scroll className="w-4 h-4" />
-            Available ({getQuestCount("available")})
+            <span className="hidden sm:inline ml-2">Available ({getQuestCount("available")})</span>
+            <span className="sm:hidden ml-1">({getQuestCount("available")})</span>
           </Button>
           <Button onClick={() => setSelectedTab("active")} className={getTabButtonClass("active")} variant="ghost">
             <Star className="w-4 h-4" />
-            Active ({getQuestCount("active")})
+            <span className="hidden sm:inline ml-2">Active ({getQuestCount("active")})</span>
+            <span className="sm:hidden ml-1">({getQuestCount("active")})</span>
           </Button>
           <Button
             onClick={() => setSelectedTab("completed")}
@@ -95,7 +97,8 @@ export function QuestScreen({
             variant="ghost"
           >
             <CheckCircle className="w-4 h-4" />
-            Completed ({getQuestCount("completed")})
+            <span className="hidden sm:inline ml-2">Completed ({getQuestCount("completed")})</span>
+            <span className="sm:hidden ml-1">({getQuestCount("completed")})</span>
           </Button>
         </div>
       </div>
