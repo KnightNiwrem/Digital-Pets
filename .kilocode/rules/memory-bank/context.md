@@ -1,7 +1,17 @@
 # Digital Pets - Current Context
 
 ## Project Status
-**Core Systems Complete**: The project has a fully functional pet raising game with all major systems implemented and 408+ tests passing.
+**Core Systems Complete**: The project has a fully functional pet raising game with all major systems implemented and 418+ tests passing.
+
+## Recently Completed
+**✅ Issue #49 - ID to Name Display Fix (December 2024)**
+- Fixed all instances where IDs were displayed instead of names in the UI
+- Added `getNpcById()` utility function for NPC name lookups
+- Updated shopkeeper displays: "shopkeeper_sam" → "Sam"
+- Updated item reward displays: "apple" → "Fresh Apple", "water_bottle" → "Water Bottle"
+- Updated quest giver displays: NPC IDs now show proper names
+- Added comprehensive unit tests (10 new tests for location utilities)
+- All 418 tests passing, linting clean, type checking passes
 
 ## Completed Systems
 **✅ Core Foundation**
@@ -23,6 +33,7 @@
 - Complete inventory system with categorization and item management
 - Battle interface with move selection and combat visualization
 - Quest interface with progress tracking and NPC dialogue
+- **✅ UI Display Quality**: All IDs replaced with user-friendly names throughout interface
 
 **✅ Content & Data**
 - **31 Pet Species**: 10 common (3 starters), 8 uncommon, 6 rare, 4 epic, 3 legendary
@@ -30,13 +41,15 @@
 - **12 Battle Moves**: Physical, special, status, and healing abilities
 - **3 Locations**: Hometown, Forest Path, Riverside with unique activities
 - **7 Initial Quests**: Tutorial, story, exploration, and collection quests
+- **✅ Data Utilities**: Enhanced with NPC lookup functions for proper name display
 
 ## Current Technical State
-- **408+ Tests Passing**: Comprehensive unit test coverage across all systems
+- **418+ Tests Passing**: Comprehensive unit test coverage across all systems
 - **Type-Safe Codebase**: Strict TypeScript with no `any`/`unknown` types
 - **Production Ready**: Clean builds, linting passes, responsive UI design
 - **Enhanced Autosave**: All user actions trigger immediate saves with error handling
 - **Offline Support**: Up to 7-day offline progression calculation
+- **✅ UI Quality**: All user-facing displays show proper names instead of technical IDs
 
 ## Next Priority Focus
 1. **World Content Expansion** - More locations, NPCs, and quest chains
@@ -48,7 +61,9 @@
 - None identified - all core functionality is complete and stable
 
 ## Recent Major Achievements
+- **✅ UI Display Enhancement**: Completed comprehensive fix for ID vs name display issue
 - Pet species expanded to full 31-pet collection meeting brief requirements
 - Item collection expanded to 35+ items across all categories with enhanced effects
 - All major UI components implemented with full functionality
 - Complete quest system with NPC integration and progression tracking
+- Enhanced data utilities with proper name lookup functions

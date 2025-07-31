@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Pickaxe, Fish, TreePine, Sword, Trophy, Clock, Zap, Gift } from "lucide-react";
 import type { Pet, WorldState } from "@/types";
 import { WorldSystem } from "@/systems/WorldSystem";
+import { getItemById } from "@/data/items";
+import { getNpcById } from "@/data/locations";
 
 interface ActivitiesPanelProps {
   pet: Pet;
@@ -129,7 +131,7 @@ export function ActivitiesPanel({
                       </div>
                       <p className="text-sm text-gray-600">{shop.description}</p>
                       <div className="text-xs text-gray-500 mt-1">
-                        Keeper: {shop.keeper} • {shop.items.length} items available
+                        Keeper: {getNpcById(shop.keeper)?.name || shop.keeper} • {shop.items.length} items available
                       </div>
                     </div>
                     <Button size="sm" onClick={() => onOpenShop?.(shop.id)} disabled={disabled} className="ml-3">
@@ -194,9 +196,12 @@ export function ActivitiesPanel({
                                   case "gold":
                                     rewardText = `${reward.amount} gold (${chance}%)`;
                                     break;
-                                  case "item":
-                                    rewardText = `${reward.id} (${chance}%)`;
+                                  case "item": {
+                                    const item = reward.id ? getItemById(reward.id) : null;
+                                    const itemName = item?.name || reward.id || "Unknown Item";
+                                    rewardText = `${itemName} (${chance}%)`;
                                     break;
+                                  }
                                   case "experience":
                                     rewardText = `${reward.amount} exp (${chance}%)`;
                                     break;

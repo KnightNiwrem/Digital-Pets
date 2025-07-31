@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { User, MapPin, Coins, Star, Gift } from "lucide-react";
+import { getNpcById } from "@/data/locations";
 import type { Quest, QuestReward } from "@/types/Quest";
 import type { Result } from "@/types";
 
@@ -85,7 +86,7 @@ export function QuestDialog({ quest, onStartQuest, onClose, isLoading = false }:
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              {quest.npcId || "Quest Giver"}
+              {quest.npcId ? getNpcById(quest.npcId)?.name || quest.npcId : "Quest Giver"}
             </DialogTitle>
             <Badge className={`${getQuestTypeColor(quest.type)} text-xs`}>{quest.type}</Badge>
           </div>
