@@ -2,8 +2,8 @@
  * Unit tests for PetCarePanel component, focusing on cleaning logic
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
-import type { Pet, Inventory, Item } from "@/types";
+import { describe, test, expect } from "bun:test";
+import type { Pet, Inventory, ConsumableItem, InventorySlot } from "@/types";
 import { PET_CONSTANTS } from "@/types";
 
 // Mock pet for testing
@@ -12,14 +12,14 @@ function createMockPet(overrides: Partial<Pet> = {}): Pet {
     id: "test-pet",
     name: "Test Pet",
     species: {
-      id: "common_starter_1",
-      name: "Fluffy",
-      type: "normal",
-      baseStats: { attack: 10, defense: 10, speed: 10, health: 100 },
-      growthRate: "medium",
-      maxGrowthStage: 49,
+      id: "wild_beast",
+      name: "Wild Beast",
       rarity: "common",
       description: "A test pet",
+      baseStats: { attack: 10, defense: 10, speed: 10, health: 100 },
+      growthRates: { attack: 1.1, defense: 1.1, speed: 1.1, health: 1.1, energy: 1.1 },
+      sprite: "beast.png",
+      icon: "beast-icon.png",
     },
     rarity: "common",
     growthStage: 0,
@@ -45,29 +45,36 @@ function createMockPet(overrides: Partial<Pet> = {}): Pet {
     moves: [],
     lastCareTime: Date.now(),
     birthTime: Date.now(),
+    totalLifetime: 0,
     ...overrides,
   };
 }
 
 // Mock cleaning item
-function createCleaningItem(): Item {
+function createCleaningItem(): ConsumableItem {
   return {
     id: "soap",
-    name: "Soap",
+    name: "Pet Soap",
     type: "hygiene",
-    description: "Cleans your pet",
+    description: "Gentle soap for cleaning your pet",
     effects: [{ type: "clean", value: 1 }],
-    value: 10,
+    value: 15,
     rarity: "common",
+    stackable: true,
+    icon: "item_soap",
   };
 }
 
 // Mock inventory with cleaning items
 function createInventoryWithCleaningItems(cleaningItemCount: number = 1): Inventory {
-  const cleaningItems = Array.from({ length: cleaningItemCount }, () => createCleaningItem());
+  const cleaningSlots: InventorySlot[] = Array.from({ length: cleaningItemCount }, (_, index) => ({
+    item: createCleaningItem(),
+    quantity: 1,
+    slotIndex: index,
+  }));
   return {
     maxSlots: 20,
-    slots: cleaningItems,
+    slots: cleaningSlots,
     gold: 100,
   };
 }
@@ -96,7 +103,7 @@ describe("PetCarePanel Cleaning Logic", () => {
         pet.state !== "exploring" &&
         pet.state !== "sleeping" &&
         pet.state !== "travelling" &&
-        inventory.slots.some(item => item.effects?.some(effect => effect.type === "clean"));
+        inventory.slots.some(slot => slot.item.effects?.some((effect: any) => effect.type === "clean"));
 
       expect(canClean).toBe(true);
     });
@@ -113,7 +120,7 @@ describe("PetCarePanel Cleaning Logic", () => {
         pet.state !== "exploring" &&
         pet.state !== "sleeping" &&
         pet.state !== "travelling" &&
-        inventory.slots.some(item => item.effects?.some(effect => effect.type === "clean"));
+        inventory.slots.some(slot => slot.item.effects?.some((effect: any) => effect.type === "clean"));
 
       expect(canClean).toBe(false);
     });
@@ -130,7 +137,7 @@ describe("PetCarePanel Cleaning Logic", () => {
         pet.state !== "exploring" &&
         pet.state !== "sleeping" &&
         pet.state !== "travelling" &&
-        inventory.slots.some(item => item.effects?.some(effect => effect.type === "clean"));
+        inventory.slots.some(slot => slot.item.effects?.some((effect: any) => effect.type === "clean"));
 
       expect(canClean).toBe(false);
     });
@@ -150,7 +157,7 @@ describe("PetCarePanel Cleaning Logic", () => {
           pet.state !== "exploring" &&
           pet.state !== "sleeping" &&
           pet.state !== "travelling" &&
-          inventory.slots.some(item => item.effects?.some(effect => effect.type === "clean"));
+          inventory.slots.some(slot => slot.item.effects?.some((effect: any) => effect.type === "clean"));
 
         expect(canClean).toBe(false);
       });
@@ -163,8 +170,8 @@ describe("PetCarePanel Cleaning Logic", () => {
         poopCount: 2, // Pet has poop
       });
       const inventory = createEmptyInventory();
-      const cleaningItems = inventory.slots.filter(item =>
-        item.effects?.some(effect => effect.type === "clean")
+      const cleaningItems = inventory.slots.filter(slot =>
+        slot.item.effects?.some((effect: any) => effect.type === "clean")
       );
 
       const buttonMessage =
@@ -182,8 +189,8 @@ describe("PetCarePanel Cleaning Logic", () => {
         poopCount: 0, // No poop to clean
       });
       const inventory = createInventoryWithCleaningItems();
-      const cleaningItems = inventory.slots.filter(item =>
-        item.effects?.some(effect => effect.type === "clean")
+      const cleaningItems = inventory.slots.filter(slot =>
+        slot.item.effects?.some((effect: any) => effect.type === "clean")
       );
 
       const buttonMessage =
@@ -202,8 +209,8 @@ describe("PetCarePanel Cleaning Logic", () => {
         state: "sleeping", // But is in a state that prevents cleaning
       });
       const inventory = createInventoryWithCleaningItems();
-      const cleaningItems = inventory.slots.filter(item =>
-        item.effects?.some(effect => effect.type === "clean")
+      const cleaningItems = inventory.slots.filter(slot =>
+        slot.item.effects?.some((effect: any) => effect.type === "clean")
       );
 
       // This represents the case where pet has poop and cleaning items exist,
