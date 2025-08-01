@@ -50,6 +50,7 @@ function createTestPet(overrides: Partial<Pet> = {}): Pet {
     hydrationTicksLeft: 800,
     happinessTicksLeft: 1000,
     poopTicksLeft: 300,
+    poopCount: overrides.poopCount ?? 0,
     sickByPoopTicksLeft: 17280,
 
     // Core stats
@@ -101,7 +102,7 @@ describe("BattleSystem", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      
+
       const battle = result.data!;
       expect(battle.type).toBe("wild");
       expect(battle.status).toBe("in_progress"); // Changed from "waiting" to "in_progress" for immediate battle progression
@@ -157,7 +158,7 @@ describe("BattleSystem", () => {
 
       // Training should give more experience
       expect(trainingResult.data!.experience).toBeGreaterThan(wildResult.data!.experience);
-      
+
       // Tournament should give more gold
       expect(tournamentResult.data!.goldReward).toBeGreaterThan(wildResult.data!.goldReward);
     });
@@ -189,7 +190,7 @@ describe("BattleSystem", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      
+
       const updatedBattle = result.data!;
       expect(updatedBattle.turns).toHaveLength(1);
       expect(updatedBattle.currentTurn).toBe(2);
@@ -197,7 +198,7 @@ describe("BattleSystem", () => {
 
     test("should fail to process action when battle is not in progress", () => {
       battle.status = "victory";
-      
+
       const action: BattleAction = {
         type: "move",
         moveId: "tackle",
@@ -229,7 +230,7 @@ describe("BattleSystem", () => {
 
     test("should fail to process action when pet has insufficient energy", () => {
       battle.playerPet.currentEnergy = 5; // Less than tackle's cost
-      
+
       const action: BattleAction = {
         type: "move",
         moveId: "tackle",
@@ -278,21 +279,21 @@ describe("BattleSystem", () => {
     test("should handle move miss due to low accuracy", () => {
       const attacker = BattleSystem["createBattlePet"](createTestPet());
       const defender = BattleSystem["createBattlePet"](createOpponentPet());
-      
+
       // Mock the calculateAccuracy method to return very low accuracy for testing
       const originalCalculateAccuracy = BattleSystem["calculateAccuracy"];
       BattleSystem["calculateAccuracy"] = () => 5; // Return minimum accuracy
-      
+
       // Mock Math.random to roll higher than 5%
       const originalRandom = Math.random;
       Math.random = () => 0.1; // 10% roll > 5% accuracy = miss
-      
+
       const results = BattleSystem["executeMove"](attacker, defender, "tackle");
-      
+
       // Restore original methods
       Math.random = originalRandom;
       BattleSystem["calculateAccuracy"] = originalCalculateAccuracy;
-      
+
       expect(results).toHaveLength(1);
       expect(results[0].type).toBe("miss");
     });
@@ -336,15 +337,15 @@ describe("BattleSystem", () => {
     test("should handle critical hits", () => {
       const attacker = BattleSystem["createBattlePet"](createTestPet());
       const defender = BattleSystem["createBattlePet"](createOpponentPet());
-      
+
       // Mock Math.random to force critical hit
       const originalRandom = Math.random;
       Math.random = () => 0.01; // Low value to force critical
-      
+
       const results = BattleSystem["executeMove"](attacker, defender, "tackle");
-      
+
       Math.random = originalRandom; // Restore original
-      
+
       expect(results).toHaveLength(1);
       expect(results[0].type).toBe("critical");
     });
@@ -395,12 +396,7 @@ describe("BattleSystem", () => {
     });
 
     test("should continue battle when both pets have health", () => {
-      const battle = BattleSystem.initiateBattle(
-        createTestPet(),
-        createOpponentPet(),
-        "wild",
-        "forest"
-      ).data!;
+      const battle = BattleSystem.initiateBattle(createTestPet(), createOpponentPet(), "wild", "forest").data!;
 
       const result = BattleSystem.checkBattleEnd(battle);
 
@@ -412,12 +408,7 @@ describe("BattleSystem", () => {
   describe("Battle Results Application", () => {
     test("should apply battle results to original pet", () => {
       const originalPet = createTestPet();
-      const battle = BattleSystem.initiateBattle(
-        originalPet,
-        createOpponentPet(),
-        "wild",
-        "forest"
-      ).data!;
+      const battle = BattleSystem.initiateBattle(originalPet, createOpponentPet(), "wild", "forest").data!;
 
       // Simulate battle damage
       battle.playerPet.currentHealth = 60; // Lost 20 health
@@ -433,12 +424,7 @@ describe("BattleSystem", () => {
 
     test("should not allow negative health or energy", () => {
       const originalPet = createTestPet();
-      const battle = BattleSystem.initiateBattle(
-        originalPet,
-        createOpponentPet(),
-        "wild",
-        "forest"
-      ).data!;
+      const battle = BattleSystem.initiateBattle(originalPet, createOpponentPet(), "wild", "forest").data!;
 
       // Simulate excessive damage
       battle.playerPet.currentHealth = 0;
@@ -454,12 +440,7 @@ describe("BattleSystem", () => {
 
   describe("Action Order Determination", () => {
     test("should prioritize actions by priority value", () => {
-      const battle = BattleSystem.initiateBattle(
-        createTestPet(),
-        createOpponentPet(),
-        "wild",
-        "forest"
-      ).data!;
+      const battle = BattleSystem.initiateBattle(createTestPet(), createOpponentPet(), "wild", "forest").data!;
 
       const playerAction: BattleAction = {
         type: "move",
@@ -486,13 +467,8 @@ describe("BattleSystem", () => {
     test("should use speed as tiebreaker when priorities are equal", () => {
       const playerPet = createTestPet({ speed: 20 });
       const opponentPet = createOpponentPet({ speed: 10 });
-      
-      const battle = BattleSystem.initiateBattle(
-        playerPet,
-        opponentPet,
-        "wild",
-        "forest"
-      ).data!;
+
+      const battle = BattleSystem.initiateBattle(playerPet, opponentPet, "wild", "forest").data!;
 
       const playerAction: BattleAction = {
         type: "move",
@@ -545,13 +521,15 @@ describe("BattleSystem", () => {
       const results: any[] = [];
 
       // Add a status effect with tick damage
-      pet.statusEffects = [{
-        id: "poison",
-        name: "Poisoned",
-        description: "Takes damage each turn",
-        duration: 2,
-        tickDamage: 5,
-      }];
+      pet.statusEffects = [
+        {
+          id: "poison",
+          name: "Poisoned",
+          description: "Takes damage each turn",
+          duration: 2,
+          tickDamage: 5,
+        },
+      ];
 
       const initialHealth = pet.currentHealth;
 
@@ -567,13 +545,15 @@ describe("BattleSystem", () => {
       const pet = BattleSystem["createBattlePet"](createTestPet());
       const results: any[] = [];
 
-      pet.statusEffects = [{
-        id: "poison",
-        name: "Poisoned",
-        description: "Takes damage each turn",
-        duration: 1,
-        tickDamage: 5,
-      }];
+      pet.statusEffects = [
+        {
+          id: "poison",
+          name: "Poisoned",
+          description: "Takes damage each turn",
+          duration: 1,
+          tickDamage: 5,
+        },
+      ];
 
       BattleSystem["processStatusEffects"](pet, results);
 
@@ -585,12 +565,7 @@ describe("BattleSystem", () => {
 
   describe("AI Opponent Actions", () => {
     test("should generate valid opponent actions", () => {
-      const battle = BattleSystem.initiateBattle(
-        createTestPet(),
-        createOpponentPet(),
-        "wild",
-        "forest"
-      ).data!;
+      const battle = BattleSystem.initiateBattle(createTestPet(), createOpponentPet(), "wild", "forest").data!;
 
       const action = BattleSystem["generateOpponentAction"](battle);
 

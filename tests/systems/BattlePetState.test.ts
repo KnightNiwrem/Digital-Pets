@@ -29,6 +29,7 @@ function createTestPet(overrides: Partial<Pet> = {}): Pet {
     hydrationTicksLeft: 800,
     happinessTicksLeft: 1000,
     poopTicksLeft: 300,
+    poopCount: overrides.poopCount ?? 0,
     sickByPoopTicksLeft: 17280,
     life: 900000,
     maxEnergy: 100,
@@ -120,7 +121,7 @@ describe("BattleSystem Pet State Management", () => {
       const result = BattleSystem.initiateBattle(playerPet, opponentPet, "wild", "forest");
 
       expect(result.success).toBe(true);
-      
+
       const battle = result.data!;
       expect(battle.playerPet.moves).toBeDefined();
       expect(battle.opponentPet.moves).toBeDefined();
@@ -135,7 +136,7 @@ describe("BattleSystem Pet State Management", () => {
       const result = BattleSystem.initiateBattle(playerPet, opponentPet, "wild", "forest");
 
       expect(result.success).toBe(true);
-      
+
       const battle = result.data!;
       expect(battle.currentTurn).toBe(1);
       expect(battle.turns).toEqual([]);
@@ -185,20 +186,20 @@ describe("BattleSystem Pet State Management", () => {
       // Create a battle
       const battleResult = BattleSystem.initiateBattle(playerPet, opponentPet, "wild", "forest");
       expect(battleResult.success).toBe(true);
-      
+
       const battle = battleResult.data!;
-      
+
       // Simulate some damage and energy loss during battle
       battle.playerPet.currentHealth = 60; // Lost 20 health
-      battle.playerPet.currentEnergy = 70;  // Lost 30 energy
+      battle.playerPet.currentEnergy = 70; // Lost 30 energy
       battle.status = "victory"; // Battle ended in victory
 
       // Apply battle results to original pet
       const applyResult = BattleSystem.applyBattleResults(originalPet, battle);
-      
+
       expect(applyResult.success).toBe(true);
       expect(applyResult.data!.currentHealth).toBe(60); // Health should be reduced
-      expect(applyResult.data!.currentEnergy).toBe(70);  // Energy should be reduced
+      expect(applyResult.data!.currentEnergy).toBe(70); // Energy should be reduced
     });
 
     test("should not allow negative health or energy after battle", () => {
@@ -208,17 +209,17 @@ describe("BattleSystem Pet State Management", () => {
 
       const battleResult = BattleSystem.initiateBattle(playerPet, opponentPet, "wild", "forest");
       const battle = battleResult.data!;
-      
+
       // Simulate extreme damage (more than current health)
       battle.playerPet.currentHealth = 0;
       battle.playerPet.currentEnergy = 0;
       battle.status = "defeat";
 
       const applyResult = BattleSystem.applyBattleResults(originalPet, battle);
-      
+
       expect(applyResult.success).toBe(true);
       expect(applyResult.data!.currentHealth).toBe(0); // Should be 0, not negative
-      expect(applyResult.data!.currentEnergy).toBe(0);  // Should be 0, not negative
+      expect(applyResult.data!.currentEnergy).toBe(0); // Should be 0, not negative
     });
   });
 });

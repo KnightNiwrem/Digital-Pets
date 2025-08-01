@@ -48,7 +48,7 @@ describe("Pet Species Data", () => {
     expect(allSpecies).toHaveLength(31);
     // Check that the first few species are as expected
     expect(allSpecies).toContain(WILD_BEAST);
-    expect(allSpecies).toContain(FOREST_GUARDIAN); 
+    expect(allSpecies).toContain(FOREST_GUARDIAN);
     expect(allSpecies).toContain(ARENA_CHAMPION);
   });
 
@@ -100,7 +100,7 @@ describe("Mock Battle Data", () => {
     // Test the structure that useBattleState creates
     const mockOpponent = {
       id: "wild_beast",
-      name: "Wild Beast", 
+      name: "Wild Beast",
       species: WILD_BEAST,
       rarity: "common" as const,
       growthStage: 10,

@@ -33,13 +33,13 @@ describe("Location Data Validation", () => {
       expect(location?.activities.length).toBe(3);
       expect(location?.npcs.length).toBe(3);
       expect(location?.shops.length).toBe(1);
-      
+
       // Check unlock requirements
       expect(location?.unlockRequirements).toBeDefined();
       expect(location?.unlockRequirements?.length).toBe(1);
       expect(location?.unlockRequirements?.[0].type).toBe("quest_completed");
       expect(location?.unlockRequirements?.[0].value).toBe("the_great_discovery_part2");
-      
+
       // Check activities are unique to ruins
       const activityIds = location?.activities.map(a => a.id);
       expect(activityIds).toContain("artifact_hunting");
@@ -57,13 +57,13 @@ describe("Location Data Validation", () => {
       expect(location?.activities.length).toBe(3);
       expect(location?.npcs.length).toBe(3);
       expect(location?.shops.length).toBe(2);
-      
+
       // Check unlock requirements
       expect(location?.unlockRequirements).toBeDefined();
       expect(location?.unlockRequirements?.length).toBe(1);
       expect(location?.unlockRequirements?.[0].type).toBe("quest_completed");
       expect(location?.unlockRequirements?.[0].value).toBe("the_great_discovery_part3");
-      
+
       // Check maritime activities
       const activityIds = location?.activities.map(a => a.id);
       expect(activityIds).toContain("deep_sea_fishing");
@@ -99,12 +99,12 @@ describe("Location Data Validation", () => {
       expect(blacksmith).toBeDefined();
       expect(blacksmith?.id).toBe("blacksmith_thor");
       expect(blacksmith?.name).toBe("Thor the Blacksmith");
-      
+
       const guide = getNpcById("mining_guide_elena");
       expect(guide).toBeDefined();
       expect(guide?.id).toBe("mining_guide_elena");
       expect(guide?.name).toBe("Elena the Mining Guide");
-      
+
       const elder = getNpcById("village_elder_magnus");
       expect(elder).toBeDefined();
       expect(elder?.id).toBe("village_elder_magnus");
@@ -132,12 +132,12 @@ describe("Location Data Validation", () => {
       expect(archaeologist).toBeDefined();
       expect(archaeologist?.id).toBe("archaeologist_vera");
       expect(archaeologist?.name).toBe("Dr. Vera Cross");
-      
+
       const guardian = getNpcById("guardian_spirit_aeon");
       expect(guardian).toBeDefined();
       expect(guardian?.id).toBe("guardian_spirit_aeon");
       expect(guardian?.name).toBe("Aeon the Guardian");
-      
+
       const treasureHunter = getNpcById("treasure_hunter_zara");
       expect(treasureHunter).toBeDefined();
       expect(treasureHunter?.id).toBe("treasure_hunter_zara");
@@ -149,12 +149,12 @@ describe("Location Data Validation", () => {
       expect(harborMaster).toBeDefined();
       expect(harborMaster?.id).toBe("harbor_master_thaddeus");
       expect(harborMaster?.name).toBe("Harbor Master Thaddeus");
-      
+
       const merchantCaptain = getNpcById("merchant_captain_elena");
       expect(merchantCaptain).toBeDefined();
       expect(merchantCaptain?.id).toBe("merchant_captain_elena");
       expect(merchantCaptain?.name).toBe("Captain Elena Stormwind");
-      
+
       const fishmonger = getNpcById("fishmonger_barnabus");
       expect(fishmonger).toBeDefined();
       expect(fishmonger?.id).toBe("fishmonger_barnabus");
@@ -177,7 +177,7 @@ describe("Location Data Validation", () => {
       const destinations = getAvailableDestinations("hometown");
       expect(destinations).toBeDefined();
       expect(destinations.length).toBeGreaterThan(0);
-      
+
       // Check that all destinations are valid locations
       destinations.forEach(dest => {
         expect(dest.id).toBeDefined();
@@ -189,7 +189,7 @@ describe("Location Data Validation", () => {
       const destinations = getAvailableDestinations("forest_path");
       expect(destinations).toBeDefined();
       expect(destinations.length).toBe(3);
-      
+
       const destinationIds = destinations.map(dest => dest.id);
       expect(destinationIds).toContain("hometown");
       expect(destinationIds).toContain("riverside");

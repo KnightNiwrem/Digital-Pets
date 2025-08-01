@@ -119,6 +119,7 @@ export class GameStateFactory {
       hydrationTicksLeft: 8000, // ~33 hours
       happinessTicksLeft: 12000, // ~50 hours
       poopTicksLeft: 480, // ~2 hours
+      poopCount: 0, // Start with no uncleaned poop
       sickByPoopTicksLeft: 17280, // 72 hours
 
       // Core stats

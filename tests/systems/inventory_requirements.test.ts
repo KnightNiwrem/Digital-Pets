@@ -37,6 +37,7 @@ describe("WorldSystem Inventory Requirements", () => {
       hydrationTicksLeft: 1000,
       happinessTicksLeft: 1000,
       poopTicksLeft: 500,
+      poopCount: 0,
       sickByPoopTicksLeft: 10000,
       life: 500000,
       maxEnergy: 150,
@@ -58,14 +59,14 @@ describe("WorldSystem Inventory Requirements", () => {
   beforeEach(() => {
     mockPet = createTestPet();
     worldState = WorldSystem.initializeWorldState();
-    
+
     // Set location to riverside where fishing activity exists
     worldState.currentLocationId = "riverside";
     worldState.unlockedLocations.push("riverside");
-    
+
     // Create empty inventory
     emptyInventory = ItemSystem.createInventory();
-    
+
     // Create inventory with a fishing rod item
     inventoryWithItem = ItemSystem.createInventory();
     const fishingRod = getItemById("fishing_rod");
@@ -80,7 +81,7 @@ describe("WorldSystem Inventory Requirements", () => {
   it("should fail to start activity when required item is missing", () => {
     // Try to start fishing activity that requires fishing_rod
     const result = WorldSystem.startActivity(worldState, mockPet, "riverside_fishing", emptyInventory);
-    
+
     expect(result.success).toBe(false);
     expect(result.error).toContain("fishing_rod");
   });
@@ -88,7 +89,7 @@ describe("WorldSystem Inventory Requirements", () => {
   it("should successfully start activity when required item is present", () => {
     // Try to start fishing activity with fishing_rod in inventory
     const result = WorldSystem.startActivity(worldState, mockPet, "riverside_fishing", inventoryWithItem);
-    
+
     // This might still fail due to location requirements, but it should NOT fail due to missing item
     if (!result.success) {
       expect(result.error).not.toContain("fishing_rod");

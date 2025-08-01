@@ -136,7 +136,7 @@ describe("Quest Component Props", () => {
 describe("Quest Type Utilities", () => {
   it("should categorize quest types correctly", () => {
     const questTypes = ["story", "exploration", "collection", "battle", "care"];
-    
+
     questTypes.forEach(type => {
       expect(type).toMatch(/^(story|exploration|collection|battle|care)$/);
     });
@@ -189,10 +189,10 @@ describe("Quest State Management", () => {
   it("should transition quest states correctly", () => {
     // Available -> Active
     expect(mockQuest.status).toBe("available");
-    
+
     const activeQuest = { ...mockQuest, status: "active" as const };
     expect(activeQuest.status).toBe("active");
-    
+
     // Active -> Completed
     const completedQuest = { ...activeQuest, status: "completed" as const };
     expect(completedQuest.status).toBe("completed");
@@ -234,7 +234,7 @@ describe("Quest Component Error Handling", () => {
       requirements: [],
       rewards: [],
       npcId: "minimal_npc",
-      location: "minimal_location", 
+      location: "minimal_location",
       dialogue: {
         start: "Hello!",
         progress: "Keep going!",

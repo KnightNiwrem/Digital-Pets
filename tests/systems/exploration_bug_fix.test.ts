@@ -49,11 +49,11 @@ describe("Exploration Bug Fix Tests", () => {
       // Ensure pet has enough energy and move to forest_path where activities are available
       gameState.currentPet!.currentEnergy = 100;
       gameState.currentPet!.growthStage = 5; // High enough level for travel
-      
+
       // First travel to forest_path
       const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
       expect(travelResult.success).toBe(true);
-      
+
       // Complete travel by processing ticks
       let currentWorldState = travelResult.data!.worldState;
       const travelDuration = currentWorldState.travelState!.totalTravelTime;
@@ -63,7 +63,7 @@ describe("Exploration Bug Fix Tests", () => {
           currentWorldState = tickResult.data;
         }
       }
-      
+
       // Update game state with completed travel
       gameState.world = currentWorldState;
       gameState.currentPet = travelResult.data!.pet;
@@ -98,7 +98,7 @@ describe("Exploration Bug Fix Tests", () => {
       // Ensure pet has enough energy and move to forest_path
       gameState.currentPet!.currentEnergy = 100;
       gameState.currentPet!.growthStage = 5;
-      
+
       // Travel to forest_path and complete travel
       const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
       let currentWorldState = travelResult.data!.worldState;
@@ -189,7 +189,7 @@ describe("Exploration Bug Fix Tests", () => {
       // Ensure pet has enough energy and move to forest_path
       gameState.currentPet!.currentEnergy = 100;
       gameState.currentPet!.growthStage = 5;
-      
+
       // Travel to forest_path and complete travel
       const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
       let currentWorldState = travelResult.data!.worldState;
@@ -288,7 +288,7 @@ describe("Exploration Bug Fix Tests", () => {
       // Ensure pet has enough energy and move to forest_path
       gameState.currentPet!.currentEnergy = 100;
       gameState.currentPet!.growthStage = 5;
-      
+
       // Travel to forest_path and complete travel
       const travelResult = WorldSystem.startTravel(gameState.world, gameState.currentPet!, "forest_path");
       let currentWorldState = travelResult.data!.worldState;

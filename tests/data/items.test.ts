@@ -1,12 +1,6 @@
 // Tests for item data expansion
 import { describe, it, expect } from "bun:test";
-import { 
-  ITEMS, 
-  getItemById, 
-  getItemsByType, 
-  getItemsByRarity,
-  createItemInstance 
-} from "@/data/items";
+import { ITEMS, getItemById, getItemsByType, getItemsByRarity, createItemInstance } from "@/data/items";
 import type { ItemType, ItemRarity, DurabilityItem } from "@/types/Item";
 
 describe("Item Data Expansion", () => {
@@ -35,17 +29,15 @@ describe("Item Data Expansion", () => {
 
   describe("Item Categories", () => {
     it("should have expanded food items", () => {
-      const foodItems = ITEMS.filter(item => 
-        item.type === "consumable" && 
-        item.effects.some(effect => effect.type === "satiety")
+      const foodItems = ITEMS.filter(
+        item => item.type === "consumable" && item.effects.some(effect => effect.type === "satiety")
       );
       expect(foodItems.length).toBeGreaterThanOrEqual(8); // at least 8 food items
     });
 
     it("should have expanded drink items", () => {
-      const drinkItems = ITEMS.filter(item => 
-        item.type === "consumable" && 
-        item.effects.some(effect => effect.type === "hydration")
+      const drinkItems = ITEMS.filter(
+        item => item.type === "consumable" && item.effects.some(effect => effect.type === "hydration")
       );
       expect(drinkItems.length).toBeGreaterThanOrEqual(4); // at least 4 drink items
     });
@@ -68,7 +60,7 @@ describe("Item Data Expansion", () => {
     it("should have mining materials", () => {
       const materialItems = getItemsByType("material");
       expect(materialItems.length).toBeGreaterThanOrEqual(4); // at least 4 material items
-      
+
       // Check for specific mining items
       const miningItems = ["iron_ore", "silver_ore", "gold_ore", "precious_gem"];
       miningItems.forEach(itemId => {
@@ -191,18 +183,16 @@ describe("Item Data Expansion", () => {
 
     it("should have items with new effect types", () => {
       const newEffectTypes = ["fishing_bonus", "training_bonus", "luck_bonus", "exploration_bonus", "growth_bonus"];
-      
+
       newEffectTypes.forEach(effectType => {
-        const itemsWithEffect = ITEMS.filter(item => 
-          item.effects.some(effect => effect.type === effectType)
-        );
+        const itemsWithEffect = ITEMS.filter(item => item.effects.some(effect => effect.type === effectType));
         expect(itemsWithEffect.length).toBeGreaterThan(0);
       });
     });
 
     it("should have items with various durability ranges", () => {
       const durabilityItems = ITEMS.filter(item => !item.stackable);
-      
+
       const durabilityValues = durabilityItems.map(item => item.maxDurability);
       const minDurability = Math.min(...durabilityValues);
       const maxDurability = Math.max(...durabilityValues);
@@ -214,9 +204,8 @@ describe("Item Data Expansion", () => {
 
     it("should have appropriate value progression within categories", () => {
       // Test that rare items within same category are more expensive than common ones
-      const foodItems = ITEMS.filter(item => 
-        item.type === "consumable" && 
-        item.effects.some(effect => effect.type === "satiety")
+      const foodItems = ITEMS.filter(
+        item => item.type === "consumable" && item.effects.some(effect => effect.type === "satiety")
       );
 
       const commonFood = foodItems.filter(item => item.rarity === "common");
@@ -225,7 +214,7 @@ describe("Item Data Expansion", () => {
       if (commonFood.length > 0 && rareFood.length > 0) {
         const avgCommonFoodValue = commonFood.reduce((sum, item) => sum + item.value, 0) / commonFood.length;
         const avgRareFoodValue = rareFood.reduce((sum, item) => sum + item.value, 0) / rareFood.length;
-        
+
         expect(avgRareFoodValue).toBeGreaterThan(avgCommonFoodValue);
       }
     });
@@ -235,9 +224,7 @@ describe("Item Data Expansion", () => {
     it("should have reasonable stat restoration values", () => {
       // Check that basic stat restoration items aren't overpowered
       const statRestorationItems = ITEMS.filter(item =>
-        item.effects.some(effect => 
-          ["satiety", "hydration", "happiness"].includes(effect.type) && effect.value > 50
-        )
+        item.effects.some(effect => ["satiety", "hydration", "happiness"].includes(effect.type) && effect.value > 50)
       );
 
       // Only rare+ items should have very high restoration values
@@ -250,13 +237,13 @@ describe("Item Data Expansion", () => {
       const energyCostItems = ITEMS.filter(item =>
         item.effects.some(effect => effect.type === "energy" && effect.value < 0)
       );
-      
+
       expect(energyCostItems.length).toBeGreaterThan(0); // some items should cost energy
     });
 
     it("should have proper equipment durability scaling", () => {
       const equipmentItems = getItemsByType("equipment");
-      
+
       equipmentItems.forEach(item => {
         expect(item.stackable).toBe(false);
         if (!item.stackable) {

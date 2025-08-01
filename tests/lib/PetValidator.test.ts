@@ -7,7 +7,7 @@ describe("PetValidator", () => {
   const createTestPet = (overrides: Partial<Pet> = {}): Pet => {
     const testSpecies: import("@/types/Pet").PetSpecies = {
       id: "test_species",
-      name: "Test Pet", 
+      name: "Test Pet",
       rarity: "common",
       description: "A pet for testing",
       baseStats: { attack: 10, defense: 8, speed: 12, health: 50 },
@@ -29,6 +29,7 @@ describe("PetValidator", () => {
       hydrationTicksLeft: 50 * 80, // HYDRATION multiplier is 80
       happinessTicksLeft: 50 * 120, // HAPPINESS multiplier is 120
       poopTicksLeft: 2000,
+      poopCount: overrides.poopCount ?? 0,
       sickByPoopTicksLeft: 17280,
       life: 1000000,
       maxEnergy: 100,
@@ -357,13 +358,13 @@ describe("GameMath", () => {
     it("should work with probability 0.5", () => {
       let successes = 0;
       const trials = 1000;
-      
+
       for (let i = 0; i < trials; i++) {
         if (GameMath.randomChance(0.5)) {
           successes++;
         }
       }
-      
+
       // Should be roughly 50% (allowing for randomness)
       expect(successes).toBeGreaterThan(400);
       expect(successes).toBeLessThan(600);
@@ -414,7 +415,7 @@ describe("EnergyManager", () => {
     const testSpecies: import("@/types/Pet").PetSpecies = {
       id: "test_species",
       name: "Test Pet",
-      rarity: "common", 
+      rarity: "common",
       description: "A pet for testing",
       baseStats: { attack: 10, defense: 8, speed: 12, health: 50 },
       growthRates: { attack: 1.1, defense: 1.1, speed: 1.1, health: 1.2, energy: 1.1 },
@@ -435,6 +436,7 @@ describe("EnergyManager", () => {
       hydrationTicksLeft: 50 * 80,
       happinessTicksLeft: 50 * 120,
       poopTicksLeft: 2000,
+      poopCount: 0,
       sickByPoopTicksLeft: 17280,
       life: 1000000,
       maxEnergy: 100,
@@ -537,7 +539,9 @@ describe("EnergyManager", () => {
     });
 
     it("should generate dynamic error messages", () => {
-      expect(EnergyManager.ERROR_MESSAGES.GENERAL("custom action")).toBe("Pet doesn't have enough energy for custom action");
+      expect(EnergyManager.ERROR_MESSAGES.GENERAL("custom action")).toBe(
+        "Pet doesn't have enough energy for custom action"
+      );
     });
   });
 });

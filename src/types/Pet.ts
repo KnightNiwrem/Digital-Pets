@@ -65,6 +65,7 @@ export interface Pet {
   hydrationTicksLeft: number;
   happinessTicksLeft: number;
   poopTicksLeft: number;
+  poopCount: number; // Number of uncleaned poops (0+)
   sickByPoopTicksLeft: number;
 
   // Core Stats

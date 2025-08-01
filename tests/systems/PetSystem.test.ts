@@ -35,6 +35,7 @@ function createTestPet(overrides: Partial<Pet> = {}): Pet {
     hydrationTicksLeft: 4000,
     happinessTicksLeft: 6000,
     poopTicksLeft: 240,
+    poopCount: 0,
     sickByPoopTicksLeft: PET_CONSTANTS.SICK_BY_POOP_TICKS,
 
     // Core stats
@@ -202,23 +203,33 @@ describe("PetSystem - Pet Care Actions", () => {
 
   describe("cleanPoop", () => {
     test("should successfully clean poop when needed", () => {
-      pet.poopTicksLeft = 0; // Pet has pooped
+      pet.poopCount = 2; // Pet has uncleaned poop
 
       const result = PetSystem.cleanPoop(pet);
 
       expect(result.success).toBe(true);
       expect(result.data?.type).toBe("clean");
+      expect(pet.poopCount).toBe(0); // All poop cleaned
       expect(pet.poopTicksLeft).toBeGreaterThan(0);
       expect(pet.sickByPoopTicksLeft).toBe(PET_CONSTANTS.SICK_BY_POOP_TICKS);
     });
 
     test("should fail when there's no poop to clean", () => {
-      pet.poopTicksLeft = 100; // No poop yet
+      pet.poopCount = 0; // No uncleaned poop
 
       const result = PetSystem.cleanPoop(pet);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain("no poop to clean");
+    });
+
+    test("should clean multiple poops at once", () => {
+      pet.poopCount = 5; // Maximum poop count
+
+      const result = PetSystem.cleanPoop(pet);
+
+      expect(result.success).toBe(true);
+      expect(pet.poopCount).toBe(0); // All poop cleaned regardless of count
     });
   });
 
@@ -348,17 +359,50 @@ describe("PetSystem - Tick Processing", () => {
     expect(pet.happiness).toBe(Math.ceil(119 / PET_CONSTANTS.STAT_MULTIPLIER.HAPPINESS));
   });
 
-  test("should handle pet pooping", () => {
+  test("should handle pet pooping and increment poop count", () => {
     pet.poopTicksLeft = 1;
+    pet.poopCount = 0; // No existing poop
 
     const changes = PetSystem.processPetTick(pet);
 
     expect(changes).toContain("pet_pooped");
     expect(pet.poopTicksLeft).toBeGreaterThan(0);
+    expect(pet.poopCount).toBe(1); // Poop count incremented
+  });
+
+  test("should increment poop count when pooping with existing uncleaned poop", () => {
+    pet.poopTicksLeft = 1;
+    pet.poopCount = 2; // Already has uncleaned poop
+
+    const changes = PetSystem.processPetTick(pet);
+
+    expect(changes).toContain("pet_pooped");
+    expect(pet.poopCount).toBe(3); // Poop count incremented
+  });
+
+  test("should accelerate sickness countdown with more poop", () => {
+    pet.poopCount = 3;
+    pet.sickByPoopTicksLeft = 100;
+
+    PetSystem.processPetTick(pet);
+
+    // Should decrement by (2 * poopCount) = 6
+    expect(pet.sickByPoopTicksLeft).toBe(94);
+  });
+
+  test("should not accelerate sickness countdown with no poop", () => {
+    pet.poopCount = 0;
+    pet.sickByPoopTicksLeft = 100;
+
+    PetSystem.processPetTick(pet);
+
+    // Should decrement by normal 1
+    expect(pet.sickByPoopTicksLeft).toBe(100);
   });
 
   test("should make pet sick from uncleaned poop", () => {
     pet.sickByPoopTicksLeft = 1;
+    pet.poopCount = 1;
     pet.health = "healthy";
 
     const changes = PetSystem.processPetTick(pet);
@@ -524,12 +568,29 @@ describe("PetSystem - Status and Events", () => {
       expect(status.warnings).toContain("Pet is sick");
     });
 
-    test("should warn about poop", () => {
-      pet.poopTicksLeft = 0;
+    test("should warn about single poop", () => {
+      pet.poopCount = 1;
 
       const status = PetSystem.getPetStatus(pet);
 
       expect(status.warnings).toContain("Pet needs cleaning");
+    });
+
+    test("should warn about multiple poops with count", () => {
+      pet.poopCount = 3;
+
+      const status = PetSystem.getPetStatus(pet);
+
+      expect(status.warnings).toContain("Pet needs cleaning (3 poops)");
+    });
+
+    test("should not warn about poop when clean", () => {
+      pet.poopCount = 0;
+
+      const status = PetSystem.getPetStatus(pet);
+
+      expect(status.warnings).not.toContain("Pet needs cleaning");
+      expect(status.warnings.some(w => w.includes("poops"))).toBe(false);
     });
 
     test("should warn about critically low life", () => {

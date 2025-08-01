@@ -40,6 +40,7 @@ describe("WorldSystem", () => {
       hydrationTicksLeft: 100,
       happinessTicksLeft: 100,
       poopTicksLeft: 100,
+      poopCount: overrides.poopCount ?? 0,
       sickByPoopTicksLeft: 17280,
 
       // Core stats
@@ -69,10 +70,10 @@ describe("WorldSystem", () => {
   beforeEach(() => {
     // Create a mock pet for testing
     mockPet = createTestPet();
-    
+
     // Initialize world state
     worldState = WorldSystem.initializeWorldState();
-    
+
     // Create test inventory
     testInventory = ItemSystem.createInventory();
   });
@@ -80,7 +81,7 @@ describe("WorldSystem", () => {
   describe("World Initialization", () => {
     it("should initialize world state with starting location", () => {
       const world = WorldSystem.initializeWorldState();
-      
+
       expect(world.currentLocationId).toBe("hometown");
       expect(world.unlockedLocations).toContain("hometown");
       expect(world.visitedLocations).toContain("hometown");
@@ -90,7 +91,7 @@ describe("WorldSystem", () => {
 
     it("should get current location correctly", () => {
       const location = WorldSystem.getCurrentLocation(worldState);
-      
+
       expect(location).toBeDefined();
       expect(location?.id).toBe("hometown");
       expect(location?.name).toBe("Hometown");
@@ -99,7 +100,7 @@ describe("WorldSystem", () => {
 
     it("should get available locations", () => {
       const locations = WorldSystem.getAvailableLocations(worldState);
-      
+
       expect(locations).toHaveLength(1);
       expect(locations[0].id).toBe("hometown");
     });
@@ -108,7 +109,7 @@ describe("WorldSystem", () => {
   describe("Travel System", () => {
     it("should fail to start travel when no valid destination", () => {
       const result = WorldSystem.startTravel(worldState, mockPet, "invalid_location");
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot travel to that destination from here");
     });
@@ -116,7 +117,7 @@ describe("WorldSystem", () => {
     it("should fail to start travel when pet is sleeping", () => {
       const sleepingPet = { ...mockPet, state: "sleeping" as const };
       const result = WorldSystem.startTravel(worldState, sleepingPet, "forest_path");
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot travel while pet is sleeping");
     });
@@ -133,7 +134,7 @@ describe("WorldSystem", () => {
       };
 
       const result = WorldSystem.startTravel(travellingWorld, mockPet, "riverside");
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Already travelling to another location");
     });
@@ -141,7 +142,7 @@ describe("WorldSystem", () => {
     it("should fail to start travel when pet level too low", () => {
       const lowLevelPet = { ...mockPet, growthStage: 1 }; // Need level 2 for forest
       const result = WorldSystem.startTravel(worldState, lowLevelPet, "forest_path");
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet must be at least level 2 to travel there");
     });
@@ -149,7 +150,7 @@ describe("WorldSystem", () => {
     it("should fail to start travel when pet has insufficient energy", () => {
       const lowEnergyPet = { ...mockPet, currentEnergy: 5, growthStage: 5 }; // Need 15 energy for travel
       const result = WorldSystem.startTravel(worldState, lowEnergyPet, "forest_path");
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet doesn't have enough energy for this journey");
     });
@@ -157,7 +158,7 @@ describe("WorldSystem", () => {
     it("should successfully start travel when requirements met", () => {
       const readyPet = { ...mockPet, growthStage: 5, currentEnergy: 100 };
       const result = WorldSystem.startTravel(worldState, readyPet, "forest_path");
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.worldState.travelState).toBeDefined();
@@ -180,7 +181,7 @@ describe("WorldSystem", () => {
       };
 
       const result = WorldSystem.processTravelTick(travellingWorld);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.currentLocationId).toBe("forest_path");
@@ -203,7 +204,7 @@ describe("WorldSystem", () => {
       };
 
       const result = WorldSystem.processTravelTick(travellingWorld);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.currentLocationId).toBe("hometown"); // Still at origin
@@ -246,7 +247,7 @@ describe("WorldSystem", () => {
       };
 
       const result = WorldSystem.startActivity(travellingWorld, mockPet, "hometown_foraging", testInventory);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot start activity while travelling");
     });
@@ -254,7 +255,7 @@ describe("WorldSystem", () => {
     it("should fail to start activity when pet sleeping", () => {
       const sleepingPet = { ...mockPet, state: "sleeping" as const };
       const result = WorldSystem.startActivity(worldState, sleepingPet, "hometown_foraging", testInventory);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot start activity while pet is sleeping");
     });
@@ -262,7 +263,7 @@ describe("WorldSystem", () => {
     it("should fail to start activity when insufficient energy", () => {
       const lowEnergyPet = { ...mockPet, currentEnergy: 5 }; // Need 10 for foraging
       const result = WorldSystem.startActivity(worldState, lowEnergyPet, "hometown_foraging", testInventory);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet doesn't have enough energy for this activity");
     });
@@ -270,24 +271,26 @@ describe("WorldSystem", () => {
     it("should fail to start activity when already doing one", () => {
       const busyWorld = {
         ...worldState,
-        activeActivities: [{
-          activityId: "hometown_foraging",
-          locationId: "hometown",
-          startTime: Date.now(),
-          ticksRemaining: 10,
-          petId: mockPet.id,
-        }],
+        activeActivities: [
+          {
+            activityId: "hometown_foraging",
+            locationId: "hometown",
+            startTime: Date.now(),
+            ticksRemaining: 10,
+            petId: mockPet.id,
+          },
+        ],
       };
 
       const result = WorldSystem.startActivity(busyWorld, mockPet, "hometown_foraging", testInventory);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet is already doing an activity");
     });
 
     it("should successfully start activity when requirements met", () => {
       const result = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(1);
@@ -300,17 +303,19 @@ describe("WorldSystem", () => {
     it("should process activity completion", () => {
       const worldWithActivity = {
         ...worldState,
-        activeActivities: [{
-          activityId: "hometown_foraging",
-          locationId: "hometown",
-          startTime: Date.now(),
-          ticksRemaining: 1, // Will complete this tick
-          petId: mockPet.id,
-        }],
+        activeActivities: [
+          {
+            activityId: "hometown_foraging",
+            locationId: "hometown",
+            startTime: Date.now(),
+            ticksRemaining: 1, // Will complete this tick
+            petId: mockPet.id,
+          },
+        ],
       };
 
       const result = WorldSystem.processActivitiesTick(worldWithActivity);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(0);
@@ -321,17 +326,19 @@ describe("WorldSystem", () => {
     it("should continue activity when ticks remaining", () => {
       const worldWithActivity = {
         ...worldState,
-        activeActivities: [{
-          activityId: "hometown_foraging",
-          locationId: "hometown",
-          startTime: Date.now(),
-          ticksRemaining: 10,
-          petId: mockPet.id,
-        }],
+        activeActivities: [
+          {
+            activityId: "hometown_foraging",
+            locationId: "hometown",
+            startTime: Date.now(),
+            ticksRemaining: 10,
+            petId: mockPet.id,
+          },
+        ],
       };
 
       const result = WorldSystem.processActivitiesTick(worldWithActivity);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(1);
@@ -342,17 +349,19 @@ describe("WorldSystem", () => {
     it("should get activity progress correctly", () => {
       const worldWithActivity = {
         ...worldState,
-        activeActivities: [{
-          activityId: "hometown_foraging",
-          locationId: "hometown",
-          startTime: Date.now(),
-          ticksRemaining: 10, // 10 remaining out of 20 total
-          petId: mockPet.id,
-        }],
+        activeActivities: [
+          {
+            activityId: "hometown_foraging",
+            locationId: "hometown",
+            startTime: Date.now(),
+            ticksRemaining: 10, // 10 remaining out of 20 total
+            petId: mockPet.id,
+          },
+        ],
       };
 
       const progress = WorldSystem.getActivityProgress(worldWithActivity, mockPet.id);
-      
+
       expect(progress.activity).toBeDefined();
       expect(progress.activity?.id).toBe("hometown_foraging");
       expect(progress.progress).toBe(50); // 50% complete
@@ -361,7 +370,7 @@ describe("WorldSystem", () => {
 
     it("should return no progress when no activity", () => {
       const progress = WorldSystem.getActivityProgress(worldState, mockPet.id);
-      
+
       expect(progress.activity).toBeUndefined();
       expect(progress.progress).toBe(0);
       expect(progress.timeRemaining).toBe(0);
@@ -370,17 +379,19 @@ describe("WorldSystem", () => {
     it("should cancel activity successfully", () => {
       const worldWithActivity = {
         ...worldState,
-        activeActivities: [{
-          activityId: "hometown_foraging",
-          locationId: "hometown",
-          startTime: Date.now(),
-          ticksRemaining: 10,
-          petId: mockPet.id,
-        }],
+        activeActivities: [
+          {
+            activityId: "hometown_foraging",
+            locationId: "hometown",
+            startTime: Date.now(),
+            ticksRemaining: 10,
+            petId: mockPet.id,
+          },
+        ],
       };
 
       const result = WorldSystem.cancelActivity(worldWithActivity, mockPet.id);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.activeActivities).toHaveLength(0);
@@ -390,7 +401,7 @@ describe("WorldSystem", () => {
 
     it("should fail to cancel when no activity", () => {
       const result = WorldSystem.cancelActivity(worldState, mockPet.id);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("No active activity to cancel");
     });
@@ -409,7 +420,7 @@ describe("WorldSystem", () => {
       };
 
       const result = WorldSystem.processOfflineProgression(travellingWorld, 10);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.worldState.currentLocationId).toBe("forest_path");
@@ -420,17 +431,19 @@ describe("WorldSystem", () => {
     it("should process offline activity completion", () => {
       const worldWithActivity = {
         ...worldState,
-        activeActivities: [{
-          activityId: "hometown_foraging",
-          locationId: "hometown",
-          startTime: Date.now(),
-          ticksRemaining: 5,
-          petId: mockPet.id,
-        }],
+        activeActivities: [
+          {
+            activityId: "hometown_foraging",
+            locationId: "hometown",
+            startTime: Date.now(),
+            ticksRemaining: 5,
+            petId: mockPet.id,
+          },
+        ],
       };
 
       const result = WorldSystem.processOfflineProgression(worldWithActivity, 10);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data.worldState.activeActivities).toHaveLength(0);
@@ -443,7 +456,7 @@ describe("WorldSystem", () => {
     it("should return empty array for low level pet", () => {
       const lowLevelPet = { ...mockPet, growthStage: 1 };
       const result = WorldSystem.getAvailableDestinations(worldState, lowLevelPet);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data).toHaveLength(0);
@@ -453,7 +466,7 @@ describe("WorldSystem", () => {
     it("should return forest path for high level pet", () => {
       const highLevelPet = { ...mockPet, growthStage: 5 };
       const result = WorldSystem.getAvailableDestinations(worldState, highLevelPet);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect(result.data).toHaveLength(1);
@@ -465,7 +478,7 @@ describe("WorldSystem", () => {
   describe("Shop System", () => {
     it("should get available shops at current location", () => {
       const shops = WorldSystem.getAvailableShops(worldState);
-      
+
       expect(shops).toHaveLength(1);
       expect(shops[0].id).toBe("hometown_general_store");
       expect(shops[0].name).toBe("General Store");
@@ -478,15 +491,15 @@ describe("WorldSystem", () => {
         ...worldState,
         currentLocationId: "nonexistent_location",
       };
-      
+
       const shops = WorldSystem.getAvailableShops(noShopsWorld);
-      
+
       expect(shops).toHaveLength(0);
     });
 
     it("should get specific shop by ID", () => {
       const shop = WorldSystem.getShopById(worldState, "hometown_general_store");
-      
+
       expect(shop).toBeDefined();
       expect(shop?.id).toBe("hometown_general_store");
       expect(shop?.name).toBe("General Store");
@@ -494,14 +507,14 @@ describe("WorldSystem", () => {
 
     it("should return undefined for non-existent shop ID", () => {
       const shop = WorldSystem.getShopById(worldState, "nonexistent_shop");
-      
+
       expect(shop).toBeUndefined();
     });
 
     it("should check if shop is available", () => {
       const isAvailable = WorldSystem.isShopAvailable(worldState, "hometown_general_store");
       const isNotAvailable = WorldSystem.isShopAvailable(worldState, "nonexistent_shop");
-      
+
       expect(isAvailable).toBe(true);
       expect(isNotAvailable).toBe(false);
     });

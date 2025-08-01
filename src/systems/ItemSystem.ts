@@ -402,8 +402,9 @@ export class ItemSystem {
           break;
 
         case "clean":
+          updatedPet.poopCount = 0; // Clear all uncleaned poop
           updatedPet.poopTicksLeft = Math.floor(Math.random() * 240) + 240; // Reset poop timer (1-2 hours)
-          updatedPet.sickByPoopTicksLeft = 17280; // Reset poop sickness timer
+          updatedPet.sickByPoopTicksLeft = PET_CONSTANTS.SICK_BY_POOP_TICKS; // Reset poop sickness timer
           messages.push("Cleaned pet");
           break;
       }

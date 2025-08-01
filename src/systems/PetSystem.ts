@@ -125,14 +125,15 @@ export class PetSystem {
    * Clean the pet's poop
    */
   static cleanPoop(pet: Pet): Result<PetCareAction> {
-    if (pet.poopTicksLeft > 0) {
+    if (pet.poopCount === 0) {
       return {
         success: false,
         error: "There's no poop to clean right now.",
       };
     }
 
-    // Reset poop timer and sickness timer
+    // Clean all poop and reset timers
+    pet.poopCount = 0; // Clear all uncleaned poop
     pet.poopTicksLeft = Math.floor(Math.random() * 240) + 240; // 1-2 hours until next poop
     pet.sickByPoopTicksLeft = PET_CONSTANTS.SICK_BY_POOP_TICKS; // Reset to full 72 hours
     pet.lastCareTime = Date.now();
@@ -242,7 +243,10 @@ export class PetSystem {
     pet.hydrationTicksLeft = GameMath.subtractEnergy(pet.hydrationTicksLeft, 1);
     pet.happinessTicksLeft = GameMath.subtractEnergy(pet.happinessTicksLeft, 1);
     pet.poopTicksLeft = GameMath.subtractEnergy(pet.poopTicksLeft, 1);
-    pet.sickByPoopTicksLeft = GameMath.subtractEnergy(pet.sickByPoopTicksLeft, 1);
+
+    // Decrement sickness timer faster when there are more poops
+    const sickDecrement = pet.poopCount > 0 ? 2 * pet.poopCount : 0;
+    pet.sickByPoopTicksLeft = GameMath.subtractEnergy(pet.sickByPoopTicksLeft, sickDecrement);
 
     // Update displayed stats
     const prevSatiety = pet.satiety;
@@ -260,6 +264,8 @@ export class PetSystem {
 
     // Handle poop
     if (pet.poopTicksLeft === 0) {
+      // Increment poop count (if there was already poop, this adds more)
+      pet.poopCount = pet.poopCount + 1;
       pet.poopTicksLeft = Math.floor(Math.random() * 240) + 240; // 1-2 hours
       changes.push("pet_pooped");
     }
@@ -416,7 +422,10 @@ export class PetSystem {
 
     // Check health warnings
     if (PetValidator.isUnhealthy(pet)) warnings.push(`Pet is ${pet.health}`);
-    if (pet.poopTicksLeft === 0) warnings.push("Pet needs cleaning");
+    if (pet.poopCount > 0) {
+      const poopMessage = pet.poopCount === 1 ? "Pet needs cleaning" : `Pet needs cleaning (${pet.poopCount} poops)`;
+      warnings.push(poopMessage);
+    }
     if (pet.sickByPoopTicksLeft < 1000) warnings.push("Pet may get sick from uncleaned area");
     if (PetValidator.hasCriticalLife(pet)) warnings.push("Pet's life is critically low");
 
@@ -494,7 +503,7 @@ export class PetSystem {
     const happiness = GameMath.calculateHappinessDisplay(pet.happinessTicksLeft);
 
     // Check if pet needs poop cleaning
-    const needsPoop = pet.poopTicksLeft <= 0;
+    const needsPoop = pet.poopCount > 0;
 
     return {
       satiety,

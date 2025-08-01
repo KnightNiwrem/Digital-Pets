@@ -37,6 +37,7 @@ function createMockGameState(): GameState {
       hydrationTicksLeft: 900,
       happinessTicksLeft: 1100,
       poopTicksLeft: 500,
+      poopCount: 0,
       sickByPoopTicksLeft: 10000,
       life: 1000000,
       maxEnergy: 100,
@@ -56,35 +57,35 @@ function createMockGameState(): GameState {
     ownedPets: [],
     inventory: {
       slots: [
-        { 
-          item: { 
-            id: "apple", 
-            name: "Fresh Apple", 
-            description: "A crisp, red apple that pets love.", 
-            type: "consumable", 
-            rarity: "common", 
-            icon: "item_apple", 
-            effects: [{ type: "satiety", value: 25 }], 
-            value: 10, 
-            stackable: true 
-          }, 
-          quantity: 3, 
-          slotIndex: 0 
+        {
+          item: {
+            id: "apple",
+            name: "Fresh Apple",
+            description: "A crisp, red apple that pets love.",
+            type: "consumable",
+            rarity: "common",
+            icon: "item_apple",
+            effects: [{ type: "satiety", value: 25 }],
+            value: 10,
+            stackable: true,
+          },
+          quantity: 3,
+          slotIndex: 0,
         },
-        { 
-          item: { 
-            id: "water_bottle", 
-            name: "Water Bottle", 
-            description: "Clean, refreshing water.", 
-            type: "consumable", 
-            rarity: "common", 
-            icon: "item_water", 
-            effects: [{ type: "hydration", value: 30 }], 
-            value: 8, 
-            stackable: true 
-          }, 
-          quantity: 2, 
-          slotIndex: 1 
+        {
+          item: {
+            id: "water_bottle",
+            name: "Water Bottle",
+            description: "Clean, refreshing water.",
+            type: "consumable",
+            rarity: "common",
+            icon: "item_water",
+            effects: [{ type: "hydration", value: 30 }],
+            value: 8,
+            stackable: true,
+          },
+          quantity: 2,
+          slotIndex: 1,
         },
       ],
       gold: 150,
@@ -176,7 +177,7 @@ describe("QuestSystem", () => {
   describe("initializeQuestLog", () => {
     it("should create an empty quest log", () => {
       const questLog = QuestSystem.initializeQuestLog();
-      
+
       expect(questLog.activeQuests).toEqual([]);
       expect(questLog.completedQuests).toEqual([]);
       expect(questLog.failedQuests).toEqual([]);
@@ -188,16 +189,16 @@ describe("QuestSystem", () => {
   describe("canStartQuest", () => {
     it("should allow starting quest with no requirements", () => {
       const result = QuestSystem.canStartQuest(petCareQuest, gameState);
-      
+
       expect(result.success).toBe(true);
       expect(result.data).toBe(true);
     });
 
     it("should prevent starting already completed quest", () => {
       gameState.questLog!.completedQuests.push(petCareQuest.id);
-      
+
       const result = QuestSystem.canStartQuest(petCareQuest, gameState);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Quest has already been completed.");
     });
@@ -215,18 +216,18 @@ describe("QuestSystem", () => {
         variables: {},
       };
       gameState.questLog!.activeQuests.push(questProgress);
-      
+
       const result = QuestSystem.canStartQuest(petCareQuest, gameState);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Quest is already active.");
     });
 
     it("should prevent starting quest with unmet requirements", () => {
       const forestQuest = getQuestById("forest_exploration")!;
-      
+
       const result = QuestSystem.canStartQuest(forestQuest, gameState);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Required quest not completed.");
     });
@@ -247,9 +248,9 @@ describe("QuestSystem", () => {
         };
         gameState.questLog!.activeQuests.push(questProgress);
       }
-      
+
       const result = QuestSystem.canStartQuest(petCareQuest, gameState);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Too many active quests. Complete some quests first.");
     });
@@ -258,10 +259,10 @@ describe("QuestSystem", () => {
   describe("startQuest", () => {
     it("should successfully start a valid quest", () => {
       const result = QuestSystem.startQuest(petCareQuest, gameState);
-      
+
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      
+
       // Check that updated gameState is returned
       const updatedGameState = result.data!;
       expect(updatedGameState.questLog!.activeQuests).toHaveLength(1);
@@ -273,10 +274,10 @@ describe("QuestSystem", () => {
 
     it("should initialize objectives correctly", () => {
       QuestSystem.startQuest(petCareQuest, gameState);
-      
+
       const questProgress = gameState.questLog!.activeQuests[0];
       expect(questProgress.objectives).toHaveLength(petCareQuest.objectives.length);
-      
+
       for (const objective of questProgress.objectives) {
         expect(objective.currentAmount).toBe(0);
         expect(objective.completed).toBe(false);
@@ -285,9 +286,9 @@ describe("QuestSystem", () => {
 
     it("should fail to start invalid quest", () => {
       gameState.questLog!.completedQuests.push(petCareQuest.id);
-      
+
       const result = QuestSystem.startQuest(petCareQuest, gameState);
-      
+
       expect(result.success).toBe(false);
       expect(gameState.questLog!.activeQuests).toHaveLength(0);
     });
@@ -300,17 +301,12 @@ describe("QuestSystem", () => {
 
     it("should successfully update objective progress", () => {
       const objective = petCareQuest.objectives[0]; // feed_pet objective
-      
-      const result = QuestSystem.updateObjectiveProgress(
-        petCareQuest.id,
-        objective.id,
-        1,
-        gameState
-      );
-      
+
+      const result = QuestSystem.updateObjectiveProgress(petCareQuest.id, objective.id, 1, gameState);
+
       expect(result.success).toBe(true);
       expect(result.data?.type).toBe("update_objective");
-      
+
       const questProgress = gameState.questLog!.activeQuests[0];
       const updatedObjective = questProgress.objectives.find(obj => obj.id === objective.id);
       expect(updatedObjective?.currentAmount).toBe(1);
@@ -319,16 +315,11 @@ describe("QuestSystem", () => {
 
     it("should complete objective when target is reached", () => {
       const objective = petCareQuest.objectives[0]; // feed_pet objective (target: 3)
-      
-      const result = QuestSystem.updateObjectiveProgress(
-        petCareQuest.id,
-        objective.id,
-        3,
-        gameState
-      );
-      
+
+      const result = QuestSystem.updateObjectiveProgress(petCareQuest.id, objective.id, 3, gameState);
+
       expect(result.success).toBe(true);
-      
+
       const questProgress = gameState.questLog!.activeQuests[0];
       const updatedObjective = questProgress.objectives.find(obj => obj.id === objective.id);
       expect(updatedObjective?.currentAmount).toBe(3);
@@ -337,52 +328,37 @@ describe("QuestSystem", () => {
 
     it("should not exceed target amount", () => {
       const objective = petCareQuest.objectives[0]; // feed_pet objective (target: 3)
-      
+
       QuestSystem.updateObjectiveProgress(petCareQuest.id, objective.id, 5, gameState);
-      
+
       const questProgress = gameState.questLog!.activeQuests[0];
       const updatedObjective = questProgress.objectives.find(obj => obj.id === objective.id);
       expect(updatedObjective?.currentAmount).toBe(3); // capped at target
     });
 
     it("should fail for non-existent quest", () => {
-      const result = QuestSystem.updateObjectiveProgress(
-        "fake_quest",
-        "fake_objective",
-        1,
-        gameState
-      );
-      
+      const result = QuestSystem.updateObjectiveProgress("fake_quest", "fake_objective", 1, gameState);
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Quest is not active.");
     });
 
     it("should fail for non-existent objective", () => {
-      const result = QuestSystem.updateObjectiveProgress(
-        petCareQuest.id,
-        "fake_objective",
-        1,
-        gameState
-      );
-      
+      const result = QuestSystem.updateObjectiveProgress(petCareQuest.id, "fake_objective", 1, gameState);
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Objective not found.");
     });
 
     it("should fail for already completed objective", () => {
       const objective = petCareQuest.objectives[0];
-      
+
       // Complete the objective first
       QuestSystem.updateObjectiveProgress(petCareQuest.id, objective.id, 3, gameState);
-      
+
       // Try to update again
-      const result = QuestSystem.updateObjectiveProgress(
-        petCareQuest.id,
-        objective.id,
-        1,
-        gameState
-      );
-      
+      const result = QuestSystem.updateObjectiveProgress(petCareQuest.id, objective.id, 1, gameState);
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Objective is already completed.");
     });
@@ -401,14 +377,9 @@ describe("QuestSystem", () => {
     it("should return true when all objectives are complete", () => {
       // Complete all objectives
       for (const objective of petCareQuest.objectives) {
-        QuestSystem.updateObjectiveProgress(
-          petCareQuest.id,
-          objective.id,
-          objective.targetAmount || 1,
-          gameState
-        );
+        QuestSystem.updateObjectiveProgress(petCareQuest.id, objective.id, objective.targetAmount || 1, gameState);
       }
-      
+
       const isComplete = QuestSystem.isQuestComplete(petCareQuest.id, gameState);
       expect(isComplete).toBe(true);
     });
@@ -426,31 +397,26 @@ describe("QuestSystem", () => {
         // Update gameState with the started quest
         gameState.questLog = startResult.data.questLog;
       }
-      
+
       // Complete all objectives
       for (const objective of petCareQuest.objectives) {
-        QuestSystem.updateObjectiveProgress(
-          petCareQuest.id,
-          objective.id,
-          objective.targetAmount || 1,
-          gameState
-        );
+        QuestSystem.updateObjectiveProgress(petCareQuest.id, objective.id, objective.targetAmount || 1, gameState);
       }
     });
 
     it("should successfully complete quest", () => {
       const initialGold = gameState.inventory.gold;
-      
+
       const result = QuestSystem.completeQuest(gameState, petCareQuest.id);
-      
+
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      
+
       // Check that updated gameState is returned
       const updatedGameState = result.data!;
       expect(updatedGameState.questLog!.activeQuests).toHaveLength(0);
       expect(updatedGameState.questLog!.completedQuests).toContain(petCareQuest.id);
-      
+
       // Check that gold didn't change (pet care quest doesn't give gold)
       expect(updatedGameState.inventory.gold).toBe(initialGold);
     });
@@ -458,22 +424,22 @@ describe("QuestSystem", () => {
     it("should fail for quest with incomplete objectives", () => {
       // Complete the prerequisite quest to start shop tutorial
       gameState.questLog!.completedQuests.push("pet_care_basics");
-      
+
       // Start a new quest and don't complete objectives
       const startResult = QuestSystem.startQuest(shopTutorialQuest, gameState);
       if (startResult.success && startResult.data) {
         gameState.questLog = startResult.data.questLog;
       }
-      
+
       const result = QuestSystem.completeQuest(gameState, shopTutorialQuest.id);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Not all objectives are complete.");
     });
 
     it("should fail for non-active quest", () => {
       const result = QuestSystem.completeQuest(gameState, shopTutorialQuest.id);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe("Quest is not active.");
     });
@@ -485,17 +451,12 @@ describe("QuestSystem", () => {
     });
 
     it("should update quest progress for relevant actions", () => {
-      const events = QuestSystem.processGameAction(
-        "pet_care",
-        { action: "feed" },
-        QUESTS,
-        gameState
-      );
-      
+      const events = QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, gameState);
+
       expect(events).toHaveLength(1);
       expect(events[0].type).toBe("objective_completed");
       expect(events[0].questId).toBe(petCareQuest.id);
-      
+
       // Check objective progress was updated
       const questProgress = gameState.questLog!.activeQuests[0];
       const feedObjective = questProgress.objectives.find(obj => obj.id === "feed_pet");
@@ -507,34 +468,29 @@ describe("QuestSystem", () => {
       QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, gameState);
       QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, gameState);
       QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, gameState);
-      
+
       QuestSystem.processGameAction("pet_care", { action: "drink" }, QUESTS, gameState);
       QuestSystem.processGameAction("pet_care", { action: "drink" }, QUESTS, gameState);
       QuestSystem.processGameAction("pet_care", { action: "drink" }, QUESTS, gameState);
-      
+
       QuestSystem.processGameAction("pet_care", { action: "play" }, QUESTS, gameState);
       const events = QuestSystem.processGameAction("pet_care", { action: "play" }, QUESTS, gameState);
-      
+
       // Should have quest completion event
       const completionEvent = events.find(e => e.type === "quest_completed");
       expect(completionEvent).toBeDefined();
       expect(completionEvent?.questId).toBe(petCareQuest.id);
-      
+
       // Quest should be completed
       expect(gameState.questLog!.completedQuests).toContain(petCareQuest.id);
       expect(gameState.questLog!.activeQuests).toHaveLength(0);
     });
 
     it("should ignore irrelevant actions", () => {
-      const events = QuestSystem.processGameAction(
-        "irrelevant_action",
-        { data: "test" },
-        QUESTS,
-        gameState
-      );
-      
+      const events = QuestSystem.processGameAction("irrelevant_action", { data: "test" }, QUESTS, gameState);
+
       expect(events).toHaveLength(0);
-      
+
       // Check no objective progress was made
       const questProgress = gameState.questLog!.activeQuests[0];
       for (const objective of questProgress.objectives) {
@@ -546,7 +502,7 @@ describe("QuestSystem", () => {
   describe("getAvailableQuests", () => {
     it("should return quests with no requirements", () => {
       const availableQuests = QuestSystem.getAvailableQuests(QUESTS, gameState);
-      
+
       expect(availableQuests).toContainEqual(petCareQuest);
       expect(availableQuests).not.toContainEqual(shopTutorialQuest); // has requirement
     });
@@ -554,26 +510,26 @@ describe("QuestSystem", () => {
     it("should return quests with met requirements", () => {
       // Complete the required quest
       gameState.questLog!.completedQuests.push("shop_tutorial");
-      
+
       const availableQuests = QuestSystem.getAvailableQuests(QUESTS, gameState);
       const forestQuest = getQuestById("forest_exploration");
-      
+
       expect(availableQuests).toContainEqual(forestQuest);
     });
 
     it("should exclude already completed quests", () => {
       gameState.questLog!.completedQuests.push(petCareQuest.id);
-      
+
       const availableQuests = QuestSystem.getAvailableQuests(QUESTS, gameState);
-      
+
       expect(availableQuests).not.toContainEqual(petCareQuest);
     });
 
     it("should exclude already active quests", () => {
       QuestSystem.startQuest(petCareQuest, gameState);
-      
+
       const availableQuests = QuestSystem.getAvailableQuests(QUESTS, gameState);
-      
+
       expect(availableQuests).not.toContainEqual(petCareQuest);
     });
   });
@@ -586,9 +542,9 @@ describe("QuestSystem", () => {
 
     it("should return active quest progress", () => {
       QuestSystem.startQuest(petCareQuest, gameState);
-      
+
       const activeQuests = QuestSystem.getActiveQuests(gameState);
-      
+
       expect(activeQuests).toHaveLength(1);
       expect(activeQuests[0].questId).toBe(petCareQuest.id);
       expect(activeQuests[0].status).toBe("active");
@@ -603,9 +559,9 @@ describe("QuestSystem", () => {
 
     it("should return completed quest IDs", () => {
       gameState.questLog!.completedQuests.push(petCareQuest.id);
-      
+
       const completedQuests = QuestSystem.getCompletedQuests(gameState);
-      
+
       expect(completedQuests).toEqual([petCareQuest.id]);
     });
   });
@@ -658,34 +614,35 @@ describe("QuestSystem", () => {
 
     it("should distribute gold rewards correctly", () => {
       const initialGold = gameState.inventory.gold;
-      
+
       const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
-      
+
       expect(result.success).toBe(true);
       expect(result.data!.inventory.gold).toBe(initialGold + 50);
     });
 
     it("should distribute experience rewards correctly", () => {
       const initialExperience = gameState.playerStats.experience;
-      
+
       const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
-      
+
       expect(result.success).toBe(true);
       expect(result.data!.playerStats.experience).toBe(initialExperience + 100);
     });
 
     it("should distribute item rewards correctly", () => {
       const initialAppleCount = gameState.inventory.slots.find(slot => slot.item.id === "apple")?.quantity || 0;
-      const initialWaterBottleCount = gameState.inventory.slots.find(slot => slot.item.id === "water_bottle")?.quantity || 0;
-      
+      const initialWaterBottleCount =
+        gameState.inventory.slots.find(slot => slot.item.id === "water_bottle")?.quantity || 0;
+
       const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
-      
+
       expect(result.success).toBe(true);
-      
+
       const updatedInventory = result.data!.inventory;
       const appleSlot = updatedInventory.slots.find(slot => slot.item.id === "apple");
       const waterBottleSlot = updatedInventory.slots.find(slot => slot.item.id === "water_bottle");
-      
+
       expect(appleSlot?.quantity).toBe(initialAppleCount + 3);
       expect(waterBottleSlot?.quantity).toBe(initialWaterBottleCount + 2);
     });
@@ -694,17 +651,17 @@ describe("QuestSystem", () => {
       const initialGold = gameState.inventory.gold;
       const initialExperience = gameState.playerStats.experience;
       const initialAppleCount = gameState.inventory.slots.find(slot => slot.item.id === "apple")?.quantity || 0;
-      
+
       const result = QuestSystem.completeQuest(gameState, mockQuestWithRewards.id);
-      
+
       expect(result.success).toBe(true);
-      
+
       const updatedGameState = result.data!;
-      
+
       // Check all reward types were distributed correctly
       expect(updatedGameState.inventory.gold).toBe(initialGold + 50);
       expect(updatedGameState.playerStats.experience).toBe(initialExperience + 100);
-      
+
       const appleSlot = updatedGameState.inventory.slots.find(slot => slot.item.id === "apple");
       expect(appleSlot?.quantity).toBe(initialAppleCount + 3);
     });
@@ -712,7 +669,7 @@ describe("QuestSystem", () => {
     it("should handle item rewards for non-existent items gracefully", () => {
       // Use a fresh gameState to avoid conflicts with other tests
       const freshGameState = createMockGameState();
-      
+
       const questWithInvalidItem: Quest = {
         id: "invalid_item_quest",
         name: "Invalid Item Test Quest",
@@ -749,7 +706,7 @@ describe("QuestSystem", () => {
 
       const startResult = QuestSystem.startQuest(questWithInvalidItem, freshGameState);
       expect(startResult.success).toBe(true);
-      
+
       const updatedGameState = startResult.data!;
       const questProgress = updatedGameState.questLog!.activeQuests.find(q => q.questId === questWithInvalidItem.id);
       expect(questProgress).toBeDefined();
@@ -757,9 +714,9 @@ describe("QuestSystem", () => {
       questProgress!.objectives[0].completed = true;
 
       const initialGold = updatedGameState.inventory.gold;
-      
+
       const result = QuestSystem.completeQuest(updatedGameState, questWithInvalidItem.id);
-      
+
       expect(result.success).toBe(true);
       // Gold should still be awarded even if item reward fails
       expect(result.data!.inventory.gold).toBe(initialGold + 25);
@@ -768,7 +725,7 @@ describe("QuestSystem", () => {
     it("should handle location unlock rewards correctly", () => {
       // Use a fresh gameState to avoid conflicts with other tests
       const freshGameState = createMockGameState();
-      
+
       const questWithLocationReward: Quest = {
         id: "location_unlock_quest",
         name: "Location Unlock Test Quest",
@@ -805,7 +762,7 @@ describe("QuestSystem", () => {
 
       const startResult = QuestSystem.startQuest(questWithLocationReward, freshGameState);
       expect(startResult.success).toBe(true);
-      
+
       const updatedGameState = startResult.data!;
       const questProgress = updatedGameState.questLog!.activeQuests.find(q => q.questId === questWithLocationReward.id);
       expect(questProgress).toBeDefined();
@@ -813,9 +770,9 @@ describe("QuestSystem", () => {
       questProgress!.objectives[0].completed = true;
 
       const initialLocations = [...updatedGameState.world.unlockedLocations];
-      
+
       const result = QuestSystem.completeQuest(updatedGameState, questWithLocationReward.id);
-      
+
       expect(result.success).toBe(true);
       expect(result.data!.world.unlockedLocations).toContain("riverside");
       expect(result.data!.world.unlockedLocations.length).toBe(initialLocations.length + 1);
@@ -868,7 +825,7 @@ describe("QuestSystem", () => {
 
     it("should have valid quest objectives", () => {
       const miningTutorial = getQuestById("mountain_mining_tutorial");
-      
+
       expect(miningTutorial?.objectives).toHaveLength(3);
       expect(miningTutorial?.objectives[0].type).toBe("collect_item");
       expect(miningTutorial?.objectives[0].itemId).toBe("pickaxe");
@@ -928,7 +885,7 @@ describe("QuestSystem", () => {
     it("should have appropriate quest objectives for ancient ruins exploration", () => {
       const part3 = getQuestById("the_great_discovery_part3");
       const part4 = getQuestById("the_great_discovery_part4");
-      
+
       // Part 3 objectives
       expect(part3?.objectives).toHaveLength(4);
       expect(part3?.objectives[0].type).toBe("visit_location");
@@ -936,7 +893,7 @@ describe("QuestSystem", () => {
       expect(part3?.objectives[1].type).toBe("collect_item");
       expect(part3?.objectives[1].itemId).toBe("ancient_relic");
       expect(part3?.objectives[1].targetAmount).toBe(5);
-      
+
       // Part 4 objectives (finale)
       expect(part4?.objectives).toHaveLength(4);
       expect(part4?.objectives[0].type).toBe("collect_item");
@@ -1005,20 +962,18 @@ describe("QuestSystem", () => {
       expect(deepSeaExpedition?.rewards).toContainEqual(
         expect.objectContaining({ type: "item", itemId: "pearl", amount: 5 })
       );
-      expect(deepSeaExpedition?.rewards).toContainEqual(
-        expect.objectContaining({ type: "gold", amount: 500 })
-      );
+      expect(deepSeaExpedition?.rewards).toContainEqual(expect.objectContaining({ type: "gold", amount: 500 }));
     });
 
     it("should have correct maritime quest objectives", () => {
       const masterAngler = getQuestById("master_angler");
       const tradingApprentice = getQuestById("trading_apprentice");
-      
+
       // Master angler should focus on deep sea fishing
       expect(masterAngler?.objectives[0].itemId).toBe("exotic_fish");
       expect(masterAngler?.objectives[0].targetAmount).toBe(8);
       expect(masterAngler?.objectives[1].itemId).toBe("pearl");
-      
+
       // Trading apprentice should focus on trade activities
       expect(tradingApprentice?.objectives[0].itemId).toBe("trade_permit");
       expect(tradingApprentice?.objectives[1].itemId).toBe("exotic_spice");
@@ -1033,13 +988,13 @@ describe("QuestSystem", () => {
 
       expect(harborIntegration?.npcId).toBe("harbor_master_thaddeus");
       expect(harborIntegration?.location).toBe("coastal_harbor");
-      
+
       expect(tradingApprentice?.npcId).toBe("merchant_captain_elena");
       expect(tradingApprentice?.location).toBe("coastal_harbor");
-      
+
       expect(masterAngler?.npcId).toBe("fishmonger_barnabus");
       expect(masterAngler?.location).toBe("coastal_harbor");
-      
+
       expect(deepSeaExpedition?.npcId).toBe("harbor_master_thaddeus");
       expect(deepSeaExpedition?.location).toBe("coastal_harbor");
 
@@ -1057,14 +1012,14 @@ describe("QuestSystem", () => {
     beforeEach(() => {
       gameState = createMockGameState();
       miningTutorialQuest = getQuestById("mountain_mining_tutorial")!;
-      
+
       // Meet the quest requirements
       gameState.questLog = QuestSystem.initializeQuestLog();
       gameState.questLog.completedQuests.push("fishing_lesson");
       if (gameState.currentPet) {
         gameState.currentPet.growthStage = 10; // High enough for level requirement
       }
-      
+
       // Start the mining tutorial quest
       const startResult = QuestSystem.startQuest(miningTutorialQuest, gameState);
       if (startResult.success && startResult.data) {
@@ -1076,31 +1031,26 @@ describe("QuestSystem", () => {
       // Test the first objective (buy pickaxe) - positive target
       const buyPickaxeObjective = miningTutorialQuest.objectives[0];
       expect(buyPickaxeObjective.targetAmount).toBe(1);
-      
+
       // Update progress incrementally
-      let result = QuestSystem.updateObjectiveProgress(
-        miningTutorialQuest.id,
-        buyPickaxeObjective.id,
-        1,
-        gameState
-      );
-      
+      let result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, buyPickaxeObjective.id, 1, gameState);
+
       expect(result.success).toBe(true);
-      
+
       // Check progress
       const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       const objective = questProgress!.objectives.find(obj => obj.id === buyPickaxeObjective.id);
-      
+
       expect(objective!.currentAmount).toBe(1);
       expect(objective!.completed).toBe(true);
     });
 
-    it("should handle negative targetAmount correctly (selling items)", () => { 
+    it("should handle negative targetAmount correctly (selling items)", () => {
       // Test the sell_ore objective - negative target
       const sellOreObjective = miningTutorialQuest.objectives[2];
       expect(sellOreObjective.targetAmount).toBe(-3);
       expect(sellOreObjective.currentAmount).toBe(0);
-      
+
       // Simulate selling items incrementally
       // First sale: -1 item
       let result = QuestSystem.updateObjectiveProgress(
@@ -1109,44 +1059,34 @@ describe("QuestSystem", () => {
         -1, // amount is negative when selling
         gameState
       );
-      
+
       expect(result.success).toBe(true);
-      
+
       let questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       let objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
-      
+
       expect(objective!.currentAmount).toBe(-1);
       expect(objective!.completed).toBe(false); // Should not be complete yet
 
       // Second sale: -1 item (total -2)
-      result = QuestSystem.updateObjectiveProgress(
-        miningTutorialQuest.id,
-        sellOreObjective.id,
-        -1,
-        gameState
-      );
-      
+      result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, sellOreObjective.id, -1, gameState);
+
       expect(result.success).toBe(true);
-      
+
       questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
-      
+
       expect(objective!.currentAmount).toBe(-2);
       expect(objective!.completed).toBe(false); // Still not complete
 
       // Third sale: -1 item (total -3, should complete)
-      result = QuestSystem.updateObjectiveProgress(
-        miningTutorialQuest.id,
-        sellOreObjective.id,
-        -1,
-        gameState
-      );
-      
+      result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, sellOreObjective.id, -1, gameState);
+
       expect(result.success).toBe(true);
-      
+
       questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
-      
+
       expect(objective!.currentAmount).toBe(-3);
       expect(objective!.completed).toBe(true); // Now should be complete
     });
@@ -1154,7 +1094,7 @@ describe("QuestSystem", () => {
     it("should not allow progress beyond negative target", () => {
       // Test that selling more than required doesn't go beyond target
       const sellOreObjective = miningTutorialQuest.objectives[2];
-      
+
       // Try to sell 5 items at once (more than the target of -3)
       const result = QuestSystem.updateObjectiveProgress(
         miningTutorialQuest.id,
@@ -1162,12 +1102,12 @@ describe("QuestSystem", () => {
         -5, // selling 5 items
         gameState
       );
-      
+
       expect(result.success).toBe(true);
-      
+
       const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       const objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
-      
+
       // Should be clamped to the target (-3), not go to -5
       expect(objective!.currentAmount).toBe(-3);
       expect(objective!.completed).toBe(true);
@@ -1177,20 +1117,15 @@ describe("QuestSystem", () => {
       // Test existing behavior for positive targets
       const ironOreObjective = miningTutorialQuest.objectives[1];
       expect(ironOreObjective.targetAmount).toBe(5);
-      
+
       // Try to collect 10 items at once (more than the target of 5)
-      const result = QuestSystem.updateObjectiveProgress(
-        miningTutorialQuest.id,
-        ironOreObjective.id,
-        10,
-        gameState
-      );
-      
+      const result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, ironOreObjective.id, 10, gameState);
+
       expect(result.success).toBe(true);
-      
+
       const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       const objective = questProgress!.objectives.find(obj => obj.id === ironOreObjective.id);
-      
+
       // Should be clamped to the target (5), not go to 10
       expect(objective!.currentAmount).toBe(5);
       expect(objective!.completed).toBe(true);

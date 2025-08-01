@@ -14,7 +14,7 @@ describe("ItemSystem", () => {
 
   beforeEach(() => {
     testInventory = ItemSystem.createInventory(10, 100);
-    
+
     const testSpecies: PetSpecies = {
       id: "test_species",
       name: "Test Pet",
@@ -25,20 +25,21 @@ describe("ItemSystem", () => {
       sprite: "test.png",
       icon: "test_icon.png",
     };
-    
+
     testPet = {
       id: "test-pet",
       name: "Test Pet",
       species: testSpecies,
       rarity: "common",
       growthStage: 1,
-      satiety: 5,  // Math.ceil(500 / 100) = 5
+      satiety: 5, // Math.ceil(500 / 100) = 5
       hydration: 7, // Math.ceil(500 / 80) = 7
       happiness: 5, // Math.ceil(500 / 120) = 5
       satietyTicksLeft: 500,
       hydrationTicksLeft: 500,
       happinessTicksLeft: 500,
       poopTicksLeft: 100,
+      poopCount: 0,
       sickByPoopTicksLeft: 1000,
       life: 500000,
       maxEnergy: 100,
@@ -90,7 +91,7 @@ describe("ItemSystem", () => {
         // Add first stack
         let result = ItemSystem.addItem(testInventory, apple, 3);
         expect(result.success).toBe(true);
-        
+
         // Add to existing stack
         result = ItemSystem.addItem(result.data!, apple, 2);
         expect(result.success).toBe(true);
@@ -102,7 +103,7 @@ describe("ItemSystem", () => {
         // Add max stack
         let result = ItemSystem.addItem(testInventory, apple, 99);
         expect(result.success).toBe(true);
-        
+
         // Try to add one more
         result = ItemSystem.addItem(result.data!, apple, 1);
         expect(result.success).toBe(false);
@@ -112,7 +113,7 @@ describe("ItemSystem", () => {
       it("should add non-stackable items to separate slots", () => {
         const result1 = ItemSystem.addItem(testInventory, ball, 1);
         expect(result1.success).toBe(true);
-        
+
         const result2 = ItemSystem.addItem(result1.data!, ball, 1);
         expect(result2.success).toBe(true);
         expect(result2.data!.slots).toHaveLength(2);
@@ -131,7 +132,7 @@ describe("ItemSystem", () => {
           if (!result.success) break;
           testInventory = result.data!;
         }
-        
+
         // Try to add one more
         const result = ItemSystem.addItem(testInventory, apple, 1);
         expect(result.success).toBe(false);
@@ -221,10 +222,10 @@ describe("ItemSystem", () => {
     describe("getAvailableSlots", () => {
       it("should return correct available slots", () => {
         expect(ItemSystem.getAvailableSlots(testInventory)).toBe(10);
-        
+
         testInventory = ItemSystem.addItem(testInventory, apple, 1).data!;
         expect(ItemSystem.getAvailableSlots(testInventory)).toBe(9);
-        
+
         testInventory = ItemSystem.addItem(testInventory, ball, 1).data!;
         expect(ItemSystem.getAvailableSlots(testInventory)).toBe(8);
       });
@@ -233,10 +234,10 @@ describe("ItemSystem", () => {
     describe("getInventoryValue", () => {
       it("should calculate correct total value", () => {
         expect(ItemSystem.getInventoryValue(testInventory)).toBe(0);
-        
+
         testInventory = ItemSystem.addItem(testInventory, apple, 2).data!; // 2 * 10 = 20
         testInventory = ItemSystem.addItem(testInventory, ball, 1).data!; // 1 * 25 = 25
-        
+
         expect(ItemSystem.getInventoryValue(testInventory)).toBe(45);
       });
     });
@@ -351,10 +352,11 @@ describe("ItemSystem", () => {
       });
 
       it("should apply cleaning effects", () => {
-        const dirtyPet = { ...testPet, poopTicksLeft: 0 }; // Pet has poop when timer is 0
+        const dirtyPet = { ...testPet, poopCount: 2 }; // Pet has uncleaned poop
         const soap = getItemById("soap")!;
         const result = ItemSystem.applyItemEffects(dirtyPet, soap);
         expect(result.success).toBe(true);
+        expect(result.data!.poopCount).toBe(0); // Poop count should be reset to 0
         expect(result.data!.poopTicksLeft).toBeGreaterThan(0); // Timer should be reset
         expect(result.data!.sickByPoopTicksLeft).toBe(17280);
       });
@@ -381,7 +383,7 @@ describe("ItemSystem", () => {
         expect(result.success).toBe(true);
         expect(result.data!.pet.happiness).toBe(35);
         expect(result.data!.pet.currentEnergy).toBe(40);
-        
+
         // Check durability reduced
         const ballSlot = ItemSystem.getInventoryItem(result.data!.inventory, "ball")!;
         const ballItem = ballSlot.item as DurabilityItem;
@@ -393,7 +395,7 @@ describe("ItemSystem", () => {
         const fragileInventory = ItemSystem.createInventory();
         const fragileBall = { ...ball, currentDurability: 1 };
         const inventoryWithBall = ItemSystem.addItem(fragileInventory, fragileBall, 1).data!;
-        
+
         const result = ItemSystem.useItem(inventoryWithBall, testPet, "ball");
         expect(result.success).toBe(true);
         expect(ItemSystem.hasItem(result.data!.inventory, "ball")).toBe(false);
@@ -444,7 +446,7 @@ describe("ItemSystem", () => {
       it("should create new durability item instances", () => {
         const result = ItemSystem.buyItem(testInventory, "ball", 1, 1.0);
         expect(result.success).toBe(true);
-        
+
         const ballSlot = ItemSystem.getInventoryItem(result.data!, "ball")!;
         const ballItem = ballSlot.item as DurabilityItem;
         expect(ballItem.currentDurability).toBe(20); // full durability
@@ -467,7 +469,7 @@ describe("ItemSystem", () => {
         // Add damaged ball
         const damagedBall = { ...ball, currentDurability: 10 }; // 50% durability
         testInventory = ItemSystem.addItem(testInventory, damagedBall, 1).data!;
-        
+
         const result = ItemSystem.sellItem(testInventory, "ball", 1, 0.5);
         expect(result.success).toBe(true);
         // 25 * 0.5 * 0.5 (durability) = 6.25, floored to 6
@@ -531,7 +533,7 @@ describe("ItemSystem", () => {
         const sorted = ItemSystem.sortInventory(testInventory, "value");
         expect(sorted.slots[0].item.value).toBe(25); // ball
         expect(sorted.slots[1].item.value).toBe(10); // apple
-        expect(sorted.slots[2].item.value).toBe(8);  // berry
+        expect(sorted.slots[2].item.value).toBe(8); // berry
       });
 
       it("should sort by rarity", () => {

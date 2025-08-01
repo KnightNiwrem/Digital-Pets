@@ -1,11 +1,6 @@
 // Tests for pet species data
 import { describe, it, expect } from "bun:test";
-import { 
-  getAllPetSpecies, 
-  getStarterPets, 
-  getPetsByRarity, 
-  getPetSpeciesById 
-} from "@/data/pets";
+import { getAllPetSpecies, getStarterPets, getPetsByRarity, getPetSpeciesById } from "@/data/pets";
 import type { PetRarity } from "@/types/Pet";
 
 describe("Pet Species Data", () => {
@@ -86,7 +81,8 @@ describe("Pet Species Data", () => {
       const legendaryPets = getPetsByRarity("legendary");
 
       const avgCommonHealth = commonPets.reduce((sum, pet) => sum + pet.baseStats.health, 0) / commonPets.length;
-      const avgLegendaryHealth = legendaryPets.reduce((sum, pet) => sum + pet.baseStats.health, 0) / legendaryPets.length;
+      const avgLegendaryHealth =
+        legendaryPets.reduce((sum, pet) => sum + pet.baseStats.health, 0) / legendaryPets.length;
 
       expect(avgLegendaryHealth).toBeGreaterThan(avgCommonHealth);
     });
@@ -154,11 +150,29 @@ describe("Pet Species Data", () => {
       const commonPets = getPetsByRarity("common");
       const epicPets = getPetsByRarity("epic");
 
-      const avgCommonGrowth = commonPets.reduce((sum, pet) => 
-        sum + (pet.growthRates.attack + pet.growthRates.defense + pet.growthRates.speed + pet.growthRates.health + pet.growthRates.energy), 0) / commonPets.length;
-      
-      const avgEpicGrowth = epicPets.reduce((sum, pet) => 
-        sum + (pet.growthRates.attack + pet.growthRates.defense + pet.growthRates.speed + pet.growthRates.health + pet.growthRates.energy), 0) / epicPets.length;
+      const avgCommonGrowth =
+        commonPets.reduce(
+          (sum, pet) =>
+            sum +
+            (pet.growthRates.attack +
+              pet.growthRates.defense +
+              pet.growthRates.speed +
+              pet.growthRates.health +
+              pet.growthRates.energy),
+          0
+        ) / commonPets.length;
+
+      const avgEpicGrowth =
+        epicPets.reduce(
+          (sum, pet) =>
+            sum +
+            (pet.growthRates.attack +
+              pet.growthRates.defense +
+              pet.growthRates.speed +
+              pet.growthRates.health +
+              pet.growthRates.energy),
+          0
+        ) / epicPets.length;
 
       expect(avgEpicGrowth).toBeGreaterThan(avgCommonGrowth);
     });
