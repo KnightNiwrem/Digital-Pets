@@ -73,7 +73,15 @@ const HOMETOWN: Location = {
     {
       destinationId: "forest_path",
       travelTime: 60, // 15 minutes
-      requirements: [{ type: "level", value: 2 }],
+      requirements: [{ type: "level", value: 1 }],
+    },
+    {
+      destinationId: "town_garden",
+      travelTime: 20, // 5 minutes - very close
+    },
+    {
+      destinationId: "peaceful_meadow",
+      travelTime: 40, // 10 minutes
     },
   ],
   sprite: "location_hometown",
@@ -154,7 +162,12 @@ const FOREST_PATH: Location = {
     {
       destinationId: "riverside",
       travelTime: 80, // 20 minutes
-      requirements: [{ type: "level", value: 5 }],
+      requirements: [{ type: "level", value: 3 }],
+    },
+    {
+      destinationId: "quiet_pond",
+      travelTime: 50, // 12.5 minutes
+      requirements: [{ type: "level", value: 1 }],
     },
     {
       destinationId: "mountain_village",
@@ -162,7 +175,7 @@ const FOREST_PATH: Location = {
       requirements: [{ type: "level", value: 8 }],
     },
   ],
-  unlockRequirements: [{ type: "level", value: 2 }],
+  unlockRequirements: [{ type: "level", value: 1 }],
   sprite: "location_forest",
   background: "bg_forest",
 };
@@ -253,7 +266,7 @@ const RIVERSIDE: Location = {
       travelTime: 80, // 20 minutes back
     },
   ],
-  unlockRequirements: [{ type: "level", value: 5 }],
+  unlockRequirements: [{ type: "level", value: 3 }],
   sprite: "location_riverside",
   background: "bg_riverside",
 };
@@ -909,10 +922,274 @@ const COASTAL_HARBOR: Location = {
   background: "bg_coastal_harbor",
 };
 
+// Town Garden - A peaceful garden area accessible from the start
+const TOWN_GARDEN: Location = {
+  id: "town_garden",
+  name: "Town Garden",
+  type: "forest" as LocationType,
+  description: "A well-tended garden on the outskirts of town, perfect for gathering flowers and herbs.",
+  activities: [
+    {
+      id: "flower_picking",
+      name: "Pick Flowers",
+      type: "foraging",
+      description: "Gather beautiful flowers and useful herbs in the peaceful garden",
+      energyCost: 8,
+      duration: 15, // 3.75 minutes - shorter than other activities
+      rewards: [
+        { type: "item", id: "herb", amount: 1, probability: 0.7 },
+        { type: "item", id: "honey", amount: 1, probability: 0.3 },
+        { type: "gold", amount: 3, probability: 0.4 },
+      ],
+    },
+    {
+      id: "butterfly_watching",
+      name: "Watch Butterflies",
+      type: "foraging",
+      description: "Observe butterflies and other garden creatures for a calming experience",
+      energyCost: 5,
+      duration: 20, // 5 minutes
+      rewards: [
+        { type: "experience", amount: 5, probability: 1.0 },
+        { type: "item", id: "honey", amount: 1, probability: 0.2 },
+      ],
+    },
+  ],
+  shops: [],
+  npcs: [
+    {
+      id: "gardener_marie",
+      name: "Marie the Gardener",
+      description: "A kind gardener who tends to the flowers and knows about plant care",
+      sprite: "npc_gardener",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Welcome to our town garden! The flowers are especially beautiful today.",
+          responses: [
+            {
+              id: "ask_about_plants",
+              text: "Can you teach me about plants?",
+              nextNodeId: "plant_knowledge",
+            },
+            {
+              id: "compliment_garden",
+              text: "Your garden is beautiful!",
+              nextNodeId: "thank_you",
+            },
+          ],
+        },
+        {
+          id: "plant_knowledge",
+          text: "Plants need love and care, just like pets! The herbs here can help keep your companion healthy.",
+        },
+        {
+          id: "thank_you",
+          text: "Thank you so much! I've spent years nurturing these plants. Feel free to pick some herbs for your pet.",
+        },
+      ],
+      quests: [],
+    },
+  ],
+  connections: [
+    {
+      destinationId: "hometown",
+      travelTime: 20, // 5 minutes back
+    },
+  ],
+  sprite: "location_garden",
+  background: "bg_garden",
+};
+
+// Peaceful Meadow - Open area for training and gathering
+const PEACEFUL_MEADOW: Location = {
+  id: "peaceful_meadow",
+  name: "Peaceful Meadow",
+  type: "forest" as LocationType,
+  description: "A wide open meadow with soft grass and wildflowers, perfect for play and light training.",
+  activities: [
+    {
+      id: "meadow_playing",
+      name: "Play in Meadow",
+      type: "training",
+      description: "Let your pet run freely and play in the open meadow",
+      energyCost: 12,
+      duration: 25, // 6.25 minutes
+      rewards: [
+        { type: "experience", amount: 8, probability: 1.0 },
+        { type: "item", id: "mushroom", amount: 1, probability: 0.3 },
+      ],
+    },
+    {
+      id: "wildflower_gathering",
+      name: "Gather Wildflowers",
+      type: "foraging",
+      description: "Collect colorful wildflowers scattered across the meadow",
+      energyCost: 10,
+      duration: 18, // 4.5 minutes
+      rewards: [
+        { type: "item", id: "herb", amount: 1, probability: 0.5 },
+        { type: "item", id: "honey", amount: 1, probability: 0.4 },
+        { type: "gold", amount: 6, probability: 0.3 },
+      ],
+    },
+    {
+      id: "gentle_training",
+      name: "Gentle Training",
+      type: "training",
+      description: "Practice basic skills in the safe, open environment",
+      energyCost: 15,
+      duration: 40, // 10 minutes
+      rewards: [
+        { type: "experience", amount: 12, probability: 1.0 },
+        { type: "gold", amount: 5, probability: 0.2 },
+      ],
+    },
+  ],
+  shops: [],
+  npcs: [
+    {
+      id: "wandering_musician",
+      name: "Luna the Wandering Musician",
+      description: "A traveling musician who plays soothing melodies in the meadow",
+      sprite: "npc_musician",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "What a lovely day for music! Your pet seems to enjoy my melodies.",
+          responses: [
+            {
+              id: "compliment_music",
+              text: "Your music is beautiful!",
+              nextNodeId: "music_appreciation",
+            },
+            {
+              id: "ask_about_travel",
+              text: "Do you travel often?",
+              nextNodeId: "travel_stories",
+            },
+          ],
+        },
+        {
+          id: "music_appreciation",
+          text: "Music soothes both pets and their companions. I hope it brings you peace on your journey.",
+        },
+        {
+          id: "travel_stories",
+          text: "I wander from place to place, sharing music with all who'll listen. Each location has its own special rhythm.",
+        },
+      ],
+      quests: [],
+    },
+  ],
+  connections: [
+    {
+      destinationId: "hometown",
+      travelTime: 40, // 10 minutes back
+    },
+  ],
+  sprite: "location_meadow",
+  background: "bg_meadow",
+};
+
+// Quiet Pond - Basic fishing without equipment requirements
+const QUIET_POND: Location = {
+  id: "quiet_pond",
+  name: "Quiet Pond",
+  type: "beach" as LocationType,
+  description: "A small, peaceful pond where you can try simple fishing and enjoy the tranquil water.",
+  activities: [
+    {
+      id: "simple_fishing",
+      name: "Simple Fishing",
+      type: "fishing",
+      description: "Try catching fish with basic techniques in the calm pond water",
+      energyCost: 20,
+      duration: 35, // 8.75 minutes
+      rewards: [
+        { type: "item", id: "fish", amount: 1, probability: 0.6 },
+        { type: "experience", amount: 8, probability: 1.0 },
+        { type: "gold", amount: 8, probability: 0.3 },
+      ],
+      // No fishing rod requirement - can fish with hands/simple methods
+    },
+    {
+      id: "pond_meditation",
+      name: "Peaceful Meditation",
+      type: "foraging",
+      description: "Sit by the pond and meditate with your pet",
+      energyCost: -5, // restores energy
+      duration: 25, // 6.25 minutes
+      rewards: [{ type: "experience", amount: 6, probability: 1.0 }],
+    },
+    {
+      id: "water_plant_gathering",
+      name: "Gather Water Plants",
+      type: "foraging",
+      description: "Collect useful plants that grow near the water's edge",
+      energyCost: 12,
+      duration: 22, // 5.5 minutes
+      rewards: [
+        { type: "item", id: "herb", amount: 1, probability: 0.6 },
+        { type: "item", id: "kelp_supplement", amount: 1, probability: 0.2 },
+        { type: "gold", amount: 4, probability: 0.4 },
+      ],
+    },
+  ],
+  shops: [],
+  npcs: [
+    {
+      id: "old_fisherman_tom",
+      name: "Old Tom",
+      description: "An elderly local who's been fishing this pond for decades",
+      sprite: "npc_old_fisherman",
+      dialogue: [
+        {
+          id: "greeting",
+          text: "Ah, another young soul drawn to the water! This pond's been my peaceful refuge for forty years.",
+          responses: [
+            {
+              id: "ask_fishing_tips",
+              text: "Can you teach me to fish?",
+              nextNodeId: "fishing_wisdom",
+            },
+            {
+              id: "ask_about_pond",
+              text: "Tell me about this pond.",
+              nextNodeId: "pond_history",
+            },
+          ],
+        },
+        {
+          id: "fishing_wisdom",
+          text: "Patience, young one. The fish can sense your intentions. Be calm, be quiet, and they'll come to you.",
+        },
+        {
+          id: "pond_history",
+          text: "This pond has always been special. The water's clear and sweet, and the fish here are gentle creatures, not easily frightened.",
+        },
+      ],
+      quests: [],
+    },
+  ],
+  connections: [
+    {
+      destinationId: "forest_path",
+      travelTime: 50, // 12.5 minutes back
+    },
+  ],
+  unlockRequirements: [{ type: "level", value: 1 }],
+  sprite: "location_pond",
+  background: "bg_pond",
+};
+
 // Export all locations
 export const LOCATIONS: Location[] = [
   HOMETOWN,
+  TOWN_GARDEN,
+  PEACEFUL_MEADOW,
   FOREST_PATH,
+  QUIET_POND,
   RIVERSIDE,
   MOUNTAIN_VILLAGE,
   ANCIENT_RUINS,

@@ -15,9 +15,15 @@ export class WorldSystem {
   static initializeWorldState(): WorldState {
     const startingLocation = getStartingLocation();
 
+    // Find all locations that have no unlock requirements (should be available from start)
+    const startingLocations = LOCATIONS.filter(
+      location =>
+        location.id === startingLocation.id || !location.unlockRequirements || location.unlockRequirements.length === 0
+    ).map(location => location.id);
+
     return {
       currentLocationId: startingLocation.id,
-      unlockedLocations: [startingLocation.id],
+      unlockedLocations: startingLocations,
       visitedLocations: [startingLocation.id],
       activeActivities: [],
     };
@@ -438,6 +444,56 @@ export class WorldSystem {
     return {
       success: true,
       data: { worldState: currentWorldState, rewards: allRewards },
+    };
+  }
+
+  /**
+   * Check for newly unlocked locations based on current pet level and completed quests
+   */
+  static checkForNewUnlocks(
+    worldState: WorldState,
+    pet: Pet,
+    completedQuests: string[] = []
+  ): Result<{ worldState: WorldState; newlyUnlocked: Location[] }> {
+    const currentlyUnlocked = new Set(worldState.unlockedLocations);
+    const newlyUnlocked: Location[] = [];
+
+    for (const location of LOCATIONS) {
+      // Skip if already unlocked
+      if (currentlyUnlocked.has(location.id)) continue;
+
+      // Check if location meets unlock requirements
+      if (location.unlockRequirements) {
+        const meetsRequirements = location.unlockRequirements.every(req => {
+          switch (req.type) {
+            case "level":
+              return pet.growthStage >= (req.value as number);
+            case "quest_completed":
+              return completedQuests.includes(req.value as string);
+            default:
+              return false;
+          }
+        });
+
+        if (meetsRequirements) {
+          newlyUnlocked.push(location);
+        }
+      }
+    }
+
+    if (newlyUnlocked.length === 0) {
+      return { success: true, data: { worldState, newlyUnlocked: [] } };
+    }
+
+    const updatedWorldState: WorldState = {
+      ...worldState,
+      unlockedLocations: [...worldState.unlockedLocations, ...newlyUnlocked.map(loc => loc.id)],
+    };
+
+    return {
+      success: true,
+      data: { worldState: updatedWorldState, newlyUnlocked },
+      message: `New locations unlocked: ${newlyUnlocked.map(loc => loc.name).join(", ")}!`,
     };
   }
 

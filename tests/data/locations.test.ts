@@ -185,15 +185,16 @@ describe("Location Data Validation", () => {
       });
     });
 
-    it("should return available destinations from forest path including mountain village", () => {
+    it("should return available destinations from forest path including mountain village and quiet pond", () => {
       const destinations = getAvailableDestinations("forest_path");
       expect(destinations).toBeDefined();
-      expect(destinations.length).toBe(3);
+      expect(destinations.length).toBe(4); // hometown, riverside, mountain_village, quiet_pond
 
       const destinationIds = destinations.map(dest => dest.id);
       expect(destinationIds).toContain("hometown");
       expect(destinationIds).toContain("riverside");
       expect(destinationIds).toContain("mountain_village");
+      expect(destinationIds).toContain("quiet_pond");
     });
 
     it("should return empty array for invalid location", () => {
