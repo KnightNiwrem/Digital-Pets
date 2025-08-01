@@ -74,7 +74,7 @@ export function PetCarePanel({
   const canDrink = pet.hydration < 100 && !PetValidator.validateCareAction(pet, "drink") && drinkItems.length > 0;
   const canPlay = pet.happiness < 100 && !PetValidator.validateCareAction(pet, "play", 10) && happinessItems.length > 0;
   const canClean =
-    pet.poopTicksLeft <= 0 &&
+    pet.poopCount > 0 &&
     pet.state !== "exploring" &&
     pet.state !== "sleeping" &&
     pet.state !== "travelling" &&
@@ -276,7 +276,7 @@ export function PetCarePanel({
                   <Button disabled variant="outline" size="sm" className="w-full">
                     {cleaningItems.length === 0
                       ? "No Cleaning Items"
-                      : pet.poopTicksLeft > 0
+                      : pet.poopCount === 0
                         ? "No Poop to Clean"
                         : "Cannot Clean"}
                   </Button>
