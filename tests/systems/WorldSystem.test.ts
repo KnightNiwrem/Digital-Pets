@@ -101,8 +101,11 @@ describe("WorldSystem", () => {
     it("should get available locations", () => {
       const locations = WorldSystem.getAvailableLocations(worldState);
 
-      expect(locations).toHaveLength(1);
-      expect(locations[0].id).toBe("hometown");
+      // Should now have hometown + town_garden + peaceful_meadow (no unlock requirements)
+      expect(locations).toHaveLength(3);
+      expect(locations.map(l => l.id)).toContain("hometown");
+      expect(locations.map(l => l.id)).toContain("town_garden");
+      expect(locations.map(l => l.id)).toContain("peaceful_meadow");
     });
   });
 
@@ -140,11 +143,11 @@ describe("WorldSystem", () => {
     });
 
     it("should fail to start travel when pet level too low", () => {
-      const lowLevelPet = { ...mockPet, growthStage: 1 }; // Need level 2 for forest
+      const lowLevelPet = { ...mockPet, growthStage: 0 }; // Need level 1 for forest path now
       const result = WorldSystem.startTravel(worldState, lowLevelPet, "forest_path");
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Pet must be at least level 2 to travel there");
+      expect(result.error).toBe("Pet must be at least level 1 to travel there");
     });
 
     it("should fail to start travel when pet has insufficient energy", () => {
@@ -453,24 +456,32 @@ describe("WorldSystem", () => {
   });
 
   describe("Available Destinations", () => {
-    it("should return empty array for low level pet", () => {
-      const lowLevelPet = { ...mockPet, growthStage: 1 };
+    it("should return available destinations for low level pet", () => {
+      const lowLevelPet = { ...mockPet, growthStage: 0 };
       const result = WorldSystem.getAvailableDestinations(worldState, lowLevelPet);
 
       expect(result.success).toBe(true);
       if (result.success && result.data) {
-        expect(result.data).toHaveLength(0);
+        // Level 0 pet can still go to town_garden and peaceful_meadow (no level requirement)
+        expect(result.data).toHaveLength(2);
+        const destinationIds = result.data.map(dest => dest.id);
+        expect(destinationIds).toContain("town_garden");
+        expect(destinationIds).toContain("peaceful_meadow");
       }
     });
 
-    it("should return forest path for high level pet", () => {
-      const highLevelPet = { ...mockPet, growthStage: 5 };
-      const result = WorldSystem.getAvailableDestinations(worldState, highLevelPet);
+    it("should return forest path for level 1+ pet", () => {
+      const levelOnePet = { ...mockPet, growthStage: 1 };
+      const result = WorldSystem.getAvailableDestinations(worldState, levelOnePet);
 
       expect(result.success).toBe(true);
       if (result.success && result.data) {
-        expect(result.data).toHaveLength(1);
-        expect(result.data[0].id).toBe("forest_path");
+        // Level 1 pet can access forest path + town_garden + peaceful_meadow
+        expect(result.data).toHaveLength(3);
+        const destinationIds = result.data.map(dest => dest.id);
+        expect(destinationIds).toContain("forest_path");
+        expect(destinationIds).toContain("town_garden");
+        expect(destinationIds).toContain("peaceful_meadow");
       }
     });
   });
@@ -517,6 +528,46 @@ describe("WorldSystem", () => {
 
       expect(isAvailable).toBe(true);
       expect(isNotAvailable).toBe(false);
+    });
+  });
+
+  describe("Location Unlocking", () => {
+    it("should unlock new locations when pet levels up", () => {
+      // Start with a level 0 pet
+      const level0Pet = { ...mockPet, growthStage: 0 };
+      
+      // Check initial unlocks - should not unlock level 1 locations yet
+      let result = WorldSystem.checkForNewUnlocks(worldState, level0Pet, []);
+      expect(result.success).toBe(true);
+      if (result.success && result.data) {
+        expect(result.data.newlyUnlocked).toHaveLength(0);
+      }
+
+      // Level up to 1
+      const level1Pet = { ...mockPet, growthStage: 1 };
+      result = WorldSystem.checkForNewUnlocks(worldState, level1Pet, []);
+      expect(result.success).toBe(true);
+      if (result.success && result.data) {
+        expect(result.data.newlyUnlocked).toHaveLength(2); // forest_path and quiet_pond
+        const unlockedIds = result.data.newlyUnlocked.map(loc => loc.id);
+        expect(unlockedIds).toContain("forest_path");
+        expect(unlockedIds).toContain("quiet_pond");
+      }
+    });
+
+    it("should not unlock already unlocked locations", () => {
+      // Pet is already level 1 and locations are already unlocked
+      const level1Pet = { ...mockPet, growthStage: 1 };
+      const updatedWorldState: WorldState = {
+        ...worldState,
+        unlockedLocations: ["hometown", "town_garden", "peaceful_meadow", "forest_path", "quiet_pond"],
+      };
+      
+      const result = WorldSystem.checkForNewUnlocks(updatedWorldState, level1Pet, []);
+      expect(result.success).toBe(true);
+      if (result.success && result.data) {
+        expect(result.data.newlyUnlocked).toHaveLength(0);
+      }
     });
   });
 });
