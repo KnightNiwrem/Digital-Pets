@@ -244,20 +244,62 @@ export function useGameState(): UseGameStateReturn {
   }, [gameState]);
 
   // Pet care actions
-  const feedPet = useCallback(
-    () => performPetAction(pet => PetSystem.feedPet(pet, 25), "feed pet"),
-    [performPetAction]
-  );
+  // Updated to emit quest progress events for tutorial care objectives
+  const feedPet = useCallback(async (): Promise<Result<void>> => {
+    if (!gameState?.currentPet) {
+      return { success: false, error: "No active pet" };
+    }
+    const result = PetSystem.feedPet(gameState.currentPet, 25);
+    if (!result.success) return { success: false, error: result.error };
 
-  const giveDrink = useCallback(
-    () => performPetAction(pet => PetSystem.giveDrink(pet, 25), "give drink"),
-    [performPetAction]
-  );
+    // State update
+    setGameState(prev => (prev ? { ...prev } : null));
 
-  const playWithPet = useCallback(
-    () => performPetAction(pet => PetSystem.playWithPet(pet, 20), "play with pet"),
-    [performPetAction]
-  );
+    // Process quest progress for care action: feed
+    if (gameState?.questLog) {
+      QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, gameState);
+      setGameState(prev => (prev ? { ...prev } : null));
+    }
+
+    await triggerAutosave("feed pet", gameState);
+    return { success: true };
+  }, [gameState, triggerAutosave]);
+
+  const giveDrink = useCallback(async (): Promise<Result<void>> => {
+    if (!gameState?.currentPet) {
+      return { success: false, error: "No active pet" };
+    }
+    const result = PetSystem.giveDrink(gameState.currentPet, 25);
+    if (!result.success) return { success: false, error: result.error };
+
+    setGameState(prev => (prev ? { ...prev } : null));
+
+    if (gameState?.questLog) {
+      QuestSystem.processGameAction("pet_care", { action: "drink" }, QUESTS, gameState);
+      setGameState(prev => (prev ? { ...prev } : null));
+    }
+
+    await triggerAutosave("give drink", gameState);
+    return { success: true };
+  }, [gameState, triggerAutosave]);
+
+  const playWithPet = useCallback(async (): Promise<Result<void>> => {
+    if (!gameState?.currentPet) {
+      return { success: false, error: "No active pet" };
+    }
+    const result = PetSystem.playWithPet(gameState.currentPet, 20);
+    if (!result.success) return { success: false, error: result.error };
+
+    setGameState(prev => (prev ? { ...prev } : null));
+
+    if (gameState?.questLog) {
+      QuestSystem.processGameAction("pet_care", { action: "play" }, QUESTS, gameState);
+      setGameState(prev => (prev ? { ...prev } : null));
+    }
+
+    await triggerAutosave("play with pet", gameState);
+    return { success: true };
+  }, [gameState, triggerAutosave]);
 
   const cleanPoop = useCallback(() => performPetAction(PetSystem.cleanPoop, "clean poop"), [performPetAction]);
 
@@ -293,7 +335,7 @@ export function useGameState(): UseGameStateReturn {
         // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          const updatedGameState = {
+          const updatedGameState: GameState = {
             ...gameState,
             inventory: result.data.inventory,
             currentPet: result.data.pet,
@@ -305,7 +347,13 @@ export function useGameState(): UseGameStateReturn {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          await triggerAutosave(`feed pet with ${itemId}`);
+          // Emit quest progress for feeding via item if applicable
+          if (updatedGameState.questLog) {
+            QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, updatedGameState);
+            // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
+          }
+
+          await triggerAutosave(`feed pet with ${itemId}`, updatedGameState);
           return { success: true };
         }
         return { success: false, error: result.error };
@@ -326,19 +374,23 @@ export function useGameState(): UseGameStateReturn {
         // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          const updatedGameState = {
+          const updatedGameState: GameState = {
             ...gameState,
             inventory: result.data.inventory,
             currentPet: result.data.pet,
           };
 
-          // Update both React state and GameLoop internal state
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          await triggerAutosave(`give drink with ${itemId}`);
+          if (updatedGameState.questLog) {
+            QuestSystem.processGameAction("pet_care", { action: "drink" }, QUESTS, updatedGameState);
+            // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
+          }
+
+          await triggerAutosave(`give drink with ${itemId}`, updatedGameState);
           return { success: true };
         }
         return { success: false, error: result.error };
@@ -359,19 +411,23 @@ export function useGameState(): UseGameStateReturn {
         // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          const updatedGameState = {
+          const updatedGameState: GameState = {
             ...gameState,
             inventory: result.data.inventory,
             currentPet: result.data.pet,
           };
 
-          // Update both React state and GameLoop internal state
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          await triggerAutosave(`play with ${itemId}`);
+          if (updatedGameState.questLog) {
+            QuestSystem.processGameAction("pet_care", { action: "play" }, QUESTS, updatedGameState);
+            // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
+          }
+
+          await triggerAutosave(`play with ${itemId}`, updatedGameState);
           return { success: true };
         }
         return { success: false, error: result.error };
@@ -408,7 +464,7 @@ export function useGameState(): UseGameStateReturn {
               gameLoopRef.current.updateState(updatedGameState);
             }
 
-            await triggerAutosave(`clean with ${itemId}`);
+            await triggerAutosave(`clean with ${itemId}`, updatedGameState);
             return { success: true };
           }
         }
@@ -442,7 +498,7 @@ export function useGameState(): UseGameStateReturn {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          await triggerAutosave(`treat with ${itemId}`);
+          await triggerAutosave(`treat with ${itemId}`, updatedGameState);
           return { success: true };
         }
         return { success: false, error: result.error };
