@@ -110,12 +110,14 @@ export function useGameState(): UseGameStateReturn {
   }, []);
 
   // Enhanced autosave utility for user actions
+  // Accepts an explicit state to avoid stale closure timing issues
   const triggerAutosave = useCallback(
-    async (actionName: string): Promise<void> => {
-      if (!gameState) return;
+    async (actionName: string, stateOverride?: GameState): Promise<void> => {
+      const stateToSave = stateOverride ?? gameState;
+      if (!stateToSave) return;
 
       try {
-        const saveResult = GameStorage.saveGame(gameState);
+        const saveResult = GameStorage.saveGame(stateToSave);
         if (!saveResult.success) {
           console.warn(`${actionName} succeeded but autosave failed:`, saveResult.error);
         } else {
@@ -452,6 +454,7 @@ export function useGameState(): UseGameStateReturn {
   );
 
   // Item action wrapper
+  // CRITICAL FIX: Build explicit newState, update GameLoop immediately, and autosave with that state
   const performItemAction = useCallback(
     async (
       action: (inventory: Inventory, pet: Pet) => Result<{ inventory?: Inventory; pet?: Pet }>,
@@ -465,23 +468,23 @@ export function useGameState(): UseGameStateReturn {
         const result = action(gameState.inventory, gameState.currentPet);
 
         if (result.success) {
-          // Update the game state with new inventory and pet data
-          setGameState(prev => {
-            if (!prev) return null;
-            const updates: Partial<GameState> = { ...prev };
+          // Build an explicit new state snapshot to avoid timing/race conditions
+          const newState: GameState = {
+            ...(gameState as GameState),
+            inventory: result.data?.inventory ?? gameState.inventory,
+            currentPet: result.data?.pet ?? gameState.currentPet,
+          };
 
-            if (result.data?.inventory) {
-              updates.inventory = result.data.inventory;
-            }
-            if (result.data?.pet) {
-              updates.currentPet = result.data.pet;
-            }
+          // Update React state
+          setGameState(newState);
 
-            return updates as GameState;
-          });
+          // Keep GameLoop internal state in sync immediately
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(newState);
+          }
 
-          // Trigger autosave after inventory/money update
-          await triggerAutosave(actionName);
+          // Trigger autosave using the explicit updated state to avoid stale closure
+          await triggerAutosave(actionName, newState);
 
           return { success: true };
         } else {
