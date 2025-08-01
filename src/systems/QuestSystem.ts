@@ -440,6 +440,12 @@ export class QuestSystem {
         }
         break;
 
+      case "sell_item":
+        if (actionType === "item_sold" && actionData.itemId === objective.itemId) {
+          return Number(actionData.amount) || 1;
+        }
+        break;
+
       case "visit_location":
         if (actionType === "location_visited" && actionData.locationId === objective.locationId) {
           return 1;

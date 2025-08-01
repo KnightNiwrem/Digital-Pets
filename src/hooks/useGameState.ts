@@ -563,16 +563,45 @@ export function useGameState(): UseGameStateReturn {
   );
 
   const sellItem = useCallback(
-    (itemId: string, quantity: number) =>
-      performItemAction(inventory => {
-        const result = ItemSystem.sellItem(inventory, itemId, quantity, 0.5);
-        return {
-          success: result.success,
-          error: result.error,
-          data: result.success ? { inventory: result.data } : undefined,
-        };
-      }, "sell item"),
-    [performItemAction]
+    async (itemId: string, quantity: number): Promise<Result<void>> => {
+      if (!gameState?.inventory) {
+        return { success: false, error: "No inventory available" };
+      }
+
+      try {
+        const result = ItemSystem.sellItem(gameState.inventory, itemId, quantity, 0.5);
+        if (result.success && result.data) {
+          const newState: GameState = {
+            ...gameState,
+            inventory: result.data,
+          };
+
+          // Update React state
+          setGameState(newState);
+
+          // Keep GameLoop internal state in sync immediately
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(newState);
+          }
+
+          // Process quest progress for item_sold action
+          if (newState.questLog) {
+            QuestSystem.processGameAction("item_sold", { itemId, amount: quantity }, QUESTS, newState);
+          }
+
+          // Trigger autosave using the explicit updated state to avoid stale closure
+          await triggerAutosave("sell item", newState);
+
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error in sell item";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+    [gameState, triggerAutosave]
   );
 
   const buyItem = useCallback(

@@ -573,10 +573,10 @@ const MOUNTAIN_MINING_TUTORIAL: Quest = {
     },
     {
       id: "sell_ore",
-      type: "collect_item",
+      type: "sell_item",
       description: "Sell 3 iron ore back to Thor to complete the lesson",
       itemId: "iron_ore",
-      targetAmount: -3, // negative means selling/losing items
+      targetAmount: 3, // positive amount for items to sell
       currentAmount: 0,
       completed: false,
     },
