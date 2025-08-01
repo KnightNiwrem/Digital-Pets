@@ -1005,7 +1005,7 @@ describe("QuestSystem", () => {
     });
   });
 
-  describe("Negative targetAmount handling", () => {
+  describe("Item selling objective handling", () => {
     let gameState: GameState;
     let miningTutorialQuest: Quest;
 
@@ -1045,18 +1045,19 @@ describe("QuestSystem", () => {
       expect(objective!.completed).toBe(true);
     });
 
-    it("should handle negative targetAmount correctly (selling items)", () => {
-      // Test the sell_ore objective - negative target
+    it("should handle sell_item objective with positive targetAmount", () => {
+      // Test the sell_ore objective - now uses positive target with sell_item type
       const sellOreObjective = miningTutorialQuest.objectives[2];
-      expect(sellOreObjective.targetAmount).toBe(-3);
+      expect(sellOreObjective.type).toBe("sell_item");
+      expect(sellOreObjective.targetAmount).toBe(3); // Now positive
       expect(sellOreObjective.currentAmount).toBe(0);
 
-      // Simulate selling items incrementally
-      // First sale: -1 item
+      // Simulate selling items incrementally using positive amounts
+      // First sale: 1 item
       let result = QuestSystem.updateObjectiveProgress(
         miningTutorialQuest.id,
         sellOreObjective.id,
-        -1, // amount is negative when selling
+        1, // amount is positive for sell_item objectives
         gameState
       );
 
@@ -1065,41 +1066,56 @@ describe("QuestSystem", () => {
       let questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       let objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
 
-      expect(objective!.currentAmount).toBe(-1);
+      expect(objective!.currentAmount).toBe(1);
       expect(objective!.completed).toBe(false); // Should not be complete yet
 
-      // Second sale: -1 item (total -2)
-      result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, sellOreObjective.id, -1, gameState);
+      // Second sale: 1 item (total 2)
+      result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, sellOreObjective.id, 1, gameState);
 
       expect(result.success).toBe(true);
 
       questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
 
-      expect(objective!.currentAmount).toBe(-2);
+      expect(objective!.currentAmount).toBe(2);
       expect(objective!.completed).toBe(false); // Still not complete
 
-      // Third sale: -1 item (total -3, should complete)
-      result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, sellOreObjective.id, -1, gameState);
+      // Third sale: 1 item (total 3, should complete)
+      result = QuestSystem.updateObjectiveProgress(miningTutorialQuest.id, sellOreObjective.id, 1, gameState);
 
       expect(result.success).toBe(true);
 
       questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
 
-      expect(objective!.currentAmount).toBe(-3);
+      expect(objective!.currentAmount).toBe(3);
       expect(objective!.completed).toBe(true); // Now should be complete
     });
 
-    it("should not allow progress beyond negative target", () => {
+    it("should handle item_sold action events for sell_item objectives", () => {
+      // Test that item_sold actions trigger progress for sell_item objectives
+      const events = QuestSystem.processGameAction("item_sold", { itemId: "iron_ore", amount: 2 }, QUESTS, gameState);
+
+      expect(events).toHaveLength(1);
+      expect(events[0].type).toBe("objective_completed");
+      expect(events[0].questId).toBe(miningTutorialQuest.id);
+
+      // Check objective progress was updated
+      const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      const sellObjective = questProgress!.objectives.find(obj => obj.id === "sell_ore");
+      expect(sellObjective?.currentAmount).toBe(2);
+      expect(sellObjective?.completed).toBe(false); // Not complete yet (needs 3 total)
+    });
+
+    it("should not allow progress beyond positive target for sell_item objectives", () => {
       // Test that selling more than required doesn't go beyond target
       const sellOreObjective = miningTutorialQuest.objectives[2];
 
-      // Try to sell 5 items at once (more than the target of -3)
+      // Try to sell 5 items at once (more than the target of 3)
       const result = QuestSystem.updateObjectiveProgress(
         miningTutorialQuest.id,
         sellOreObjective.id,
-        -5, // selling 5 items
+        5, // selling 5 items
         gameState
       );
 
@@ -1108,9 +1124,60 @@ describe("QuestSystem", () => {
       const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       const objective = questProgress!.objectives.find(obj => obj.id === sellOreObjective.id);
 
-      // Should be clamped to the target (-3), not go to -5
-      expect(objective!.currentAmount).toBe(-3);
+      // Should be clamped to the target (3), not go to 5
+      expect(objective!.currentAmount).toBe(3);
       expect(objective!.completed).toBe(true);
+    });
+
+    it("should complete sell_item quest through item_sold events", () => {
+      // Complete the first two objectives to test the sell objective independently
+      const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      expect(questProgress).toBeDefined();
+      
+      // Complete buy pickaxe objective
+      questProgress!.objectives[0].currentAmount = 1;
+      questProgress!.objectives[0].completed = true;
+      
+      // Complete mining objective
+      questProgress!.objectives[1].currentAmount = 5;
+      questProgress!.objectives[1].completed = true;
+
+      // Now test the sell objective through item_sold events
+      expect(QuestSystem.isQuestComplete(miningTutorialQuest.id, gameState)).toBe(false);
+
+      // Sell 1 iron ore
+      let events = QuestSystem.processGameAction("item_sold", { itemId: "iron_ore", amount: 1 }, QUESTS, gameState);
+      expect(events).toHaveLength(1);
+      expect(events[0].type).toBe("objective_completed");
+
+      // Sell 2 more iron ore to complete the objective
+      events = QuestSystem.processGameAction("item_sold", { itemId: "iron_ore", amount: 2 }, QUESTS, gameState);
+      expect(events).toHaveLength(2); // objective_completed and quest_completed
+
+      const objectiveEvent = events.find(e => e.type === "objective_completed");
+      const questEvent = events.find(e => e.type === "quest_completed");
+      
+      expect(objectiveEvent).toBeDefined();
+      expect(questEvent).toBeDefined();
+      expect(questEvent!.questId).toBe(miningTutorialQuest.id);
+
+      // The quest should be completed and moved to completed quests
+      expect(gameState.questLog!.completedQuests).toContain(miningTutorialQuest.id);
+      expect(gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id)).toBeUndefined();
+    });
+
+    it("should ignore item_sold events for wrong item types", () => {
+      // Try selling a different item
+      const events = QuestSystem.processGameAction("item_sold", { itemId: "apple", amount: 5 }, QUESTS, gameState);
+
+      // Should not generate any events since apple is not the target item
+      expect(events).toHaveLength(0);
+
+      // Check that the sell objective has not progressed
+      const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
+      const sellObjective = questProgress!.objectives.find(obj => obj.id === "sell_ore");
+      expect(sellObjective!.currentAmount).toBe(0);
+      expect(sellObjective!.completed).toBe(false);
     });
 
     it("should not allow progress beyond positive target", () => {

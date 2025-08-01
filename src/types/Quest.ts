@@ -7,6 +7,7 @@ export type QuestStatus = "not_started" | "available" | "active" | "completed" |
 export type ObjectiveType =
   | "collect_item"
   | "deliver_item"
+  | "sell_item"
   | "visit_location"
   | "defeat_pet"
   | "care_action"
