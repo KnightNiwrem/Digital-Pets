@@ -120,7 +120,6 @@ function createMockGameState(): GameState {
       showNotifications: true,
       animationSpeed: "normal",
       theme: "auto",
-      autoSave: true,
       autoSaveInterval: 4,
       offlineProgressEnabled: true,
       reducedMotion: false,

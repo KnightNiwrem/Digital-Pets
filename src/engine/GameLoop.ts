@@ -157,8 +157,9 @@ export class GameLoop {
       this.gameState.metrics.totalTicks++;
       this.gameState.metrics.ticksThisSession++;
 
-      // Auto-save if needed
-      if (this.shouldAutoSave()) {
+      // Auto-save if on interval (autosave is always enabled)
+      const interval = this.gameState.settings.autoSaveInterval;
+      if (this.tickNumber % interval === 0) {
         const saveResult = GameStorage.saveGame(this.gameState);
         if (saveResult.success) {
           stateChanges.push("auto_saved");
@@ -373,16 +374,6 @@ export class GameLoop {
 
     // Save the updated state
     GameStorage.saveGame(this.gameState);
-  }
-
-  /**
-   * Check if auto-save should happen this tick
-   */
-  private shouldAutoSave(): boolean {
-    if (!this.gameState?.settings.autoSave) return false;
-
-    const interval = this.gameState.settings.autoSaveInterval;
-    return this.tickNumber % interval === 0;
   }
 
   /**

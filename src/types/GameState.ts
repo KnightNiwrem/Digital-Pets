@@ -18,7 +18,6 @@ export interface GameSettings {
   theme: "light" | "dark" | "auto";
 
   // Gameplay
-  autoSave: boolean;
   autoSaveInterval: number; // in ticks
   offlineProgressEnabled: boolean;
 
@@ -195,7 +194,6 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   showNotifications: true,
   animationSpeed: "normal",
   theme: "auto",
-  autoSave: true,
   autoSaveInterval: 4,
   offlineProgressEnabled: true,
   reducedMotion: false,
