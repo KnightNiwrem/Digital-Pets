@@ -65,6 +65,9 @@ export class GameStateFactory {
         totals: { ...DEFAULT_ACTIVITY_STATS.totals },
       },
 
+      // Initialize empty activity log
+      activityLog: [],
+
       gameTime: {
         totalTicks: 0,
         lastTickTime: now,
@@ -245,6 +248,7 @@ export class GameStateFactory {
       "settings",
       "metrics",
       "activityStats",
+      "activityLog",
       "gameTime",
       "tutorial",
       "achievements",

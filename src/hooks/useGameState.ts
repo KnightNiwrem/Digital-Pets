@@ -778,10 +778,8 @@ export function useGameState(): UseGameStateReturn {
 
       try {
         const result = WorldSystem.startActivity(
-          gameState.world,
-          gameState.currentPet,
-          activityId,
-          gameState.inventory
+          gameState,
+          activityId
         );
         if (result.success && result.data) {
           setGameState(prev => {
@@ -819,7 +817,7 @@ export function useGameState(): UseGameStateReturn {
     }
 
     try {
-      const result = WorldSystem.cancelActivity(gameState.world, gameState.currentPet.id);
+      const result = WorldSystem.cancelActivity(gameState, gameState.currentPet.id);
       if (result.success && result.data) {
         setGameState(prev => {
           if (!prev) return null;

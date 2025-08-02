@@ -138,6 +138,25 @@ export interface CompletedActivityInfo {
   rewards: ActivityReward[];
 }
 
+// Activity Log System Types
+export interface ActivityLogEntry {
+  id: string; // unique identifier for each log entry
+  activityId: string; // reference to the activity definition
+  locationId: string; // where the activity was performed
+  status: "started" | "cancelled" | "completed"; // current state
+  energyCost: number; // energy consumed when starting
+  startTime: number; // timestamp when activity began
+  endTime?: number; // timestamp when activity finished (optional)
+  results: ActivityLogResult[]; // array of rewards/outcomes
+}
+
+export interface ActivityLogResult {
+  type: "item" | "gold" | "experience" | "none";
+  itemId?: string; // for item rewards
+  amount?: number; // quantity received
+  description: string; // human-readable description
+}
+
 // World constants
 export const WORLD_CONSTANTS = {
   STARTING_LOCATION: "hometown",

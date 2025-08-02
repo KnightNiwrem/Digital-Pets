@@ -185,6 +185,7 @@ function createMockGameState(): GameState {
         experienceEarned: 0,
       },
     },
+    activityLog: [],
     gameTime: {
       totalTicks: 0,
       lastTickTime: Date.now(),
