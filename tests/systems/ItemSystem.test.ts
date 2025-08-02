@@ -269,11 +269,19 @@ describe("ItemSystem", () => {
         expect(result.error).toContain("already healthy");
       });
 
-      it("should fail hygiene item when pet is clean", () => {
+      it("should fail hygiene item when pet has no poop to clean", () => {
         const soap = getItemById("soap")!;
-        const result = ItemSystem.validateItemUsage(testPet, soap);
+        const cleanPet = { ...testPet, poopCount: 0 }; // Explicitly clean pet
+        const result = ItemSystem.validateItemUsage(cleanPet, soap);
         expect(result.success).toBe(false);
-        expect(result.error).toContain("already clean");
+        expect(result.error).toContain("no poop to clean");
+      });
+
+      it("should allow hygiene item when pet has poop to clean", () => {
+        const soap = getItemById("soap")!;
+        const dirtyPet = { ...testPet, poopCount: 2 }; // Pet with poop
+        const result = ItemSystem.validateItemUsage(dirtyPet, soap);
+        expect(result.success).toBe(true);
       });
 
       it("should fail toy when pet is very happy", () => {

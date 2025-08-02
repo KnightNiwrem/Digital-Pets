@@ -278,8 +278,8 @@ export class ItemSystem {
         break;
 
       case "hygiene":
-        if (pet.poopTicksLeft > 0) {
-          return { success: false, error: "Pet doesn't need cleaning - already clean" };
+        if (pet.poopCount === 0) {
+          return { success: false, error: "Pet doesn't need cleaning - no poop to clean" };
         }
         break;
 
