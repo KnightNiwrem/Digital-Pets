@@ -445,28 +445,24 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        // First use the cleaning item to clean the pet
+        // Use the cleaning item (this already handles the cleaning via "clean" effect)
         // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
         const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
         if (result.success && result.data) {
-          // Then also trigger the poop cleaning effect
-          const cleanResult = PetSystem.cleanPoop(result.data.pet);
-          if (cleanResult.success) {
-            const updatedGameState = {
-              ...gameState,
-              inventory: result.data.inventory,
-              currentPet: result.data.pet,
-            };
+          const updatedGameState = {
+            ...gameState,
+            inventory: result.data.inventory,
+            currentPet: result.data.pet, // Pet is already cleaned by ItemSystem
+          };
 
-            // Update both React state and GameLoop internal state
-            setGameState(updatedGameState);
-            if (gameLoopRef.current) {
-              gameLoopRef.current.updateState(updatedGameState);
-            }
-
-            await triggerAutosave(`clean with ${itemId}`, updatedGameState);
-            return { success: true };
+          // Update both React state and GameLoop internal state
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
           }
+
+          await triggerAutosave(`clean with ${itemId}`, updatedGameState);
+          return { success: true };
         }
         return { success: false, error: result.error };
       } catch (error) {
