@@ -48,4 +48,4 @@
 - **Type Safety**: Strict TypeScript without any/unknown types throughout codebase
 
 ## Current Focus
-Project is production-ready with all core systems complete. Focus has shifted to optional enhancements and polish.
+Project is production-ready with all core systems complete. Recently completed architecture cleanup by removing unused `useWorldState` hook that duplicated functionality from `useGameState`. Focus has shifted to optional enhancements and polish.
