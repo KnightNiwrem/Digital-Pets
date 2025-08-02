@@ -4,15 +4,16 @@
 **Core Systems Complete**: The project now has a fully functional pet raising game with all major systems implemented and 478+ tests passing. **Phase 4B World Content Expansion Successfully Completed + Critical Bug Fixes** ✨
 
 ## Recently Completed
-**✅ Issue #67 - Fix Poop Cleaning UI Logic (January 2025)**
+**✅ Issue #67 - Fix Poop Cleaning UI Logic (January 2025) - RESOLVED**  
 - **✅ Bug Identification**: UI incorrectly claimed no poop to clean when `pet.poopCount > 0`
-- **✅ Root Cause Analysis**: PetCarePanel checking `pet.poopTicksLeft <= 0` instead of `pet.poopCount > 0`
-- **✅ Logic Fixes**: Fixed cleaning condition and disabled button message logic
-- **✅ Comprehensive Testing**: Added 12 new unit tests covering all cleaning scenarios (478 total tests)
-- **✅ Manual Verification**: Tested all scenarios showing fix works correctly
+- **✅ Root Cause Analysis**: `ItemSystem.validateItemUsage()` checking `pet.poopTicksLeft > 0` instead of `pet.poopCount > 0`
+- **✅ Core Fix**: Changed hygiene validation from checking "time until next poop" to "existing poop count"
+- **✅ Both Issues Fixed**: Pet care panel AND inventory hygiene item usage now work correctly
+- **✅ Comprehensive Testing**: Updated validation tests, 479 tests passing (increased from 478)
+- **✅ Manual Verification**: UI testing confirmed both cleaning scenarios work properly
 - **✅ Production Ready**: All linting, type checking, and builds pass
-- **Status**: COMPLETED - Poop cleaning functionality now works properly
-- **Impact**: Users can now properly clean their pets when poop is present and use hygiene items from inventory
+- **Status**: COMPLETED ✅ - Both poop cleaning issues fully resolved
+- **Impact**: Users can now properly clean their pets when poop is present using both care panel and inventory hygiene items
 
 **✅ Issue #61 - Phase 4B: World Content Expansion (January 2025)**
 - **✅ Ancient Ruins Implementation**: Complete end-game location with 3 unique activities (artifact hunting, puzzle solving, guardian challenges)
