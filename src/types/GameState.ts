@@ -2,7 +2,7 @@
 
 import type { Pet } from "./Pet";
 import type { Inventory } from "./Item";
-import type { WorldState } from "./World";
+import type { WorldState, ActivityLogEntry } from "./World";
 import type { QuestLog } from "./Quest";
 import type { Battle } from "./Battle";
 
@@ -151,6 +151,9 @@ export interface GameState {
 
   // Activity statistics tracking
   activityStats: ActivityStats;
+
+  // Activity log for tracking player history
+  activityLog: ActivityLogEntry[];
 
   // Game time tracking
   gameTime: {

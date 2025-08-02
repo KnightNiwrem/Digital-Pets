@@ -7,6 +7,7 @@ import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
+import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
 import { getItemById } from "@/data/items";
 import { getLocationById } from "@/data/locations";
 
@@ -224,6 +225,14 @@ export class GameLoop {
       const hadActivitiesCompleted = activityResult.data.rewards.length > 0;
       this.gameState.world = activityResult.data.worldState;
 
+      // Update activity log entries for completed activities
+      if (hadActivitiesCompleted && activityResult.data.completedActivities) {
+        this.updateActivityLogForCompletedActivities(
+          activityResult.data.completedActivities,
+          activityResult.data.rewards
+        );
+      }
+
       // Process rewards from completed activities
       if (hadActivitiesCompleted) {
         stateChanges.push("activities_completed");
@@ -402,6 +411,122 @@ export class GameLoop {
   }
 
   /**
+   * Update activity log entries for completed activities
+   */
+  private updateActivityLogForCompletedActivities(
+    completedActivities: import("@/types/World").CompletedActivityInfo[],
+    rewards: ActivityReward[]
+  ): void {
+    if (!this.gameState) return;
+
+    for (const completedActivity of completedActivities) {
+      // Find the corresponding log entry
+      const logEntry = ActivityLogSystem.findLogEntryByActivity(
+        this.gameState,
+        completedActivity.activityId,
+        completedActivity.locationId,
+        Date.now() - completedActivity.duration * GAME_CONSTANTS.TICK_INTERVAL // Approximate start time
+      );
+
+      if (logEntry) {
+        // Calculate activity rewards for this specific activity
+        const activityRewards = this.calculateActivitySpecificRewards(completedActivity, rewards);
+
+        // Create log results from the rewards
+        const logResults = activityRewards.map(reward =>
+          ActivityLogSystem.createLogResult(reward.type, reward.amount, reward.id, this.formatRewardDescription(reward))
+        );
+
+        // If no rewards, add a "no rewards" result
+        if (logResults.length === 0) {
+          logResults.push(ActivityLogSystem.createLogResult("none", 0, undefined, "No rewards received"));
+        }
+
+        // Update the log entry
+        ActivityLogSystem.updateLogEntry(this.gameState, logEntry.id, {
+          status: "completed",
+          endTime: Date.now(),
+          results: logResults,
+        });
+      }
+    }
+  }
+
+  /**
+   * Calculate rewards specific to a completed activity
+   */
+  private calculateActivitySpecificRewards(
+    _completedActivity: import("@/types/World").CompletedActivityInfo,
+    allRewards: ActivityReward[]
+  ): ActivityReward[] {
+    // For now, assign all rewards to the activity
+    // In the future, this could be enhanced to track which rewards came from which activity
+    return allRewards;
+  }
+
+  /**
+   * Format reward description for activity log
+   */
+  private formatRewardDescription(reward: ActivityReward): string {
+    switch (reward.type) {
+      case "item":
+        return reward.id ? `Found ${reward.id} x${reward.amount}` : `Found item x${reward.amount}`;
+      case "gold":
+        return `Earned ${reward.amount} gold`;
+      case "experience":
+        return `Gained ${reward.amount} experience`;
+      default:
+        return `Received ${reward.type} x${reward.amount}`;
+    }
+  }
+
+  /**
+   * Update activity log entries for offline completed activities
+   */
+  private updateOfflineActivityLogs(
+    completedActivities: import("@/types/World").CompletedActivityInfo[],
+    rewards: ActivityReward[]
+  ): void {
+    if (!this.gameState) return;
+
+    for (const completedActivity of completedActivities) {
+      // For offline activities, we need to find log entries differently since we don't have exact start times
+      // We'll look for the most recent "started" entry for this activity and location
+      const logEntry = this.gameState.activityLog.find(
+        entry =>
+          entry.activityId === completedActivity.activityId &&
+          entry.locationId === completedActivity.locationId &&
+          entry.status === "started"
+      );
+
+      if (logEntry) {
+        // Calculate end time based on duration
+        const endTime = logEntry.startTime + completedActivity.duration * GAME_CONSTANTS.TICK_INTERVAL;
+
+        // Calculate activity rewards for this specific activity
+        const activityRewards = this.calculateActivitySpecificRewards(completedActivity, rewards);
+
+        // Create log results from the rewards
+        const logResults = activityRewards.map(reward =>
+          ActivityLogSystem.createLogResult(reward.type, reward.amount, reward.id, this.formatRewardDescription(reward))
+        );
+
+        // If no rewards, add a "no rewards" result
+        if (logResults.length === 0) {
+          logResults.push(ActivityLogSystem.createLogResult("none", 0, undefined, "No rewards received"));
+        }
+
+        // Update the log entry
+        ActivityLogSystem.updateLogEntry(this.gameState, logEntry.id, {
+          status: "completed",
+          endTime,
+          results: logResults,
+        });
+      }
+    }
+  }
+
+  /**
    * Process activity rewards (static version for offline processing)
    */
   private static processActivityRewardsStatic(
@@ -559,6 +684,11 @@ export class GameLoop {
     const worldResult = WorldSystem.processOfflineProgression(this.gameState.world, actualTicks);
     if (worldResult.success && worldResult.data) {
       this.gameState.world = worldResult.data.worldState;
+
+      // Update activity log entries for offline completed activities
+      if (worldResult.data.completedActivities.length > 0) {
+        this.updateOfflineActivityLogs(worldResult.data.completedActivities, worldResult.data.rewards);
+      }
 
       // Process any rewards from offline activities
       if (worldResult.data.rewards.length > 0) {

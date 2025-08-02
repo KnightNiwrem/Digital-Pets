@@ -11,10 +11,11 @@ import type {
   CompletedActivityInfo,
 } from "@/types/World";
 import type { Pet } from "@/types/Pet";
-import type { Inventory } from "@/types/Item";
+import type { GameState } from "@/types/GameState";
 import type { Result } from "@/types";
 import { PetValidator, EnergyManager } from "@/lib/utils";
 import { ItemSystem } from "@/systems/ItemSystem";
+import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
 import { LOCATIONS, getLocationById, getStartingLocation } from "@/data/locations";
 
 export class WorldSystem {
@@ -221,12 +222,13 @@ export class WorldSystem {
   /**
    * Start an activity at current location
    */
-  static startActivity(
-    worldState: WorldState,
-    pet: Pet,
-    activityId: string,
-    inventory: Inventory
-  ): Result<{ worldState: WorldState; pet: Pet }> {
+  static startActivity(gameState: GameState, activityId: string): Result<{ worldState: WorldState; pet: Pet }> {
+    const { world: worldState, currentPet: pet, inventory } = gameState;
+
+    if (!pet) {
+      return { success: false, error: "No pet selected" };
+    }
+
     // Check if pet is travelling
     if (worldState.travelState) {
       return { success: false, error: "Cannot start activity while travelling" };
@@ -295,10 +297,11 @@ export class WorldSystem {
     }
 
     // Start activity
+    const startTime = Date.now();
     const activeActivity: ActiveActivity = {
       activityId: activity.id,
       locationId: currentLocation.id,
-      startTime: Date.now(),
+      startTime,
       ticksRemaining: activity.duration,
       petId: pet.id,
     };
@@ -311,11 +314,21 @@ export class WorldSystem {
     const updatedPet: Pet = {
       ...pet,
       state: "exploring",
-      lastCareTime: Date.now(),
+      lastCareTime: startTime,
     };
 
     // Deduct energy cost for activity
     EnergyManager.deductEnergy(updatedPet, activity.energyCost);
+
+    // Create activity log entry
+    ActivityLogSystem.addLogEntry(gameState, {
+      activityId: activity.id,
+      locationId: currentLocation.id,
+      status: "started",
+      energyCost: activity.energyCost,
+      startTime,
+      results: [], // Will be populated when activity completes
+    });
 
     return {
       success: true,
@@ -432,10 +445,12 @@ export class WorldSystem {
    * Cancel current activity for a pet
    */
   static cancelActivity(
-    worldState: WorldState,
+    gameState: GameState,
     petId: string,
     refundEnergy: boolean = false
   ): Result<WorldState & { energyRefunded?: number }> {
+    const { world: worldState } = gameState;
+
     const activeActivityIndex = worldState.activeActivities.findIndex(a => a.petId === petId);
     if (activeActivityIndex === -1) {
       return { success: false, error: "No active activity to cancel" };
@@ -460,6 +475,22 @@ export class WorldSystem {
           energyRefunded = Math.floor(activity.energyCost * unusedEnergyRatio * 0.5);
         }
       }
+    }
+
+    // Update activity log entry to cancelled status
+    const logEntry = ActivityLogSystem.findLogEntryByActivity(
+      gameState,
+      activeActivity.activityId,
+      activeActivity.locationId,
+      activeActivity.startTime
+    );
+
+    if (logEntry) {
+      ActivityLogSystem.updateLogEntry(gameState, logEntry.id, {
+        status: "cancelled",
+        endTime: Date.now(),
+        results: [ActivityLogSystem.createCancellationResult(energyRefunded)],
+      });
     }
 
     const updatedWorldState: WorldState = {

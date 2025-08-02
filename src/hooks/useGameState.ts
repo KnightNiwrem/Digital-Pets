@@ -777,12 +777,7 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = WorldSystem.startActivity(
-          gameState.world,
-          gameState.currentPet,
-          activityId,
-          gameState.inventory
-        );
+        const result = WorldSystem.startActivity(gameState, activityId);
         if (result.success && result.data) {
           setGameState(prev => {
             if (!prev) return null;
@@ -819,7 +814,7 @@ export function useGameState(): UseGameStateReturn {
     }
 
     try {
-      const result = WorldSystem.cancelActivity(gameState.world, gameState.currentPet.id);
+      const result = WorldSystem.cancelActivity(gameState, gameState.currentPet.id);
       if (result.success && result.data) {
         setGameState(prev => {
           if (!prev) return null;

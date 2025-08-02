@@ -2,12 +2,10 @@
 
 import { useCallback } from "react";
 import { WorldSystem } from "@/systems/WorldSystem";
-import type { Pet, WorldState, GameState, Location, Activity, Inventory } from "@/types";
+import type { WorldState, GameState, Location, Activity } from "@/types";
 
 interface UseWorldStateProps {
-  pet: Pet | null;
-  worldState: WorldState;
-  inventory: Inventory;
+  gameState: GameState;
   updateGameState: (updater: (prev: GameState) => GameState) => void;
   disabled?: boolean;
 }
@@ -35,12 +33,12 @@ interface UseWorldStateReturn {
 }
 
 export function useWorldState({
-  pet,
-  worldState,
-  inventory,
+  gameState,
   updateGameState,
   disabled = false,
 }: UseWorldStateProps): UseWorldStateReturn {
+  const { currentPet: pet, world: worldState, inventory } = gameState;
+
   const startTravel = useCallback(
     async (destinationId: string) => {
       if (!pet || disabled) {
@@ -77,7 +75,7 @@ export function useWorldState({
         return { success: false, error: "Cannot start activity at this time" };
       }
 
-      const result = WorldSystem.startActivity(worldState, pet, activityId, inventory);
+      const result = WorldSystem.startActivity(gameState, activityId);
 
       if (result.success && result.data) {
         updateGameState((prev: GameState) => ({
@@ -98,7 +96,7 @@ export function useWorldState({
       }
     },
 
-    [pet, worldState, inventory, updateGameState, disabled]
+    [pet, updateGameState, disabled, gameState]
   );
 
   const cancelActivity = useCallback(async () => {
@@ -106,7 +104,7 @@ export function useWorldState({
       return { success: false, error: "Cannot cancel activity at this time" };
     }
 
-    const result = WorldSystem.cancelActivity(worldState, pet.id);
+    const result = WorldSystem.cancelActivity(gameState, pet.id);
 
     if (result.success && result.data) {
       updateGameState((prev: GameState) => ({
@@ -124,7 +122,7 @@ export function useWorldState({
         error: result.error,
       };
     }
-  }, [pet, worldState, updateGameState, disabled]);
+  }, [pet, updateGameState, disabled, gameState]);
 
   const getTravelProgress = useCallback(() => {
     return WorldSystem.getTravelProgress(worldState);

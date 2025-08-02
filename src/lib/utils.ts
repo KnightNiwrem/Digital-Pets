@@ -811,3 +811,159 @@ export class ActionHandler {
     console.log(`${actionText} ${quantity}x ${itemId} for ${totalPrice} gold`);
   }
 }
+
+/**
+ * Activity Log Utility Functions
+ */
+export class ActivityLogUtils {
+  /**
+   * Format activity duration from start and end times
+   */
+  static formatActivityDuration(startTime: number, endTime?: number): string {
+    if (!endTime) {
+      return "In progress...";
+    }
+
+    const durationMs = endTime - startTime;
+    const minutes = Math.floor(durationMs / 60000);
+    const seconds = Math.floor((durationMs % 60000) / 1000);
+
+    if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  }
+
+  /**
+   * Format activity results for display
+   */
+  static formatActivityResults(results: import("@/types/World").ActivityLogResult[]): string {
+    if (results.length === 0) {
+      return "No results";
+    }
+
+    return results.map(result => result.description).join(", ");
+  }
+
+  /**
+   * Get display name for activity ID
+   */
+  static getActivityDisplayName(activityId: string): string {
+    // Convert snake_case to Title Case
+    return activityId
+      .split("_")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
+  /**
+   * Get display name for location ID
+   */
+  static getLocationDisplayName(locationId: string): string {
+    // Convert snake_case to Title Case
+    return locationId
+      .split("_")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
+  /**
+   * Calculate total value of activity results
+   */
+  static calculateActivityValue(results: import("@/types/World").ActivityLogResult[]): number {
+    return results.reduce((total, result) => {
+      if (result.type === "gold" && result.amount) {
+        return total + result.amount;
+      }
+      // For items, we could add estimated value but for now just count as 1 gold each
+      if (result.type === "item" && result.amount) {
+        return total + result.amount;
+      }
+      return total;
+    }, 0);
+  }
+
+  /**
+   * Format timestamp to local time string
+   */
+  static formatTimestamp(timestamp: number): string {
+    return new Date(timestamp).toLocaleString();
+  }
+
+  /**
+   * Format timestamp to relative time (e.g., "2 hours ago")
+   */
+  static formatRelativeTime(timestamp: number): string {
+    const now = Date.now();
+    const diffMs = now - timestamp;
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMinutes < 1) {
+      return "Just now";
+    } else if (diffMinutes < 60) {
+      return `${diffMinutes}m ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    } else {
+      return `${diffDays}d ago`;
+    }
+  }
+
+  /**
+   * Get status badge styling for activity status
+   */
+  static getStatusBadgeClass(status: "started" | "cancelled" | "completed"): string {
+    switch (status) {
+      case "started":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "cancelled":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  }
+
+  /**
+   * Filter activity log entries by various criteria
+   */
+  static filterEntries(
+    entries: import("@/types/World").ActivityLogEntry[],
+    filters: {
+      status?: "started" | "cancelled" | "completed" | "all";
+      locationId?: string;
+      activityId?: string;
+      dateRange?: { start: number; end: number };
+    }
+  ): import("@/types/World").ActivityLogEntry[] {
+    return entries.filter(entry => {
+      // Status filter
+      if (filters.status && filters.status !== "all" && entry.status !== filters.status) {
+        return false;
+      }
+
+      // Location filter
+      if (filters.locationId && entry.locationId !== filters.locationId) {
+        return false;
+      }
+
+      // Activity filter
+      if (filters.activityId && entry.activityId !== filters.activityId) {
+        return false;
+      }
+
+      // Date range filter
+      if (filters.dateRange) {
+        if (entry.startTime < filters.dateRange.start || entry.startTime > filters.dateRange.end) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+}
