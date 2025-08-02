@@ -2,20 +2,16 @@
 
 import type { Pet, PetCareAction, ItemEffect, Result } from "@/types";
 import { PET_CONSTANTS } from "@/types";
-import { PetValidator, GameMath, EnergyManager, StatUpdateUtils } from "@/lib/utils";
+import { PetValidator, GameMath, EnergyManager, StatUpdateUtils, ResultUtils, PetCareActionFactory } from "@/lib/utils";
 
 export class PetSystem {
   /**
    * Feed the pet with a food item
    */
   static feedPet(pet: Pet, satietyValue: number): Result<PetCareAction> {
-    const validationError = PetValidator.validateCareAction(pet, "feed");
-    if (validationError) {
-      return {
-        success: false,
-        error: validationError,
-      };
-    }
+    // Use new validation utility
+    const validationResult = ResultUtils.validateOrError<PetCareAction>(PetValidator.validateCareAction(pet, "feed"));
+    if (validationResult) return validationResult;
 
     const updateResult = StatUpdateUtils.updateStat(
       pet,
@@ -26,34 +22,23 @@ export class PetSystem {
     );
 
     if (updateResult.actualIncrease <= 0) {
-      return {
-        success: false,
-        error: "Pet is not hungry right now.",
-      };
+      return ResultUtils.error("Pet is not hungry right now.");
     }
 
     const updatedPet = updateResult.updatedPet;
     Object.assign(pet, updatedPet);
 
-    const action: PetCareAction = {
-      type: "feed",
-      timestamp: Date.now(),
-    };
-
-    return { success: true, data: action };
+    // Use new action factory
+    return ResultUtils.success(PetCareActionFactory.feed());
   }
 
   /**
    * Give the pet water or other drinks
    */
   static giveDrink(pet: Pet, hydrationValue: number): Result<PetCareAction> {
-    const validationError = PetValidator.validateCareAction(pet, "drink");
-    if (validationError) {
-      return {
-        success: false,
-        error: validationError,
-      };
-    }
+    // Use new validation utility
+    const validationResult = ResultUtils.validateOrError<PetCareAction>(PetValidator.validateCareAction(pet, "drink"));
+    if (validationResult) return validationResult;
 
     const updateResult = StatUpdateUtils.updateStat(
       pet,
@@ -64,34 +49,25 @@ export class PetSystem {
     );
 
     if (updateResult.actualIncrease <= 0) {
-      return {
-        success: false,
-        error: "Pet is not dehydrated right now.",
-      };
+      return ResultUtils.error("Pet is not dehydrated right now.");
     }
 
     const updatedPet = updateResult.updatedPet;
     Object.assign(pet, updatedPet);
 
-    const action: PetCareAction = {
-      type: "drink",
-      timestamp: Date.now(),
-    };
-
-    return { success: true, data: action };
+    // Use new action factory
+    return ResultUtils.success(PetCareActionFactory.drink());
   }
 
   /**
    * Play with the pet using toys or activities
    */
   static playWithPet(pet: Pet, happinessValue: number, energyCost: number = 10): Result<PetCareAction> {
-    const validationError = PetValidator.validateCareAction(pet, "play", energyCost);
-    if (validationError) {
-      return {
-        success: false,
-        error: validationError,
-      };
-    }
+    // Use new validation utility
+    const validationResult = ResultUtils.validateOrError<PetCareAction>(
+      PetValidator.validateCareAction(pet, "play", energyCost)
+    );
+    if (validationResult) return validationResult;
 
     const updateResult = StatUpdateUtils.updateStat(
       pet,
@@ -102,23 +78,15 @@ export class PetSystem {
     );
 
     if (updateResult.actualIncrease <= 0) {
-      return {
-        success: false,
-        error: "Pet is already very happy.",
-      };
+      return ResultUtils.error("Pet is already very happy.");
     }
 
     const updatedPet = updateResult.updatedPet;
     Object.assign(pet, updatedPet);
     EnergyManager.deductEnergy(pet, energyCost);
 
-    const action: PetCareAction = {
-      type: "play",
-      timestamp: Date.now(),
-      energyCost,
-    };
-
-    return { success: true, data: action };
+    // Use new action factory
+    return ResultUtils.success(PetCareActionFactory.play(energyCost));
   }
 
   /**
@@ -126,10 +94,7 @@ export class PetSystem {
    */
   static cleanPoop(pet: Pet): Result<PetCareAction> {
     if (pet.poopCount === 0) {
-      return {
-        success: false,
-        error: "There's no poop to clean right now.",
-      };
+      return ResultUtils.error("There's no poop to clean right now.");
     }
 
     // Clean all poop and reset timers
@@ -138,12 +103,8 @@ export class PetSystem {
     pet.sickByPoopTicksLeft = PET_CONSTANTS.SICK_BY_POOP_TICKS; // Reset to full 72 hours
     pet.lastCareTime = Date.now();
 
-    const action: PetCareAction = {
-      type: "clean",
-      timestamp: Date.now(),
-    };
-
-    return { success: true, data: action };
+    // Use new action factory
+    return ResultUtils.success(PetCareActionFactory.clean());
   }
 
   /**
@@ -154,10 +115,7 @@ export class PetSystem {
     const healthEffects = medicine.filter(effect => effect.type === "health" || effect.type === "cure");
 
     if (healthEffects.length === 0) {
-      return {
-        success: false,
-        error: "This item cannot treat the pet's condition.",
-      };
+      return ResultUtils.error("This item cannot treat the pet's condition.");
     }
 
     for (const effect of healthEffects) {
@@ -171,43 +129,28 @@ export class PetSystem {
     }
 
     if (!treated) {
-      return {
-        success: false,
-        error: "Pet doesn't need this treatment right now.",
-      };
+      return ResultUtils.error("Pet doesn't need this treatment right now.");
     }
 
     pet.lastCareTime = Date.now();
 
-    const action: PetCareAction = {
-      type: "medicine",
-      timestamp: Date.now(),
-    };
-
-    return { success: true, data: action };
+    // Use new action factory
+    return ResultUtils.success(PetCareActionFactory.medicine());
   }
 
   /**
    * Put the pet to sleep for energy recovery
    */
   static putPetToSleep(pet: Pet): Result<PetCareAction> {
-    const validationError = PetValidator.validateSleepAction(pet);
-    if (validationError) {
-      return {
-        success: false,
-        error: validationError,
-      };
-    }
+    // Use new validation utility
+    const validationResult = ResultUtils.validateOrError<PetCareAction>(PetValidator.validateSleepAction(pet));
+    if (validationResult) return validationResult;
 
     pet.state = "sleeping";
     pet.lastCareTime = Date.now();
 
-    const action: PetCareAction = {
-      type: "sleep",
-      timestamp: Date.now(),
-    };
-
-    return { success: true, data: action };
+    // Use new action factory
+    return ResultUtils.success(PetCareActionFactory.sleep());
   }
 
   /**
@@ -215,21 +158,14 @@ export class PetSystem {
    */
   static wakePetUp(pet: Pet): Result<PetCareAction> {
     if (pet.state !== "sleeping") {
-      return {
-        success: false,
-        error: "Pet is not sleeping.",
-      };
+      return ResultUtils.error("Pet is not sleeping.");
     }
 
     pet.state = "idle";
     pet.lastCareTime = Date.now();
 
-    const action: PetCareAction = {
-      type: "wake",
-      timestamp: Date.now(),
-    };
-
-    return { success: true, data: action };
+    // Use new action factory
+    return ResultUtils.success(PetCareActionFactory.wake());
   }
 
   /**

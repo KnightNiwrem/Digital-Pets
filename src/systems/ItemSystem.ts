@@ -3,7 +3,7 @@
 import type { Item, Inventory, InventorySlot, ItemUsage, DurabilityItem } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
 import type { Result } from "@/types";
-import { PetValidator, GameMath, StatUpdateUtils } from "@/lib/utils";
+import { PetValidator, GameMath, StatUpdateUtils, ResultUtils } from "@/lib/utils";
 import { ITEM_CONSTANTS } from "@/types/Item";
 import { PET_CONSTANTS } from "@/types/Pet";
 import { getItemById } from "@/data/items";
@@ -27,11 +27,11 @@ export class ItemSystem {
    */
   static addItem(inventory: Inventory, item: Item, quantity: number = 1): Result<Inventory> {
     if (quantity <= 0) {
-      return { success: false, error: "Quantity must be positive" };
+      return ResultUtils.error("Quantity must be positive");
     }
 
     if (!item.stackable && quantity > 1) {
-      return { success: false, error: "Cannot add multiple non-stackable items at once" };
+      return ResultUtils.error("Cannot add multiple non-stackable items at once");
     }
 
     // For stackable items, try to find an existing slot
@@ -40,7 +40,7 @@ export class ItemSystem {
       if (existingSlot) {
         const newQuantity = existingSlot.quantity + quantity;
         if (newQuantity > ITEM_CONSTANTS.MAX_STACK_SIZE) {
-          return { success: false, error: `Stack size limit exceeded (max ${ITEM_CONSTANTS.MAX_STACK_SIZE})` };
+          return ResultUtils.error(`Stack size limit exceeded (max ${ITEM_CONSTANTS.MAX_STACK_SIZE})`);
         }
 
         const updatedInventory = {
@@ -50,11 +50,7 @@ export class ItemSystem {
           ),
         };
 
-        return {
-          success: true,
-          data: updatedInventory,
-          message: `Added ${quantity}x ${item.name} to existing stack`,
-        };
+        return ResultUtils.success(updatedInventory, `Added ${quantity}x ${item.name} to existing stack`);
       }
     }
 
@@ -66,7 +62,7 @@ export class ItemSystem {
     }
 
     if (nextSlotIndex >= inventory.maxSlots) {
-      return { success: false, error: "Inventory is full" };
+      return ResultUtils.error("Inventory is full");
     }
 
     const newSlot: InventorySlot = {
@@ -80,11 +76,7 @@ export class ItemSystem {
       slots: [...inventory.slots, newSlot],
     };
 
-    return {
-      success: true,
-      data: updatedInventory,
-      message: `Added ${quantity}x ${item.name} to inventory`,
-    };
+    return ResultUtils.success(updatedInventory, `Added ${quantity}x ${item.name} to inventory`);
   }
 
   /**
@@ -92,17 +84,17 @@ export class ItemSystem {
    */
   static removeItem(inventory: Inventory, itemId: string, quantity: number = 1): Result<Inventory> {
     if (quantity <= 0) {
-      return { success: false, error: "Quantity must be positive" };
+      return ResultUtils.error("Quantity must be positive");
     }
 
     const slotIndex = inventory.slots.findIndex(slot => slot.item.id === itemId);
     if (slotIndex === -1) {
-      return { success: false, error: "Item not found in inventory" };
+      return ResultUtils.error("Item not found in inventory");
     }
 
     const slot = inventory.slots[slotIndex];
     if (slot.quantity < quantity) {
-      return { success: false, error: "Not enough items in inventory" };
+      return ResultUtils.error("Not enough items in inventory");
     }
 
     let updatedSlots: InventorySlot[];
@@ -121,11 +113,7 @@ export class ItemSystem {
       slots: updatedSlots,
     };
 
-    return {
-      success: true,
-      data: updatedInventory,
-      message: `Removed ${quantity}x ${slot.item.name} from inventory`,
-    };
+    return ResultUtils.success(updatedInventory, `Removed ${quantity}x ${slot.item.name} from inventory`);
   }
 
   /**
@@ -266,52 +254,52 @@ export class ItemSystem {
   static validateItemUsage(pet: Pet, item: Item): Result<void> {
     // Dead pets can't use items
     if (PetValidator.isDead(pet)) {
-      return { success: false, error: "Cannot use items on a deceased pet" };
+      return ResultUtils.error("Cannot use items on a deceased pet");
     }
 
     // Check item type specific conditions
     switch (item.type) {
       case "medicine":
         if (PetValidator.isHealthy(pet)) {
-          return { success: false, error: "Pet doesn't need medicine - already healthy" };
+          return ResultUtils.error("Pet doesn't need medicine - already healthy");
         }
         break;
 
       case "hygiene":
         if (pet.poopCount === 0) {
-          return { success: false, error: "Pet doesn't need cleaning - no poop to clean" };
+          return ResultUtils.error("Pet doesn't need cleaning - no poop to clean");
         }
         // Add state validation for cleaning - consistent with UI logic
         if (PetValidator.isSleeping(pet)) {
-          return { success: false, error: "Cannot clean pet while sleeping" };
+          return ResultUtils.error("Cannot clean pet while sleeping");
         }
         if (PetValidator.isExploring(pet)) {
-          return { success: false, error: "Cannot clean pet while exploring" };
+          return ResultUtils.error("Cannot clean pet while exploring");
         }
         if (PetValidator.isTravelling(pet)) {
-          return { success: false, error: "Cannot clean pet while travelling" };
+          return ResultUtils.error("Cannot clean pet while travelling");
         }
         break;
 
       case "toy":
         if (pet.happiness >= 100) {
-          return { success: false, error: "Pet is already very happy" };
+          return ResultUtils.error("Pet is already very happy");
         }
         // Add state validation for toys - consistent with play validation
         if (PetValidator.isSleeping(pet)) {
-          return { success: false, error: "Pet cannot play while sleeping" };
+          return ResultUtils.error("Pet cannot play while sleeping");
         }
         if (PetValidator.isExploring(pet)) {
-          return { success: false, error: "Pet cannot play while exploring" };
+          return ResultUtils.error("Pet cannot play while exploring");
         }
         if (!PetValidator.hasEnoughEnergy(pet, 10)) {
-          return { success: false, error: "Pet has insufficient energy to play" };
+          return ResultUtils.error("Pet has insufficient energy to play");
         }
         break;
 
       case "energy_booster":
         if (PetValidator.hasFullEnergy(pet)) {
-          return { success: false, error: "Pet already has full energy" };
+          return ResultUtils.error("Pet already has full energy");
         }
         break;
 
@@ -321,10 +309,10 @@ export class ItemSystem {
         const hasDrink = item.effects.some(effect => effect.type === "hydration");
 
         if (hasFood && pet.satiety >= 100) {
-          return { success: false, error: "Pet is not hungry" };
+          return ResultUtils.error("Pet is not hungry");
         }
         if (hasDrink && pet.hydration >= 100) {
-          return { success: false, error: "Pet is not thirsty" };
+          return ResultUtils.error("Pet is not thirsty");
         }
         break;
       }
@@ -334,11 +322,11 @@ export class ItemSystem {
     if (!item.stackable) {
       const durabilityItem = item as DurabilityItem;
       if (durabilityItem.currentDurability <= 0) {
-        return { success: false, error: "Item is broken and cannot be used" };
+        return ResultUtils.error("Item is broken and cannot be used");
       }
     }
 
-    return { success: true };
+    return ResultUtils.successVoid();
   }
 
   /**
