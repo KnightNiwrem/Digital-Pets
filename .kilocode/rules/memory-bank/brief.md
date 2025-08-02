@@ -56,8 +56,6 @@ Create a purely client-side HTML5 pet raising game using Web Storage API. Implem
 1. Client-only: No server dependencies
 2. Storage: Web Storage API
 3. Workflow:
-   - Create `PRD.md` first
-   - Maintain `tasks.md` (continuously updated)
    - Ensure typecheck passes, avoiding `any` and `unknown` types
    - Ensure lint and prettier formatting passes
    - Ensure project production builds successfully
