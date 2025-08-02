@@ -53,6 +53,7 @@ interface Pet {
   happinessTicksLeft: number;
   poopTicksLeft: number;
   sickByPoopTicksLeft: number;
+  poopCount: number; // Current poop amount
   
   // Core Stats
   life: number; // max 1,000,000
@@ -245,11 +246,11 @@ src/
 │   ├── useBattleState.ts
 │   └── useWorldState.ts
 ├── data/               # Game content definitions (✅ Complete)
-│   ├── pets.ts         # 31 pet species across all rarities
-│   ├── items.ts        # 35+ items across all categories
-│   ├── locations.ts    # 3 world locations with activities
+│   ├── pets/           # 31 pet species across all rarities (individual files)
+│   ├── items/          # 57+ items across all categories (individual files)
+│   ├── locations.ts    # 6 world locations with activities and NPCs
 │   ├── moves.ts        # 12 battle moves
-│   └── quests.ts       # 7 initial quests
+│   └── quests.ts       # 17 quests including epic storylines
 ├── types/              # TypeScript interfaces (✅ Complete)
 │   ├── Pet.ts
 │   ├── Item.ts
@@ -276,12 +277,12 @@ tests/                  # Comprehensive test coverage (✅ 408+ tests)
 5. **✅ UI Components**: All major interfaces (Pet Care/World/Inventory/Battle/Quests)
 6. **✅ World System**: Locations, travel, activities, and NPCs
 7. **✅ Battle System**: Turn-based combat with AI opponents
-8. **✅ Content**: 31 pets, 35+ items, 3 locations, 12 moves, 7 quests
+8. **✅ Content**: 31 pets, 57+ items, 6 locations, 12 moves, 17 quests
 9. **✅ Quest System**: Complete quest management with progression tracking
-10. **✅ Testing**: 408+ tests with comprehensive coverage
+10. **✅ Testing**: 478+ tests with comprehensive coverage
 
 ## Testing Strategy (✅ Implemented)
-- **✅ Unit Tests**: 408+ tests covering all system functions
+- **✅ Unit Tests**: 478+ tests covering all system functions
 - **✅ Integration Tests**: Cross-system functionality validation
 - **✅ Storage Tests**: Save/load reliability and migration testing
 - **✅ Game Loop Tests**: Tick progression and offline calculations

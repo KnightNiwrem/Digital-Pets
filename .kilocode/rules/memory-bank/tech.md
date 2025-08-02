@@ -134,7 +134,7 @@
 5. **Browser Standards**: Web Storage API, ES modules, modern JavaScript
 
 ## Testing & Quality Assurance
-- **Testing Framework**: Comprehensive test suite with 408+ passing tests
+- **Testing Framework**: Comprehensive test suite with 478+ passing tests
   - Unit tests for all systems (`tests/systems/`)
   - Component tests (`tests/components/`)
   - Integration tests for game mechanics
