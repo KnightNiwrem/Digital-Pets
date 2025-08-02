@@ -130,6 +130,14 @@ export interface ActiveActivity {
   petId: string;
 }
 
+export interface CompletedActivityInfo {
+  activityId: string;
+  locationId: string;
+  activityType: ActivityType;
+  duration: number;
+  rewards: ActivityReward[];
+}
+
 // World constants
 export const WORLD_CONSTANTS = {
   STARTING_LOCATION: "hometown",

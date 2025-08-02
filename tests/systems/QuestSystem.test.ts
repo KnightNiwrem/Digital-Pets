@@ -148,6 +148,43 @@ function createMockGameState(): GameState {
       totalItemsUsed: 0,
       totalItemsSold: 0,
     },
+    activityStats: {
+      foraging: {
+        completions: 0,
+        timeSpent: 0,
+        goldEarned: 0,
+        itemsEarned: 0,
+        experienceEarned: 0,
+      },
+      fishing: {
+        completions: 0,
+        timeSpent: 0,
+        goldEarned: 0,
+        itemsEarned: 0,
+        experienceEarned: 0,
+      },
+      mining: {
+        completions: 0,
+        timeSpent: 0,
+        goldEarned: 0,
+        itemsEarned: 0,
+        experienceEarned: 0,
+      },
+      training: {
+        completions: 0,
+        timeSpent: 0,
+        goldEarned: 0,
+        itemsEarned: 0,
+        experienceEarned: 0,
+      },
+      totals: {
+        completions: 0,
+        timeSpent: 0,
+        goldEarned: 0,
+        itemsEarned: 0,
+        experienceEarned: 0,
+      },
+    },
     gameTime: {
       totalTicks: 0,
       lastTickTime: Date.now(),
