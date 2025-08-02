@@ -3,7 +3,7 @@
 import type { Battle, BattleAction, BattlePet, BattleResult, BattleTurn, BattleType, BattleMove } from "@/types/Battle";
 import type { Pet, Move } from "@/types/Pet";
 import type { Result } from "@/types/index";
-import { EnergyManager, PetValidator, GameMath } from "@/lib/utils";
+import { EnergyManager, PetValidator, GameMath, ResultUtils } from "@/lib/utils";
 import { getMoveById, getStarterMoves } from "@/data/moves";
 
 // Import constants
@@ -62,15 +62,15 @@ export class BattleSystem {
     try {
       // Validate pets are ready for battle
       if (playerPet.currentHealth <= 0) {
-        return { success: false, error: "Your pet is unable to battle - no health remaining" };
+        return ResultUtils.error("Your pet is unable to battle - no health remaining");
       }
 
       if (!EnergyManager.hasEnoughEnergy(playerPet, 20)) {
-        return { success: false, error: "Your pet is too tired to battle - needs at least 20 energy" };
+        return ResultUtils.error("Your pet is too tired to battle - needs at least 20 energy");
       }
 
       if (!PetValidator.isIdle(playerPet)) {
-        return { success: false, error: "Your pet is busy and cannot battle right now" };
+        return ResultUtils.error("Your pet is busy and cannot battle right now");
       }
 
       // Convert pets to battle pets
@@ -93,9 +93,9 @@ export class BattleSystem {
         location,
       };
 
-      return { success: true, data: battle };
+      return ResultUtils.success(battle);
     } catch (error) {
-      return { success: false, error: `Failed to initiate battle: ${error}` };
+      return ResultUtils.error(`Failed to initiate battle: ${error}`);
     }
   }
 
@@ -105,17 +105,17 @@ export class BattleSystem {
   static processPlayerAction(battle: Battle, action: BattleAction): Result<Battle> {
     try {
       if (battle.status !== "in_progress" && battle.status !== "waiting") {
-        return { success: false, error: "Battle is not in progress" };
+        return ResultUtils.error("Battle is not in progress");
       }
 
       if (battle.turnPhase !== "select_action") {
-        return { success: false, error: "Not currently accepting actions" };
+        return ResultUtils.error("Not currently accepting actions");
       }
 
       // Validate action
       const validationResult = this.validateAction(battle, action);
       if (!validationResult.success) {
-        return { success: false, error: validationResult.error };
+        return ResultUtils.error(validationResult.error!);
       }
 
       // Generate opponent action (AI)
@@ -132,9 +132,9 @@ export class BattleSystem {
       // Check for battle end conditions
       const endResult = this.checkBattleEnd(updatedBattle);
 
-      return { success: true, data: endResult };
+      return ResultUtils.success(endResult);
     } catch (error) {
-      return { success: false, error: `Failed to process action: ${error}` };
+      return ResultUtils.error(`Failed to process action: ${error}`);
     }
   }
 
@@ -198,9 +198,9 @@ export class BattleSystem {
       updatedBattle.status = "in_progress";
       updatedBattle.turnPhase = "select_action";
 
-      return { success: true, data: updatedBattle };
+      return ResultUtils.success(updatedBattle);
     } catch (error) {
-      return { success: false, error: `Failed to execute turn: ${error}` };
+      return ResultUtils.error(`Failed to execute turn: ${error}`);
     }
   }
 
@@ -381,9 +381,9 @@ export class BattleSystem {
         // This method focuses on pet stat changes
       }
 
-      return { success: true, data: updatedPet };
+      return ResultUtils.success(updatedPet);
     } catch (error) {
-      return { success: false, error: `Failed to apply battle results: ${error}` };
+      return ResultUtils.error(`Failed to apply battle results: ${error}`);
     }
   }
 
@@ -418,25 +418,25 @@ export class BattleSystem {
   private static validateAction(battle: Battle, action: BattleAction): Result<void> {
     if (action.type === "move") {
       if (!action.moveId) {
-        return { success: false, error: "Move ID is required for move actions" };
+        return ResultUtils.error("Move ID is required for move actions");
       }
 
       const move = getMoveById(action.moveId);
       if (!move) {
-        return { success: false, error: "Invalid move selected" };
+        return ResultUtils.error("Invalid move selected");
       }
 
       const petMoves = battle.playerPet.moves.map(m => m.id);
       if (!petMoves.includes(action.moveId)) {
-        return { success: false, error: "Pet doesn't know this move" };
+        return ResultUtils.error("Pet doesn't know this move");
       }
 
       if (!EnergyManager.hasEnoughEnergy(battle.playerPet, move.energyCost)) {
-        return { success: false, error: EnergyManager.ERROR_MESSAGES.BATTLE };
+        return ResultUtils.error(EnergyManager.ERROR_MESSAGES.BATTLE);
       }
     }
 
-    return { success: true };
+    return ResultUtils.successVoid();
   }
 
   private static generateOpponentAction(battle: Battle): BattleAction {
