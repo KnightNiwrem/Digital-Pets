@@ -281,11 +281,28 @@ export class ItemSystem {
         if (pet.poopCount === 0) {
           return { success: false, error: "Pet doesn't need cleaning - no poop to clean" };
         }
+        // Add state validation for cleaning - consistent with UI logic
+        if (PetValidator.isSleeping(pet)) {
+          return { success: false, error: "Cannot clean pet while sleeping" };
+        }
+        if (PetValidator.isExploring(pet)) {
+          return { success: false, error: "Cannot clean pet while exploring" };
+        }
+        if (PetValidator.isTravelling(pet)) {
+          return { success: false, error: "Cannot clean pet while travelling" };
+        }
         break;
 
       case "toy":
         if (pet.happiness >= 100) {
           return { success: false, error: "Pet is already very happy" };
+        }
+        // Add state validation for toys - consistent with play validation
+        if (PetValidator.isSleeping(pet)) {
+          return { success: false, error: "Pet cannot play while sleeping" };
+        }
+        if (PetValidator.isExploring(pet)) {
+          return { success: false, error: "Pet cannot play while exploring" };
         }
         if (!PetValidator.hasEnoughEnergy(pet, 10)) {
           return { success: false, error: "Pet has insufficient energy to play" };

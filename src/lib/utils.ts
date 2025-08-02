@@ -153,6 +153,11 @@ export class PetValidator {
       return actionMessages[actionType];
     }
 
+    // Add sleeping validation - only play is restricted while sleeping
+    if (actionType === "play" && this.isSleeping(pet)) {
+      return "Pet cannot play while sleeping. Wake up the pet first.";
+    }
+
     if (actionType === "play" && !this.hasEnoughEnergy(pet, energyCost)) {
       return "Pet doesn't have enough energy to play.";
     }
