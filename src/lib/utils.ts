@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { Pet } from "@/types/Pet";
+import type { Result } from "@/types";
 import { PET_CONSTANTS } from "@/types";
 
 // Interface for objects that have energy properties
@@ -11,6 +12,54 @@ interface HasEnergy {
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+/**
+ * Result utility helpers for reducing boilerplate in success/error handling
+ * Centralizes common Result<T> creation patterns across systems
+ */
+export class ResultUtils {
+  /**
+   * Create a successful result with data
+   */
+  static success<T>(data: T, message?: string): Result<T> {
+    return { success: true, data, message };
+  }
+
+  /**
+   * Create a successful result without data (void operations)
+   */
+  static successVoid(message?: string): Result<void> {
+    return { success: true, message };
+  }
+
+  /**
+   * Create an error result with message
+   */
+  static error<T>(error: string): Result<T> {
+    return { success: false, error };
+  }
+
+  /**
+   * Execute validation and return error result if validation fails
+   * Reduces the repetitive if (validationError) { return error } pattern
+   */
+  static validateOrError<T>(validationError: string | null): Result<T> | null {
+    if (validationError) {
+      return this.error<T>(validationError);
+    }
+    return null;
+  }
+
+  /**
+   * Process a result that might be null (no data case) vs not found
+   */
+  static fromNullable<T>(data: T | null | undefined, errorMessage: string): Result<T> {
+    if (data === null || data === undefined) {
+      return this.error<T>(errorMessage);
+    }
+    return this.success(data);
+  }
 }
 
 /**
@@ -224,6 +273,81 @@ export class PetValidator {
     }
 
     return null;
+  }
+}
+
+/**
+ * Factory for creating PetCareAction objects
+ * Reduces duplicate action creation patterns across PetSystem methods
+ */
+export class PetCareActionFactory {
+  /**
+   * Create a pet care action with standard properties
+   */
+  static createAction(
+    type: "feed" | "drink" | "play" | "clean" | "medicine" | "sleep" | "wake",
+    energyCost?: number
+  ): import("@/types/Pet").PetCareAction {
+    const action: import("@/types/Pet").PetCareAction = {
+      type,
+      timestamp: Date.now(),
+    };
+
+    // Add energy cost for actions that require it
+    if (energyCost !== undefined) {
+      action.energyCost = energyCost;
+    }
+
+    return action;
+  }
+
+  /**
+   * Create a feed action
+   */
+  static feed(): import("@/types/Pet").PetCareAction {
+    return this.createAction("feed");
+  }
+
+  /**
+   * Create a drink action
+   */
+  static drink(): import("@/types/Pet").PetCareAction {
+    return this.createAction("drink");
+  }
+
+  /**
+   * Create a play action with energy cost
+   */
+  static play(energyCost: number): import("@/types/Pet").PetCareAction {
+    return this.createAction("play", energyCost);
+  }
+
+  /**
+   * Create a clean action
+   */
+  static clean(): import("@/types/Pet").PetCareAction {
+    return this.createAction("clean");
+  }
+
+  /**
+   * Create a medicine action
+   */
+  static medicine(): import("@/types/Pet").PetCareAction {
+    return this.createAction("medicine");
+  }
+
+  /**
+   * Create a sleep action
+   */
+  static sleep(): import("@/types/Pet").PetCareAction {
+    return this.createAction("sleep");
+  }
+
+  /**
+   * Create a wake action
+   */
+  static wake(): import("@/types/Pet").PetCareAction {
+    return this.createAction("wake");
   }
 }
 

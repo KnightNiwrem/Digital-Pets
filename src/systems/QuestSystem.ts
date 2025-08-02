@@ -12,6 +12,7 @@ import type {
 import type { Result, GameState } from "@/types";
 import { getItemById } from "@/data/items";
 import { ItemSystem } from "@/systems/ItemSystem";
+import { ResultUtils } from "@/lib/utils";
 
 export interface QuestAction {
   type: "start_quest" | "complete_quest" | "update_objective" | "fail_quest";
@@ -43,40 +44,28 @@ export class QuestSystem {
     const questLog = gameState.questLog || this.initializeQuestLog();
 
     if (questLog.completedQuests.includes(quest.id)) {
-      return {
-        success: false,
-        error: "Quest has already been completed.",
-      };
+      return ResultUtils.error("Quest has already been completed.");
     }
 
     if (questLog.activeQuests.some(q => q.questId === quest.id)) {
-      return {
-        success: false,
-        error: "Quest is already active.",
-      };
+      return ResultUtils.error("Quest is already active.");
     }
 
     // Check quest requirements
     for (const requirement of quest.requirements) {
       const requirementMet = this.checkRequirement(requirement, gameState);
       if (!requirementMet.success) {
-        return {
-          success: false,
-          error: requirementMet.error || "Quest requirements not met.",
-        };
+        return ResultUtils.error(requirementMet.error || "Quest requirements not met.");
       }
     }
 
     // Check if player has room for more active quests
     const maxActiveQuests = 10; // From QUEST_CONSTANTS
     if (questLog.activeQuests.length >= maxActiveQuests) {
-      return {
-        success: false,
-        error: "Too many active quests. Complete some quests first.",
-      };
+      return ResultUtils.error("Too many active quests. Complete some quests first.");
     }
 
-    return { success: true, data: true };
+    return ResultUtils.success(true);
   }
 
   /**
@@ -85,10 +74,7 @@ export class QuestSystem {
   static startQuest(quest: Quest, gameState: GameState): Result<GameState> {
     const canStart = this.canStartQuest(quest, gameState);
     if (!canStart.success) {
-      return {
-        success: false,
-        error: canStart.error,
-      };
+      return ResultUtils.error(canStart.error!);
     }
 
     const questLog = gameState.questLog || this.initializeQuestLog();
@@ -115,7 +101,7 @@ export class QuestSystem {
     // Update game state
     const updatedGameState = { ...gameState, questLog };
 
-    return { success: true, data: updatedGameState };
+    return ResultUtils.success(updatedGameState);
   }
 
   /**
@@ -127,10 +113,7 @@ export class QuestSystem {
     // Find the quest in active quests
     const questIndex = questLog.activeQuests.findIndex(q => q.questId === questId);
     if (questIndex === -1) {
-      return {
-        success: false,
-        error: "Quest is not active.",
-      };
+      return ResultUtils.error("Quest is not active.");
     }
 
     // Remove from active quests
@@ -144,7 +127,7 @@ export class QuestSystem {
     // Update game state
     const updatedGameState = { ...gameState, questLog };
 
-    return { success: true, data: updatedGameState };
+    return ResultUtils.success(updatedGameState);
   }
 
   /**
