@@ -2,7 +2,7 @@
 
 export type LocationType = "town" | "city" | "forest" | "beach" | "mountain" | "cave" | "desert" | "ruins";
 
-export type ActivityType = "foraging" | "fishing" | "mining" | "shop" | "training" | "battle" | "quest";
+export type ActivityType = "foraging" | "fishing" | "mining" | "training";
 
 export interface Activity {
   id: string;

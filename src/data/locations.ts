@@ -203,12 +203,15 @@ const RIVERSIDE: Location = {
     },
     {
       id: "riverside_rest",
-      name: "Rest by the Water",
-      type: "foraging",
-      description: "Relax by the peaceful water and restore energy",
-      energyCost: -10, // actually restores energy
+      name: "Peaceful Reflection",
+      type: "training",
+      description: "Sit quietly by the water and reflect with your pet, practicing mindfulness",
+      energyCost: 5,
       duration: 30,
-      rewards: [{ type: "experience", amount: 5, probability: 1.0 }],
+      rewards: [
+        { type: "experience", amount: 8, probability: 1.0 },
+        { type: "item", id: "herb", amount: 1, probability: 0.2 },
+      ],
     },
   ],
   shops: [
@@ -310,14 +313,15 @@ const MOUNTAIN_VILLAGE: Location = {
     },
     {
       id: "mountain_rest",
-      name: "Rest at High Altitude",
-      type: "foraging",
-      description: "Rest in the crisp mountain air and enjoy the spectacular views",
-      energyCost: -15, // restores energy
+      name: "High Altitude Training",
+      type: "training",
+      description: "Train in the crisp mountain air, building endurance and strength at high altitude",
+      energyCost: 15,
       duration: 45,
       rewards: [
-        { type: "experience", amount: 8, probability: 1.0 },
+        { type: "experience", amount: 12, probability: 1.0 },
         { type: "item", id: "herb", amount: 1, probability: 0.3 }, // mountain herbs
+        { type: "gold", amount: 5, probability: 0.2 },
       ],
     },
   ],
@@ -1115,12 +1119,12 @@ const QUIET_POND: Location = {
     },
     {
       id: "pond_meditation",
-      name: "Peaceful Meditation",
-      type: "foraging",
-      description: "Sit by the pond and meditate with your pet",
-      energyCost: -5, // restores energy
+      name: "Mindful Practice",
+      type: "training",
+      description: "Practice mindful meditation with your pet by the tranquil pond",
+      energyCost: 10,
       duration: 25, // 6.25 minutes
-      rewards: [{ type: "experience", amount: 6, probability: 1.0 }],
+      rewards: [{ type: "experience", amount: 8, probability: 1.0 }],
     },
     {
       id: "water_plant_gathering",
