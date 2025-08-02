@@ -277,7 +277,12 @@ export class GameLoop {
   /**
    * Process activity rewards
    */
-  private processActivityRewards(rewards: ActivityReward[], actions?: GameAction[], stateChanges?: string[], majorEvents?: string[]): void {
+  private processActivityRewards(
+    rewards: ActivityReward[],
+    actions?: GameAction[],
+    stateChanges?: string[],
+    majorEvents?: string[]
+  ): void {
     if (!this.gameState) return;
 
     GameLoop.processActivityRewardsStatic(this.gameState, rewards, majorEvents);
@@ -399,7 +404,11 @@ export class GameLoop {
   /**
    * Process activity rewards (static version for offline processing)
    */
-  private static processActivityRewardsStatic(gameState: GameState, rewards: ActivityReward[], majorEvents?: string[]): void {
+  private static processActivityRewardsStatic(
+    gameState: GameState,
+    rewards: ActivityReward[],
+    majorEvents?: string[]
+  ): void {
     for (const reward of rewards) {
       // Validate reward has required properties
       if (!reward.type || reward.amount === undefined || reward.amount === null) {
