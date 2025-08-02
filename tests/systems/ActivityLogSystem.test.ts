@@ -2,7 +2,7 @@
 
 import { describe, it, expect, beforeEach } from "bun:test";
 import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
-import type { GameState, ActivityLogEntry } from "@/types";
+import type { GameState } from "@/types";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 
 describe("ActivityLogSystem", () => {

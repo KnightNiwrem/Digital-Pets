@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { WorldSystem } from "@/systems/WorldSystem";
-import type { Pet, WorldState, GameState, Location, Activity, Inventory } from "@/types";
+import type { WorldState, GameState, Location, Activity } from "@/types";
 
 interface UseWorldStateProps {
   gameState: GameState;
