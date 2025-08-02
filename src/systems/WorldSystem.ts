@@ -269,6 +269,18 @@ export class WorldSystem {
               return { success: false, error: `Requires ${req.value}` };
             }
             break;
+          case "quest_completed":
+            // TODO: Quest integration not yet implemented
+            console.warn(`Quest requirement "${req.value}" not yet implemented - allowing activity to proceed`);
+            break;
+          case "pet_species":
+            if (pet.species.id !== req.value) {
+              return { success: false, error: `Requires ${req.value} species pet` };
+            }
+            break;
+          default:
+            console.warn(`Unknown requirement type "${req.type}" - allowing activity to proceed`);
+            break;
         }
       }
     }
