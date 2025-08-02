@@ -408,10 +408,35 @@ export class WorldSystem {
   /**
    * Cancel current activity for a pet
    */
-  static cancelActivity(worldState: WorldState, petId: string): Result<WorldState> {
+  static cancelActivity(
+    worldState: WorldState,
+    petId: string,
+    refundEnergy: boolean = false
+  ): Result<WorldState & { energyRefunded?: number }> {
     const activeActivityIndex = worldState.activeActivities.findIndex(a => a.petId === petId);
     if (activeActivityIndex === -1) {
       return { success: false, error: "No active activity to cancel" };
+    }
+
+    const activeActivity = worldState.activeActivities[activeActivityIndex];
+    let energyRefunded = 0;
+
+    if (refundEnergy) {
+      // Get the activity definition to calculate energy refund
+      const location = getLocationById(worldState.currentLocationId);
+      if (location) {
+        const activity = location.activities.find(a => a.id === activeActivity.activityId);
+        if (activity && activity.energyCost > 0) {
+          // Calculate partial energy refund based on remaining progress
+          const totalDuration = activity.duration;
+          const remainingTicks = activeActivity.ticksRemaining;
+          const progressCompleted = (totalDuration - remainingTicks) / totalDuration;
+
+          // Refund 50% of unused energy (energy not consumed by completed progress)
+          const unusedEnergyRatio = 1 - progressCompleted;
+          energyRefunded = Math.floor(activity.energyCost * unusedEnergyRatio * 0.5);
+        }
+      }
     }
 
     const updatedWorldState: WorldState = {
@@ -419,11 +444,23 @@ export class WorldSystem {
       activeActivities: worldState.activeActivities.filter((_, index) => index !== activeActivityIndex),
     };
 
-    return {
-      success: true,
-      data: updatedWorldState,
-      message: "Activity cancelled",
-    };
+    const message =
+      energyRefunded > 0 ? `Activity cancelled. ${energyRefunded} energy refunded.` : "Activity cancelled";
+
+    // Only include energyRefunded if there was actually a refund
+    if (energyRefunded > 0) {
+      return {
+        success: true,
+        data: { ...updatedWorldState, energyRefunded },
+        message,
+      };
+    } else {
+      return {
+        success: true,
+        data: updatedWorldState,
+        message,
+      };
+    }
   }
 
   /**

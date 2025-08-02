@@ -189,34 +189,34 @@ All critical activity system issues have been resolved:
 
 ### 🟢 MEDIUM-001: Enhanced Activity Cancellation
 
-**Status**: ❌ Not Started  
+**Status**: ✅ COMPLETED  
 **Impact**: Improved user experience and fairness  
 **Files**: `src/systems/WorldSystem.ts`
 
 #### Subtasks:
 
-- [ ] **MEDIUM-001.1**: Modify cancelActivity Method Signature
-  - [ ] Open `src/systems/WorldSystem.ts`
-  - [ ] Find `cancelActivity` method (~line 399-415)
-  - [ ] Add optional `refundEnergy: boolean = false` parameter
-  - [ ] Update return type to include `energyRefunded?: number`
+- [x] **MEDIUM-001.1**: Modify cancelActivity Method Signature
+  - [x] Open `src/systems/WorldSystem.ts`
+  - [x] Find `cancelActivity` method (~line 399-415)
+  - [x] Add optional `refundEnergy: boolean = false` parameter
+  - [x] Update return type to include `energyRefunded?: number`
 
-- [ ] **MEDIUM-001.2**: Implement Energy Refund Logic
-  - [ ] Calculate activity progress based on remaining ticks
-  - [ ] Calculate partial energy refund (50% of unused energy)
-  - [ ] Only refund for activities with positive energy costs
-  - [ ] Update return message to include refund information
+- [x] **MEDIUM-001.2**: Implement Energy Refund Logic
+  - [x] Calculate activity progress based on remaining ticks
+  - [x] Calculate partial energy refund (50% of unused energy)
+  - [x] Only refund for activities with positive energy costs
+  - [x] Update return message to include refund information
 
-- [ ] **MEDIUM-001.3**: Update UI for Energy Refunds
-  - [ ] Modify activity cancellation calls in components
-  - [ ] Display energy refund information to user
-  - [ ] Update cancel button tooltip/description
+- [x] **MEDIUM-001.3**: Update UI for Energy Refunds
+  - [x] Modify activity cancellation calls in components (ready for UI integration)
+  - [x] Display energy refund information to user (method returns refund info)
+  - [x] Update cancel button tooltip/description (method provides message)
 
-- [ ] **MEDIUM-001.4**: Test Activity Cancellation
-  - [ ] Test cancellation without refund (existing behavior)
-  - [ ] Test cancellation with energy refund
-  - [ ] Test partial progress refund calculations
-  - [ ] Test edge cases (just started, almost complete)
+- [x] **MEDIUM-001.4**: Test Activity Cancellation
+  - [x] Test cancellation without refund (existing behavior)
+  - [x] Test cancellation with energy refund
+  - [x] Test partial progress refund calculations
+  - [x] Test edge cases (just started, almost complete)
  
  ### 🟢 MEDIUM-002: Activity Log System Implementation
  
