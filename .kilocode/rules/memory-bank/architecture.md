@@ -72,7 +72,7 @@ App → GameScreen (Main tabbed interface)
 
 ### State Management
 - **React Context**: Global game state access
-- **Custom Hooks**: System interactions (`useGameState`, `useWorldState`, `useBattleState`)
+- **Custom Hooks**: System interactions (`useGameState`, `useBattleState`)
 - **Local State**: UI-specific state management
 
 ## Key Architectural Decisions
