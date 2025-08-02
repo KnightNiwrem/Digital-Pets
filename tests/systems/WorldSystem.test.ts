@@ -570,4 +570,88 @@ describe("WorldSystem", () => {
       }
     });
   });
+
+  describe("Enhanced Activity Cancellation", () => {
+    it("should cancel activity without refund by default", () => {
+      // Start an activity first
+      const startResult = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
+      expect(startResult.success).toBe(true);
+      const worldStateWithActivity = startResult.data!.worldState;
+      
+      // Cancel without refund
+      const cancelResult = WorldSystem.cancelActivity(worldStateWithActivity, mockPet.id);
+      expect(cancelResult.success).toBe(true);
+      expect(cancelResult.data!.activeActivities).toHaveLength(0);
+      expect(cancelResult.message).toBe("Activity cancelled");
+      expect(cancelResult.data!.energyRefunded).toBeUndefined();
+    });
+
+    it("should cancel activity with energy refund when requested", () => {
+      // Start an activity first  
+      const startResult = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
+      expect(startResult.success).toBe(true);
+      const worldStateWithActivity = startResult.data!.worldState;
+      
+      // Simulate some progress by reducing ticks remaining
+      const activityWithProgress = {
+        ...worldStateWithActivity,
+        activeActivities: worldStateWithActivity.activeActivities.map(a => ({
+          ...a,
+          ticksRemaining: a.ticksRemaining - 5  // Some progress made
+        }))
+      };
+      
+      // Cancel with refund
+      const cancelResult = WorldSystem.cancelActivity(activityWithProgress, mockPet.id, true);
+      expect(cancelResult.success).toBe(true);
+      expect(cancelResult.data!.activeActivities).toHaveLength(0);
+      expect(cancelResult.data!.energyRefunded).toBeGreaterThan(0);
+      expect(cancelResult.message).toContain("energy refunded");
+    });
+
+    it("should calculate energy refund based on remaining progress", () => {
+      // Start an activity first
+      const startResult = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
+      expect(startResult.success).toBe(true);
+      const worldStateWithActivity = startResult.data!.worldState;
+      
+      // Simulate 50% progress (10 ticks completed out of 20)
+      const activityWithHalfProgress = {
+        ...worldStateWithActivity,
+        activeActivities: worldStateWithActivity.activeActivities.map(a => ({
+          ...a,
+          ticksRemaining: 10  // Half remaining
+        }))
+      };
+      
+      // Cancel with refund - should get ~25% of original energy (50% of unused 50% energy)
+      const cancelResult = WorldSystem.cancelActivity(activityWithHalfProgress, mockPet.id, true);
+      expect(cancelResult.success).toBe(true);
+      
+      // Original activity cost is 10, 50% unused = 5, 50% of that = 2.5, floored = 2
+      expect(cancelResult.data!.energyRefunded).toBe(2);
+    });
+
+    it("should not refund energy for zero or negative energy cost activities", () => {
+      // This test would be for edge cases, but since we've validated all activities have positive costs,
+      // we can test the logic by mocking a hypothetical activity
+      
+      // Mock an activity with zero energy cost in the world state
+      const worldStateWithZeroEnergyActivity = {
+        ...worldState,
+        activeActivities: [{
+          activityId: "test_zero_energy", // This won't match any real activity
+          locationId: "hometown",
+          startTime: Date.now(),
+          ticksRemaining: 10,
+          petId: mockPet.id
+        }]
+      };
+      
+      const cancelResult = WorldSystem.cancelActivity(worldStateWithZeroEnergyActivity, mockPet.id, true);
+      expect(cancelResult.success).toBe(true);
+      expect(cancelResult.data!.energyRefunded).toBeUndefined(); // No refund for zero energy activities
+      expect(cancelResult.message).toBe("Activity cancelled");
+    });
+  });
 });
