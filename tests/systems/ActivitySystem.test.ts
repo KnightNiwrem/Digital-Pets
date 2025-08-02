@@ -19,7 +19,7 @@ describe("Activity System", () => {
         });
       });
 
-      // Currently failing - this test documents the existing broken state
+      // Should pass now that negative energy costs have been fixed
       expect(negativeEnergyActivities).toEqual([]);
     });
 
