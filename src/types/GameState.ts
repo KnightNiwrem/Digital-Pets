@@ -78,6 +78,46 @@ export interface GameMetrics {
   totalItemsSold: number;
 }
 
+export interface ActivityStats {
+  // Activity completion counts by type
+  foraging: {
+    completions: number;
+    timeSpent: number; // in ticks
+    goldEarned: number;
+    itemsEarned: number;
+    experienceEarned: number;
+  };
+  fishing: {
+    completions: number;
+    timeSpent: number; // in ticks
+    goldEarned: number;
+    itemsEarned: number;
+    experienceEarned: number;
+  };
+  mining: {
+    completions: number;
+    timeSpent: number; // in ticks
+    goldEarned: number;
+    itemsEarned: number;
+    experienceEarned: number;
+  };
+  training: {
+    completions: number;
+    timeSpent: number; // in ticks
+    goldEarned: number;
+    itemsEarned: number;
+    experienceEarned: number;
+  };
+  // Overall totals
+  totals: {
+    completions: number;
+    timeSpent: number; // in ticks
+    goldEarned: number;
+    itemsEarned: number;
+    experienceEarned: number;
+  };
+}
+
 export interface SaveMetadata {
   version: string;
   lastSaveTime: number;
@@ -108,6 +148,9 @@ export interface GameState {
 
   // Metrics and analytics
   metrics: GameMetrics;
+
+  // Activity statistics tracking
+  activityStats: ActivityStats;
 
   // Game time tracking
   gameTime: {
@@ -215,3 +258,41 @@ export const DEFAULT_PLAYER_STATS: PlayerStats = {
   mostGoldOwned: 100,
   firstPetSpecies: "",
 };
+
+export const DEFAULT_ACTIVITY_STATS: ActivityStats = {
+  foraging: {
+    completions: 0,
+    timeSpent: 0,
+    goldEarned: 0,
+    itemsEarned: 0,
+    experienceEarned: 0,
+  },
+  fishing: {
+    completions: 0,
+    timeSpent: 0,
+    goldEarned: 0,
+    itemsEarned: 0,
+    experienceEarned: 0,
+  },
+  mining: {
+    completions: 0,
+    timeSpent: 0,
+    goldEarned: 0,
+    itemsEarned: 0,
+    experienceEarned: 0,
+  },
+  training: {
+    completions: 0,
+    timeSpent: 0,
+    goldEarned: 0,
+    itemsEarned: 0,
+    experienceEarned: 0,
+  },
+  totals: {
+    completions: 0,
+    timeSpent: 0,
+    goldEarned: 0,
+    itemsEarned: 0,
+    experienceEarned: 0,
+  },
+} as const;

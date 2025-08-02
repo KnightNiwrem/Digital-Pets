@@ -9,13 +9,14 @@ import { WorldScreen } from "@/components/world/WorldScreen";
 import { InventoryScreen } from "@/components/inventory/InventoryScreen";
 import { BattleScreen } from "@/components/battle/BattleScreen";
 import { QuestScreen } from "@/components/quest/QuestScreen";
+import { ActivityStatsPanel } from "@/components/world/ActivityStatsPanel";
 import { useGameState } from "@/hooks/useGameState";
 import { useBattleState } from "@/hooks/useBattleState";
 import type { BattleAction } from "@/types/Battle";
 import type { PetSpecies } from "@/types/Pet";
 import { getStarterPets } from "@/data/pets";
 import { GameStateValidator, ActionHandler } from "@/lib/utils";
-import { Home, Map as MapIcon, Package, Sword, ScrollText } from "lucide-react";
+import { Home, Map as MapIcon, Package, Sword, ScrollText, BarChart3 } from "lucide-react";
 
 export function GameScreen() {
   const {
@@ -65,7 +66,7 @@ export function GameScreen() {
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
   const [selectedStarter, setSelectedStarter] = useState<PetSpecies | null>(null);
-  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle" | "quest">("pet");
+  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle" | "quest" | "stats">("pet");
 
   // Get starter pets
   const starterPets = getStarterPets();
@@ -379,6 +380,17 @@ export function GameScreen() {
               <ScrollText className="w-4 h-4 inline mr-1 sm:mr-2" />
               Quests
             </button>
+            <button
+              onClick={() => setActiveTab("stats")}
+              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                activeTab === "stats"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <BarChart3 className="w-4 h-4 inline mr-1 sm:mr-2" />
+              Stats
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -452,6 +464,8 @@ export function GameScreen() {
               isLoading={isLoading}
             />
           )}
+
+          {activeTab === "stats" && <ActivityStatsPanel activityStats={gameState.activityStats} />}
         </div>
       ) : (
         <div className="text-center py-12">

@@ -1,7 +1,7 @@
 // Core game loop and state management
 
 import type { GameState, GameTick, GameAction } from "@/types";
-import type { ActivityReward } from "@/types/World";
+import type { ActivityReward, ActivityType } from "@/types/World";
 import { GAME_CONSTANTS } from "@/types";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
@@ -472,6 +472,62 @@ export class GameLoop {
   }
 
   /**
+   * Update activity statistics for completed activity
+   */
+  private static updateActivityStatistics(
+    gameState: GameState,
+    activityType: ActivityType,
+    activityDuration: number,
+    rewards: ActivityReward[]
+  ): void {
+    // Calculate totals from rewards
+    let goldEarned = 0;
+    let itemsEarned = 0;
+    let experienceEarned = 0;
+
+    for (const reward of rewards) {
+      switch (reward.type) {
+        case "gold":
+          goldEarned += reward.amount;
+          break;
+        case "item":
+          itemsEarned += reward.amount;
+          break;
+        case "experience":
+          experienceEarned += reward.amount;
+          break;
+      }
+    }
+
+    // Update activity-specific stats
+    if (gameState.activityStats[activityType]) {
+      gameState.activityStats[activityType].completions += 1;
+      gameState.activityStats[activityType].timeSpent += activityDuration;
+      gameState.activityStats[activityType].goldEarned += goldEarned;
+      gameState.activityStats[activityType].itemsEarned += itemsEarned;
+      gameState.activityStats[activityType].experienceEarned += experienceEarned;
+    }
+
+    // Update totals
+    gameState.activityStats.totals.completions += 1;
+    gameState.activityStats.totals.timeSpent += activityDuration;
+    gameState.activityStats.totals.goldEarned += goldEarned;
+    gameState.activityStats.totals.itemsEarned += itemsEarned;
+    gameState.activityStats.totals.experienceEarned += experienceEarned;
+
+    // Also update the legacy metrics for backward compatibility
+    if (activityType === "foraging") {
+      gameState.metrics.totalForaging += 1;
+    } else if (activityType === "fishing") {
+      gameState.metrics.totalFishing += 1;
+    } else if (activityType === "mining") {
+      gameState.metrics.totalMining += 1;
+    } else if (activityType === "training") {
+      gameState.metrics.totalTraining += 1;
+    }
+  }
+
+  /**
    * Calculate offline progression when loading a saved game
    */
   calculateOfflineProgression(lastSaveTime: number): void {
@@ -509,6 +565,16 @@ export class GameLoop {
         const actions: GameAction[] = [];
         const stateChanges: string[] = [];
         this.processActivityRewards(worldResult.data.rewards, actions, stateChanges);
+      }
+
+      // Update activity statistics for offline completed activities
+      for (const completedActivity of worldResult.data.completedActivities) {
+        GameLoop.updateActivityStatistics(
+          this.gameState,
+          completedActivity.activityType,
+          completedActivity.duration,
+          completedActivity.rewards
+        );
       }
     }
 
@@ -678,9 +744,20 @@ export class GameLoop {
     });
 
     // Process rewards for all completed activities
-    for (const { rewards } of completedActivities) {
+    for (const { activity, rewards } of completedActivities) {
       if (rewards.length > 0) {
         GameLoop.processActivityRewardsStatic(gameState, rewards, majorEvents);
+      }
+
+      // Update activity statistics if we have the activity definition
+      const activityData = activity as { definition?: { type: ActivityType; duration: number } };
+      if (activityData.definition) {
+        GameLoop.updateActivityStatistics(
+          gameState,
+          activityData.definition.type,
+          activityData.definition.duration,
+          rewards
+        );
       }
     }
 

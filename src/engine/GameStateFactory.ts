@@ -1,7 +1,7 @@
 // Factory for creating game state objects
 
 import type { GameState, Pet, PetSpecies, Inventory, WorldState, QuestLog } from "@/types";
-import { GAME_CONSTANTS, DEFAULT_GAME_SETTINGS, DEFAULT_PLAYER_STATS } from "@/types";
+import { GAME_CONSTANTS, DEFAULT_GAME_SETTINGS, DEFAULT_PLAYER_STATS, DEFAULT_ACTIVITY_STATS } from "@/types";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { getItemById } from "@/data/items";
@@ -55,6 +55,14 @@ export class GameStateFactory {
         totalGoldSpent: 0,
         totalItemsUsed: 0,
         totalItemsSold: 0,
+      },
+
+      activityStats: {
+        foraging: { ...DEFAULT_ACTIVITY_STATS.foraging },
+        fishing: { ...DEFAULT_ACTIVITY_STATS.fishing },
+        mining: { ...DEFAULT_ACTIVITY_STATS.mining },
+        training: { ...DEFAULT_ACTIVITY_STATS.training },
+        totals: { ...DEFAULT_ACTIVITY_STATS.totals },
       },
 
       gameTime: {
@@ -232,10 +240,11 @@ export class GameStateFactory {
       "metadata",
       "inventory",
       "world",
-      "quests",
+      "questLog",
       "playerStats",
       "settings",
       "metrics",
+      "activityStats",
       "gameTime",
       "tutorial",
       "achievements",

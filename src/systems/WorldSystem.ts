@@ -1,6 +1,15 @@
 // WorldSystem - Manages locations, travel, and world interactions
 
-import type { WorldState, TravelState, Location, Activity, ActiveActivity, ActivityReward, Shop } from "@/types/World";
+import type {
+  WorldState,
+  TravelState,
+  Location,
+  Activity,
+  ActiveActivity,
+  ActivityReward,
+  Shop,
+  CompletedActivityInfo,
+} from "@/types/World";
 import type { Pet } from "@/types/Pet";
 import type { Inventory } from "@/types/Item";
 import type { Result } from "@/types";
@@ -318,10 +327,13 @@ export class WorldSystem {
   /**
    * Process active activities during game tick
    */
-  static processActivitiesTick(worldState: WorldState): Result<{ worldState: WorldState; rewards: ActivityReward[] }> {
+  static processActivitiesTick(
+    worldState: WorldState
+  ): Result<{ worldState: WorldState; rewards: ActivityReward[]; completedActivities: CompletedActivityInfo[] }> {
     const completedActivities: ActiveActivity[] = [];
     const continuingActivities: ActiveActivity[] = [];
     const allRewards: ActivityReward[] = [];
+    const completedActivityInfo: CompletedActivityInfo[] = [];
 
     for (const activeActivity of worldState.activeActivities) {
       const newTicksRemaining = activeActivity.ticksRemaining - 1;
@@ -336,11 +348,22 @@ export class WorldSystem {
           const activity = location.activities.find(a => a.id === activeActivity.activityId);
           if (activity) {
             // Calculate rewards based on probability
+            const earnedRewards: ActivityReward[] = [];
             for (const reward of activity.rewards) {
               if (Math.random() < reward.probability) {
+                earnedRewards.push(reward);
                 allRewards.push(reward);
               }
             }
+
+            // Store completed activity info for statistics tracking
+            completedActivityInfo.push({
+              activityId: activeActivity.activityId,
+              locationId: activeActivity.locationId,
+              activityType: activity.type,
+              duration: activity.duration,
+              rewards: earnedRewards,
+            });
           }
         }
       } else {
@@ -359,7 +382,7 @@ export class WorldSystem {
 
     return {
       success: true,
-      data: { worldState: updatedWorldState, rewards: allRewards },
+      data: { worldState: updatedWorldState, rewards: allRewards, completedActivities: completedActivityInfo },
       message: completedActivities.length > 0 ? `Completed ${completedActivities.length} activities` : undefined,
     };
   }
@@ -469,9 +492,10 @@ export class WorldSystem {
   static processOfflineProgression(
     worldState: WorldState,
     ticksToProcess: number
-  ): Result<{ worldState: WorldState; rewards: ActivityReward[] }> {
+  ): Result<{ worldState: WorldState; rewards: ActivityReward[]; completedActivities: CompletedActivityInfo[] }> {
     let currentWorldState = worldState;
     const allRewards: ActivityReward[] = [];
+    const allCompletedActivities: CompletedActivityInfo[] = [];
 
     for (let i = 0; i < ticksToProcess; i++) {
       // Process travel
@@ -488,11 +512,12 @@ export class WorldSystem {
       }
       currentWorldState = activityResult.data.worldState;
       allRewards.push(...activityResult.data.rewards);
+      allCompletedActivities.push(...activityResult.data.completedActivities);
     }
 
     return {
       success: true,
-      data: { worldState: currentWorldState, rewards: allRewards },
+      data: { worldState: currentWorldState, rewards: allRewards, completedActivities: allCompletedActivities },
     };
   }
 
