@@ -1,12 +1,14 @@
 // Core game loop and state management
 
 import type { GameState, GameTick, GameAction } from "@/types";
+import type { ActivityReward } from "@/types/World";
 import { GAME_CONSTANTS } from "@/types";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { getItemById } from "@/data/items";
+import { getLocationById } from "@/data/locations";
 
 export class GameLoop {
   private static instance: GameLoop | null = null;
@@ -276,22 +278,149 @@ export class GameLoop {
    * Process activity rewards
    */
   private processActivityRewards(
-    rewards: import("@/types/World").ActivityReward[],
-    actions: GameAction[],
-    stateChanges: string[]
+    rewards: ActivityReward[],
+    actions?: GameAction[],
+    stateChanges?: string[],
+    majorEvents?: string[]
   ): void {
     if (!this.gameState) return;
 
-    for (const reward of rewards) {
-      switch (reward.type) {
-        case "gold":
-          this.gameState.inventory.gold += reward.amount;
+    GameLoop.processActivityRewardsStatic(this.gameState, rewards, majorEvents);
+
+    // Add actions and state changes only when provided (for online processing)
+    if (actions && stateChanges) {
+      for (const reward of rewards) {
+        // Validate reward has required properties
+        if (!reward.type || reward.amount === undefined || reward.amount === null) {
           actions.push({
             type: "gold_earned",
-            payload: { amount: reward.amount, source: "activity" },
+            payload: { amount: 1, source: "activity_error_compensation" },
             timestamp: Date.now(),
             source: "system",
           });
+          continue;
+        }
+
+        switch (reward.type) {
+          case "gold":
+            actions.push({
+              type: "gold_earned",
+              payload: { amount: reward.amount, source: "activity" },
+              timestamp: Date.now(),
+              source: "system",
+            });
+            break;
+
+          case "item":
+            if (reward.id) {
+              const item = getItemById(reward.id);
+              if (item) {
+                const addResult = ItemSystem.addItem(this.gameState.inventory, item, reward.amount);
+                if (!addResult.success) {
+                  // Convert failed item additions to gold compensation
+                  const compensationGold = Math.max(1, Math.floor(item.value * reward.amount * 0.5));
+                  actions.push({
+                    type: "gold_earned",
+                    payload: { amount: compensationGold, source: "item_compensation" },
+                    timestamp: Date.now(),
+                    source: "system",
+                  });
+                  actions.push({
+                    type: "item_conversion",
+                    payload: {
+                      itemId: reward.id,
+                      amount: reward.amount,
+                      goldReceived: compensationGold,
+                      reason: "inventory_full",
+                    },
+                    timestamp: Date.now(),
+                    source: "system",
+                  });
+                }
+              } else {
+                // Provide default gold compensation for missing items
+                const compensationGold = reward.amount * 2;
+                actions.push({
+                  type: "gold_earned",
+                  payload: { amount: compensationGold, source: "missing_item_compensation" },
+                  timestamp: Date.now(),
+                  source: "system",
+                });
+                actions.push({
+                  type: "item_missing",
+                  payload: { itemId: reward.id, amount: reward.amount, goldReceived: compensationGold },
+                  timestamp: Date.now(),
+                  source: "system",
+                });
+                console.warn(`Missing item definition for ${reward.id}, providing gold compensation`);
+              }
+              actions.push({
+                type: "item_earned",
+                payload: { itemId: reward.id, amount: reward.amount, source: "activity" },
+                timestamp: Date.now(),
+                source: "system",
+              });
+            } else {
+              // Handle malformed item rewards missing ID
+              const compensationGold = reward.amount || 1;
+              actions.push({
+                type: "gold_earned",
+                payload: { amount: compensationGold, source: "malformed_item_compensation" },
+                timestamp: Date.now(),
+                source: "system",
+              });
+              console.warn("Item reward missing ID, providing gold compensation:", reward);
+            }
+            break;
+
+          case "experience":
+            actions.push({
+              type: "experience_earned",
+              payload: { amount: reward.amount, source: "activity" },
+              timestamp: Date.now(),
+              source: "system",
+            });
+            break;
+
+          default: {
+            // Handle unknown reward types
+            const unknownCompensation = 1;
+            actions.push({
+              type: "gold_earned",
+              payload: { amount: unknownCompensation, source: "unknown_reward_compensation" },
+              timestamp: Date.now(),
+              source: "system",
+            });
+            console.warn("Unknown reward type, providing gold compensation:", reward);
+            break;
+          }
+        }
+      }
+
+      stateChanges.push("rewards_processed");
+    }
+  }
+
+  /**
+   * Process activity rewards (static version for offline processing)
+   */
+  private static processActivityRewardsStatic(
+    gameState: GameState,
+    rewards: ActivityReward[],
+    majorEvents?: string[]
+  ): void {
+    for (const reward of rewards) {
+      // Validate reward has required properties
+      if (!reward.type || reward.amount === undefined || reward.amount === null) {
+        // Provide minimal gold compensation for malformed rewards
+        gameState.inventory.gold += 1;
+        console.warn("Malformed reward data, providing gold compensation:", reward);
+        continue;
+      }
+
+      switch (reward.type) {
+        case "gold":
+          gameState.inventory.gold += reward.amount;
           break;
 
         case "item":
@@ -299,33 +428,47 @@ export class GameLoop {
             // Add item to inventory using ItemSystem
             const item = getItemById(reward.id);
             if (item) {
-              const addResult = ItemSystem.addItem(this.gameState.inventory, item, reward.amount);
+              const addResult = ItemSystem.addItem(gameState.inventory, item, reward.amount);
               if (addResult.success) {
-                this.gameState.inventory = addResult.data!;
+                gameState.inventory = addResult.data!;
+              } else {
+                // Convert failed item additions to gold compensation
+                const compensationGold = Math.max(1, Math.floor(item.value * reward.amount * 0.5));
+                gameState.inventory.gold += compensationGold;
+                if (majorEvents) {
+                  majorEvents.push(`item_conversion_to_gold_${reward.id}`);
+                }
               }
+            } else {
+              // Provide default gold compensation for missing items
+              const compensationGold = reward.amount * 2;
+              gameState.inventory.gold += compensationGold;
+              if (majorEvents) {
+                majorEvents.push(`missing_item_compensation_${reward.id}`);
+              }
+              console.warn(`Missing item definition for ${reward.id}, providing gold compensation`);
             }
-            actions.push({
-              type: "item_earned",
-              payload: { itemId: reward.id, amount: reward.amount, source: "activity" },
-              timestamp: Date.now(),
-              source: "system",
-            });
+          } else {
+            // Handle malformed item rewards missing ID
+            const compensationGold = reward.amount || 1;
+            gameState.inventory.gold += compensationGold;
+            console.warn("Item reward missing ID, providing gold compensation:", reward);
           }
           break;
 
         case "experience":
-          this.gameState.playerStats.experience += reward.amount;
-          actions.push({
-            type: "experience_earned",
-            payload: { amount: reward.amount, source: "activity" },
-            timestamp: Date.now(),
-            source: "system",
-          });
+          gameState.playerStats.experience += reward.amount;
           break;
+
+        default: {
+          // Handle unknown reward types
+          const unknownCompensation = 1;
+          gameState.inventory.gold += unknownCompensation;
+          console.warn("Unknown reward type, providing gold compensation:", reward);
+          break;
+        }
       }
     }
-
-    stateChanges.push("rewards_processed");
   }
 
   /**
@@ -499,17 +642,47 @@ export class GameLoop {
 
     // Process active activities
     const hadActivities = gameState.world.activeActivities.length > 0;
+    const completedActivities: Array<{ activity: { [key: string]: unknown }; rewards: ActivityReward[] }> = [];
+
     gameState.world.activeActivities = gameState.world.activeActivities.filter(activity => {
       activity.ticksRemaining -= actualTicksToProcess;
 
       if (activity.ticksRemaining <= 0) {
         majorEvents.push("activity_completed");
-        // Distribute activity rewards using ItemSystem
+
+        // Get activity definition from location data
+        const location = getLocationById(activity.locationId);
+        if (location) {
+          const activityDef = location.activities.find(a => a.id === activity.activityId);
+          if (activityDef) {
+            // Calculate rewards based on probability rolls
+            const earnedRewards: ActivityReward[] = [];
+            for (const reward of activityDef.rewards) {
+              if (Math.random() <= reward.probability) {
+                earnedRewards.push(reward);
+              }
+            }
+
+            // Store activity and rewards for later processing
+            completedActivities.push({
+              activity: { ...activity, definition: activityDef },
+              rewards: earnedRewards,
+            });
+          }
+        }
+
         return false; // Remove completed activity
       }
 
       return true; // Keep ongoing activity
     });
+
+    // Process rewards for all completed activities
+    for (const { rewards } of completedActivities) {
+      if (rewards.length > 0) {
+        GameLoop.processActivityRewardsStatic(gameState, rewards, majorEvents);
+      }
+    }
 
     // Reset pet state to idle if it was exploring and activities completed but no more remain
     if (hadActivities && gameState.world.activeActivities.length === 0 && gameState.currentPet?.state === "exploring") {

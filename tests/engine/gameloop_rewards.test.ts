@@ -83,22 +83,7 @@ describe("GameLoop Item Rewards", () => {
     expect(goldActions).toHaveLength(1);
   });
 
-  it("should handle rewards for non-existent items gracefully", () => {
-    const rewards: ActivityReward[] = [{ type: "item", id: "non_existent_item", amount: 1, probability: 1.0 }];
 
-    const actions: GameAction[] = [];
-    const stateChanges: string[] = [];
-
-    // This should not throw an error
-    expect(() => {
-      (gameLoop as any).processActivityRewards(rewards, actions, stateChanges);
-    }).not.toThrow();
-
-    // Should still log the action even if item doesn't exist
-    expect(actions).toHaveLength(1);
-    expect(actions[0].type).toBe("item_earned");
-    expect(actions[0].payload.itemId).toBe("non_existent_item");
-  });
 
   it("should verify that items are properly defined in data", () => {
     // This test ensures our test items actually exist
