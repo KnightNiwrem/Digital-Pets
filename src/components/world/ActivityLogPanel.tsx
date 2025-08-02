@@ -30,7 +30,7 @@ export function ActivityLogPanel({ gameState }: ActivityLogPanelProps) {
   // Get all log entries
   const allEntries = useMemo(() => {
     return ActivityLogSystem.getLogEntries(gameState);
-  }, [gameState.activityLog]);
+  }, [gameState]);
 
   // Get unique locations for filter dropdown
   const uniqueLocations = useMemo(() => {
@@ -56,7 +56,7 @@ export function ActivityLogPanel({ gameState }: ActivityLogPanelProps) {
   // Calculate statistics
   const statistics = useMemo(() => {
     return ActivityLogSystem.getLogStatistics(gameState);
-  }, [gameState.activityLog]);
+  }, [gameState]);
 
   return (
     <div className="space-y-6">
@@ -122,9 +122,7 @@ export function ActivityLogPanel({ gameState }: ActivityLogPanelProps) {
               <label className="text-sm font-medium text-gray-700">Status</label>
               <Select
                 value={filters.status}
-                onValueChange={(value: FilterState["status"]) =>
-                  setFilters(prev => ({ ...prev, status: value }))
-                }
+                onValueChange={(value: FilterState["status"]) => setFilters(prev => ({ ...prev, status: value }))}
               >
                 <SelectTrigger className="w-40">
                   <SelectValue />
@@ -142,9 +140,7 @@ export function ActivityLogPanel({ gameState }: ActivityLogPanelProps) {
               <label className="text-sm font-medium text-gray-700">Location</label>
               <Select
                 value={filters.location}
-                onValueChange={(value: string) =>
-                  setFilters(prev => ({ ...prev, location: value }))
-                }
+                onValueChange={(value: string) => setFilters(prev => ({ ...prev, location: value }))}
               >
                 <SelectTrigger className="w-40">
                   <SelectValue />
@@ -164,9 +160,7 @@ export function ActivityLogPanel({ gameState }: ActivityLogPanelProps) {
               <label className="text-sm font-medium text-gray-700">Show</label>
               <Select
                 value={filters.limit.toString()}
-                onValueChange={(value: string) =>
-                  setFilters(prev => ({ ...prev, limit: parseInt(value) }))
-                }
+                onValueChange={(value: string) => setFilters(prev => ({ ...prev, limit: parseInt(value) }))}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -181,10 +175,7 @@ export function ActivityLogPanel({ gameState }: ActivityLogPanelProps) {
             </div>
 
             <div className="flex items-end">
-              <Button
-                variant="outline"
-                onClick={() => setFilters({ status: "all", location: "all", limit: 20 })}
-              >
+              <Button variant="outline" onClick={() => setFilters({ status: "all", location: "all", limit: 20 })}>
                 Clear Filters
               </Button>
             </div>
@@ -199,19 +190,14 @@ export function ActivityLogPanel({ gameState }: ActivityLogPanelProps) {
                 <p className="text-sm text-gray-400">Try adjusting your filters or start some activities!</p>
               </div>
             ) : (
-              filteredEntries.map((entry) => (
-                <ActivityLogEntryCard key={entry.id} entry={entry} />
-              ))
+              filteredEntries.map(entry => <ActivityLogEntryCard key={entry.id} entry={entry} />)
             )}
           </div>
 
           {/* Show more button if there are more entries */}
           {filters.limit > 0 && allEntries.length > filters.limit && (
             <div className="text-center mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setFilters(prev => ({ ...prev, limit: prev.limit + 20 }))}
-              >
+              <Button variant="outline" onClick={() => setFilters(prev => ({ ...prev, limit: prev.limit + 20 }))}>
                 Show More ({allEntries.length - filters.limit} remaining)
               </Button>
             </div>
@@ -235,9 +221,7 @@ function ActivityLogEntryCard({ entry }: ActivityLogEntryCardProps) {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">
-              <h3 className="font-medium text-gray-900">
-                {ActivityLogUtils.getActivityDisplayName(entry.activityId)}
-              </h3>
+              <h3 className="font-medium text-gray-900">{ActivityLogUtils.getActivityDisplayName(entry.activityId)}</h3>
               <span className={`px-2 py-1 text-xs font-medium rounded-full border ${statusBadgeClass}`}>
                 {entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}
               </span>
@@ -263,10 +247,7 @@ function ActivityLogEntryCard({ entry }: ActivityLogEntryCardProps) {
                 <p className="text-sm font-medium text-gray-700 mb-1">Results:</p>
                 <div className="flex flex-wrap gap-1">
                   {entry.results.map((result, index) => (
-                    <span
-                      key={index}
-                      className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
-                    >
+                    <span key={index} className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
                       {result.description}
                     </span>
                   ))}

@@ -431,15 +431,10 @@ export class GameLoop {
       if (logEntry) {
         // Calculate activity rewards for this specific activity
         const activityRewards = this.calculateActivitySpecificRewards(completedActivity, rewards);
-        
+
         // Create log results from the rewards
-        const logResults = activityRewards.map(reward => 
-          ActivityLogSystem.createLogResult(
-            reward.type,
-            reward.amount,
-            reward.id,
-            this.formatRewardDescription(reward)
-          )
+        const logResults = activityRewards.map(reward =>
+          ActivityLogSystem.createLogResult(reward.type, reward.amount, reward.id, this.formatRewardDescription(reward))
         );
 
         // If no rewards, add a "no rewards" result
@@ -497,27 +492,23 @@ export class GameLoop {
     for (const completedActivity of completedActivities) {
       // For offline activities, we need to find log entries differently since we don't have exact start times
       // We'll look for the most recent "started" entry for this activity and location
-      const logEntry = this.gameState.activityLog.find(entry =>
-        entry.activityId === completedActivity.activityId &&
-        entry.locationId === completedActivity.locationId &&
-        entry.status === "started"
+      const logEntry = this.gameState.activityLog.find(
+        entry =>
+          entry.activityId === completedActivity.activityId &&
+          entry.locationId === completedActivity.locationId &&
+          entry.status === "started"
       );
 
       if (logEntry) {
         // Calculate end time based on duration
-        const endTime = logEntry.startTime + (completedActivity.duration * GAME_CONSTANTS.TICK_INTERVAL);
-        
+        const endTime = logEntry.startTime + completedActivity.duration * GAME_CONSTANTS.TICK_INTERVAL;
+
         // Calculate activity rewards for this specific activity
         const activityRewards = this.calculateActivitySpecificRewards(completedActivity, rewards);
-        
+
         // Create log results from the rewards
-        const logResults = activityRewards.map(reward => 
-          ActivityLogSystem.createLogResult(
-            reward.type,
-            reward.amount,
-            reward.id,
-            this.formatRewardDescription(reward)
-          )
+        const logResults = activityRewards.map(reward =>
+          ActivityLogSystem.createLogResult(reward.type, reward.amount, reward.id, this.formatRewardDescription(reward))
         );
 
         // If no rewards, add a "no rewards" result

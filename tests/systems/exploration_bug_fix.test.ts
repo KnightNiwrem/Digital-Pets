@@ -70,12 +70,7 @@ describe("Exploration Bug Fix Tests", () => {
       gameState.currentPet.state = "idle"; // Reset from travelling to idle
 
       // Now start activity at forest_path
-      const result = WorldSystem.startActivity(
-        gameState.world,
-        gameState.currentPet!,
-        "forest_foraging",
-        gameState.inventory
-      );
+      const result = WorldSystem.startActivity(gameState, "forest_foraging");
 
       expect(result.success).toBe(true);
       expect(result.data?.pet.state).toBe("exploring");
@@ -114,12 +109,7 @@ describe("Exploration Bug Fix Tests", () => {
       gameState.currentPet.state = "idle";
 
       // Start activity
-      const result = WorldSystem.startActivity(
-        gameState.world,
-        gameState.currentPet!,
-        "forest_foraging",
-        gameState.inventory
-      );
+      const result = WorldSystem.startActivity(gameState, "forest_foraging");
 
       // Update game loop state (simulating the fix)
       const updatedGameState = {
@@ -158,12 +148,7 @@ describe("Exploration Bug Fix Tests", () => {
         currentLocation.activities.push(shortActivity);
       }
 
-      const result = WorldSystem.startActivity(
-        gameState.world,
-        gameState.currentPet!,
-        "test_short_activity",
-        gameState.inventory
-      );
+      const result = WorldSystem.startActivity(gameState, "test_short_activity");
 
       // Update game loop state (simulating the fix)
       const updatedGameState = {
@@ -205,12 +190,7 @@ describe("Exploration Bug Fix Tests", () => {
       gameState.currentPet.state = "idle";
 
       // Start activity with longer duration
-      const result = WorldSystem.startActivity(
-        gameState.world,
-        gameState.currentPet!,
-        "forest_foraging", // 30 tick duration
-        gameState.inventory
-      );
+      const result = WorldSystem.startActivity(gameState, "forest_foraging"); // 30 tick duration
 
       // Update game loop state (simulating the fix)
       const updatedGameState = {
@@ -304,12 +284,7 @@ describe("Exploration Bug Fix Tests", () => {
       gameState.currentPet.state = "idle";
 
       // Simulate React state update (like in useGameState hook)
-      const result = WorldSystem.startActivity(
-        gameState.world,
-        gameState.currentPet!,
-        "forest_foraging",
-        gameState.inventory
-      );
+      const result = WorldSystem.startActivity(gameState, "forest_foraging");
 
       const newReactState = {
         ...gameState,

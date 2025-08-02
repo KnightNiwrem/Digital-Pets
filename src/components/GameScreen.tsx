@@ -67,7 +67,9 @@ export function GameScreen() {
   const [gameStarted, setGameStarted] = useState(false);
   const [petName, setPetName] = useState("Buddy");
   const [selectedStarter, setSelectedStarter] = useState<PetSpecies | null>(null);
-  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle" | "quest" | "stats" | "log">("pet");
+  const [activeTab, setActiveTab] = useState<"pet" | "world" | "inventory" | "battle" | "quest" | "stats" | "log">(
+    "pet"
+  );
 
   // Get starter pets
   const starterPets = getStarterPets();

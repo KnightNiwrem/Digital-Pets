@@ -222,12 +222,9 @@ export class WorldSystem {
   /**
    * Start an activity at current location
    */
-  static startActivity(
-    gameState: GameState,
-    activityId: string
-  ): Result<{ worldState: WorldState; pet: Pet }> {
+  static startActivity(gameState: GameState, activityId: string): Result<{ worldState: WorldState; pet: Pet }> {
     const { world: worldState, currentPet: pet, inventory } = gameState;
-    
+
     if (!pet) {
       return { success: false, error: "No pet selected" };
     }
@@ -453,7 +450,7 @@ export class WorldSystem {
     refundEnergy: boolean = false
   ): Result<WorldState & { energyRefunded?: number }> {
     const { world: worldState } = gameState;
-    
+
     const activeActivityIndex = worldState.activeActivities.findIndex(a => a.petId === petId);
     if (activeActivityIndex === -1) {
       return { success: false, error: "No active activity to cancel" };

@@ -10,13 +10,10 @@ export class ActivityLogSystem {
    * Add a new activity log entry to the game state
    * Maintains maximum of 100 entries (removes oldest)
    */
-  static addLogEntry(
-    gameState: GameState,
-    entry: Omit<ActivityLogEntry, 'id'>
-  ): void {
+  static addLogEntry(gameState: GameState, entry: Omit<ActivityLogEntry, "id">): void {
     // Generate unique ID for the entry
     const id = `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const newEntry: ActivityLogEntry = {
       ...entry,
       id,
@@ -37,13 +34,9 @@ export class ActivityLogSystem {
   /**
    * Update an existing log entry by ID
    */
-  static updateLogEntry(
-    gameState: GameState,
-    entryId: string,
-    updates: Partial<ActivityLogEntry>
-  ): void {
+  static updateLogEntry(gameState: GameState, entryId: string, updates: Partial<ActivityLogEntry>): void {
     const entryIndex = gameState.activityLog.findIndex(entry => entry.id === entryId);
-    
+
     if (entryIndex === -1) {
       console.warn(`ActivityLogSystem: Entry with ID ${entryId} not found`);
       return;
@@ -59,16 +52,13 @@ export class ActivityLogSystem {
   /**
    * Get activity log entries with optional limit
    */
-  static getLogEntries(
-    gameState: GameState,
-    limit?: number
-  ): ActivityLogEntry[] {
+  static getLogEntries(gameState: GameState, limit?: number): ActivityLogEntry[] {
     const entries = gameState.activityLog || [];
-    
+
     if (limit && limit > 0) {
       return entries.slice(0, limit);
     }
-    
+
     return entries;
   }
 
@@ -81,11 +71,12 @@ export class ActivityLogSystem {
     locationId: string,
     startTime: number
   ): ActivityLogEntry | undefined {
-    return gameState.activityLog.find(entry => 
-      entry.activityId === activityId &&
-      entry.locationId === locationId &&
-      entry.startTime === startTime &&
-      entry.status === "started"
+    return gameState.activityLog.find(
+      entry =>
+        entry.activityId === activityId &&
+        entry.locationId === locationId &&
+        entry.startTime === startTime &&
+        entry.status === "started"
     );
   }
 
@@ -99,7 +90,7 @@ export class ActivityLogSystem {
     description?: string
   ): ActivityLogResult {
     let resultDescription = description;
-    
+
     if (!resultDescription) {
       switch (type) {
         case "item":
@@ -131,10 +122,11 @@ export class ActivityLogSystem {
    * Create a cancellation result for cancelled activities
    */
   static createCancellationResult(energyRefunded?: number): ActivityLogResult {
-    const description = energyRefunded && energyRefunded > 0 
-      ? `Activity cancelled (${energyRefunded} energy refunded)`
-      : "Activity cancelled";
-      
+    const description =
+      energyRefunded && energyRefunded > 0
+        ? `Activity cancelled (${energyRefunded} energy refunded)`
+        : "Activity cancelled";
+
     return {
       type: "none",
       description,
@@ -152,7 +144,7 @@ export class ActivityLogSystem {
     byLocation: Record<string, { started: number; completed: number; cancelled: number }>;
   } {
     const entries = gameState.activityLog || [];
-    
+
     const stats = {
       totalActivities: entries.length,
       completedActivities: entries.filter(e => e.status === "completed").length,
@@ -167,7 +159,7 @@ export class ActivityLogSystem {
       if (!stats.byType[entry.activityId]) {
         stats.byType[entry.activityId] = { started: 0, completed: 0, cancelled: 0 };
       }
-      
+
       // Initialize location stats if needed
       if (!stats.byLocation[entry.locationId]) {
         stats.byLocation[entry.locationId] = { started: 0, completed: 0, cancelled: 0 };

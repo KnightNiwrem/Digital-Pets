@@ -777,10 +777,7 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = WorldSystem.startActivity(
-          gameState,
-          activityId
-        );
+        const result = WorldSystem.startActivity(gameState, activityId);
         if (result.success && result.data) {
           setGameState(prev => {
             if (!prev) return null;

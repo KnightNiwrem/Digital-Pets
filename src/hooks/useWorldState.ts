@@ -38,7 +38,7 @@ export function useWorldState({
   disabled = false,
 }: UseWorldStateProps): UseWorldStateReturn {
   const { currentPet: pet, world: worldState, inventory } = gameState;
-  
+
   const startTravel = useCallback(
     async (destinationId: string) => {
       if (!pet || disabled) {
@@ -96,7 +96,7 @@ export function useWorldState({
       }
     },
 
-    [pet, worldState, inventory, updateGameState, disabled]
+    [pet, updateGameState, disabled, gameState]
   );
 
   const cancelActivity = useCallback(async () => {
@@ -122,7 +122,7 @@ export function useWorldState({
         error: result.error,
       };
     }
-  }, [pet, worldState, updateGameState, disabled]);
+  }, [pet, updateGameState, disabled, gameState]);
 
   const getTravelProgress = useCallback(() => {
     return WorldSystem.getTravelProgress(worldState);

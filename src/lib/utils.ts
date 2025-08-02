@@ -852,9 +852,9 @@ export class ActivityLogUtils {
   static getActivityDisplayName(activityId: string): string {
     // Convert snake_case to Title Case
     return activityId
-      .split('_')
+      .split("_")
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .join(" ");
   }
 
   /**
@@ -863,9 +863,9 @@ export class ActivityLogUtils {
   static getLocationDisplayName(locationId: string): string {
     // Convert snake_case to Title Case
     return locationId
-      .split('_')
+      .split("_")
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .join(" ");
   }
 
   /**

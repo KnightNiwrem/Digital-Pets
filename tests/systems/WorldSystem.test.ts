@@ -2,80 +2,21 @@
 
 import { describe, it, expect, beforeEach } from "bun:test";
 import { WorldSystem } from "@/systems/WorldSystem";
-import { ItemSystem } from "@/systems/ItemSystem";
-import type { WorldState, Pet, PetSpecies, Inventory } from "@/types";
+import { GameStateFactory } from "@/engine/GameStateFactory";
+import type { WorldState, Pet, GameState } from "@/types";
 
 describe("WorldSystem", () => {
+  let gameState: GameState;
   let mockPet: Pet;
   let worldState: WorldState;
-  let testInventory: Inventory;
-
-  // Test helper to create a standard test pet
-  function createTestPet(overrides: Partial<Pet> = {}): Pet {
-    const testSpecies: PetSpecies = {
-      id: "test_species",
-      name: "Test Pet",
-      rarity: "common",
-      description: "A pet for testing",
-      baseStats: { attack: 10, defense: 8, speed: 12, health: 50 },
-      growthRates: { attack: 1.1, defense: 1.1, speed: 1.1, health: 1.2, energy: 1.1 },
-      sprite: "test.png",
-      icon: "test_icon.png",
-    };
-
-    return {
-      id: "test_pet_1",
-      name: "Buddy",
-      species: testSpecies,
-      rarity: "common",
-      growthStage: 0,
-
-      // Care stats
-      satiety: 50,
-      hydration: 50,
-      happiness: 50,
-
-      // Hidden counters
-      satietyTicksLeft: 100,
-      hydrationTicksLeft: 100,
-      happinessTicksLeft: 100,
-      poopTicksLeft: 100,
-      poopCount: overrides.poopCount ?? 0,
-      sickByPoopTicksLeft: 17280,
-
-      // Core stats
-      life: 1000000,
-      maxEnergy: 100,
-      currentEnergy: 100,
-      health: "healthy",
-      state: "idle",
-
-      // Battle stats
-      attack: 10,
-      defense: 8,
-      speed: 12,
-      maxHealth: 50,
-      currentHealth: 50,
-      moves: [],
-
-      // Metadata
-      birthTime: Date.now(),
-      lastCareTime: Date.now(),
-      totalLifetime: 0,
-
-      ...overrides,
-    };
-  }
 
   beforeEach(() => {
-    // Create a mock pet for testing
-    mockPet = createTestPet();
-
-    // Initialize world state
-    worldState = WorldSystem.initializeWorldState();
-
-    // Create test inventory
-    testInventory = ItemSystem.createInventory();
+    // Create a test game state
+    gameState = GameStateFactory.createTestGame();
+    
+    // Extract commonly used references
+    mockPet = gameState.currentPet!;
+    worldState = gameState.world;
   });
 
   describe("World Initialization", () => {
@@ -239,60 +180,72 @@ describe("WorldSystem", () => {
 
   describe("Activity System", () => {
     it("should fail to start activity when travelling", () => {
-      const travellingWorld = {
-        ...worldState,
-        travelState: {
-          destinationId: "forest_path",
-          ticksRemaining: 30,
-          totalTravelTime: 60,
-          startTime: Date.now(),
+      const gameStateWithTravel = {
+        ...gameState,
+        world: {
+          ...worldState,
+          travelState: {
+            destinationId: "forest_path",
+            ticksRemaining: 30,
+            totalTravelTime: 60,
+            startTime: Date.now(),
+          },
         },
       };
 
-      const result = WorldSystem.startActivity(travellingWorld, mockPet, "hometown_foraging", testInventory);
+      const result = WorldSystem.startActivity(gameStateWithTravel, "hometown_foraging");
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot start activity while travelling");
     });
 
     it("should fail to start activity when pet sleeping", () => {
-      const sleepingPet = { ...mockPet, state: "sleeping" as const };
-      const result = WorldSystem.startActivity(worldState, sleepingPet, "hometown_foraging", testInventory);
+      const gameStateWithSleepingPet = {
+        ...gameState,
+        currentPet: { ...mockPet, state: "sleeping" as const }
+      };
+      const result = WorldSystem.startActivity(gameStateWithSleepingPet, "hometown_foraging");
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Cannot start activity while pet is sleeping");
     });
 
     it("should fail to start activity when insufficient energy", () => {
-      const lowEnergyPet = { ...mockPet, currentEnergy: 5 }; // Need 10 for foraging
-      const result = WorldSystem.startActivity(worldState, lowEnergyPet, "hometown_foraging", testInventory);
+      const gameStateWithLowEnergyPet = {
+        ...gameState,
+        currentPet: { ...mockPet, currentEnergy: 5 } // Need more energy for foraging
+      };
+      const result = WorldSystem.startActivity(gameStateWithLowEnergyPet, "hometown_foraging");
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet doesn't have enough energy for this activity");
     });
 
     it("should fail to start activity when already doing one", () => {
-      const busyWorld = {
-        ...worldState,
-        activeActivities: [
-          {
-            activityId: "hometown_foraging",
-            locationId: "hometown",
-            startTime: Date.now(),
-            ticksRemaining: 10,
-            petId: mockPet.id,
-          },
-        ],
+      const gameStateWithBusyPet = {
+        ...gameState,
+        world: {
+          ...worldState,
+          activeActivities: [
+            {
+              activityId: "hometown_foraging",
+              locationId: "hometown",
+              startTime: Date.now(),
+              ticksRemaining: 10,
+              petId: mockPet.id,
+            },
+          ],
+        },
       };
 
-      const result = WorldSystem.startActivity(busyWorld, mockPet, "hometown_foraging", testInventory);
+      const result = WorldSystem.startActivity(gameStateWithBusyPet, "hometown_foraging");
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Pet is already doing an activity");
     });
 
     it("should successfully start activity when requirements met", () => {
-      const result = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
+      const result = WorldSystem.startActivity(gameState, "hometown_foraging");
 
       expect(result.success).toBe(true);
       if (result.success && result.data) {
@@ -380,20 +333,23 @@ describe("WorldSystem", () => {
     });
 
     it("should cancel activity successfully", () => {
-      const worldWithActivity = {
-        ...worldState,
-        activeActivities: [
-          {
-            activityId: "hometown_foraging",
-            locationId: "hometown",
-            startTime: Date.now(),
-            ticksRemaining: 10,
-            petId: mockPet.id,
-          },
-        ],
+      const gameStateWithActivity = {
+        ...gameState,
+        world: {
+          ...worldState,
+          activeActivities: [
+            {
+              activityId: "hometown_foraging",
+              locationId: "hometown",
+              startTime: Date.now(),
+              ticksRemaining: 10,
+              petId: mockPet.id,
+            },
+          ],
+        },
       };
 
-      const result = WorldSystem.cancelActivity(worldWithActivity, mockPet.id);
+      const result = WorldSystem.cancelActivity(gameStateWithActivity, mockPet.id);
 
       expect(result.success).toBe(true);
       if (result.success && result.data) {
@@ -403,7 +359,7 @@ describe("WorldSystem", () => {
     });
 
     it("should fail to cancel when no activity", () => {
-      const result = WorldSystem.cancelActivity(worldState, mockPet.id);
+      const result = WorldSystem.cancelActivity(gameState, mockPet.id);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("No active activity to cancel");
@@ -574,12 +530,16 @@ describe("WorldSystem", () => {
   describe("Enhanced Activity Cancellation", () => {
     it("should cancel activity without refund by default", () => {
       // Start an activity first
-      const startResult = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
+      const startResult = WorldSystem.startActivity(gameState, "hometown_foraging");
       expect(startResult.success).toBe(true);
-      const worldStateWithActivity = startResult.data!.worldState;
+      const gameStateWithActivity = {
+        ...gameState,
+        world: startResult.data!.worldState,
+        currentPet: startResult.data!.pet
+      };
       
       // Cancel without refund
-      const cancelResult = WorldSystem.cancelActivity(worldStateWithActivity, mockPet.id);
+      const cancelResult = WorldSystem.cancelActivity(gameStateWithActivity, mockPet.id);
       expect(cancelResult.success).toBe(true);
       expect(cancelResult.data!.activeActivities).toHaveLength(0);
       expect(cancelResult.message).toBe("Activity cancelled");
@@ -588,21 +548,28 @@ describe("WorldSystem", () => {
 
     it("should cancel activity with energy refund when requested", () => {
       // Start an activity first  
-      const startResult = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
+      const startResult = WorldSystem.startActivity(gameState, "hometown_foraging");
       expect(startResult.success).toBe(true);
-      const worldStateWithActivity = startResult.data!.worldState;
+      const gameStateWithActivity = {
+        ...gameState,
+        world: startResult.data!.worldState,
+        currentPet: startResult.data!.pet
+      };
       
       // Simulate some progress by reducing ticks remaining
-      const activityWithProgress = {
-        ...worldStateWithActivity,
-        activeActivities: worldStateWithActivity.activeActivities.map(a => ({
-          ...a,
-          ticksRemaining: a.ticksRemaining - 5  // Some progress made
-        }))
+      const gameStateWithProgress = {
+        ...gameStateWithActivity,
+        world: {
+          ...gameStateWithActivity.world,
+          activeActivities: gameStateWithActivity.world.activeActivities.map(a => ({
+            ...a,
+            ticksRemaining: a.ticksRemaining - 5  // Some progress made
+          }))
+        }
       };
       
       // Cancel with refund
-      const cancelResult = WorldSystem.cancelActivity(activityWithProgress, mockPet.id, true);
+      const cancelResult = WorldSystem.cancelActivity(gameStateWithProgress, mockPet.id, true);
       expect(cancelResult.success).toBe(true);
       expect(cancelResult.data!.activeActivities).toHaveLength(0);
       expect(cancelResult.data!.energyRefunded).toBeGreaterThan(0);
@@ -611,21 +578,28 @@ describe("WorldSystem", () => {
 
     it("should calculate energy refund based on remaining progress", () => {
       // Start an activity first
-      const startResult = WorldSystem.startActivity(worldState, mockPet, "hometown_foraging", testInventory);
+      const startResult = WorldSystem.startActivity(gameState, "hometown_foraging");
       expect(startResult.success).toBe(true);
-      const worldStateWithActivity = startResult.data!.worldState;
+      const gameStateWithActivity = {
+        ...gameState,
+        world: startResult.data!.worldState,
+        currentPet: startResult.data!.pet
+      };
       
       // Simulate 50% progress (10 ticks completed out of 20)
-      const activityWithHalfProgress = {
-        ...worldStateWithActivity,
-        activeActivities: worldStateWithActivity.activeActivities.map(a => ({
-          ...a,
-          ticksRemaining: 10  // Half remaining
-        }))
+      const gameStateWithHalfProgress = {
+        ...gameStateWithActivity,
+        world: {
+          ...gameStateWithActivity.world,
+          activeActivities: gameStateWithActivity.world.activeActivities.map(a => ({
+            ...a,
+            ticksRemaining: 10  // Half remaining
+          }))
+        }
       };
       
       // Cancel with refund - should get ~25% of original energy (50% of unused 50% energy)
-      const cancelResult = WorldSystem.cancelActivity(activityWithHalfProgress, mockPet.id, true);
+      const cancelResult = WorldSystem.cancelActivity(gameStateWithHalfProgress, mockPet.id, true);
       expect(cancelResult.success).toBe(true);
       
       // Original activity cost is 10, 50% unused = 5, 50% of that = 2.5, floored = 2
@@ -637,18 +611,21 @@ describe("WorldSystem", () => {
       // we can test the logic by mocking a hypothetical activity
       
       // Mock an activity with zero energy cost in the world state
-      const worldStateWithZeroEnergyActivity = {
-        ...worldState,
-        activeActivities: [{
-          activityId: "test_zero_energy", // This won't match any real activity
-          locationId: "hometown",
-          startTime: Date.now(),
-          ticksRemaining: 10,
-          petId: mockPet.id
-        }]
+      const gameStateWithZeroEnergyActivity = {
+        ...gameState,
+        world: {
+          ...worldState,
+          activeActivities: [{
+            activityId: "test_zero_energy", // This won't match any real activity
+            locationId: "hometown",
+            startTime: Date.now(),
+            ticksRemaining: 10,
+            petId: mockPet.id
+          }]
+        }
       };
       
-      const cancelResult = WorldSystem.cancelActivity(worldStateWithZeroEnergyActivity, mockPet.id, true);
+      const cancelResult = WorldSystem.cancelActivity(gameStateWithZeroEnergyActivity, mockPet.id, true);
       expect(cancelResult.success).toBe(true);
       expect(cancelResult.data!.energyRefunded).toBeUndefined(); // No refund for zero energy activities
       expect(cancelResult.message).toBe("Activity cancelled");

@@ -259,15 +259,16 @@ export class GameStorage {
 
     // Validate and clean up log entries
     if (migrated.activityLog) {
-      migrated.activityLog = migrated.activityLog.filter(entry => 
-        entry && 
-        typeof entry.id === 'string' &&
-        typeof entry.activityId === 'string' &&
-        typeof entry.locationId === 'string' &&
-        typeof entry.status === 'string' &&
-        typeof entry.energyCost === 'number' &&
-        typeof entry.startTime === 'number' &&
-        Array.isArray(entry.results)
+      migrated.activityLog = migrated.activityLog.filter(
+        entry =>
+          entry &&
+          typeof entry.id === "string" &&
+          typeof entry.activityId === "string" &&
+          typeof entry.locationId === "string" &&
+          typeof entry.status === "string" &&
+          typeof entry.energyCost === "number" &&
+          typeof entry.startTime === "number" &&
+          Array.isArray(entry.results)
       );
     }
 
