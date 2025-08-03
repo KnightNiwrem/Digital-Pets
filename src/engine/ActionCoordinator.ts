@@ -13,7 +13,6 @@ import type {
   ValidationResult,
   ProposalContext,
   ProposalGenerator,
-  ActivityLogEntry,
 } from "@/types/SystemProposal";
 import { ProposalFactory, ProposalUtils } from "@/types/SystemProposal";
 import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
@@ -839,47 +838,24 @@ export class ActionCoordinator {
       case "activity_log":
         if (change.operation === "push" && change.newValue) {
           const logData = change.newValue as {
-            activityId?: string;
+            activityId: string;
             locationId?: string;
-            status?: "started" | "cancelled" | "completed";
+            status: "started" | "cancelled" | "completed";
             energyCost?: number;
             startTime?: number;
             endTime?: number;
             results?: ActivityLogResult[];
-            type?: string;
-            timestamp?: number;
-            description?: string;
           };
-          // Handle different types of activity log entries
-          if (logData.activityId && logData.status) {
-            // This is a proper activity log entry (like travel or activity)
-            ActivityLogSystem.addLogEntry(newState, {
-              activityId: logData.activityId,
-              locationId: logData.locationId || newState.world.currentLocationId,
-              startTime: logData.startTime || Date.now(),
-              endTime: logData.endTime,
-              status: logData.status,
-              energyCost: logData.energyCost || 0,
-              results: logData.results || [],
-            });
-          } else {
-            // Legacy activity log entry (like quest events) - keep existing behavior
-            ActivityLogSystem.addLogEntry(newState, {
-              activityId: (change.newValue as ActivityLogEntry).type,
-              locationId: newState.world.currentLocationId,
-              startTime: (change.newValue as ActivityLogEntry).timestamp,
-              endTime: (change.newValue as ActivityLogEntry).timestamp,
-              status: "completed",
-              energyCost: 0,
-              results: [
-                {
-                  type: "none",
-                  amount: 0,
-                  description: (change.newValue as ActivityLogEntry).description,
-                },
-              ],
-            });
-          }
+
+          ActivityLogSystem.addLogEntry(newState, {
+            activityId: logData.activityId,
+            locationId: logData.locationId || newState.world.currentLocationId,
+            startTime: logData.startTime || Date.now(),
+            endTime: logData.endTime,
+            status: logData.status,
+            energyCost: logData.energyCost || 0,
+            results: logData.results || [],
+          });
         }
         break;
     }
