@@ -349,4 +349,119 @@ describe("ActivityLogSystem", () => {
       expect(gameState.activityLog[0]).toEqual(existingEntry);
     });
   });
+
+  describe("Activity Lifecycle Logging (Fix for Issue #88)", () => {
+    it("should create only one log entry when activity starts", () => {
+      // Simulate what WorldSystem.startActivity() does
+      const startTime = Date.now();
+      ActivityLogSystem.addLogEntry(gameState, {
+        activityId: "hometown_foraging",
+        locationId: "hometown",
+        status: "started",
+        energyCost: 10,
+        startTime,
+        results: [],
+      });
+
+      // Verify only one log entry exists
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].status).toBe("started");
+      expect(gameState.activityLog[0].activityId).toBe("hometown_foraging");
+    });
+
+    it("should update existing log entry when activity is cancelled (not create new one)", () => {
+      // Start an activity
+      const startTime = Date.now();
+      ActivityLogSystem.addLogEntry(gameState, {
+        activityId: "hometown_foraging",
+        locationId: "hometown",
+        status: "started",
+        energyCost: 10,
+        startTime,
+        results: [],
+      });
+
+      const originalEntryId = gameState.activityLog[0].id;
+
+      // Cancel the activity (update existing entry)
+      ActivityLogSystem.updateLogEntry(gameState, originalEntryId, {
+        status: "cancelled",
+        endTime: Date.now(),
+        results: [ActivityLogSystem.createCancellationResult(5)],
+      });
+
+      // Verify still only one log entry exists and it was updated
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].id).toBe(originalEntryId);
+      expect(gameState.activityLog[0].status).toBe("cancelled");
+      expect(gameState.activityLog[0].endTime).toBeDefined();
+      expect(gameState.activityLog[0].results).toHaveLength(1);
+      expect(gameState.activityLog[0].results[0].description).toContain("cancelled");
+    });
+
+    it("should update existing log entry when activity completes (not create new one)", () => {
+      // Start an activity
+      const startTime = Date.now();
+      ActivityLogSystem.addLogEntry(gameState, {
+        activityId: "hometown_foraging",
+        locationId: "hometown",
+        status: "started",
+        energyCost: 10,
+        startTime,
+        results: [],
+      });
+
+      const originalEntryId = gameState.activityLog[0].id;
+
+      // Complete the activity (update existing entry)
+      const rewardResult = ActivityLogSystem.createLogResult("gold", 25);
+      ActivityLogSystem.updateLogEntry(gameState, originalEntryId, {
+        status: "completed",
+        endTime: Date.now(),
+        results: [rewardResult],
+      });
+
+      // Verify still only one log entry exists and it was updated
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].id).toBe(originalEntryId);
+      expect(gameState.activityLog[0].status).toBe("completed");
+      expect(gameState.activityLog[0].endTime).toBeDefined();
+      expect(gameState.activityLog[0].results).toHaveLength(1);
+      expect(gameState.activityLog[0].results[0].description).toContain("25 gold");
+    });
+
+    it("should not create duplicate activity logs for the same activity", () => {
+      const startTime = Date.now();
+      
+      // Simulate starting an activity - should only create one entry
+      ActivityLogSystem.addLogEntry(gameState, {
+        activityId: "hometown_foraging",
+        locationId: "hometown",
+        status: "started",
+        energyCost: 10,
+        startTime,
+        results: [],
+      });
+
+      // This would be wrong behavior that ActionCoordinator was doing before the fix:
+      // Adding another log entry with "completed" status for "activity started" message
+      // We should NOT do this anymore!
+      
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].status).toBe("started");
+      
+      // Complete the activity by updating the same entry
+      const entryId = gameState.activityLog[0].id;
+      ActivityLogSystem.updateLogEntry(gameState, entryId, {
+        status: "completed",
+        endTime: Date.now(),
+        results: [ActivityLogSystem.createLogResult("gold", 15)],
+      });
+      
+      // Should still be only one entry, now completed
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].status).toBe("completed");
+      expect(gameState.activityLog[0].id).toBe(entryId);
+    });
+  });
 });

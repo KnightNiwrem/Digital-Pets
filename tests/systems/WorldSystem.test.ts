@@ -633,4 +633,73 @@ describe("WorldSystem", () => {
       expect(cancelResult.message).toBe("Activity cancelled");
     });
   });
+
+  describe("Activity Logging Integration (Fix for Issue #88)", () => {
+    it("should create only one log entry throughout complete activity lifecycle", () => {
+      // Initially no activity logs
+      expect(gameState.activityLog).toHaveLength(0);
+
+      // Start activity
+      const startResult = WorldSystem.startActivity(gameState, "hometown_foraging");
+      expect(startResult.success).toBe(true);
+
+      // Should have exactly one log entry with "started" status
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].status).toBe("started");
+      expect(gameState.activityLog[0].activityId).toBe("hometown_foraging");
+      const originalLogId = gameState.activityLog[0].id;
+
+      // Update game state with activity result
+      gameState.world = startResult.data!.worldState;
+      gameState.currentPet = startResult.data!.pet;
+
+      // Cancel the activity  
+      const cancelResult = WorldSystem.cancelActivity(gameState, mockPet.id, true);
+      expect(cancelResult.success).toBe(true);
+
+      // Should still have exactly one log entry, now with "cancelled" status
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].id).toBe(originalLogId); // Same entry updated
+      expect(gameState.activityLog[0].status).toBe("cancelled");
+      expect(gameState.activityLog[0].results).toHaveLength(1);
+      expect(gameState.activityLog[0].results[0].description).toContain("cancelled");
+    });
+
+    it("should update single log entry when activity completes naturally", () => {
+      // Start activity
+      const startResult = WorldSystem.startActivity(gameState, "hometown_foraging");
+      expect(startResult.success).toBe(true);
+      
+      // Should have exactly one log entry
+      expect(gameState.activityLog).toHaveLength(1);
+      const originalLogId = gameState.activityLog[0].id;
+      expect(gameState.activityLog[0].status).toBe("started");
+
+      // Simulate activity completion (like GameLoop would do)
+      gameState.world = startResult.data!.worldState;
+      gameState.currentPet = startResult.data!.pet;
+      
+      // Find the log entry and update it to completed
+      const logEntry = gameState.activityLog.find(
+        entry => entry.activityId === "hometown_foraging" && entry.status === "started"
+      );
+      expect(logEntry).toBeDefined();
+      
+      // Update to completed status with rewards
+      const rewardResult = { type: "gold" as const, amount: 15, description: "Earned 15 gold" };
+      gameState.activityLog[0] = {
+        ...gameState.activityLog[0], 
+        status: "completed",
+        endTime: Date.now(),
+        results: [rewardResult]
+      };
+
+      // Should still have exactly one log entry, now completed
+      expect(gameState.activityLog).toHaveLength(1);
+      expect(gameState.activityLog[0].id).toBe(originalLogId); // Same entry updated
+      expect(gameState.activityLog[0].status).toBe("completed");
+      expect(gameState.activityLog[0].results).toHaveLength(1);
+      expect(gameState.activityLog[0].results[0].description).toContain("15 gold");
+    });
+  });
 });
