@@ -244,16 +244,16 @@ export class GameLoop {
         if (this.gameState.currentPet?.state === "travelling") {
           this.gameState.currentPet.state = "idle";
         }
-        
+
         // Update travel log entry from "started" to "completed"
         const destinationLocation = getLocationById(travelResult.data.currentLocationId);
         const destinationName = destinationLocation ? destinationLocation.name : travelResult.data.currentLocationId;
-        
+
         // Find the most recent travel log entry with "started" status for this destination
         const travelLogEntry = this.gameState.activityLog.find(
           entry => entry.activityId === destinationName && entry.status === "started"
         );
-        
+
         if (travelLogEntry) {
           ActivityLogSystem.updateLogEntry(this.gameState, travelLogEntry.id, {
             status: "completed",

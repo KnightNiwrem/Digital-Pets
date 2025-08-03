@@ -838,7 +838,18 @@ export class ActionCoordinator {
 
       case "activity_log":
         if (change.operation === "push" && change.newValue) {
-          const logData = change.newValue as any;
+          const logData = change.newValue as {
+            activityId?: string;
+            locationId?: string;
+            status?: string;
+            energyCost?: number;
+            startTime?: number;
+            endTime?: number;
+            results?: unknown[];
+            type?: string;
+            timestamp?: number;
+            description?: string;
+          };
           // Handle different types of activity log entries
           if (logData.activityId && logData.status) {
             // This is a proper activity log entry (like travel or activity)
@@ -1235,10 +1246,10 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
             // Use the destination location name as the activity name
             const destination = getLocationById(worldAction.payload.destinationId);
             const destinationName = destination ? destination.name : worldAction.payload.destinationId;
-            
+
             proposals.push({
               id: ProposalFactory.generateId("world_system"),
-              systemId: "world_system", 
+              systemId: "world_system",
               description: `Create travel log entry for ${destinationName}`,
               priority: 50,
               changes: [
@@ -1248,7 +1259,9 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
                     activityId: destinationName, // Use destination name as activity identifier
                     locationId: context.currentState.world.currentLocationId,
                     status: "started",
-                    energyCost: travelResult.data ? (context.activePet.currentEnergy - travelResult.data.pet.currentEnergy) : 0,
+                    energyCost: travelResult.data
+                      ? context.activePet.currentEnergy - travelResult.data.pet.currentEnergy
+                      : 0,
                     startTime: Date.now(),
                     results: [], // Will be populated when travel completes
                   },
