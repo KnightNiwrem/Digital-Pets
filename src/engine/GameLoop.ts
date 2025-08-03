@@ -508,12 +508,12 @@ export class GameLoop {
     if (!this.gameState) return;
 
     for (const completedActivity of completedActivities) {
-      // Find the corresponding log entry
-      const logEntry = ActivityLogSystem.findLogEntryByActivity(
-        this.gameState,
-        completedActivity.activityId,
-        completedActivity.locationId,
-        Date.now() - completedActivity.duration * GAME_CONSTANTS.TICK_INTERVAL // Approximate start time
+      // Find the corresponding log entry - look for the most recent "started" entry for this activity and location
+      const logEntry = this.gameState.activityLog.find(
+        entry =>
+          entry.activityId === completedActivity.activityId &&
+          entry.locationId === completedActivity.locationId &&
+          entry.status === "started"
       );
 
       if (logEntry) {
