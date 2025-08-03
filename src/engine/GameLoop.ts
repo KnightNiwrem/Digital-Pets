@@ -950,6 +950,12 @@ export class GameLoop {
     // Process active activities
     const hadActivities = gameState.world.activeActivities.length > 0;
     const completedActivities: Array<{ activity: { [key: string]: unknown }; rewards: ActivityReward[] }> = [];
+    const completedActivityInfo: Array<{
+      activityId: string;
+      locationId: string;
+      duration: number;
+      rewards: ActivityReward[];
+    }> = [];
 
     gameState.world.activeActivities = gameState.world.activeActivities.filter(activity => {
       activity.ticksRemaining -= actualTicksToProcess;
@@ -973,6 +979,14 @@ export class GameLoop {
             // Store activity and rewards for later processing
             completedActivities.push({
               activity: { ...activity, definition: activityDef },
+              rewards: earnedRewards,
+            });
+
+            // Store completed activity info for activity log updates
+            completedActivityInfo.push({
+              activityId: activity.activityId,
+              locationId: activity.locationId,
+              duration: activityDef.duration,
               rewards: earnedRewards,
             });
           }
@@ -1047,6 +1061,70 @@ export class GameLoop {
           activityData.definition.duration,
           rewards
         );
+      }
+    }
+
+    // FIXED: Update activity log entries for offline completed activities
+    if (completedActivityInfo.length > 0) {
+      for (const completedActivity of completedActivityInfo) {
+        // Find the corresponding log entry (most recent "started" entry for this activity and location)
+        const logEntry = gameState.activityLog.find(
+          entry =>
+            entry.activityId === completedActivity.activityId &&
+            entry.locationId === completedActivity.locationId &&
+            entry.status === "started"
+        );
+
+        if (logEntry) {
+          // Calculate end time based on duration
+          const endTime = logEntry.startTime + completedActivity.duration * GAME_CONSTANTS.TICK_INTERVAL;
+
+          // Create log results from the rewards
+          const logResults = completedActivity.rewards.map(reward => {
+            let description: string;
+            switch (reward.type) {
+              case "item":
+                description = reward.id ? `Found ${reward.id} x${reward.amount}` : `Found item x${reward.amount}`;
+                break;
+              case "gold":
+                description = `Earned ${reward.amount} gold`;
+                break;
+              case "experience":
+                description = `Gained ${reward.amount} experience`;
+                break;
+              default:
+                description = `Received ${reward.type} x${reward.amount}`;
+            }
+
+            return {
+              type: reward.type as "item" | "gold" | "experience" | "none",
+              itemId: reward.id,
+              amount: reward.amount,
+              description,
+            };
+          });
+
+          // If no rewards, add a "no rewards" result
+          if (logResults.length === 0) {
+            logResults.push({
+              type: "none" as const,
+              itemId: undefined,
+              amount: 0,
+              description: "No rewards received",
+            });
+          }
+
+          // Update the log entry to completed status
+          const entryIndex = gameState.activityLog.findIndex(entry => entry.id === logEntry.id);
+          if (entryIndex !== -1) {
+            gameState.activityLog[entryIndex] = {
+              ...gameState.activityLog[entryIndex],
+              status: "completed",
+              endTime,
+              results: logResults,
+            };
+          }
+        }
       }
     }
 

@@ -34,10 +34,22 @@ describe("GameLoop Item Rewards", () => {
     const finalAppleCount = gameState.inventory.slots.find(slot => slot.item.id === "apple")?.quantity || 0;
     expect(finalAppleCount).toBe(initialAppleCount + 2);
 
-    // Check that appropriate action was logged
-    expect(actions).toHaveLength(1);
-    expect(actions[0].type).toBe("item_earned");
-    expect(actions[0].payload).toEqual({
+    // Check that appropriate actions were logged (both activity and quest compatible)
+    expect(actions).toHaveLength(2);
+    
+    // Should have both item_earned (activity) and item_obtained (quest) actions
+    const itemEarnedAction = actions.find(a => a.type === "item_earned");
+    const itemObtainedAction = actions.find(a => a.type === "item_obtained");
+    
+    expect(itemEarnedAction).toBeDefined();
+    expect(itemEarnedAction?.payload).toEqual({
+      itemId: "apple",
+      amount: 2,
+      source: "activity",
+    });
+    
+    expect(itemObtainedAction).toBeDefined();
+    expect(itemObtainedAction?.payload).toEqual({
       itemId: "apple",
       amount: 2,
       source: "activity",
@@ -75,12 +87,16 @@ describe("GameLoop Item Rewards", () => {
     const finalWaterCount = gameState.inventory.slots.find(slot => slot.item.id === "water_bottle")?.quantity || 0;
     expect(finalWaterCount).toBe(initialWaterCount + 3);
 
-    // Check that all actions were logged
-    expect(actions).toHaveLength(3);
-    const itemActions = actions.filter(action => action.type === "item_earned");
+    // Check that all actions were logged (includes both activity and quest actions for items)
+    expect(actions).toHaveLength(5); // 2 items × 2 actions each + 1 gold = 5 total
+    
+    const itemEarnedActions = actions.filter(action => action.type === "item_earned");
+    const itemObtainedActions = actions.filter(action => action.type === "item_obtained");
     const goldActions = actions.filter(action => action.type === "gold_earned");
-    expect(itemActions).toHaveLength(2);
-    expect(goldActions).toHaveLength(1);
+    
+    expect(itemEarnedActions).toHaveLength(2); // One for each item (activity system)
+    expect(itemObtainedActions).toHaveLength(2); // One for each item (quest system)
+    expect(goldActions).toHaveLength(1); // One gold reward
   });
 
 
