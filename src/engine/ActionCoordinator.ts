@@ -753,7 +753,9 @@ export class ActionCoordinator {
       case "inventory_update":
         if (change.target && change.property === "quantity") {
           const slotIndex = newState.inventory.slots.findIndex(slot => slot.item.id === change.target);
+
           if (slotIndex !== -1) {
+            // Item exists in inventory
             const slot = newState.inventory.slots[slotIndex];
             switch (change.operation) {
               case "add":
@@ -775,6 +777,18 @@ export class ActionCoordinator {
                 }
                 break;
               }
+            }
+          } else if (change.operation === "add") {
+            // Item doesn't exist, need to add it
+            const item = getItemById(change.target);
+            if (item) {
+              // Create new inventory slot
+              const newSlot = {
+                item: { ...item },
+                quantity: change.newValue as number,
+                slotIndex: newState.inventory.slots.length,
+              };
+              newState.inventory.slots.push(newSlot);
             }
           }
         }
@@ -1039,7 +1053,7 @@ class PetSystemProposalGenerator implements ProposalGenerator {
  * Item System Proposal Generator
  */
 class ItemSystemProposalGenerator implements ProposalGenerator {
-  generateProposals(action: unknown, context: ProposalContext): SystemProposal[] {
+  generateProposals(action: unknown, _context: ProposalContext): SystemProposal[] {
     const itemAction = action as ItemAction;
     if (itemAction.type !== "item_operation") return [];
 
@@ -1063,14 +1077,21 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
           const item = getItemById(itemAction.payload.itemId);
           if (item) {
             const cost = item.value * itemAction.payload.quantity;
-            proposals.push(
-              ProposalFactory.createGameStateUpdateProposal(
-                "item_system",
-                `Buy ${itemAction.payload.quantity}x ${item.name}`,
-                { gold: context.currentState.inventory.gold - cost },
-                100
-              )
-            );
+            proposals.push({
+              id: ProposalFactory.generateId("item_system"),
+              systemId: "item_system",
+              description: `Deduct ${cost} gold for purchase`,
+              priority: 100,
+              changes: [
+                {
+                  type: "game_state_update" as const,
+                  property: "gold",
+                  newValue: cost,
+                  operation: "subtract" as const,
+                },
+              ],
+              dependencies: [],
+            });
             proposals.push(
               ProposalFactory.createInventoryUpdateProposal(
                 "item_system",
@@ -1098,14 +1119,21 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
                 100
               )
             );
-            proposals.push(
-              ProposalFactory.createGameStateUpdateProposal(
-                "item_system",
-                `Add gold from sale`,
-                { gold: context.currentState.inventory.gold + value },
-                100
-              )
-            );
+            proposals.push({
+              id: ProposalFactory.generateId("item_system"),
+              systemId: "item_system",
+              description: `Add ${value} gold from sale`,
+              priority: 100,
+              changes: [
+                {
+                  type: "game_state_update" as const,
+                  property: "gold",
+                  newValue: value,
+                  operation: "add" as const,
+                },
+              ],
+              dependencies: [],
+            });
           }
         }
         break;
@@ -1544,8 +1572,8 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
                     {
                       type: "game_state_update" as const,
                       property: "gold",
-                      newValue: context.currentState.inventory.gold + reward.amount,
-                      operation: "set" as const,
+                      newValue: reward.amount,
+                      operation: "add" as const,
                     },
                   ],
                   dependencies: [],
