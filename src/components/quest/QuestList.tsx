@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Clock, MapPin, User, Trophy, Heart } from "lucide-react";
 import type { Quest, QuestProgress } from "@/types/Quest";
 import { QuestUtils, GameMath } from "@/lib/utils";
+import { QUESTS } from "@/data/quests";
 
 interface QuestListProps {
   tab: "available" | "active" | "completed";
@@ -25,6 +26,30 @@ export function QuestList({
   selectedQuest,
   isLoading = false,
 }: QuestListProps) {
+  // Helper function to enrich quest progress with quest definition data
+  const enrichQuestProgress = (questProgress: QuestProgress): QuestProgress => {
+    // If the quest progress already has all required fields, return as is
+    if (questProgress.name && questProgress.description && questProgress.type && questProgress.objectives) {
+      return questProgress;
+    }
+
+    // Find the original quest definition
+    const questDefinition = QUESTS.find(q => q.id === questProgress.questId);
+    if (!questDefinition) {
+      console.warn(`Quest definition not found for questId: ${questProgress.questId}`);
+      return questProgress;
+    }
+
+    // Enrich the quest progress with missing fields from the definition
+    return {
+      ...questProgress,
+      name: questProgress.name || questDefinition.name,
+      description: questProgress.description || questDefinition.description,
+      type: questProgress.type || questDefinition.type,
+      objectives: questProgress.objectives || questDefinition.objectives,
+      rewards: questProgress.rewards || questDefinition.rewards,
+    };
+  };
   const getQuestTypeIcon = (type: string) => {
     switch (type) {
       case "story":
@@ -133,7 +158,8 @@ export function QuestList({
       );
     }
 
-    return activeQuests.map(questProgress => {
+    return activeQuests.map(questProgressRaw => {
+      const questProgress = enrichQuestProgress(questProgressRaw);
       const progress = QuestUtils.calculateQuestProgress(questProgress);
       return (
         <div
