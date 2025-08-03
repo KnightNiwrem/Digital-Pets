@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { GameState, Pet, Result, PetCareAction, Inventory } from "@/types";
+import type { Item } from "@/types/Item";
 import type { Quest, QuestProgress } from "@/types/Quest";
 import type { Battle } from "@/types/Battle";
 import { GameLoop } from "@/engine/GameLoop";
@@ -552,11 +553,91 @@ export function useGameState(): UseGameStateReturn {
     [gameState, triggerAutosave]
   );
 
+  // Helper function to determine ALL care action types from item effects
+  const getCareActionsFromItem = useCallback((item: Item): string[] => {
+    const effects = item.effects;
+    const actions: string[] = [];
+
+    // Check for satiety effect (feeding)
+    if (effects.some(effect => effect.type === "satiety")) {
+      actions.push("feed");
+    }
+
+    // Check for hydration effect (drinking)
+    if (effects.some(effect => effect.type === "hydration")) {
+      actions.push("drink");
+    }
+
+    // Check for happiness effect (playing) - toys or happiness items
+    if (effects.some(effect => effect.type === "happiness") || item.type === "toy") {
+      actions.push("play");
+    }
+
+    // Check for cleaning effect
+    if (effects.some(effect => effect.type === "clean") || item.type === "hygiene") {
+      actions.push("clean");
+    }
+
+    // Check for healing effects (medicine)
+    if (effects.some(effect => effect.type === "health" || effect.type === "cure") || item.type === "medicine") {
+      actions.push("medicine");
+    }
+
+    return actions;
+  }, []);
+
   // Item actions
   const useItem = useCallback(
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    (itemId: string) => performItemAction((inventory, pet) => ItemSystem.useItem(inventory, pet, itemId), "use item"),
-    [performItemAction]
+    async (itemId: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet || !gameState?.inventory) {
+        return { success: false, error: "No active pet or inventory" };
+      }
+
+      try {
+        // Get the item to determine care action type
+        const inventorySlot = ItemSystem.getInventoryItem(gameState.inventory, itemId);
+        if (!inventorySlot) {
+          return { success: false, error: "Item not found in inventory" };
+        }
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
+        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
+        if (result.success && result.data) {
+          const updatedGameState: GameState = {
+            ...gameState,
+            inventory: result.data.inventory,
+            currentPet: result.data.pet,
+          };
+
+          // Update both React state and GameLoop internal state
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
+
+          // Process quest progression based on ALL item effects
+          if (updatedGameState.questLog) {
+            const careActions = getCareActionsFromItem(inventorySlot.item);
+            for (const careAction of careActions) {
+              QuestSystem.processGameAction(
+                QUEST_ACTION_TYPES.PET_CARE,
+                { action: careAction },
+                QUESTS,
+                updatedGameState
+              );
+              // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
+            }
+          }
+
+          await triggerAutosave(`use item ${itemId}`, updatedGameState);
+          return { success: true };
+        }
+        return { success: false, error: result.error };
+      } catch (error) {
+        return ErrorHandler.handleCatchError(error, "Failed to use item", "Use item");
+      }
+    },
+    [gameState, getCareActionsFromItem, triggerAutosave]
   );
 
   const sellItem = useCallback(
