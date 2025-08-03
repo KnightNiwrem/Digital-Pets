@@ -1085,7 +1085,7 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
               changes: [
                 {
                   type: "game_state_update" as const,
-                  property: "gold",
+                  property: "inventory.gold",
                   newValue: cost,
                   operation: "subtract" as const,
                 },
@@ -1127,7 +1127,7 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
               changes: [
                 {
                   type: "game_state_update" as const,
-                  property: "gold",
+                  property: "inventory.gold",
                   newValue: value,
                   operation: "add" as const,
                 },
@@ -1571,7 +1571,7 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
                   changes: [
                     {
                       type: "game_state_update" as const,
-                      property: "gold",
+                      property: "inventory.gold",
                       newValue: reward.amount,
                       operation: "add" as const,
                     },

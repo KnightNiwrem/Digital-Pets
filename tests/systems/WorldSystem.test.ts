@@ -13,7 +13,7 @@ describe("WorldSystem", () => {
   beforeEach(() => {
     // Create a test game state
     gameState = GameStateFactory.createTestGame();
-    
+
     // Extract commonly used references
     mockPet = gameState.currentPet!;
     worldState = gameState.world;
@@ -202,7 +202,7 @@ describe("WorldSystem", () => {
     it("should fail to start activity when pet sleeping", () => {
       const gameStateWithSleepingPet = {
         ...gameState,
-        currentPet: { ...mockPet, state: "sleeping" as const }
+        currentPet: { ...mockPet, state: "sleeping" as const },
       };
       const result = WorldSystem.startActivity(gameStateWithSleepingPet, "hometown_foraging");
 
@@ -213,7 +213,7 @@ describe("WorldSystem", () => {
     it("should fail to start activity when insufficient energy", () => {
       const gameStateWithLowEnergyPet = {
         ...gameState,
-        currentPet: { ...mockPet, currentEnergy: 5 } // Need more energy for foraging
+        currentPet: { ...mockPet, currentEnergy: 5 }, // Need more energy for foraging
       };
       const result = WorldSystem.startActivity(gameStateWithLowEnergyPet, "hometown_foraging");
 
@@ -491,7 +491,7 @@ describe("WorldSystem", () => {
     it("should unlock new locations when pet levels up", () => {
       // Start with a level 0 pet
       const level0Pet = { ...mockPet, growthStage: 0 };
-      
+
       // Check initial unlocks - should not unlock level 1 locations yet
       let result = WorldSystem.checkForNewUnlocks(worldState, level0Pet, []);
       expect(result.success).toBe(true);
@@ -518,7 +518,7 @@ describe("WorldSystem", () => {
         ...worldState,
         unlockedLocations: ["hometown", "town_garden", "peaceful_meadow", "forest_path", "quiet_pond"],
       };
-      
+
       const result = WorldSystem.checkForNewUnlocks(updatedWorldState, level1Pet, []);
       expect(result.success).toBe(true);
       if (result.success && result.data) {
@@ -535,9 +535,9 @@ describe("WorldSystem", () => {
       const gameStateWithActivity = {
         ...gameState,
         world: startResult.data!.worldState,
-        currentPet: startResult.data!.pet
+        currentPet: startResult.data!.pet,
       };
-      
+
       // Cancel without refund
       const cancelResult = WorldSystem.cancelActivity(gameStateWithActivity, mockPet.id);
       expect(cancelResult.success).toBe(true);
@@ -547,15 +547,15 @@ describe("WorldSystem", () => {
     });
 
     it("should cancel activity with energy refund when requested", () => {
-      // Start an activity first  
+      // Start an activity first
       const startResult = WorldSystem.startActivity(gameState, "hometown_foraging");
       expect(startResult.success).toBe(true);
       const gameStateWithActivity = {
         ...gameState,
         world: startResult.data!.worldState,
-        currentPet: startResult.data!.pet
+        currentPet: startResult.data!.pet,
       };
-      
+
       // Simulate some progress by reducing ticks remaining
       const gameStateWithProgress = {
         ...gameStateWithActivity,
@@ -563,11 +563,11 @@ describe("WorldSystem", () => {
           ...gameStateWithActivity.world,
           activeActivities: gameStateWithActivity.world.activeActivities.map(a => ({
             ...a,
-            ticksRemaining: a.ticksRemaining - 5  // Some progress made
-          }))
-        }
+            ticksRemaining: a.ticksRemaining - 5, // Some progress made
+          })),
+        },
       };
-      
+
       // Cancel with refund
       const cancelResult = WorldSystem.cancelActivity(gameStateWithProgress, mockPet.id, true);
       expect(cancelResult.success).toBe(true);
@@ -583,9 +583,9 @@ describe("WorldSystem", () => {
       const gameStateWithActivity = {
         ...gameState,
         world: startResult.data!.worldState,
-        currentPet: startResult.data!.pet
+        currentPet: startResult.data!.pet,
       };
-      
+
       // Simulate 50% progress (10 ticks completed out of 20)
       const gameStateWithHalfProgress = {
         ...gameStateWithActivity,
@@ -593,15 +593,15 @@ describe("WorldSystem", () => {
           ...gameStateWithActivity.world,
           activeActivities: gameStateWithActivity.world.activeActivities.map(a => ({
             ...a,
-            ticksRemaining: 10  // Half remaining
-          }))
-        }
+            ticksRemaining: 10, // Half remaining
+          })),
+        },
       };
-      
+
       // Cancel with refund - should get ~25% of original energy (50% of unused 50% energy)
       const cancelResult = WorldSystem.cancelActivity(gameStateWithHalfProgress, mockPet.id, true);
       expect(cancelResult.success).toBe(true);
-      
+
       // Original activity cost is 10, 50% unused = 5, 50% of that = 2.5, floored = 2
       expect(cancelResult.data!.energyRefunded).toBe(2);
     });
@@ -609,22 +609,24 @@ describe("WorldSystem", () => {
     it("should not refund energy for zero or negative energy cost activities", () => {
       // This test would be for edge cases, but since we've validated all activities have positive costs,
       // we can test the logic by mocking a hypothetical activity
-      
+
       // Mock an activity with zero energy cost in the world state
       const gameStateWithZeroEnergyActivity = {
         ...gameState,
         world: {
           ...worldState,
-          activeActivities: [{
-            activityId: "test_zero_energy", // This won't match any real activity
-            locationId: "hometown",
-            startTime: Date.now(),
-            ticksRemaining: 10,
-            petId: mockPet.id
-          }]
-        }
+          activeActivities: [
+            {
+              activityId: "test_zero_energy", // This won't match any real activity
+              locationId: "hometown",
+              startTime: Date.now(),
+              ticksRemaining: 10,
+              petId: mockPet.id,
+            },
+          ],
+        },
       };
-      
+
       const cancelResult = WorldSystem.cancelActivity(gameStateWithZeroEnergyActivity, mockPet.id, true);
       expect(cancelResult.success).toBe(true);
       expect(cancelResult.data!.energyRefunded).toBeUndefined(); // No refund for zero energy activities

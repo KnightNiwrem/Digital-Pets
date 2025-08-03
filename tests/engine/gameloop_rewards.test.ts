@@ -36,18 +36,18 @@ describe("GameLoop Item Rewards", () => {
 
     // Check that appropriate actions were logged (both activity and quest compatible)
     expect(actions).toHaveLength(2);
-    
+
     // Should have both item_earned (activity) and item_obtained (quest) actions
     const itemEarnedAction = actions.find(a => a.type === "item_earned");
     const itemObtainedAction = actions.find(a => a.type === "item_obtained");
-    
+
     expect(itemEarnedAction).toBeDefined();
     expect(itemEarnedAction?.payload).toEqual({
       itemId: "apple",
       amount: 2,
       source: "activity",
     });
-    
+
     expect(itemObtainedAction).toBeDefined();
     expect(itemObtainedAction?.payload).toEqual({
       itemId: "apple",
@@ -89,17 +89,15 @@ describe("GameLoop Item Rewards", () => {
 
     // Check that all actions were logged (includes both activity and quest actions for items)
     expect(actions).toHaveLength(5); // 2 items × 2 actions each + 1 gold = 5 total
-    
+
     const itemEarnedActions = actions.filter(action => action.type === "item_earned");
     const itemObtainedActions = actions.filter(action => action.type === "item_obtained");
     const goldActions = actions.filter(action => action.type === "gold_earned");
-    
+
     expect(itemEarnedActions).toHaveLength(2); // One for each item (activity system)
     expect(itemObtainedActions).toHaveLength(2); // One for each item (quest system)
     expect(goldActions).toHaveLength(1); // One gold reward
   });
-
-
 
   it("should verify that items are properly defined in data", () => {
     // This test ensures our test items actually exist

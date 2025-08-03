@@ -184,7 +184,7 @@ export class ProposalFactory {
           type: "inventory_update" as const,
           target: itemId,
           property: "quantity",
-          newValue: quantityChange,
+          newValue: Math.abs(quantityChange),
           operation: quantityChange > 0 ? "add" : "subtract",
         },
       ],

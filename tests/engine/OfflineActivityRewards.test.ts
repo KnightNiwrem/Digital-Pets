@@ -9,11 +9,11 @@ describe("Offline Activity Reward Processing", () => {
 
   beforeEach(() => {
     gameState = GameStateFactory.createTestGame();
-    
+
     // Enable offline progression and set a past save time for testing
     gameState.settings.offlineProgressEnabled = true;
     gameState.metadata.lastSaveTime = Date.now() - 300000; // 5 minutes ago
-    
+
     // Add some activities to test offline processing
     gameState.world.activeActivities = [
       {
@@ -29,7 +29,7 @@ describe("Offline Activity Reward Processing", () => {
         ticksRemaining: 50, // Won't complete during small offline processing
         startTime: Date.now() - 30000, // Started 30 seconds ago
         petId: gameState.currentPet?.id || "test-pet",
-      }
+      },
     ];
   });
 
@@ -43,10 +43,10 @@ describe("Offline Activity Reward Processing", () => {
 
       expect(result.progressionApplied).toBe(true);
       expect(result.majorEvents).toContain("activity_completed");
-      
+
       // Should have fewer active activities
       expect(gameState.world.activeActivities.length).toBeLessThan(initialActivities);
-      
+
       // Should have received rewards (experience increase for training activity)
       expect(gameState.playerStats.experience).toBeGreaterThan(initialExp);
     });
@@ -58,7 +58,7 @@ describe("Offline Activity Reward Processing", () => {
       });
 
       const initialActivities = gameState.world.activeActivities.length;
-      
+
       // Process minimal offline time
       const result = GameLoop.calculateOfflineProgression(gameState);
 
@@ -78,10 +78,10 @@ describe("Offline Activity Reward Processing", () => {
       const result = GameLoop.calculateOfflineProgression(gameState);
 
       // Both activities should have completed
-      expect(gameState.world.activeActivities.length).toBe(0);  
+      expect(gameState.world.activeActivities.length).toBe(0);
       // Major events are deduplicated, so we'll just check that activity_completed exists
       expect(result.majorEvents).toContain("activity_completed");
-      
+
       // Should have received experience from both training activities
       expect(gameState.playerStats.experience).toBeGreaterThan(initialExp);
     });
@@ -90,16 +90,18 @@ describe("Offline Activity Reward Processing", () => {
   describe("Reward Distribution", () => {
     it("should properly distribute gold rewards from completed activities", () => {
       // Use an activity that gives gold rewards
-      gameState.world.activeActivities = [{
-        activityId: "mountain_rest", // This gives gold rewards
-        locationId: "mountain_village", 
-        ticksRemaining: 5,
-        startTime: Date.now() - 60000,
-        petId: gameState.currentPet?.id || "test-pet",
-      }];
+      gameState.world.activeActivities = [
+        {
+          activityId: "mountain_rest", // This gives gold rewards
+          locationId: "mountain_village",
+          ticksRemaining: 5,
+          startTime: Date.now() - 60000,
+          petId: gameState.currentPet?.id || "test-pet",
+        },
+      ];
 
       const initialGold = gameState.inventory.gold;
-      
+
       GameLoop.calculateOfflineProgression(gameState);
 
       // Should have potentially received gold (depends on probability)
@@ -109,13 +111,15 @@ describe("Offline Activity Reward Processing", () => {
 
     it("should handle missing activity definitions gracefully", () => {
       // Create activity with non-existent activity ID that should complete
-      gameState.world.activeActivities = [{
-        activityId: "non_existent_activity",
-        locationId: "riverside",
-        ticksRemaining: 5, // Should complete with offline processing
-        startTime: Date.now() - 60000,
-        petId: gameState.currentPet?.id || "test-pet",
-      }];
+      gameState.world.activeActivities = [
+        {
+          activityId: "non_existent_activity",
+          locationId: "riverside",
+          ticksRemaining: 5, // Should complete with offline processing
+          startTime: Date.now() - 60000,
+          petId: gameState.currentPet?.id || "test-pet",
+        },
+      ];
 
       // Should not crash when processing missing activity
       expect(() => {
@@ -128,13 +132,15 @@ describe("Offline Activity Reward Processing", () => {
 
     it("should handle missing location definitions gracefully", () => {
       // Create activity with non-existent location ID that should complete
-      gameState.world.activeActivities = [{
-        activityId: "riverside_rest", 
-        locationId: "non_existent_location",
-        ticksRemaining: 5, // Should complete with offline processing
-        startTime: Date.now() - 60000,
-        petId: gameState.currentPet?.id || "test-pet",
-      }];
+      gameState.world.activeActivities = [
+        {
+          activityId: "riverside_rest",
+          locationId: "non_existent_location",
+          ticksRemaining: 5, // Should complete with offline processing
+          startTime: Date.now() - 60000,
+          petId: gameState.currentPet?.id || "test-pet",
+        },
+      ];
 
       // Should not crash when processing activity from missing location
       expect(() => {
@@ -154,24 +160,28 @@ describe("Offline Activity Reward Processing", () => {
       if (!appleItem) {
         throw new Error("Apple item not found - test setup issue");
       }
-      
-      gameState.inventory.slots = Array(gameState.inventory.maxSlots).fill(null).map((_, index) => ({
-        item: appleItem,
-        quantity: 99,
-        slotIndex: index
-      }));
+
+      gameState.inventory.slots = Array(gameState.inventory.maxSlots)
+        .fill(null)
+        .map((_, index) => ({
+          item: appleItem,
+          quantity: 99,
+          slotIndex: index,
+        }));
 
       // Create activity that would give item rewards
-      gameState.world.activeActivities = [{
-        activityId: "riverside_rest", // This can give herb items
-        locationId: "riverside",
-        ticksRemaining: 5,
-        startTime: Date.now() - 60000,
-        petId: gameState.currentPet?.id || "test-pet",
-      }];
+      gameState.world.activeActivities = [
+        {
+          activityId: "riverside_rest", // This can give herb items
+          locationId: "riverside",
+          ticksRemaining: 5,
+          startTime: Date.now() - 60000,
+          petId: gameState.currentPet?.id || "test-pet",
+        },
+      ];
 
       const initialGold = gameState.inventory.gold;
-      
+
       GameLoop.calculateOfflineProgression(gameState);
 
       // Should have received gold compensation if item addition failed

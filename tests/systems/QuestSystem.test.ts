@@ -1171,11 +1171,11 @@ describe("QuestSystem", () => {
       // Complete the first two objectives to test the sell objective independently
       const questProgress = gameState.questLog!.activeQuests.find(q => q.questId === miningTutorialQuest.id);
       expect(questProgress).toBeDefined();
-      
+
       // Complete buy pickaxe objective
       questProgress!.objectives[0].currentAmount = 1;
       questProgress!.objectives[0].completed = true;
-      
+
       // Complete mining objective
       questProgress!.objectives[1].currentAmount = 5;
       questProgress!.objectives[1].completed = true;
@@ -1194,7 +1194,7 @@ describe("QuestSystem", () => {
 
       const objectiveEvent = events.find(e => e.type === "objective_completed");
       const questEvent = events.find(e => e.type === "quest_completed");
-      
+
       expect(objectiveEvent).toBeDefined();
       expect(questEvent).toBeDefined();
       expect(questEvent!.questId).toBe(miningTutorialQuest.id);

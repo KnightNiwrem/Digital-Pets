@@ -23,9 +23,9 @@ describe("Activity Statistics Tracking", () => {
       expect(gameState.activityStats.totals).toBeDefined();
 
       // Check all activity types have the correct structure
-      const activityTypes: (keyof typeof gameState.activityStats)[] = ['foraging', 'fishing', 'mining', 'training'];
+      const activityTypes: (keyof typeof gameState.activityStats)[] = ["foraging", "fishing", "mining", "training"];
       for (const activityType of activityTypes) {
-        if (activityType === 'totals') continue;
+        if (activityType === "totals") continue;
         const stats = gameState.activityStats[activityType];
         expect(stats.completions).toBe(0);
         expect(stats.timeSpent).toBe(0);
@@ -112,9 +112,7 @@ describe("Activity Statistics Tracking", () => {
 
     it("should update training statistics correctly", () => {
       const testGameState = GameStateFactory.createNewGameWithStarter("Fresh Pet", "wild_beast");
-      const rewards: ActivityReward[] = [
-        { type: "experience", amount: 20, probability: 1 },
-      ];
+      const rewards: ActivityReward[] = [{ type: "experience", amount: 20, probability: 1 }];
 
       (GameLoop as any).updateActivityStatistics(testGameState, "training" as ActivityType, 60, rewards);
 
@@ -129,7 +127,7 @@ describe("Activity Statistics Tracking", () => {
 
     it("should accumulate statistics from multiple activities", () => {
       const testGameState = GameStateFactory.createNewGameWithStarter("Fresh Pet", "wild_beast");
-      
+
       // Complete multiple activities of different types
       const foragingRewards: ActivityReward[] = [
         { type: "gold", amount: 5, probability: 1 },

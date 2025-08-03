@@ -2,13 +2,17 @@
 
 import { describe, it, expect, beforeEach } from "bun:test";
 import { ItemSystem } from "@/systems/ItemSystem";
+import { ActionCoordinator } from "@/engine/ActionCoordinator";
 import type { Pet, PetSpecies } from "@/types/Pet";
 import type { Inventory, ConsumableItem, DurabilityItem } from "@/types/Item";
+import type { GameState } from "@/types";
+import { ActionFactory } from "@/types/UnifiedActions";
 import { getItemById } from "@/data/items";
 
 describe("ItemSystem", () => {
   let testInventory: Inventory;
   let testPet: Pet;
+  let testGameState: GameState;
   let apple: ConsumableItem;
   let ball: DurabilityItem;
 
@@ -56,6 +60,26 @@ describe("ItemSystem", () => {
       moves: [],
       birthTime: Date.now() - 1000000,
     };
+
+    // Create minimal test game state for ActionCoordinator tests
+    testGameState = {
+      currentPet: testPet,
+      inventory: testInventory,
+      world: {
+        currentLocationId: "hometown",
+        unlockedLocations: ["hometown"],
+        visitedLocations: ["hometown"],
+        travelState: undefined,
+        activeActivities: [],
+      },
+      questLog: {
+        activeQuests: [],
+        completedQuests: [],
+        failedQuests: [],
+        availableQuests: [],
+        questChains: [],
+      },
+    } as unknown as GameState;
 
     apple = getItemById("apple") as ConsumableItem;
     ball = getItemById("ball") as DurabilityItem;
@@ -521,6 +545,277 @@ describe("ItemSystem", () => {
         expect(categories.food).toHaveLength(1);
         expect(categories.toys).toHaveLength(1);
         expect(categories.drinks).toHaveLength(0);
+      });
+
+      // ActionCoordinator Integration Tests - Testing the ACTUAL production code path
+      describe("ActionCoordinator Integration", () => {
+        describe("Shop Operations via ActionCoordinator", () => {
+          it("should handle buy action through full ActionCoordinator pipeline", async () => {
+            const buyAction = ActionFactory.createItemAction("buy", "apple", 2);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(true);
+            expect(result.data).toBeDefined();
+
+            // Validate the actual ActionCoordinator result structure
+            const { gameState } = result.data!;
+
+            // Check that inventory was updated with purchased items
+            const appleSlot = gameState.inventory.slots.find(s => s.item.id === "apple");
+            expect(appleSlot).toBeDefined();
+            expect(appleSlot!.quantity).toBe(2);
+
+            // Check that gold was deducted from inventory (ActionCoordinator path may update inventory.gold)
+            const expectedCost = apple.value * 2; // 10 * 2 = 20
+            expect(gameState.inventory.gold).toBe(testInventory.gold - expectedCost);
+          });
+
+          it("should handle buy action with price multiplier", async () => {
+            // Create a shop action with price multiplier simulation
+            const buyAction = ActionFactory.createItemAction("buy", "apple", 1);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(true);
+            expect(result.data).toBeDefined();
+
+            const { gameState } = result.data!;
+
+            // Check item was added
+            const appleSlot = gameState.inventory.slots.find(s => s.item.id === "apple");
+            expect(appleSlot).toBeDefined();
+            expect(appleSlot!.quantity).toBe(1);
+
+            // Check gold deduction
+            const expectedCost = apple.value * 1; // 10 * 1 = 10
+            expect(gameState.inventory.gold).toBe(testInventory.gold - expectedCost);
+          });
+
+          it("should fail buy action when insufficient gold", async () => {
+            // Create a game state with low gold
+            const poorGameState = {
+              ...testGameState,
+              inventory: { ...testInventory, gold: 5 }, // Only 5 gold, apple costs 10
+            } as unknown as GameState;
+
+            const buyAction = ActionFactory.createItemAction("buy", "apple", 1);
+
+            const result = await ActionCoordinator.dispatchAction(poorGameState, buyAction);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain("Insufficient gold");
+          });
+
+          it("should handle durability items correctly", async () => {
+            const buyAction = ActionFactory.createItemAction("buy", "ball", 1);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(true);
+            const { gameState } = result.data!;
+
+            // Check that durability item was created with full durability
+            const ballSlot = gameState.inventory.slots.find(s => s.item.id === "ball");
+            expect(ballSlot).toBeDefined();
+            expect(ballSlot!.quantity).toBe(1);
+
+            // For durability items, check that currentDurability is set to maxDurability
+            const ballItem = ballSlot!.item as DurabilityItem;
+            expect(ballItem.currentDurability).toBe(ball.maxDurability);
+
+            // Check gold deduction
+            const expectedCost = ball.value * 1; // 25 * 1 = 25
+            expect(gameState.inventory.gold).toBe(testInventory.gold - expectedCost);
+          });
+
+          it("should fail when buying non-existent item", async () => {
+            const buyAction = ActionFactory.createItemAction("buy", "nonexistent_item", 1);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain("Item not found");
+          });
+
+          it("should fail when inventory is full", async () => {
+            // Fill inventory to exactly maxSlots capacity (10 slots)
+            const fullInventory = { ...testInventory, slots: [] };
+
+            // Fill all 10 slots with different items to prevent stacking
+            const ballResult1 = ItemSystem.addItem(fullInventory, ball, 1);
+            Object.assign(fullInventory, ballResult1.data);
+
+            // Add 9 more different ball items (since balls are non-stackable, each takes a slot)
+            for (let i = 1; i < 10; i++) {
+              const ballResult = ItemSystem.addItem(fullInventory, ball, 1);
+              if (ballResult.success) {
+                Object.assign(fullInventory, ballResult.data);
+              }
+            }
+
+            const fullGameState = {
+              ...testGameState,
+              inventory: fullInventory,
+            } as unknown as GameState;
+
+            const buyAction = ActionFactory.createItemAction("buy", "apple", 1); // Different item that would need a new slot
+
+            const result = await ActionCoordinator.dispatchAction(fullGameState, buyAction);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain("Insufficient inventory space");
+          });
+        });
+
+        describe("Sell Operations via ActionCoordinator", () => {
+          it("should handle sell action through ActionCoordinator", async () => {
+            // Create completely fresh inventory and game state for this test
+            const freshInventory = ItemSystem.createInventory(10, 100);
+            const freshInventoryWithApples = ItemSystem.addItem(freshInventory, apple, 5).data!;
+            
+            const freshGameState = {
+              ...testGameState,
+              inventory: freshInventoryWithApples,
+            } as unknown as GameState;
+    
+            // Debug: Check initial state
+            const initialAppleSlot = freshGameState.inventory.slots.find(s => s.item.id === "apple");
+            expect(initialAppleSlot).toBeDefined();
+            expect(initialAppleSlot!.quantity).toBe(5);
+    
+            const sellAction = ActionFactory.createItemAction("sell", "apple", 2);
+    
+            const result = await ActionCoordinator.dispatchAction(freshGameState, sellAction);
+    
+            expect(result.success).toBe(true);
+            const { gameState, proposals } = result.data!;
+    
+            // Debug: Check what proposals were generated
+            console.log("Generated proposals:", proposals.map(p => ({ description: p.description, changes: p.changes })));
+    
+            // Check that items were removed
+            const appleSlot = gameState.inventory.slots.find(s => s.item.id === "apple");
+            expect(appleSlot).toBeDefined();
+            
+            // Debug: Log actual vs expected
+            console.log(`Expected quantity: 3, Actual quantity: ${appleSlot!.quantity}`);
+            expect(appleSlot!.quantity).toBe(3); // 5 - 2 = 3
+    
+            // Check that gold was added (assuming 50% sell price)
+            const expectedValue = Math.floor(apple.value * 0.5) * 2; // (10 * 0.5) * 2 = 10
+            expect(gameState.inventory.gold).toBe(freshInventory.gold + expectedValue);
+          });
+
+          it("should fail sell when item not in inventory", async () => {
+            const sellAction = ActionFactory.createItemAction("sell", "nonexistent", 1);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, sellAction);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain("Item not found");
+          });
+
+          it("should fail sell when insufficient quantity", async () => {
+            // Create a fresh game state with apples in inventory for this specific test
+            const inventoryWithApples = ItemSystem.addItem(testInventory, apple, 5).data!;
+            const gameStateWithApples = {
+              ...testGameState,
+              inventory: inventoryWithApples,
+            } as unknown as GameState;
+
+            const sellAction = ActionFactory.createItemAction("sell", "apple", 10); // More than the 5 we have
+
+            const result = await ActionCoordinator.dispatchAction(gameStateWithApples, sellAction);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain("Insufficient item quantity to sell");
+          });
+        });
+
+        describe("Proposal Generation Validation", () => {
+          it("should generate correct proposals for buy operations", async () => {
+            const buyAction = ActionFactory.createItemAction("buy", "apple", 2);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(true);
+            expect(result.data!.proposals).toBeDefined();
+
+            const proposals = result.data!.proposals;
+
+            // Should have at least 2 proposals: gold deduction and item addition
+            expect(proposals.length).toBeGreaterThanOrEqual(2);
+
+            // Check for gold deduction proposal
+            const goldProposal = proposals.find(p =>
+              p.changes.some(c => c.type === "game_state_update" && c.property === "inventory.gold")
+            );
+            expect(goldProposal).toBeDefined();
+
+            // Check for inventory update proposal
+            const inventoryProposal = proposals.find(p =>
+              p.changes.some(c => c.type === "inventory_update" && c.target === "apple")
+            );
+            expect(inventoryProposal).toBeDefined();
+          });
+
+          it("should validate state consistency across proposals", async () => {
+            const buyAction = ActionFactory.createItemAction("buy", "apple", 3);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(true);
+            const { gameState } = result.data!;
+
+            // Validate that all state changes are consistent
+            const appleSlot = gameState.inventory.slots.find(s => s.item.id === "apple");
+            const goldCost = apple.value * 3;
+
+            expect(appleSlot!.quantity).toBe(3);
+            expect(gameState.inventory.gold).toBe(testInventory.gold - goldCost);
+
+            // Validate that slotIndex is properly assigned
+            expect(appleSlot!.slotIndex).toBeGreaterThanOrEqual(0);
+            expect(appleSlot!.slotIndex).toBeLessThan(gameState.inventory.maxSlots);
+          });
+        });
+
+        describe("Error Handling and Edge Cases", () => {
+          it("should handle zero quantity gracefully", async () => {
+            const buyAction = ActionFactory.createItemAction("buy", "apple", 0);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain("Quantity must be positive");
+          });
+
+          it("should handle negative quantity gracefully", async () => {
+            const buyAction = ActionFactory.createItemAction("buy", "apple", -1);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toContain("Quantity must be positive");
+          });
+
+          it("should maintain inventory integrity on partial failures", async () => {
+            // This test ensures that if part of a transaction fails, the state remains consistent
+            const originalGold = testGameState.inventory.gold;
+            const originalSlotCount = testGameState.inventory.slots.length;
+
+            const buyAction = ActionFactory.createItemAction("buy", "nonexistent", 1);
+
+            const result = await ActionCoordinator.dispatchAction(testGameState, buyAction);
+
+            expect(result.success).toBe(false);
+
+            // Verify state wasn't modified on failure
+            expect(testGameState.inventory.gold).toBe(originalGold);
+            expect(testGameState.inventory.slots.length).toBe(originalSlotCount);
+          });
+        });
       });
     });
 

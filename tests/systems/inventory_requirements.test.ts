@@ -13,7 +13,7 @@ describe("WorldSystem Inventory Requirements", () => {
   beforeEach(() => {
     // Create game state with empty inventory
     gameStateEmpty = GameStateFactory.createTestGame();
-    
+
     // Set location to riverside where fishing activity exists
     gameStateEmpty.world.currentLocationId = "riverside";
     gameStateEmpty.world.unlockedLocations.push("riverside");

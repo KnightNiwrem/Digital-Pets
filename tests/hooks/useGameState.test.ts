@@ -248,7 +248,7 @@ describe("Enhanced Autosave Functionality", () => {
       // First move to a location with activities or test with current location
       const testGameStateWithLocation = {
         ...testGameState,
-        world: { ...testGameState.world, currentLocationId: "forest-path" }
+        world: { ...testGameState.world, currentLocationId: "forest-path" },
       };
       const activityResult = WorldSystem.startActivity(testGameStateWithLocation, "foraging");
       if (activityResult.success && activityResult.data) {

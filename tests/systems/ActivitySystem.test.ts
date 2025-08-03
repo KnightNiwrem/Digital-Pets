@@ -6,14 +6,14 @@ describe("Activity System", () => {
   describe("Energy Cost Validation", () => {
     it("should ensure all activities have positive energy costs", () => {
       const negativeEnergyActivities: Array<{ locationId: string; activityId: string; energyCost: number }> = [];
-      
+
       LOCATIONS.forEach(location => {
         location.activities.forEach(activity => {
           if (activity.energyCost < 0) {
             negativeEnergyActivities.push({
               locationId: location.id,
               activityId: activity.id,
-              energyCost: activity.energyCost
+              energyCost: activity.energyCost,
             });
           }
         });
@@ -27,18 +27,18 @@ describe("Activity System", () => {
       const fixedActivities = [
         { id: "riverside_rest", expectedCost: 5 },
         { id: "mountain_rest", expectedCost: 15 },
-        { id: "pond_meditation", expectedCost: 10 }
+        { id: "pond_meditation", expectedCost: 10 },
       ];
 
       const foundActivities: Array<{ id: string; energyCost: number }> = [];
-      
+
       LOCATIONS.forEach(location => {
         location.activities.forEach(activity => {
           const fixed = fixedActivities.find(p => p.id === activity.id);
           if (fixed) {
             foundActivities.push({
               id: activity.id,
-              energyCost: activity.energyCost
+              energyCost: activity.energyCost,
             });
           }
         });
@@ -56,14 +56,14 @@ describe("Activity System", () => {
     it("should only use valid activity types", () => {
       const validTypes: ActivityType[] = ["foraging", "fishing", "mining", "training"];
       const invalidActivities: Array<{ locationId: string; activityId: string; type: string }> = [];
-      
+
       LOCATIONS.forEach(location => {
         location.activities.forEach(activity => {
           if (!validTypes.includes(activity.type as ActivityType)) {
             invalidActivities.push({
               locationId: location.id,
               activityId: activity.id,
-              type: activity.type
+              type: activity.type,
             });
           }
         });
@@ -76,18 +76,18 @@ describe("Activity System", () => {
       const updatedActivities = [
         { id: "riverside_rest", expectedType: "training" },
         { id: "mountain_rest", expectedType: "training" },
-        { id: "pond_meditation", expectedType: "training" }
+        { id: "pond_meditation", expectedType: "training" },
       ];
 
       const foundActivities: Array<{ id: string; type: string }> = [];
-      
+
       LOCATIONS.forEach(location => {
         location.activities.forEach(activity => {
           const updated = updatedActivities.find(p => p.id === activity.id);
           if (updated) {
             foundActivities.push({
               id: activity.id,
-              type: activity.type
+              type: activity.type,
             });
           }
         });

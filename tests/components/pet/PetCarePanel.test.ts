@@ -175,11 +175,7 @@ describe("PetCarePanel Cleaning Logic", () => {
       );
 
       const buttonMessage =
-        cleaningItems.length === 0
-          ? "No Cleaning Items"
-          : pet.poopCount === 0
-            ? "No Poop to Clean"
-            : "Cannot Clean";
+        cleaningItems.length === 0 ? "No Cleaning Items" : pet.poopCount === 0 ? "No Poop to Clean" : "Cannot Clean";
 
       expect(buttonMessage).toBe("No Cleaning Items");
     });
@@ -194,11 +190,7 @@ describe("PetCarePanel Cleaning Logic", () => {
       );
 
       const buttonMessage =
-        cleaningItems.length === 0
-          ? "No Cleaning Items"
-          : pet.poopCount === 0
-            ? "No Poop to Clean"
-            : "Cannot Clean";
+        cleaningItems.length === 0 ? "No Cleaning Items" : pet.poopCount === 0 ? "No Poop to Clean" : "Cannot Clean";
 
       expect(buttonMessage).toBe("No Poop to Clean");
     });
@@ -216,11 +208,7 @@ describe("PetCarePanel Cleaning Logic", () => {
       // This represents the case where pet has poop and cleaning items exist,
       // but other conditions prevent cleaning
       const buttonMessage =
-        cleaningItems.length === 0
-          ? "No Cleaning Items"
-          : pet.poopCount === 0
-            ? "No Poop to Clean"
-            : "Cannot Clean";
+        cleaningItems.length === 0 ? "No Cleaning Items" : pet.poopCount === 0 ? "No Poop to Clean" : "Cannot Clean";
 
       expect(buttonMessage).toBe("Cannot Clean");
     });

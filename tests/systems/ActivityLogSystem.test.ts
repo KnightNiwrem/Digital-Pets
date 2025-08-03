@@ -33,7 +33,7 @@ describe("ActivityLogSystem", () => {
 
     it("should maintain chronological order (newest first)", () => {
       const baseTime = Date.now();
-      
+
       const entry1 = {
         activityId: "hometown_foraging",
         locationId: "hometown",
@@ -158,12 +158,7 @@ describe("ActivityLogSystem", () => {
 
       ActivityLogSystem.addLogEntry(gameState, entry);
 
-      const found = ActivityLogSystem.findLogEntryByActivity(
-        gameState,
-        "hometown_foraging",
-        "hometown",
-        startTime
-      );
+      const found = ActivityLogSystem.findLogEntryByActivity(gameState, "hometown_foraging", "hometown", startTime);
 
       expect(found).toBeDefined();
       expect(found?.activityId).toBe("hometown_foraging");
@@ -275,12 +270,12 @@ describe("ActivityLogSystem", () => {
       expect(stats.totalActivities).toBe(4);
       expect(stats.completedActivities).toBe(2);
       expect(stats.cancelledActivities).toBe(1);
-      
+
       expect(stats.byType.hometown_foraging.completed).toBe(1);
       expect(stats.byType.hometown_foraging.cancelled).toBe(1);
       expect(stats.byType.flower_picking.completed).toBe(1);
       expect(stats.byType.forest_foraging.started).toBe(1);
-      
+
       expect(stats.byLocation.hometown.completed).toBe(2);
       expect(stats.byLocation.hometown.cancelled).toBe(1);
       expect(stats.byLocation.forest_path.started).toBe(1);
