@@ -1281,41 +1281,77 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
         }
         break;
 
-      case "cancel_activity":
-        proposals.push({
-          id: ProposalFactory.generateId("world_system"),
-          systemId: "world_system",
-          description: "Cancel current activity",
-          priority: 100,
-          changes: [
-            {
-              type: "game_state_update" as const,
-              property: "world.activeActivities",
-              newValue: [],
-              operation: "set" as const,
-            },
-            {
-              type: "pet_update" as const,
-              property: "state",
-              newValue: "idle",
-              operation: "set" as const,
-            },
-          ],
-          dependencies: [],
-        });
+      case "cancel_activity": {
+        // Find the pet ID for cancellation
+        const currentPet = context.activePet;
+        if (currentPet) {
+          // Use WorldSystem to properly cancel the activity with energy refund
+          const cancelResult = WorldSystem.cancelActivity(context.currentState, currentPet.id, true);
 
-        // Log activity cancellation
-        proposals.push(
-          ProposalFactory.createActivityLogProposal(
-            "world_system",
-            "Activity cancelled",
-            "activity_cancelled",
-            "Cancelled current activity",
-            {},
-            50
-          )
-        );
+          if (cancelResult.success && cancelResult.data) {
+            proposals.push({
+              id: ProposalFactory.generateId("world_system"),
+              systemId: "world_system",
+              description: "Cancel current activity",
+              priority: 100,
+              changes: [
+                {
+                  type: "game_state_update" as const,
+                  property: "world.activeActivities",
+                  newValue: cancelResult.data.activeActivities,
+                  operation: "set" as const,
+                },
+                {
+                  type: "pet_update" as const,
+                  property: "state",
+                  newValue: "idle",
+                  operation: "set" as const,
+                },
+              ],
+              dependencies: [],
+            });
+
+            // If energy was refunded, also update pet energy
+            if (
+              "energyRefunded" in cancelResult.data &&
+              typeof cancelResult.data.energyRefunded === "number" &&
+              cancelResult.data.energyRefunded > 0
+            ) {
+              proposals.push({
+                id: ProposalFactory.generateId("world_system"),
+                systemId: "world_system",
+                description: "Refund energy from cancelled activity",
+                priority: 99,
+                changes: [
+                  {
+                    type: "pet_update" as const,
+                    property: "currentEnergy",
+                    newValue: Math.min(
+                      currentPet.maxEnergy,
+                      currentPet.currentEnergy + cancelResult.data.energyRefunded
+                    ),
+                    operation: "set" as const,
+                  },
+                ],
+                dependencies: [],
+              });
+            }
+
+            // Log activity cancellation with proper message
+            proposals.push(
+              ProposalFactory.createActivityLogProposal(
+                "world_system",
+                "Activity cancelled",
+                "activity_cancelled",
+                cancelResult.message || "Cancelled current activity",
+                {},
+                50
+              )
+            );
+          }
+        }
         break;
+      }
     }
 
     return proposals;
@@ -1350,8 +1386,8 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
       }
     }
 
-    if (description.includes("activity")) {
-      // Validate activity requirements
+    if (description.includes("activity") && !description.toLowerCase().includes("cancel")) {
+      // Validate activity requirements (but not for cancellation)
       if (!context.activePet) {
         errors.push("No active pet found for activity");
       } else {
@@ -1366,7 +1402,7 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
         }
       }
 
-      // Check if already doing an activity
+      // Check if already doing an activity (but not for cancellation)
       if (context.currentState.world.activeActivities.length > 0) {
         errors.push("Pet is already engaged in an activity");
       }
