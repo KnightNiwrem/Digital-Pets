@@ -1266,17 +1266,8 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
               dependencies: [],
             });
 
-            // Log activity start
-            proposals.push(
-              ProposalFactory.createActivityLogProposal(
-                "world_system",
-                "Activity started",
-                "activity_started",
-                `Started activity: ${worldAction.payload.activityId}`,
-                { activityId: worldAction.payload.activityId },
-                50
-              )
-            );
+            // Activity logging is handled by WorldSystem.startActivity()
+            // No additional log entry needed here
           }
         }
         break;
@@ -1337,17 +1328,8 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
               });
             }
 
-            // Log activity cancellation with proper message
-            proposals.push(
-              ProposalFactory.createActivityLogProposal(
-                "world_system",
-                "Activity cancelled",
-                "activity_cancelled",
-                cancelResult.message || "Cancelled current activity",
-                {},
-                50
-              )
-            );
+            // Activity cancellation logging is handled by WorldSystem.cancelActivity()
+            // No additional log entry needed here
           }
         }
         break;
