@@ -8,8 +8,11 @@ import { PetSystem } from "@/systems/PetSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
+import { QuestSystem } from "@/systems/QuestSystem";
 import { getItemById } from "@/data/items";
 import { getLocationById } from "@/data/locations";
+import { QUESTS } from "@/data/quests";
+import { QUEST_ACTION_TYPES, ACTIVITY_ACTION_TYPES, SYSTEM_ACTION_TYPES } from "@/constants/ActionTypes";
 
 export class GameLoop {
   private static instance: GameLoop | null = null;
@@ -120,11 +123,25 @@ export class GameLoop {
           this.handlePetDeath(actions, stateChanges);
         }
         if (petChanges.includes("pet_grew")) {
+          // DEBUG: Log pet growth action type fix
+          console.log("🐾 PET GROWTH FIX: Emitting both 'pet_growth' and 'level_up' for quest compatibility");
+
           actions.push({
-            type: "pet_growth",
+            type: SYSTEM_ACTION_TYPES.PET_GROWTH,
             payload: {
               petId: this.gameState.currentPet.id,
               newStage: this.gameState.currentPet.growthStage,
+            },
+            timestamp: Date.now(),
+            source: "system",
+          });
+
+          // FIXED: Also emit level_up for quest system
+          actions.push({
+            type: QUEST_ACTION_TYPES.LEVEL_UP,
+            payload: {
+              petId: this.gameState.currentPet.id,
+              newLevel: this.gameState.currentPet.growthStage,
             },
             timestamp: Date.now(),
             source: "system",
@@ -204,12 +221,26 @@ export class GameLoop {
     if (travelResult.success && travelResult.data) {
       if (travelResult.message) {
         stateChanges.push("travel_completed");
+
+        // DEBUG: Log travel completion
+        console.log("🗺️ TRAVEL DEBUG: Travel completed to:", travelResult.data.currentLocationId);
+
         actions.push({
-          type: "travel_completed",
+          type: SYSTEM_ACTION_TYPES.TRAVEL_COMPLETED,
           payload: { locationId: travelResult.data.currentLocationId },
           timestamp: Date.now(),
           source: "system",
         });
+
+        // FIXED: Emit location_visited action for quest system
+        actions.push({
+          type: QUEST_ACTION_TYPES.LOCATION_VISITED,
+          payload: { locationId: travelResult.data.currentLocationId },
+          timestamp: Date.now(),
+          source: "system",
+        });
+
+        console.log("✅ QUEST FIX: location_visited action emitted for quest system");
 
         // If pet was travelling, set back to idle
         if (this.gameState.currentPet?.state === "travelling") {
@@ -236,7 +267,18 @@ export class GameLoop {
       // Process rewards from completed activities
       if (hadActivitiesCompleted) {
         stateChanges.push("activities_completed");
+
+        // DEBUG: Log reward processing for debugging
+        console.log("🎁 REWARD DEBUG: Processing activity rewards:", {
+          rewards: activityResult.data.rewards,
+          actionsEmitted: actions.map(a => ({ type: a.type, payload: a.payload })),
+          questSystemCalled: true, // FIXED: Quest system now called
+        });
+
         this.processActivityRewards(activityResult.data.rewards, actions, stateChanges);
+
+        // FIXED: Process quest actions for automatic quest progression
+        this.dispatchQuestActions(actions, stateChanges);
       }
 
       // Reset pet state to idle if it was exploring and activities completed but no more remain
@@ -313,7 +355,7 @@ export class GameLoop {
         switch (reward.type) {
           case "gold":
             actions.push({
-              type: "gold_earned",
+              type: ACTIVITY_ACTION_TYPES.GOLD_EARNED,
               payload: { amount: reward.amount, source: "activity" },
               timestamp: Date.now(),
               source: "system",
@@ -363,8 +405,19 @@ export class GameLoop {
                 });
                 console.warn(`Missing item definition for ${reward.id}, providing gold compensation`);
               }
+              // FIXED: Emit both activity and quest action types
+              console.log("✅ ACTION TYPE FIX: Emitting both 'item_earned' and 'item_obtained'");
+
               actions.push({
-                type: "item_earned",
+                type: ACTIVITY_ACTION_TYPES.ITEM_EARNED,
+                payload: { itemId: reward.id, amount: reward.amount, source: "activity" },
+                timestamp: Date.now(),
+                source: "system",
+              });
+
+              // FIXED: Also emit quest-compatible action
+              actions.push({
+                type: QUEST_ACTION_TYPES.ITEM_OBTAINED,
                 payload: { itemId: reward.id, amount: reward.amount, source: "activity" },
                 timestamp: Date.now(),
                 source: "system",
@@ -384,7 +437,7 @@ export class GameLoop {
 
           case "experience":
             actions.push({
-              type: "experience_earned",
+              type: ACTIVITY_ACTION_TYPES.EXPERIENCE_EARNED,
               payload: { amount: reward.amount, source: "activity" },
               timestamp: Date.now(),
               source: "system",
@@ -407,6 +460,35 @@ export class GameLoop {
       }
 
       stateChanges.push("rewards_processed");
+    }
+  }
+
+  /**
+   * Dispatch quest actions to QuestSystem for automatic quest progression
+   */
+  private dispatchQuestActions(actions: GameAction[], stateChanges: string[]): void {
+    if (!this.gameState?.questLog) return;
+
+    // Process quest-compatible actions
+    for (const action of actions) {
+      if ((Object.values(QUEST_ACTION_TYPES) as string[]).includes(action.type)) {
+        console.log("🎯 QUEST DISPATCH: Processing action for quest system:", {
+          type: action.type,
+          payload: action.payload,
+        });
+
+        const questEvents = QuestSystem.processGameAction(
+          action.type,
+          action.payload as Record<string, string | number | boolean>,
+          QUESTS,
+          this.gameState
+        );
+
+        if (questEvents.length > 0) {
+          console.log("✅ QUEST EVENTS: Generated quest events:", questEvents);
+          stateChanges.push("quest_events_processed");
+        }
+      }
     }
   }
 
@@ -876,6 +958,13 @@ export class GameLoop {
     // Process rewards for all completed activities
     for (const { activity, rewards } of completedActivities) {
       if (rewards.length > 0) {
+        // DEBUG: Log offline reward processing issue
+        console.log("🌙 OFFLINE REWARD DEBUG: Processing offline rewards but NOT calling quest system:", {
+          rewards,
+          questSystemCalled: false,
+          majorEvents,
+        });
+
         GameLoop.processActivityRewardsStatic(gameState, rewards, majorEvents);
       }
 

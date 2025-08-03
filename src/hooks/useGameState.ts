@@ -13,6 +13,7 @@ import { QuestSystem } from "@/systems/QuestSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { QUESTS } from "@/data/quests";
 import { PetValidator, ErrorHandler } from "@/lib/utils";
+import { QUEST_ACTION_TYPES } from "@/constants/ActionTypes";
 
 export interface UseGameStateReturn {
   // State
@@ -257,7 +258,7 @@ export function useGameState(): UseGameStateReturn {
 
     // Process quest progress for care action: feed
     if (gameState?.questLog) {
-      QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, gameState);
+      QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "feed" }, QUESTS, gameState);
       setGameState(prev => (prev ? { ...prev } : null));
     }
 
@@ -275,7 +276,7 @@ export function useGameState(): UseGameStateReturn {
     setGameState(prev => (prev ? { ...prev } : null));
 
     if (gameState?.questLog) {
-      QuestSystem.processGameAction("pet_care", { action: "drink" }, QUESTS, gameState);
+      QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "drink" }, QUESTS, gameState);
       setGameState(prev => (prev ? { ...prev } : null));
     }
 
@@ -293,7 +294,7 @@ export function useGameState(): UseGameStateReturn {
     setGameState(prev => (prev ? { ...prev } : null));
 
     if (gameState?.questLog) {
-      QuestSystem.processGameAction("pet_care", { action: "play" }, QUESTS, gameState);
+      QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "play" }, QUESTS, gameState);
       setGameState(prev => (prev ? { ...prev } : null));
     }
 
@@ -349,7 +350,7 @@ export function useGameState(): UseGameStateReturn {
 
           // Emit quest progress for feeding via item if applicable
           if (updatedGameState.questLog) {
-            QuestSystem.processGameAction("pet_care", { action: "feed" }, QUESTS, updatedGameState);
+            QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "feed" }, QUESTS, updatedGameState);
             // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
           }
 
@@ -386,7 +387,7 @@ export function useGameState(): UseGameStateReturn {
           }
 
           if (updatedGameState.questLog) {
-            QuestSystem.processGameAction("pet_care", { action: "drink" }, QUESTS, updatedGameState);
+            QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "drink" }, QUESTS, updatedGameState);
             // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
           }
 
@@ -423,7 +424,7 @@ export function useGameState(): UseGameStateReturn {
           }
 
           if (updatedGameState.questLog) {
-            QuestSystem.processGameAction("pet_care", { action: "play" }, QUESTS, updatedGameState);
+            QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "play" }, QUESTS, updatedGameState);
             // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
           }
 
@@ -582,7 +583,7 @@ export function useGameState(): UseGameStateReturn {
 
           // Process quest progress for item_sold action
           if (newState.questLog) {
-            QuestSystem.processGameAction("item_sold", { itemId, amount: quantity }, QUESTS, newState);
+            QuestSystem.processGameAction(QUEST_ACTION_TYPES.ITEM_SOLD, { itemId, amount: quantity }, QUESTS, newState);
           }
 
           // Trigger autosave using the explicit updated state to avoid stale closure
