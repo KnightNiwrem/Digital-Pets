@@ -1,4 +1,4 @@
-import type { GameState, Pet, Quest, Result } from "@/types";
+import type { GameState, Pet, Quest, Result, ActivityLogResult } from "@/types";
 import type {
   UnifiedGameAction,
   PetCareAction,
@@ -841,11 +841,11 @@ export class ActionCoordinator {
           const logData = change.newValue as {
             activityId?: string;
             locationId?: string;
-            status?: string;
+            status?: "started" | "cancelled" | "completed";
             energyCost?: number;
             startTime?: number;
             endTime?: number;
-            results?: unknown[];
+            results?: ActivityLogResult[];
             type?: string;
             timestamp?: number;
             description?: string;

@@ -5,7 +5,8 @@ import { describe, it, expect, beforeEach } from "bun:test";
 import { ActionCoordinator } from "@/engine/ActionCoordinator";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
-import type { GameState, WorldAction } from "@/types";
+import type { GameState } from "@/types";
+import { ActionFactory } from "@/types/UnifiedActions";
 
 describe("Travel Log Fix (Issue #94)", () => {
   let gameState: GameState;
@@ -26,13 +27,9 @@ describe("Travel Log Fix (Issue #94)", () => {
     expect(gameState.activityLog).toHaveLength(0);
 
     // Create travel action to Forest Path
-    const travelAction: WorldAction = {
-      type: "world_action",
-      payload: {
-        actionType: "travel",
-        destinationId: "forest_path",
-      },
-    };
+    const travelAction = ActionFactory.createWorldAction("travel", {
+      destinationId: "forest_path",
+    });
 
     // Dispatch travel action
     const result = await ActionCoordinator.dispatchAction(gameState, travelAction);
@@ -62,13 +59,9 @@ describe("Travel Log Fix (Issue #94)", () => {
     gameState.currentPet!.currentEnergy = 100;
     gameState.currentPet!.growthStage = 5;
 
-    const travelAction: WorldAction = {
-      type: "world_action",
-      payload: {
-        actionType: "travel",
-        destinationId: "forest_path",
-      },
-    };
+    const travelAction = ActionFactory.createWorldAction("travel", {
+      destinationId: "forest_path",
+    });
 
     const startResult = await ActionCoordinator.dispatchAction(gameState, travelAction);
     expect(startResult.success).toBe(true);
@@ -115,13 +108,9 @@ describe("Travel Log Fix (Issue #94)", () => {
     gameState.currentPet!.currentEnergy = 100;
     gameState.currentPet!.growthStage = 5;
 
-    const travelAction: WorldAction = {
-      type: "world_action",
-      payload: {
-        actionType: "travel",
-        destinationId: "forest_path",
-      },
-    };
+    const travelAction = ActionFactory.createWorldAction("travel", {
+      destinationId: "forest_path",
+    });
 
     const startResult = await ActionCoordinator.dispatchAction(gameState, travelAction);
     gameState = startResult.data!.gameState;
@@ -146,13 +135,9 @@ describe("Travel Log Fix (Issue #94)", () => {
     gameState.currentPet!.currentEnergy = 100;
     gameState.currentPet!.growthStage = 5;
 
-    const travelAction: WorldAction = {
-      type: "world_action",
-      payload: {
-        actionType: "travel",
-        destinationId: "town_garden",
-      },
-    };
+    const travelAction = ActionFactory.createWorldAction("travel", {
+      destinationId: "town_garden",
+    });
 
     const result = await ActionCoordinator.dispatchAction(gameState, travelAction);
     gameState = result.data!.gameState;
