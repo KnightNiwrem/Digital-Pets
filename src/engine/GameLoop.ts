@@ -123,9 +123,6 @@ export class GameLoop {
           this.handlePetDeath(actions, stateChanges);
         }
         if (petChanges.includes("pet_grew")) {
-          // DEBUG: Log pet growth action type fix
-          console.log("🐾 PET GROWTH FIX: Emitting both 'pet_growth' and 'level_up' for quest compatibility");
-
           actions.push({
             type: SYSTEM_ACTION_TYPES.PET_GROWTH,
             payload: {
@@ -894,6 +891,23 @@ export class GameLoop {
         }
         if (petChanges.includes("pet_grew")) {
           majorEvents.push("pet_grew");
+
+          // FIXED: Add quest system integration for pet growth during offline progression
+          if (gameState.currentPet && gameState.questLog) {
+            const questEvents = QuestSystem.processGameAction(
+              QUEST_ACTION_TYPES.LEVEL_UP,
+              {
+                petId: gameState.currentPet.id,
+                newLevel: gameState.currentPet.growthStage,
+              },
+              QUESTS,
+              gameState
+            );
+
+            if (questEvents.length > 0) {
+              majorEvents.push("quest_events_processed_offline");
+            }
+          }
         }
         if (petChanges.includes("pet_sick_from_poop")) {
           majorEvents.push("pet_became_sick");
@@ -907,9 +921,24 @@ export class GameLoop {
 
       if (gameState.world.travelState.ticksRemaining <= 0) {
         // Travel completed during offline time
-        gameState.world.currentLocationId = gameState.world.travelState.destinationId;
+        const destinationId = gameState.world.travelState.destinationId;
+        gameState.world.currentLocationId = destinationId;
         gameState.world.travelState = undefined;
         majorEvents.push("travel_completed");
+
+        // FIXED: Add quest system integration for travel completion during offline progression
+        if (gameState.questLog) {
+          const questEvents = QuestSystem.processGameAction(
+            QUEST_ACTION_TYPES.LOCATION_VISITED,
+            { locationId: destinationId },
+            QUESTS,
+            gameState
+          );
+
+          if (questEvents.length > 0) {
+            majorEvents.push("quest_events_processed_offline");
+          }
+        }
 
         // Set pet back to idle if it was travelling
         if (gameState.currentPet?.state === "travelling") {
@@ -958,14 +987,55 @@ export class GameLoop {
     // Process rewards for all completed activities
     for (const { activity, rewards } of completedActivities) {
       if (rewards.length > 0) {
-        // DEBUG: Log offline reward processing issue
-        console.log("🌙 OFFLINE REWARD DEBUG: Processing offline rewards but NOT calling quest system:", {
-          rewards,
-          questSystemCalled: false,
-          majorEvents,
-        });
-
+        // Process rewards first
         GameLoop.processActivityRewardsStatic(gameState, rewards, majorEvents);
+
+        // FIXED: Add quest system integration for offline progression
+        const offlineActions: GameAction[] = [];
+
+        // Emit quest-compatible actions for offline rewards
+        for (const reward of rewards) {
+          if (reward.type === "item" && reward.id) {
+            offlineActions.push({
+              type: QUEST_ACTION_TYPES.ITEM_OBTAINED,
+              payload: { itemId: reward.id, amount: reward.amount, source: "offline_activity" },
+              timestamp: Date.now(),
+              source: "system",
+            });
+          }
+          if (reward.type === "gold") {
+            offlineActions.push({
+              type: ACTIVITY_ACTION_TYPES.GOLD_EARNED,
+              payload: { amount: reward.amount, source: "offline_activity" },
+              timestamp: Date.now(),
+              source: "system",
+            });
+          }
+          if (reward.type === "experience") {
+            offlineActions.push({
+              type: ACTIVITY_ACTION_TYPES.EXPERIENCE_EARNED,
+              payload: { amount: reward.amount, source: "offline_activity" },
+              timestamp: Date.now(),
+              source: "system",
+            });
+          }
+        }
+
+        // Process quest actions for automatic quest progression
+        for (const action of offlineActions) {
+          if ((Object.values(QUEST_ACTION_TYPES) as string[]).includes(action.type)) {
+            const questEvents = QuestSystem.processGameAction(
+              action.type,
+              action.payload as Record<string, string | number | boolean>,
+              QUESTS,
+              gameState
+            );
+
+            if (questEvents.length > 0) {
+              majorEvents.push("quest_events_processed_offline");
+            }
+          }
+        }
       }
 
       // Update activity statistics if we have the activity definition
