@@ -21,6 +21,7 @@ import { QuestSystem } from "@/systems/QuestSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { QUESTS } from "@/data/quests";
 import { getItemById } from "@/data/items";
+import { getLocationById } from "@/data/locations";
 
 /**
  * Result of executing an action through ActionCoordinator
@@ -837,21 +838,37 @@ export class ActionCoordinator {
 
       case "activity_log":
         if (change.operation === "push" && change.newValue) {
-          ActivityLogSystem.addLogEntry(newState, {
-            activityId: (change.newValue as ActivityLogEntry).type,
-            locationId: newState.world.currentLocationId,
-            startTime: (change.newValue as ActivityLogEntry).timestamp,
-            endTime: (change.newValue as ActivityLogEntry).timestamp,
-            status: "completed",
-            energyCost: 0,
-            results: [
-              {
-                type: "none",
-                amount: 0,
-                description: (change.newValue as ActivityLogEntry).description,
-              },
-            ],
-          });
+          const logData = change.newValue as any;
+          // Handle different types of activity log entries
+          if (logData.activityId && logData.status) {
+            // This is a proper activity log entry (like travel or activity)
+            ActivityLogSystem.addLogEntry(newState, {
+              activityId: logData.activityId,
+              locationId: logData.locationId || newState.world.currentLocationId,
+              startTime: logData.startTime || Date.now(),
+              endTime: logData.endTime,
+              status: logData.status,
+              energyCost: logData.energyCost || 0,
+              results: logData.results || [],
+            });
+          } else {
+            // Legacy activity log entry (like quest events) - keep existing behavior
+            ActivityLogSystem.addLogEntry(newState, {
+              activityId: (change.newValue as ActivityLogEntry).type,
+              locationId: newState.world.currentLocationId,
+              startTime: (change.newValue as ActivityLogEntry).timestamp,
+              endTime: (change.newValue as ActivityLogEntry).timestamp,
+              status: "completed",
+              energyCost: 0,
+              results: [
+                {
+                  type: "none",
+                  amount: 0,
+                  description: (change.newValue as ActivityLogEntry).description,
+                },
+              ],
+            });
+          }
         }
         break;
     }
@@ -1214,20 +1231,32 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
               dependencies: [],
             });
 
-            // Log travel start
-            proposals.push(
-              ProposalFactory.createActivityLogProposal(
-                "world_system",
-                "Travel started",
-                "travel_started",
-                travelResult.message || `Started traveling to ${worldAction.payload.destinationId}`,
+            // Log travel start - create proper activity log entry with "started" status
+            // Use the destination location name as the activity name
+            const destination = getLocationById(worldAction.payload.destinationId);
+            const destinationName = destination ? destination.name : worldAction.payload.destinationId;
+            
+            proposals.push({
+              id: ProposalFactory.generateId("world_system"),
+              systemId: "world_system", 
+              description: `Create travel log entry for ${destinationName}`,
+              priority: 50,
+              changes: [
                 {
-                  destinationId: worldAction.payload.destinationId,
-                  travelTime: worldState.travelState?.ticksRemaining || 0,
+                  type: "activity_log" as const,
+                  newValue: {
+                    activityId: destinationName, // Use destination name as activity identifier
+                    locationId: context.currentState.world.currentLocationId,
+                    status: "started",
+                    energyCost: travelResult.data ? (context.activePet.currentEnergy - travelResult.data.pet.currentEnergy) : 0,
+                    startTime: Date.now(),
+                    results: [], // Will be populated when travel completes
+                  },
+                  operation: "push" as const,
                 },
-                50
-              )
-            );
+              ],
+              dependencies: [],
+            });
           }
         }
         break;
