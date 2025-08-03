@@ -781,16 +781,41 @@ export class ActionCoordinator {
         break;
 
       case "game_state_update":
-        if (change.property === "gold") {
+        if (change.property) {
+          // Handle nested property paths
+          const propertyPath = change.property.split(".");
+          let target: Record<string, unknown> = newState as Record<string, unknown>;
+
+          // Navigate to the parent object
+          for (let i = 0; i < propertyPath.length - 1; i++) {
+            if (target[propertyPath[i]] === undefined) {
+              target[propertyPath[i]] = {};
+            }
+            target = target[propertyPath[i]] as Record<string, unknown>;
+          }
+
+          const finalProperty = propertyPath[propertyPath.length - 1];
+          const currentValue = target[finalProperty];
+
           switch (change.operation) {
+            case "set":
+              target[finalProperty] = change.newValue;
+              break;
             case "add":
-              newState.inventory.gold += change.newValue as number;
+              target[finalProperty] = (currentValue as number) + (change.newValue as number);
               break;
             case "subtract":
-              newState.inventory.gold -= change.newValue as number;
+              target[finalProperty] = (currentValue as number) - (change.newValue as number);
               break;
-            case "set":
-              newState.inventory.gold = change.newValue as number;
+            case "push":
+              if (Array.isArray(target[finalProperty])) {
+                (target[finalProperty] as unknown[]).push(change.newValue);
+              } else {
+                target[finalProperty] = [change.newValue];
+              }
+              break;
+            case "replace":
+              target[finalProperty] = change.newValue;
               break;
           }
         }
@@ -1042,7 +1067,7 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
               ProposalFactory.createGameStateUpdateProposal(
                 "item_system",
                 `Buy ${itemAction.payload.quantity}x ${item.name}`,
-                { "inventory.gold": context.currentState.inventory.gold - cost },
+                { gold: context.currentState.inventory.gold - cost },
                 100
               )
             );
@@ -1077,7 +1102,7 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
               ProposalFactory.createGameStateUpdateProposal(
                 "item_system",
                 `Add gold from sale`,
-                { "inventory.gold": context.currentState.inventory.gold + value },
+                { gold: context.currentState.inventory.gold + value },
                 100
               )
             );
@@ -1518,7 +1543,7 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
                   changes: [
                     {
                       type: "game_state_update" as const,
-                      property: "inventory.gold",
+                      property: "gold",
                       newValue: context.currentState.inventory.gold + reward.amount,
                       operation: "set" as const,
                     },
