@@ -1,5 +1,4 @@
-import type { GameState } from "@/types/GameState";
-import type { Pet } from "@/types/Pet";
+import type { GameState, Pet, Quest, Result } from "@/types";
 import type {
   UnifiedGameAction,
   PetCareAction,
@@ -22,12 +21,6 @@ import { QuestSystem } from "@/systems/QuestSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { QUESTS } from "@/data/quests";
 import { getItemById } from "@/data/items";
-import type { Quest } from "@/types/Quest";
-
-/**
- * Generic result type for operations
- */
-type Result<T> = { success: true; data: T } | { success: false; error: string };
 
 /**
  * Result of executing an action through ActionCoordinator

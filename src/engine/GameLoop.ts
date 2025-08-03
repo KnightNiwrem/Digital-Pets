@@ -1,7 +1,6 @@
 // Core game loop and state management
 
-import type { GameState, GameTick, GameAction } from "@/types";
-import type { ActivityReward, ActivityType } from "@/types/World";
+import type { GameState, GameTick, GameAction, ActivityReward, ActivityType } from "@/types";
 import { GAME_CONSTANTS } from "@/types";
 import { GameStorage } from "@/storage/GameStorage";
 import { PetSystem } from "@/systems/PetSystem";

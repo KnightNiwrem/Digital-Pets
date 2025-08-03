@@ -9,6 +9,7 @@ import { ItemCategoryTabs } from "./ItemCategoryTabs";
 import type { Inventory, InventorySlot } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
 import { Coins, Package, Settings } from "lucide-react";
+import { SortButtonGroup } from "@/components/ui/SortButtonGroup";
 
 interface InventoryScreenProps {
   inventory: Inventory;
@@ -86,30 +87,15 @@ export function InventoryScreen({ inventory, pet, onUseItem, onSellItem, onSortI
                 inventory={inventory}
               />
               <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSort("name")}
-                  className={`text-xs whitespace-nowrap ${sortBy === "name" ? "bg-secondary" : ""}`}
-                >
-                  Name
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSort("value")}
-                  className={`text-xs whitespace-nowrap ${sortBy === "value" ? "bg-secondary" : ""}`}
-                >
-                  Value
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSort("rarity")}
-                  className={`text-xs whitespace-nowrap ${sortBy === "rarity" ? "bg-secondary" : ""}`}
-                >
-                  Rarity
-                </Button>
+                <SortButtonGroup
+                  options={[
+                    { value: "name", label: "Name" },
+                    { value: "value", label: "Value" },
+                    { value: "rarity", label: "Rarity" },
+                  ]}
+                  activeSort={sortBy}
+                  onSortChange={handleSort}
+                />
                 <Button variant="outline" size="sm" className="text-xs">
                   <Settings className="h-4 w-4" />
                 </Button>

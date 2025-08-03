@@ -1,9 +1,7 @@
 // React hook for managing game state and game loop
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { GameState, Result } from "@/types";
-import type { Quest, QuestProgress } from "@/types/Quest";
-import type { Battle } from "@/types/Battle";
+import type { GameState, Result, Quest, QuestProgress, Battle } from "@/types";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 import { GameStorage } from "@/storage/GameStorage";

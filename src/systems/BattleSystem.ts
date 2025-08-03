@@ -1,8 +1,17 @@
 // Battle system for turn-based combat
 
-import type { Battle, BattleAction, BattlePet, BattleResult, BattleTurn, BattleType, BattleMove } from "@/types/Battle";
-import type { Pet, Move } from "@/types/Pet";
-import type { Result } from "@/types/index";
+import type {
+  Battle,
+  BattleAction,
+  BattlePet,
+  BattleResult,
+  BattleTurn,
+  BattleType,
+  BattleMove,
+  Pet,
+  Move,
+  Result,
+} from "@/types";
 import { EnergyManager, PetValidator, GameMath, ResultUtils } from "@/lib/utils";
 import { getMoveById, getStarterMoves } from "@/data/moves";
 

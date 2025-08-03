@@ -1,7 +1,9 @@
 // Item system for managing inventory operations
 
 import type { Item, Inventory, InventorySlot, DurabilityItem } from "@/types/Item";
+import { ITEM_CONSTANTS } from "@/types/Item";
 import type { Result } from "@/types";
+import { PET_CONSTANTS } from "@/types";
 import type {
   SystemProposal,
   ValidationResult,
@@ -9,11 +11,9 @@ import type {
   ProposalGenerator,
   StateChange,
 } from "@/types/SystemProposal";
-import { ResultUtils, GameMath } from "@/lib/utils";
-import { ITEM_CONSTANTS } from "@/types/Item";
-import { PET_CONSTANTS } from "@/types";
-import { getItemById } from "@/data/items";
 import { ProposalFactory } from "@/types/SystemProposal";
+import { ResultUtils, GameMath } from "@/lib/utils";
+import { getItemById } from "@/data/items";
 
 // Backward compatibility type for tests
 interface TestPet {

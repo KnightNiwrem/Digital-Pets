@@ -1,6 +1,6 @@
 // Quest definitions for the game
 
-import type { Quest } from "@/types/Quest";
+import type { Quest } from "@/types";
 
 // Tutorial/Starter quests
 const SHOP_TUTORIAL: Quest = {

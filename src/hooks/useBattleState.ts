@@ -1,9 +1,8 @@
 // Hook for managing battle state and actions
 
 import { useState, useCallback } from "react";
-import type { Battle, BattleAction } from "@/types/Battle";
-import type { Pet } from "@/types/Pet";
-import type { Result } from "@/types/index";
+import type { Battle, BattleAction, Pet } from "@/types";
+import type { Result } from "@/types";
 import { WILD_BEAST, FOREST_GUARDIAN, ARENA_CHAMPION } from "@/data/pets";
 
 // Mock opponent data - would be loaded from data files in a complete implementation

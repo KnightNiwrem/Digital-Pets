@@ -10,9 +10,7 @@ import type {
   Shop,
   CompletedActivityInfo,
 } from "@/types/World";
-import type { Pet } from "@/types/Pet";
-import type { GameState } from "@/types/GameState";
-import type { Result } from "@/types";
+import type { Pet, GameState, Result } from "@/types";
 import { PetValidator, EnergyManager } from "@/lib/utils";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { ActivityLogSystem } from "@/systems/ActivityLogSystem";

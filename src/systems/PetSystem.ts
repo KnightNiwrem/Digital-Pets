@@ -1,8 +1,8 @@
 // Pet care system managing all pet-related mechanics
 
 import type { Pet, ItemEffect, Result } from "@/types";
-import type { SystemProposal, ValidationResult, ProposalContext, ProposalGenerator } from "@/types/SystemProposal";
 import { PET_CONSTANTS } from "@/types";
+import type { SystemProposal, ValidationResult, ProposalContext, ProposalGenerator } from "@/types/SystemProposal";
 import { PetValidator, GameMath } from "@/lib/utils";
 import { ProposalFactory } from "@/types/SystemProposal";
 

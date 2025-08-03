@@ -1,6 +1,6 @@
 // Move definitions for battle system
 
-import type { BattleMove } from "@/types/Battle";
+import type { BattleMove } from "@/types";
 
 // Basic physical attacks
 const TACKLE: BattleMove = {

@@ -8,8 +8,9 @@ import { ItemSystem } from "@/systems/ItemSystem";
 import type { InventorySlot, DurabilityItem } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
 import { ITEM_CONSTANTS } from "@/types/Item";
-import { ItemPricing, GameMath, UIUtils, ItemEffectUtils } from "@/lib/utils";
-import { X, Play, Coins, AlertTriangle, Info, Minus, Plus } from "lucide-react";
+import { ItemPricing, UIUtils, ItemEffectUtils } from "@/lib/utils";
+import { X, Play, Coins, AlertTriangle, Info } from "lucide-react";
+import { QuantitySelector } from "@/components/ui/QuantitySelector";
 
 interface ItemDetailsPanelProps {
   slot: InventorySlot;
@@ -131,24 +132,8 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
             </div>
 
             {item.stackable && quantity > 1 && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSellQuantity(GameMath.adjustQuantity(sellQuantity, -1, 1, quantity))}
-                  disabled={sellQuantity <= 1}
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <span className="text-sm min-w-8 text-center">{sellQuantity}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSellQuantity(GameMath.adjustQuantity(sellQuantity, 1, 1, quantity))}
-                  disabled={sellQuantity >= quantity}
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
+              <div className="flex items-center justify-center">
+                <QuantitySelector value={sellQuantity} min={1} max={quantity} onChange={setSellQuantity} />
               </div>
             )}
 

@@ -1,7 +1,6 @@
 // Activity Log System for tracking player activity history
 
-import type { GameState } from "@/types/GameState";
-import type { ActivityLogEntry, ActivityLogResult } from "@/types/World";
+import type { GameState, ActivityLogEntry, ActivityLogResult } from "@/types";
 
 export class ActivityLogSystem {
   private static readonly MAX_LOG_ENTRIES = 100;

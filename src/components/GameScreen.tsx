@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TabButton } from "@/components/ui/TabButton";
 import { PetDisplay } from "@/components/pet/PetDisplay";
 import { PetCarePanel } from "@/components/pet/PetCarePanel";
 import { WorldScreen } from "@/components/world/WorldScreen";
@@ -17,6 +18,7 @@ import type { BattleAction } from "@/types/Battle";
 import type { PetSpecies } from "@/types/Pet";
 import { getStarterPets } from "@/data/pets";
 import { GameStateValidator, ActionHandler } from "@/lib/utils";
+import { logError, logSuccess, logBattle } from "@/lib/logger";
 import { Home, Map as MapIcon, Package, Sword, ScrollText, BarChart3, FileText } from "lucide-react";
 
 export function GameScreen() {
@@ -125,17 +127,17 @@ export function GameScreen() {
       // Set pet state to battling when battle starts successfully
       const setPetStateResult = await setPetBattling();
       if (!setPetStateResult.success) {
-        console.error("Failed to set pet state to battling:", setPetStateResult.error);
+        logError("Battle", "Failed to set pet state to battling", setPetStateResult.error);
       }
     } else {
-      console.error("Battle start failed:", result.error);
+      logError("Battle", "Battle start failed", result.error);
     }
   };
 
   const handleBattleAction = async (action: BattleAction) => {
     const result = await executeAction(action);
     if (!result.success) {
-      console.error("Battle action failed:", result.error);
+      logError("Battle", "Battle action failed", result.error);
     }
 
     // If battle ended, apply results to pet with enhanced autosave
@@ -144,12 +146,12 @@ export function GameScreen() {
         try {
           const applyResult = await applyGameStateBattleResults(currentBattle);
           if (applyResult.success) {
-            console.log("Battle results applied to pet and game saved");
+            logBattle("Results", "Battle results applied to pet and game saved");
           } else {
-            console.error("Failed to apply battle results:", applyResult.error);
+            logError("Battle", "Failed to apply battle results", applyResult.error);
           }
         } catch (error) {
-          console.error("Battle result application error:", error);
+          logError("Battle", "Battle result application error", error);
         }
       }
     }
@@ -159,7 +161,7 @@ export function GameScreen() {
     // Reset pet state to idle when battle ends
     const setPetStateResult = await setPetIdleFromBattle();
     if (!setPetStateResult.success) {
-      console.error("Failed to set pet state to idle after battle:", setPetStateResult.error);
+      logError("Battle", "Failed to set pet state to idle after battle", setPetStateResult.error);
     }
     endBattle();
   };
@@ -186,9 +188,9 @@ export function GameScreen() {
   const handleSaveGame = async () => {
     const result = await saveGame();
     if (result.success) {
-      console.log("Game saved successfully!");
+      logSuccess("Save", "Game saved successfully!");
     } else {
-      console.error(`Save failed: ${result.error}`);
+      logError("Save", "Save failed", result.error);
     }
   };
 
@@ -328,83 +330,39 @@ export function GameScreen() {
         <div className="space-y-6">
           {/* Tab Navigation */}
           <div className="flex flex-wrap gap-2 border-b pb-2">
-            <button
-              onClick={() => setActiveTab("pet")}
-              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                activeTab === "pet"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <Home className="w-4 h-4 inline mr-1 sm:mr-2" />
-              Care
-            </button>
-            <button
+            <TabButton label="Care" icon={Home} isActive={activeTab === "pet"} onClick={() => setActiveTab("pet")} />
+            <TabButton
+              label="Explore World"
+              icon={MapIcon}
+              isActive={activeTab === "world"}
               onClick={() => setActiveTab("world")}
-              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                activeTab === "world"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <MapIcon className="w-4 h-4 inline mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Explore </span>World
-            </button>
-            <button
+              showFullLabel={false}
+            />
+            <TabButton
+              label="Inventory"
+              icon={Package}
+              isActive={activeTab === "inventory"}
               onClick={() => setActiveTab("inventory")}
-              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                activeTab === "inventory"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <Package className="w-4 h-4 inline mr-1 sm:mr-2" />
-              Inventory
-            </button>
-            <button
+            />
+            <TabButton
+              label="Battle"
+              icon={Sword}
+              isActive={activeTab === "battle"}
               onClick={() => setActiveTab("battle")}
-              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                activeTab === "battle"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <Sword className="w-4 h-4 inline mr-1 sm:mr-2" />
-              Battle
-            </button>
-            <button
+            />
+            <TabButton
+              label="Quests"
+              icon={ScrollText}
+              isActive={activeTab === "quest"}
               onClick={() => setActiveTab("quest")}
-              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                activeTab === "quest"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <ScrollText className="w-4 h-4 inline mr-1 sm:mr-2" />
-              Quests
-            </button>
-            <button
+            />
+            <TabButton
+              label="Stats"
+              icon={BarChart3}
+              isActive={activeTab === "stats"}
               onClick={() => setActiveTab("stats")}
-              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                activeTab === "stats"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 inline mr-1 sm:mr-2" />
-              Stats
-            </button>
-            <button
-              onClick={() => setActiveTab("log")}
-              className={`px-3 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                activeTab === "log"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <FileText className="w-4 h-4 inline mr-1 sm:mr-2" />
-              Log
-            </button>
+            />
+            <TabButton label="Log" icon={FileText} isActive={activeTab === "log"} onClick={() => setActiveTab("log")} />
           </div>
 
           {/* Tab Content */}
