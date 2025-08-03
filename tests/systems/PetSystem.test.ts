@@ -115,10 +115,12 @@ describe("PetSystem - Pet Care Actions", () => {
       pet.satiety = 30;
 
       // Add small delay to ensure timestamp difference
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise(resolve => setTimeout(resolve, 5));
 
+      const afterTime = Date.now();
       PetSystem.feedPet(pet, 25);
 
+      expect(pet.lastCareTime).toBeGreaterThanOrEqual(afterTime);
       expect(pet.lastCareTime).toBeGreaterThan(beforeTime);
     });
   });
