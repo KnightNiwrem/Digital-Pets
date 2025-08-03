@@ -87,6 +87,9 @@ export interface Pet {
   birthTime: number; // timestamp
   lastCareTime: number; // timestamp
   totalLifetime: number; // total ticks alive
+
+  // Index signature for type compatibility
+  [key: string]: unknown;
 }
 
 export interface PetCareAction {

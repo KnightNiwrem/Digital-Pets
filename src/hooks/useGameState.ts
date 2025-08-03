@@ -1,20 +1,18 @@
 // React hook for managing game state and game loop
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { GameState, Pet, Result, PetCareAction, Inventory } from "@/types";
-import type { Item } from "@/types/Item";
+import type { GameState, Result } from "@/types";
 import type { Quest, QuestProgress } from "@/types/Quest";
 import type { Battle } from "@/types/Battle";
 import { GameLoop } from "@/engine/GameLoop";
 import { GameStateFactory } from "@/engine/GameStateFactory";
 import { GameStorage } from "@/storage/GameStorage";
-import { PetSystem } from "@/systems/PetSystem";
+import { ActionCoordinator } from "@/engine/ActionCoordinator";
+import { ActionFactory } from "@/types/UnifiedActions";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { QuestSystem } from "@/systems/QuestSystem";
-import { WorldSystem } from "@/systems/WorldSystem";
 import { QUESTS } from "@/data/quests";
 import { PetValidator, ErrorHandler } from "@/lib/utils";
-import { QUEST_ACTION_TYPES } from "@/constants/ActionTypes";
 
 export interface UseGameStateReturn {
   // State
@@ -132,36 +130,6 @@ export function useGameState(): UseGameStateReturn {
     [gameState]
   );
 
-  // Pet care action wrapper
-  const performPetAction = useCallback(
-    async (action: (pet: Pet) => Result<PetCareAction>, actionName: string): Promise<Result<void>> => {
-      if (!gameState?.currentPet) {
-        return { success: false, error: "No active pet" };
-      }
-
-      try {
-        const result = action(gameState.currentPet);
-
-        if (result.success) {
-          // Update the game state
-          setGameState(prev => (prev ? { ...prev } : null));
-
-          // Trigger autosave after user action
-          await triggerAutosave(actionName);
-
-          return { success: true };
-        } else {
-          return { success: false, error: result.error };
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : `Unknown error in ${actionName}`;
-        setError(errorMessage);
-        return { success: false, error: errorMessage };
-      }
-    },
-    [gameState, triggerAutosave]
-  );
-
   // Game management functions
   const startNewGame = useCallback(async (starterPetName = "Buddy", starterSpeciesId?: string): Promise<void> => {
     setIsLoading(true);
@@ -245,73 +213,135 @@ export function useGameState(): UseGameStateReturn {
     return result;
   }, [gameState]);
 
-  // Pet care actions
-  // Updated to emit quest progress events for tutorial care objectives
+  // Pet care actions - now using unified dispatch pattern
   const feedPet = useCallback(async (): Promise<Result<void>> => {
     if (!gameState?.currentPet) {
       return { success: false, error: "No active pet" };
     }
-    const result = PetSystem.feedPet(gameState.currentPet, 25);
-    if (!result.success) return { success: false, error: result.error };
 
-    // State update
-    setGameState(prev => (prev ? { ...prev } : null));
+    try {
+      const action = ActionFactory.createPetCareAction("feed", { value: 25 });
+      const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-    // Process quest progress for care action: feed
-    if (gameState?.questLog) {
-      QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "feed" }, QUESTS, gameState);
-      setGameState(prev => (prev ? { ...prev } : null));
+      if (result.success && result.data) {
+        const updatedGameState = result.data.gameState;
+        setGameState(updatedGameState);
+        if (gameLoopRef.current) {
+          gameLoopRef.current.updateState(updatedGameState);
+        }
+
+        await triggerAutosave("feed pet", updatedGameState);
+        return { success: true };
+      }
+      return { success: false, error: result.success ? "Unknown error" : result.error };
+    } catch (error) {
+      return ErrorHandler.handleCatchError(error, "Failed to feed pet", "Feed pet");
     }
-
-    await triggerAutosave("feed pet", gameState);
-    return { success: true };
   }, [gameState, triggerAutosave]);
 
   const giveDrink = useCallback(async (): Promise<Result<void>> => {
     if (!gameState?.currentPet) {
       return { success: false, error: "No active pet" };
     }
-    const result = PetSystem.giveDrink(gameState.currentPet, 25);
-    if (!result.success) return { success: false, error: result.error };
 
-    setGameState(prev => (prev ? { ...prev } : null));
+    try {
+      const action = ActionFactory.createPetCareAction("drink", { value: 25 });
+      const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-    if (gameState?.questLog) {
-      QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "drink" }, QUESTS, gameState);
-      setGameState(prev => (prev ? { ...prev } : null));
+      if (result.success && result.data) {
+        const updatedGameState = result.data.gameState;
+        setGameState(updatedGameState);
+        if (gameLoopRef.current) {
+          gameLoopRef.current.updateState(updatedGameState);
+        }
+
+        await triggerAutosave("give drink", updatedGameState);
+        return { success: true };
+      }
+      return { success: false, error: result.success ? "Unknown error" : result.error };
+    } catch (error) {
+      return ErrorHandler.handleCatchError(error, "Failed to give drink", "Give drink");
     }
-
-    await triggerAutosave("give drink", gameState);
-    return { success: true };
   }, [gameState, triggerAutosave]);
 
   const playWithPet = useCallback(async (): Promise<Result<void>> => {
     if (!gameState?.currentPet) {
       return { success: false, error: "No active pet" };
     }
-    const result = PetSystem.playWithPet(gameState.currentPet, 20);
-    if (!result.success) return { success: false, error: result.error };
 
-    setGameState(prev => (prev ? { ...prev } : null));
+    try {
+      const action = ActionFactory.createPetCareAction("play", { value: 20 });
+      const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-    if (gameState?.questLog) {
-      QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "play" }, QUESTS, gameState);
-      setGameState(prev => (prev ? { ...prev } : null));
+      if (result.success && result.data) {
+        const updatedGameState = result.data.gameState;
+        setGameState(updatedGameState);
+        if (gameLoopRef.current) {
+          gameLoopRef.current.updateState(updatedGameState);
+        }
+
+        await triggerAutosave("play with pet", updatedGameState);
+        return { success: true };
+      }
+      return { success: false, error: result.success ? "Unknown error" : result.error };
+    } catch (error) {
+      return ErrorHandler.handleCatchError(error, "Failed to play with pet", "Play with pet");
     }
-
-    await triggerAutosave("play with pet", gameState);
-    return { success: true };
   }, [gameState, triggerAutosave]);
 
-  const cleanPoop = useCallback(() => performPetAction(PetSystem.cleanPoop, "clean poop"), [performPetAction]);
+  const cleanPoop = useCallback(async (): Promise<Result<void>> => {
+    if (!gameState?.currentPet) {
+      return { success: false, error: "No active pet" };
+    }
+
+    try {
+      const action = ActionFactory.createPetCareAction("clean");
+      const result = await ActionCoordinator.dispatchAction(gameState, action);
+
+      if (result.success && result.data) {
+        const updatedGameState = result.data.gameState;
+        setGameState(updatedGameState);
+        if (gameLoopRef.current) {
+          gameLoopRef.current.updateState(updatedGameState);
+        }
+
+        await triggerAutosave("clean poop", updatedGameState);
+        return { success: true };
+      }
+      return { success: false, error: result.success ? "Unknown error" : result.error };
+    } catch (error) {
+      return ErrorHandler.handleCatchError(error, "Failed to clean poop", "Clean poop");
+    }
+  }, [gameState, triggerAutosave]);
 
   const treatPet = useCallback(
-    (_medicineType: string) => {
-      // For now, create a simple medicine effect based on the medicine type
-      const medicineEffect = [{ type: "cure" as const, value: 100 }];
-      return performPetAction(pet => PetSystem.treatPet(pet, medicineEffect), "treat pet");
+    async (_medicineType: string): Promise<Result<void>> => {
+      if (!gameState?.currentPet) {
+        return { success: false, error: "No active pet" };
+      }
+
+      try {
+        // For now, create a simple medicine effect based on the medicine type
+        const medicineEffect = [{ type: "cure" as const, value: 100 }];
+        const action = ActionFactory.createPetCareAction("medicine", { effects: medicineEffect });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
+        if (result.success && result.data) {
+          const updatedGameState = result.data.gameState;
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
+
+          await triggerAutosave("treat pet", updatedGameState);
+          return { success: true };
+        }
+        return { success: false, error: result.success ? "Unknown error" : result.error };
+      } catch (error) {
+        return ErrorHandler.handleCatchError(error, "Failed to treat pet", "Treat pet");
+      }
     },
-    [performPetAction]
+    [gameState, triggerAutosave]
   );
 
   const toggleSleep = useCallback(async (): Promise<Result<void>> => {
@@ -320,13 +350,30 @@ export function useGameState(): UseGameStateReturn {
     }
 
     const pet = gameState.currentPet;
-    const actionFn = PetValidator.isSleeping(pet) ? PetSystem.wakePetUp : PetSystem.putPetToSleep;
+    const careType = PetValidator.isSleeping(pet) ? "wake" : "sleep";
     const actionName = PetValidator.isSleeping(pet) ? "wake pet" : "put pet to sleep";
 
-    return performPetAction(actionFn, actionName);
-  }, [gameState, performPetAction]);
+    try {
+      const action = ActionFactory.createPetCareAction(careType);
+      const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-  // Item-based pet care actions
+      if (result.success && result.data) {
+        const updatedGameState = result.data.gameState;
+        setGameState(updatedGameState);
+        if (gameLoopRef.current) {
+          gameLoopRef.current.updateState(updatedGameState);
+        }
+
+        await triggerAutosave(actionName, updatedGameState);
+        return { success: true };
+      }
+      return { success: false, error: result.success ? "Unknown error" : result.error };
+    } catch (error) {
+      return ErrorHandler.handleCatchError(error, `Failed to ${actionName}`, actionName);
+    }
+  }, [gameState, triggerAutosave]);
+
+  // Item-based pet care actions - now using unified dispatch pattern
   const feedPetWithItem = useCallback(
     async (itemId: string): Promise<Result<void>> => {
       if (!gameState?.currentPet || !gameState?.inventory) {
@@ -334,31 +381,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
-        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
-        if (result.success && result.data) {
-          const updatedGameState: GameState = {
-            ...gameState,
-            inventory: result.data.inventory,
-            currentPet: result.data.pet,
-          };
+        const action = ActionFactory.createPetCareAction("feed", { itemId });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-          // Update both React state and GameLoop internal state
+        if (result.success && result.data) {
+          const updatedGameState = result.data.gameState;
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          // Emit quest progress for feeding via item if applicable
-          if (updatedGameState.questLog) {
-            QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "feed" }, QUESTS, updatedGameState);
-            // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
-          }
-
           await triggerAutosave(`feed pet with ${itemId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to feed pet with item", "Feed pet with item");
       }
@@ -373,29 +409,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
-        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
-        if (result.success && result.data) {
-          const updatedGameState: GameState = {
-            ...gameState,
-            inventory: result.data.inventory,
-            currentPet: result.data.pet,
-          };
+        const action = ActionFactory.createPetCareAction("drink", { itemId });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
 
+        if (result.success && result.data) {
+          const updatedGameState = result.data.gameState;
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          if (updatedGameState.questLog) {
-            QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "drink" }, QUESTS, updatedGameState);
-            // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
-          }
-
           await triggerAutosave(`give drink with ${itemId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to give drink with item", "Give drink with item");
       }
@@ -410,29 +437,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
-        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
-        if (result.success && result.data) {
-          const updatedGameState: GameState = {
-            ...gameState,
-            inventory: result.data.inventory,
-            currentPet: result.data.pet,
-          };
+        const action = ActionFactory.createPetCareAction("play", { itemId });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
 
+        if (result.success && result.data) {
+          const updatedGameState = result.data.gameState;
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          if (updatedGameState.questLog) {
-            QuestSystem.processGameAction(QUEST_ACTION_TYPES.PET_CARE, { action: "play" }, QUESTS, updatedGameState);
-            // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
-          }
-
           await triggerAutosave(`play with ${itemId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to play with item", "Play with item");
       }
@@ -447,17 +465,11 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        // Use the cleaning item (this already handles the cleaning via "clean" effect)
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
-        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
-        if (result.success && result.data) {
-          const updatedGameState = {
-            ...gameState,
-            inventory: result.data.inventory,
-            currentPet: result.data.pet, // Pet is already cleaned by ItemSystem
-          };
+        const action = ActionFactory.createPetCareAction("clean", { itemId });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-          // Update both React state and GameLoop internal state
+        if (result.success && result.data) {
+          const updatedGameState = result.data.gameState;
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
@@ -466,7 +478,7 @@ export function useGameState(): UseGameStateReturn {
           await triggerAutosave(`clean with ${itemId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to clean with item", "Clean with item");
       }
@@ -481,16 +493,11 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
-        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
-        if (result.success && result.data) {
-          const updatedGameState = {
-            ...gameState,
-            inventory: result.data.inventory,
-            currentPet: result.data.pet,
-          };
+        const action = ActionFactory.createPetCareAction("medicine", { itemId });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-          // Update both React state and GameLoop internal state
+        if (result.success && result.data) {
+          const updatedGameState = result.data.gameState;
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
@@ -499,7 +506,7 @@ export function useGameState(): UseGameStateReturn {
           await triggerAutosave(`treat with ${itemId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to treat with item", "Treat with item");
       }
@@ -507,86 +514,7 @@ export function useGameState(): UseGameStateReturn {
     [gameState, triggerAutosave]
   );
 
-  // Item action wrapper
-  // CRITICAL FIX: Build explicit newState, update GameLoop immediately, and autosave with that state
-  const performItemAction = useCallback(
-    async (
-      action: (inventory: Inventory, pet: Pet) => Result<{ inventory?: Inventory; pet?: Pet }>,
-      actionName: string
-    ): Promise<Result<void>> => {
-      if (!gameState?.currentPet || !gameState?.inventory) {
-        return { success: false, error: "No active pet or inventory" };
-      }
-
-      try {
-        const result = action(gameState.inventory, gameState.currentPet);
-
-        if (result.success) {
-          // Build an explicit new state snapshot to avoid timing/race conditions
-          const newState: GameState = {
-            ...(gameState as GameState),
-            inventory: result.data?.inventory ?? gameState.inventory,
-            currentPet: result.data?.pet ?? gameState.currentPet,
-          };
-
-          // Update React state
-          setGameState(newState);
-
-          // Keep GameLoop internal state in sync immediately
-          if (gameLoopRef.current) {
-            gameLoopRef.current.updateState(newState);
-          }
-
-          // Trigger autosave using the explicit updated state to avoid stale closure
-          await triggerAutosave(actionName, newState);
-
-          return { success: true };
-        } else {
-          return { success: false, error: result.error };
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : `Unknown error in ${actionName}`;
-        setError(errorMessage);
-        return { success: false, error: errorMessage };
-      }
-    },
-    [gameState, triggerAutosave]
-  );
-
-  // Helper function to determine ALL care action types from item effects
-  const getCareActionsFromItem = useCallback((item: Item): string[] => {
-    const effects = item.effects;
-    const actions: string[] = [];
-
-    // Check for satiety effect (feeding)
-    if (effects.some(effect => effect.type === "satiety")) {
-      actions.push("feed");
-    }
-
-    // Check for hydration effect (drinking)
-    if (effects.some(effect => effect.type === "hydration")) {
-      actions.push("drink");
-    }
-
-    // Check for happiness effect (playing) - toys or happiness items
-    if (effects.some(effect => effect.type === "happiness") || item.type === "toy") {
-      actions.push("play");
-    }
-
-    // Check for cleaning effect
-    if (effects.some(effect => effect.type === "clean") || item.type === "hygiene") {
-      actions.push("clean");
-    }
-
-    // Check for healing effects (medicine)
-    if (effects.some(effect => effect.type === "health" || effect.type === "cure") || item.type === "medicine") {
-      actions.push("medicine");
-    }
-
-    return actions;
-  }, []);
-
-  // Item actions
+  // Item actions - now using unified dispatch pattern
   const useItem = useCallback(
     async (itemId: string): Promise<Result<void>> => {
       if (!gameState?.currentPet || !gameState?.inventory) {
@@ -600,44 +528,25 @@ export function useGameState(): UseGameStateReturn {
           return { success: false, error: "Item not found in inventory" };
         }
 
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- ItemSystem.useItem is a static method, not a React Hook
-        const result = ItemSystem.useItem(gameState.inventory, gameState.currentPet, itemId);
-        if (result.success && result.data) {
-          const updatedGameState: GameState = {
-            ...gameState,
-            inventory: result.data.inventory,
-            currentPet: result.data.pet,
-          };
+        const action = ActionFactory.createItemAction("use", itemId, 1);
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-          // Update both React state and GameLoop internal state
+        if (result.success && result.data) {
+          const updatedGameState = result.data.gameState;
           setGameState(updatedGameState);
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(updatedGameState);
           }
 
-          // Process quest progression based on ALL item effects
-          if (updatedGameState.questLog) {
-            const careActions = getCareActionsFromItem(inventorySlot.item);
-            for (const careAction of careActions) {
-              QuestSystem.processGameAction(
-                QUEST_ACTION_TYPES.PET_CARE,
-                { action: careAction },
-                QUESTS,
-                updatedGameState
-              );
-              // QuestSystem mutates questLog inside updatedGameState; we've already synced React and GameLoop above
-            }
-          }
-
           await triggerAutosave(`use item ${itemId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to use item", "Use item");
       }
     },
-    [gameState, getCareActionsFromItem, triggerAutosave]
+    [gameState, triggerAutosave]
   );
 
   const sellItem = useCallback(
@@ -647,32 +556,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = ItemSystem.sellItem(gameState.inventory, itemId, quantity, 0.5);
+        const action = ActionFactory.createItemAction("sell", itemId, quantity, { priceMultiplier: 0.5 });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
         if (result.success && result.data) {
-          const newState: GameState = {
-            ...gameState,
-            inventory: result.data,
-          };
-
-          // Update React state
+          const newState = result.data.gameState;
           setGameState(newState);
-
-          // Keep GameLoop internal state in sync immediately
           if (gameLoopRef.current) {
             gameLoopRef.current.updateState(newState);
           }
 
-          // Process quest progress for item_sold action
-          if (newState.questLog) {
-            QuestSystem.processGameAction(QUEST_ACTION_TYPES.ITEM_SOLD, { itemId, amount: quantity }, QUESTS, newState);
-          }
-
-          // Trigger autosave using the explicit updated state to avoid stale closure
           await triggerAutosave("sell item", newState);
-
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Unknown error in sell item";
         setError(errorMessage);
@@ -683,31 +580,66 @@ export function useGameState(): UseGameStateReturn {
   );
 
   const buyItem = useCallback(
-    (itemId: string, quantity: number) =>
-      performItemAction(inventory => {
-        const result = ItemSystem.buyItem(inventory, itemId, quantity, 1.0);
-        return {
-          success: result.success,
-          error: result.error,
-          data: result.success ? { inventory: result.data } : undefined,
-        };
-      }, "buy item"),
-    [performItemAction]
+    async (itemId: string, quantity: number): Promise<Result<void>> => {
+      if (!gameState?.inventory) {
+        return { success: false, error: "No inventory available" };
+      }
+
+      try {
+        const action = ActionFactory.createItemAction("buy", itemId, quantity, { priceMultiplier: 1.0 });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
+        if (result.success && result.data) {
+          const newState = result.data.gameState;
+          setGameState(newState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(newState);
+          }
+
+          await triggerAutosave("buy item", newState);
+          return { success: true };
+        }
+        return { success: false, error: result.success ? "Unknown error" : result.error };
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error in buy item";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+    [gameState, triggerAutosave]
   );
 
   const sortInventory = useCallback(
-    (sortBy: "name" | "value" | "rarity" | "type" | "quantity") =>
-      performItemAction(
-        inventory => ({
-          success: true,
-          data: { inventory: ItemSystem.sortInventory(inventory, sortBy) },
-        }),
-        "sort inventory"
-      ),
-    [performItemAction]
+    async (sortBy: "name" | "value" | "rarity" | "type" | "quantity"): Promise<Result<void>> => {
+      if (!gameState?.inventory) {
+        return { success: false, error: "No inventory available" };
+      }
+
+      try {
+        const action = ActionFactory.createItemAction("sort", "dummy", 1, { sortBy });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
+        if (result.success && result.data) {
+          const newState = result.data.gameState;
+          setGameState(newState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(newState);
+          }
+
+          await triggerAutosave("sort inventory", newState);
+          return { success: true };
+        }
+        return { success: false, error: result.success ? "Unknown error" : result.error };
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error in sort inventory";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+    [gameState, triggerAutosave]
   );
 
-  // Quest actions
+  // Quest actions - now using unified ActionCoordinator pattern
   const startQuest = useCallback(
     async (questId: string): Promise<Result<void>> => {
       if (!gameState) {
@@ -715,22 +647,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const quest = QUESTS.find(q => q.id === questId);
-        if (!quest) {
-          return { success: false, error: "Quest not found" };
-        }
+        const action = ActionFactory.createQuestAction("start", questId);
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
 
-        const result = QuestSystem.startQuest(quest, gameState);
         if (result.success && result.data) {
-          setGameState(result.data);
+          const updatedGameState = result.data.gameState;
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
-          // Trigger autosave after quest update
-          await triggerAutosave(`start quest: ${quest.name}`);
-
-          console.log(`Started quest: ${quest.name}`);
+          await triggerAutosave(`start quest: ${questId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to start quest", "Start quest");
       }
@@ -745,17 +675,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = QuestSystem.abandonQuest(gameState, questId);
+        const action = ActionFactory.createQuestAction("abandon", questId);
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
         if (result.success && result.data) {
-          setGameState(result.data);
+          const updatedGameState = result.data.gameState;
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
-          // Trigger autosave after quest update
-          await triggerAutosave(`abandon quest: ${questId}`);
-
-          console.log(`Abandoned quest: ${questId}`);
+          await triggerAutosave(`abandon quest: ${questId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to abandon quest", "Abandon quest");
       }
@@ -770,17 +703,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = QuestSystem.completeQuest(gameState, questId);
+        const action = ActionFactory.createQuestAction("complete", questId);
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
         if (result.success && result.data) {
-          setGameState(result.data);
+          const updatedGameState = result.data.gameState;
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
-          // Trigger autosave after quest update
-          await triggerAutosave(`complete quest: ${questId}`);
-
-          console.log(`Completed quest: ${questId}`);
+          await triggerAutosave(`complete quest: ${questId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to complete quest", "Complete quest");
       }
@@ -809,7 +745,7 @@ export function useGameState(): UseGameStateReturn {
     return gameState.questLog.completedQuests;
   }, [gameState]);
 
-  // World actions
+  // World actions - now using unified ActionCoordinator pattern
   const startTravel = useCallback(
     async (destinationId: string): Promise<Result<void>> => {
       if (!gameState?.currentPet || !gameState?.world) {
@@ -817,30 +753,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = WorldSystem.startTravel(gameState.world, gameState.currentPet, destinationId);
+        const action = ActionFactory.createWorldAction("travel", { destinationId });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
         if (result.success && result.data) {
-          setGameState(prev => {
-            if (!prev) return null;
-            const newState = {
-              ...prev,
-              world: result.data!.worldState,
-              currentPet: result.data!.pet,
-            };
+          const updatedGameState = result.data.gameState;
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
-            // CRITICAL FIX: Update GameLoop state immediately to prevent race condition
-            if (gameLoopRef.current) {
-              gameLoopRef.current.updateState(newState);
-            }
-
-            return newState;
-          });
-
-          // Trigger autosave after world state change
-          await triggerAutosave(`start travel to: ${destinationId}`);
-
+          await triggerAutosave(`start travel to: ${destinationId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to start travel", "Start travel");
       }
@@ -855,30 +781,20 @@ export function useGameState(): UseGameStateReturn {
       }
 
       try {
-        const result = WorldSystem.startActivity(gameState, activityId);
+        const action = ActionFactory.createWorldAction("activity", { activityId });
+        const result = await ActionCoordinator.dispatchAction(gameState, action);
+
         if (result.success && result.data) {
-          setGameState(prev => {
-            if (!prev) return null;
-            const newState = {
-              ...prev,
-              world: result.data!.worldState,
-              currentPet: result.data!.pet,
-            };
+          const updatedGameState = result.data.gameState;
+          setGameState(updatedGameState);
+          if (gameLoopRef.current) {
+            gameLoopRef.current.updateState(updatedGameState);
+          }
 
-            // CRITICAL FIX: Update GameLoop state immediately to prevent race condition
-            if (gameLoopRef.current) {
-              gameLoopRef.current.updateState(newState);
-            }
-
-            return newState;
-          });
-
-          // Trigger autosave after world state change
-          await triggerAutosave(`start activity: ${activityId}`);
-
+          await triggerAutosave(`start activity: ${activityId}`, updatedGameState);
           return { success: true };
         }
-        return { success: false, error: result.error };
+        return { success: false, error: result.success ? "Unknown error" : result.error };
       } catch (error) {
         return ErrorHandler.handleCatchError(error, "Failed to start activity", "Start activity");
       }
@@ -892,35 +808,20 @@ export function useGameState(): UseGameStateReturn {
     }
 
     try {
-      const result = WorldSystem.cancelActivity(gameState, gameState.currentPet.id);
+      const action = ActionFactory.createWorldAction("cancel_activity");
+      const result = await ActionCoordinator.dispatchAction(gameState, action);
+
       if (result.success && result.data) {
-        setGameState(prev => {
-          if (!prev) return null;
+        const updatedGameState = result.data.gameState;
+        setGameState(updatedGameState);
+        if (gameLoopRef.current) {
+          gameLoopRef.current.updateState(updatedGameState);
+        }
 
-          // Reset pet state to idle when cancelling activity
-          const updatedPet =
-            prev.currentPet?.state === "exploring" ? { ...prev.currentPet, state: "idle" as const } : prev.currentPet;
-
-          const newState = {
-            ...prev,
-            currentPet: updatedPet,
-            world: result.data!,
-          };
-
-          // CRITICAL FIX: Update GameLoop state immediately to prevent race condition
-          if (gameLoopRef.current) {
-            gameLoopRef.current.updateState(newState);
-          }
-
-          return newState;
-        });
-
-        // Trigger autosave after world state change
-        await triggerAutosave("cancel activity");
-
+        await triggerAutosave("cancel activity", updatedGameState);
         return { success: true };
       }
-      return { success: false, error: result.error };
+      return { success: false, error: result.success ? "Unknown error" : result.error };
     } catch (error) {
       return ErrorHandler.handleCatchError(error, "Failed to cancel activity", "Cancel activity");
     }
