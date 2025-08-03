@@ -1,4 +1,4 @@
-import type { GameState, Pet, Quest, Result } from "@/types";
+import type { GameState, Pet, Quest, Result, ActivityLogResult } from "@/types";
 import type {
   UnifiedGameAction,
   PetCareAction,
@@ -13,7 +13,6 @@ import type {
   ValidationResult,
   ProposalContext,
   ProposalGenerator,
-  ActivityLogEntry,
 } from "@/types/SystemProposal";
 import { ProposalFactory, ProposalUtils } from "@/types/SystemProposal";
 import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
@@ -21,6 +20,7 @@ import { QuestSystem } from "@/systems/QuestSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { QUESTS } from "@/data/quests";
 import { getItemById } from "@/data/items";
+import { getLocationById } from "@/data/locations";
 
 /**
  * Result of executing an action through ActionCoordinator
@@ -837,20 +837,24 @@ export class ActionCoordinator {
 
       case "activity_log":
         if (change.operation === "push" && change.newValue) {
+          const logData = change.newValue as {
+            activityId: string;
+            locationId?: string;
+            status: "started" | "cancelled" | "completed";
+            energyCost?: number;
+            startTime?: number;
+            endTime?: number;
+            results?: ActivityLogResult[];
+          };
+
           ActivityLogSystem.addLogEntry(newState, {
-            activityId: (change.newValue as ActivityLogEntry).type,
-            locationId: newState.world.currentLocationId,
-            startTime: (change.newValue as ActivityLogEntry).timestamp,
-            endTime: (change.newValue as ActivityLogEntry).timestamp,
-            status: "completed",
-            energyCost: 0,
-            results: [
-              {
-                type: "none",
-                amount: 0,
-                description: (change.newValue as ActivityLogEntry).description,
-              },
-            ],
+            activityId: logData.activityId,
+            locationId: logData.locationId || newState.world.currentLocationId,
+            startTime: logData.startTime || Date.now(),
+            endTime: logData.endTime,
+            status: logData.status,
+            energyCost: logData.energyCost || 0,
+            results: logData.results || [],
           });
         }
         break;
@@ -1214,20 +1218,34 @@ class WorldSystemProposalGenerator implements ProposalGenerator {
               dependencies: [],
             });
 
-            // Log travel start
-            proposals.push(
-              ProposalFactory.createActivityLogProposal(
-                "world_system",
-                "Travel started",
-                "travel_started",
-                travelResult.message || `Started traveling to ${worldAction.payload.destinationId}`,
+            // Log travel start - create proper activity log entry with "started" status
+            // Use the destination location name as the activity name
+            const destination = getLocationById(worldAction.payload.destinationId);
+            const destinationName = destination ? destination.name : worldAction.payload.destinationId;
+
+            proposals.push({
+              id: ProposalFactory.generateId("world_system"),
+              systemId: "world_system",
+              description: `Create travel log entry for ${destinationName}`,
+              priority: 50,
+              changes: [
                 {
-                  destinationId: worldAction.payload.destinationId,
-                  travelTime: worldState.travelState?.ticksRemaining || 0,
+                  type: "activity_log" as const,
+                  newValue: {
+                    activityId: destinationName, // Use destination name as activity identifier
+                    locationId: context.currentState.world.currentLocationId,
+                    status: "started",
+                    energyCost: travelResult.data
+                      ? context.activePet.currentEnergy - travelResult.data.pet.currentEnergy
+                      : 0,
+                    startTime: Date.now(),
+                    results: [], // Will be populated when travel completes
+                  },
+                  operation: "push" as const,
                 },
-                50
-              )
-            );
+              ],
+              dependencies: [],
+            });
           }
         }
         break;
