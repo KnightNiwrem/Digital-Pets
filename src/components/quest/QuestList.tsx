@@ -168,7 +168,7 @@ export function QuestList({
           {/* Objectives Summary */}
           <div className="text-xs text-gray-500">
             <span>
-              {QuestUtils.getCompletedObjectivesCount(questProgress)}/{questProgress.objectives.length} objectives
+              {QuestUtils.getCompletedObjectivesCount(questProgress)}/{questProgress.objectives?.length || 0} objectives
               completed
             </span>
           </div>

@@ -171,7 +171,7 @@ export function QuestDetails({
       {/* Objectives */}
       <div>
         <h3 className="font-medium text-gray-800 mb-3">Objectives</h3>
-        <div className="space-y-2">{questObjectives.map(renderObjective)}</div>
+        <div className="space-y-2">{(questObjectives || []).map(renderObjective)}</div>
       </div>
 
       {/* Requirements (for available quests) */}

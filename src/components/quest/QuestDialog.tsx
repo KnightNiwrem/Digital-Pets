@@ -119,7 +119,7 @@ export function QuestDialog({ quest, onStartQuest, onClose, isLoading = false }:
           <div>
             <h4 className="font-medium text-gray-700 mb-2">Objectives:</h4>
             <ul className="space-y-1">
-              {quest.objectives.map((objective, index) => (
+              {(quest.objectives || []).map((objective, index) => (
                 <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
                   <span className="text-gray-400">•</span>
                   <span>{objective.description}</span>

@@ -595,8 +595,8 @@ export class QuestUtils {
   /**
    * Calculate quest completion progress as percentage
    */
-  static calculateQuestProgress(quest: { objectives: Array<{ completed: boolean }> }): number {
-    if (!quest.objectives || quest.objectives.length === 0) return 0;
+  static calculateQuestProgress(quest: { objectives?: Array<{ completed: boolean }> }): number {
+    if (!quest.objectives || !Array.isArray(quest.objectives) || quest.objectives.length === 0) return 0;
     const completedObjectives = quest.objectives.filter(obj => obj.completed).length;
     return Math.round((completedObjectives / quest.objectives.length) * 100);
   }
@@ -604,14 +604,20 @@ export class QuestUtils {
   /**
    * Get completed objectives count
    */
-  static getCompletedObjectivesCount(quest: { objectives: Array<{ completed: boolean }> }): number {
+  static getCompletedObjectivesCount(quest: { objectives?: Array<{ completed: boolean }> }): number {
+    if (!quest.objectives || !Array.isArray(quest.objectives)) {
+      return 0;
+    }
     return quest.objectives.filter(obj => obj.completed).length;
   }
 
   /**
    * Check if all objectives are completed
    */
-  static isQuestComplete(quest: { objectives: Array<{ completed: boolean }> }): boolean {
+  static isQuestComplete(quest: { objectives?: Array<{ completed: boolean }> }): boolean {
+    if (!quest.objectives || !Array.isArray(quest.objectives)) {
+      return false;
+    }
     return quest.objectives.every(obj => obj.completed);
   }
 }
