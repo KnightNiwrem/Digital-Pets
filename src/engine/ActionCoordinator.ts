@@ -1706,17 +1706,7 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
           dependencies: [],
         });
 
-        // Log quest start
-        proposals.push(
-          ProposalFactory.createActivityLogProposal(
-            "quest_system",
-            "Quest started",
-            "quest_started",
-            `Started quest: ${quest.name}`,
-            { questId, questTitle: quest.name },
-            50
-          )
-        );
+        // Quest started - no activity log needed as this is not a world activity
         break;
       }
 
@@ -1740,17 +1730,7 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
           dependencies: [],
         });
 
-        // Log quest abandonment
-        proposals.push(
-          ProposalFactory.createActivityLogProposal(
-            "quest_system",
-            "Quest abandoned",
-            "quest_abandoned",
-            `Abandoned quest: ${questId}`,
-            { questId },
-            50
-          )
-        );
+        // Quest abandoned - no activity log needed as this is not a world activity
         break;
       }
 
@@ -1828,17 +1808,7 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
           }
         }
 
-        // Log quest completion with rewards
-        proposals.push(
-          ProposalFactory.createActivityLogProposal(
-            "quest_system",
-            "Quest completed",
-            "quest_completed",
-            `Completed quest: ${quest.name}`,
-            { questId, questTitle: quest.name, rewards: quest.rewards },
-            50
-          )
-        );
+        // Quest completed - no activity log needed as this is not a world activity
         break;
       }
     }
@@ -1864,30 +1834,12 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
       const questEvents = QuestSystem.processGameAction(actionType, actionData, QUESTS, gameState);
 
       for (const event of questEvents) {
+        // Quest events should not be added to activity log as they are not world activities
+        // The quest system manages its own quest log and progression tracking
         if (event.type === "objective_completed") {
-          // Create proposal for objective completion logging
-          proposals.push(
-            ProposalFactory.createActivityLogProposal(
-              "quest_system",
-              "Objective completed",
-              "objective_completed",
-              `Completed objective in quest: ${event.questId}`,
-              { questId: event.questId, objectiveId: event.objectiveId },
-              50
-            )
-          );
+          // Objective completion is tracked within the quest system
         } else if (event.type === "quest_completed") {
-          // Create proposal for quest completion logging
-          proposals.push(
-            ProposalFactory.createActivityLogProposal(
-              "quest_system",
-              "Quest completed",
-              "quest_completed",
-              `Completed quest: ${event.questId}`,
-              { questId: event.questId, rewards: event.data?.rewards },
-              50
-            )
-          );
+          // Quest completion is tracked within the quest system
         }
       }
     } catch (error) {
