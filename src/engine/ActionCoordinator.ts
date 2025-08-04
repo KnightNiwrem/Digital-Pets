@@ -14,6 +14,7 @@ import type {
   ProposalContext,
   ProposalGenerator,
 } from "@/types/SystemProposal";
+import type { DurabilityItem } from "@/types/Item";
 import { ProposalFactory, ProposalUtils } from "@/types/SystemProposal";
 import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
 import { QuestSystem } from "@/systems/QuestSystem";
@@ -791,6 +792,21 @@ export class ActionCoordinator {
               newState.inventory.slots.push(newSlot);
             }
           }
+        } else if (change.target && change.property === "currentDurability") {
+          // Handle durability updates
+          const slotIndex = newState.inventory.slots.findIndex(slot => slot.item.id === change.target);
+
+          if (slotIndex !== -1) {
+            const slot = newState.inventory.slots[slotIndex];
+            const durabilityItem = slot.item as DurabilityItem;
+            newState.inventory.slots[slotIndex] = {
+              ...slot,
+              item: {
+                ...durabilityItem,
+                currentDurability: change.newValue as number,
+              },
+            };
+          }
         }
         break;
 
@@ -927,9 +943,24 @@ export class ActionCoordinator {
  */
 class PetSystemProposalGenerator implements ProposalGenerator {
   generateProposals(action: unknown, context: ProposalContext): SystemProposal[] {
-    const petCareAction = action as PetCareAction;
-    if (petCareAction.type !== "pet_care") return [];
+    const proposals: SystemProposal[] = [];
 
+    // Handle pet care actions
+    if ((action as UnifiedGameAction).type === "pet_care") {
+      const petCareAction = action as PetCareAction;
+      proposals.push(...this.generatePetCareProposals(petCareAction, context));
+    }
+
+    // Handle item usage actions that should apply pet effects
+    if ((action as UnifiedGameAction).type === "item_operation" && (action as ItemAction).payload.operation === "use") {
+      const itemAction = action as ItemAction;
+      proposals.push(...this.generateItemUsageProposals(itemAction, context));
+    }
+
+    return proposals;
+  }
+
+  private generatePetCareProposals(petCareAction: PetCareAction, context: ProposalContext): SystemProposal[] {
     const proposals: SystemProposal[] = [];
 
     switch (petCareAction.payload.careType) {
@@ -1022,6 +1053,122 @@ class PetSystemProposalGenerator implements ProposalGenerator {
     return proposals;
   }
 
+  private generateItemUsageProposals(itemAction: ItemAction, context: ProposalContext): SystemProposal[] {
+    const proposals: SystemProposal[] = [];
+    const item = getItemById(itemAction.payload.itemId);
+    if (!item) return proposals;
+
+    // Apply item effects to pet based on item's effects
+    for (const effect of item.effects) {
+      switch (effect.type) {
+        case "satiety":
+          proposals.push(
+            ProposalFactory.createPetUpdateProposal(
+              "pet_system",
+              `Apply satiety effect from ${item.name}`,
+              { satietyTicksLeft: context.activePet.satietyTicksLeft + effect.value * 50 },
+              95 // Slightly lower priority than inventory changes
+            )
+          );
+          break;
+
+        case "hydration":
+          proposals.push(
+            ProposalFactory.createPetUpdateProposal(
+              "pet_system",
+              `Apply hydration effect from ${item.name}`,
+              { hydrationTicksLeft: context.activePet.hydrationTicksLeft + effect.value * 40 },
+              95
+            )
+          );
+          break;
+
+        case "happiness": {
+          const energyCost = item.type === "toy" ? 10 : 0;
+          proposals.push(
+            ProposalFactory.createPetUpdateProposal(
+              "pet_system",
+              `Apply happiness effect from ${item.name}`,
+              {
+                happinessTicksLeft: context.activePet.happinessTicksLeft + effect.value * 60,
+                currentEnergy: Math.max(0, context.activePet.currentEnergy - energyCost),
+              },
+              95
+            )
+          );
+          break;
+        }
+
+        case "energy":
+          proposals.push(
+            ProposalFactory.createPetUpdateProposal(
+              "pet_system",
+              `Apply energy effect from ${item.name}`,
+              { currentEnergy: Math.min(context.activePet.maxEnergy, context.activePet.currentEnergy + effect.value) },
+              95
+            )
+          );
+          break;
+
+        case "health":
+        case "cure": {
+          const healthUpdates: Record<string, unknown> = {};
+          if (effect.type === "health" && context.activePet.currentHealth < context.activePet.maxHealth) {
+            healthUpdates.currentHealth = Math.min(
+              context.activePet.maxHealth,
+              context.activePet.currentHealth + effect.value
+            );
+          }
+          if (context.activePet.health !== "healthy") {
+            healthUpdates.health = "healthy";
+          }
+          if (Object.keys(healthUpdates).length > 0) {
+            proposals.push(
+              ProposalFactory.createPetUpdateProposal(
+                "pet_system",
+                `Apply healing effect from ${item.name}`,
+                healthUpdates,
+                95
+              )
+            );
+          }
+          break;
+        }
+
+        case "clean":
+          if (context.activePet.poopCount > 0) {
+            proposals.push(
+              ProposalFactory.createPetUpdateProposal(
+                "pet_system",
+                `Apply cleaning effect from ${item.name}`,
+                {
+                  poopCount: 0,
+                  poopTicksLeft: Math.floor(Math.random() * 240) + 240,
+                  sickByPoopTicksLeft: 17280,
+                },
+                95
+              )
+            );
+          }
+          break;
+      }
+    }
+
+    // Update last care time for care items
+    if (item.effects.some(e => ["satiety", "hydration", "happiness", "health", "cure", "clean"].includes(e.type))) {
+      proposals.push(
+        ProposalFactory.createPetUpdateProposal(
+          "pet_system",
+          `Update care time from ${item.name} usage`,
+          { lastCareTime: Date.now() },
+          90
+        )
+      );
+    }
+
+    return proposals;
+  }
+
   validateProposal(_proposal: SystemProposal, context: ProposalContext): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -1057,83 +1204,66 @@ class PetSystemProposalGenerator implements ProposalGenerator {
  * Item System Proposal Generator
  */
 class ItemSystemProposalGenerator implements ProposalGenerator {
-  generateProposals(action: unknown, _context: ProposalContext): SystemProposal[] {
+  generateProposals(action: unknown, context: ProposalContext): SystemProposal[] {
     const itemAction = action as ItemAction;
     if (itemAction.type !== "item_operation") return [];
 
     const proposals: SystemProposal[] = [];
 
     switch (itemAction.payload.operation) {
-      case "use":
-        proposals.push(
-          ProposalFactory.createInventoryUpdateProposal(
-            "item_system",
-            `Use item ${itemAction.payload.itemId}`,
-            itemAction.payload.itemId,
-            -1, // Remove one item
-            100
-          )
+      case "use": {
+        // Get the item to determine how to handle usage
+        const item = getItemById(itemAction.payload.itemId);
+        if (!item) break;
+
+        // Get current inventory slot to check current state
+        const inventorySlot = context.currentState.inventory.slots.find(
+          slot => slot.item.id === itemAction.payload.itemId
         );
-        break;
+        if (!inventorySlot) break;
 
-      case "buy":
-        {
-          const item = getItemById(itemAction.payload.itemId);
-          if (item) {
-            const cost = item.value * itemAction.payload.quantity;
-            proposals.push({
-              id: ProposalFactory.generateId("item_system"),
-              systemId: "item_system",
-              description: `Deduct ${cost} gold for purchase`,
-              priority: 100,
-              changes: [
-                {
-                  type: "game_state_update" as const,
-                  property: "inventory.gold",
-                  newValue: cost,
-                  operation: "subtract" as const,
-                },
-              ],
-              dependencies: [],
-            });
+        if (item.stackable) {
+          // Consumable item - remove one from inventory
+          proposals.push(
+            ProposalFactory.createInventoryUpdateProposal(
+              "item_system",
+              `Use consumable item ${item.name}`,
+              itemAction.payload.itemId,
+              -1, // Remove one item
+              100
+            )
+          );
+        } else {
+          // Durability item - handle durability reduction or removal
+          const durabilityItem = inventorySlot.item as DurabilityItem;
+          const newDurability = durabilityItem.currentDurability - durabilityItem.durabilityLossPerUse;
+
+          if (newDurability <= 0) {
+            // Item is broken, remove from inventory
             proposals.push(
               ProposalFactory.createInventoryUpdateProposal(
                 "item_system",
-                `Add purchased items to inventory`,
+                `Remove broken ${item.name}`,
                 itemAction.payload.itemId,
-                itemAction.payload.quantity,
+                -1, // Remove the broken item
                 100
               )
             );
-          }
-        }
-        break;
-
-      case "sell":
-        {
-          const item = getItemById(itemAction.payload.itemId);
-          if (item) {
-            const value = Math.floor(item.value * 0.5) * itemAction.payload.quantity;
-            proposals.push(
-              ProposalFactory.createInventoryUpdateProposal(
-                "item_system",
-                `Sell ${itemAction.payload.quantity}x ${item.name}`,
-                itemAction.payload.itemId,
-                -itemAction.payload.quantity,
-                100
-              )
-            );
+          } else {
+            // Update durability
             proposals.push({
               id: ProposalFactory.generateId("item_system"),
               systemId: "item_system",
-              description: `Add ${value} gold from sale`,
+              description: `Use ${item.name} (durability: ${newDurability}/${durabilityItem.maxDurability})`,
               priority: 100,
               changes: [
                 {
-                  type: "game_state_update" as const,
-                  property: "inventory.gold",
-                  newValue: value,
-                  operation: "add" as const,
+                  type: "inventory_update" as const,
+                  target: itemAction.payload.itemId,
+                  property: "currentDurability",
+                  newValue: newDurability,
+                  operation: "set" as const,
+                  metadata: { operation: "update_durability" },
                 },
               ],
               dependencies: [],
@@ -1141,6 +1271,71 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
           }
         }
         break;
+      }
+
+      case "buy": {
+        const item = getItemById(itemAction.payload.itemId);
+        if (item) {
+          const cost = item.value * itemAction.payload.quantity;
+          proposals.push({
+            id: ProposalFactory.generateId("item_system"),
+            systemId: "item_system",
+            description: `Deduct ${cost} gold for purchase`,
+            priority: 100,
+            changes: [
+              {
+                type: "game_state_update" as const,
+                property: "inventory.gold",
+                newValue: cost,
+                operation: "subtract" as const,
+              },
+            ],
+            dependencies: [],
+          });
+          proposals.push(
+            ProposalFactory.createInventoryUpdateProposal(
+              "item_system",
+              `Add purchased items to inventory`,
+              itemAction.payload.itemId,
+              itemAction.payload.quantity,
+              100
+            )
+          );
+        }
+        break;
+      }
+
+      case "sell": {
+        const item = getItemById(itemAction.payload.itemId);
+        if (item) {
+          const value = Math.floor(item.value * 0.5) * itemAction.payload.quantity;
+          proposals.push(
+            ProposalFactory.createInventoryUpdateProposal(
+              "item_system",
+              `Sell ${itemAction.payload.quantity}x ${item.name}`,
+              itemAction.payload.itemId,
+              -itemAction.payload.quantity,
+              100
+            )
+          );
+          proposals.push({
+            id: ProposalFactory.generateId("item_system"),
+            systemId: "item_system",
+            description: `Add ${value} gold from sale`,
+            priority: 100,
+            changes: [
+              {
+                type: "game_state_update" as const,
+                property: "inventory.gold",
+                newValue: value,
+                operation: "add" as const,
+              },
+            ],
+            dependencies: [],
+          });
+        }
+        break;
+      }
     }
 
     return proposals;
@@ -1729,6 +1924,8 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
 
         switch (itemAction.payload.operation) {
           case "use":
+            // TODO: For quest progression, detect if this is a care action
+            // For now, keeping original behavior to avoid breaking other systems
             actionType = "item_obtained";
             break;
           case "buy":
