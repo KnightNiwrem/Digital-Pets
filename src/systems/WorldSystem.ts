@@ -14,6 +14,7 @@ import type { Pet, GameState, Result } from "@/types";
 import { PetValidator, EnergyManager } from "@/lib/utils";
 import { ItemSystem } from "@/systems/ItemSystem";
 import { ActivityLogSystem } from "@/systems/ActivityLogSystem";
+import { QuestSystem } from "@/systems/QuestSystem";
 import { LOCATIONS, getLocationById, getStartingLocation } from "@/data/locations";
 
 export class WorldSystem {
@@ -279,8 +280,11 @@ export class WorldSystem {
             }
             break;
           case "quest_completed":
-            // TODO: Quest integration not yet implemented
-            console.warn(`Quest requirement "${req.value}" not yet implemented - allowing activity to proceed`);
+            // Check if the required quest has been completed
+            const completedQuests = QuestSystem.getCompletedQuests(gameState);
+            if (!completedQuests.includes(req.value as string)) {
+              return { success: false, error: `Requires completion of quest: ${req.value}` };
+            }
             break;
           case "pet_species":
             if (pet.species.id !== req.value) {
