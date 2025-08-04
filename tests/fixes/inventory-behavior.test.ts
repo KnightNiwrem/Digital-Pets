@@ -123,6 +123,7 @@ describe("Inventory Behavior Fixes", () => {
         availableQuests: [],
         questChains: [],
       },
+      activityLog: [],
     } as unknown as GameState;
   });
 

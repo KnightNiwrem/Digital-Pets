@@ -1923,11 +1923,37 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
         actionData.amount = itemAction.payload.quantity || 1;
 
         switch (itemAction.payload.operation) {
-          case "use":
-            // TODO: For quest progression, detect if this is a care action
-            // For now, keeping original behavior to avoid breaking other systems
-            actionType = "item_obtained";
+          case "use": {
+            // Detect if this is a care action based on item effects
+            const item = getItemById(itemAction.payload.itemId);
+            if (item && item.effects.length > 0) {
+              // Check for care effects that should be treated as care actions
+              const hasSatietyEffect = item.effects.some(e => e.type === "satiety");
+              const hasHydrationEffect = item.effects.some(e => e.type === "hydration");
+              const hasHappinessEffect = item.effects.some(e => e.type === "happiness");
+
+              if (hasSatietyEffect) {
+                // Items with satiety effects should count as "feed" care actions
+                actionType = "pet_care";
+                actionData.action = "feed";
+              } else if (hasHydrationEffect) {
+                // Items with hydration effects should count as "drink" care actions
+                actionType = "pet_care";
+                actionData.action = "drink";
+              } else if (hasHappinessEffect) {
+                // Items with happiness effects should count as "play" care actions
+                actionType = "pet_care";
+                actionData.action = "play";
+              } else {
+                // Items with other effects (health, energy, etc.) are still item usage
+                actionType = "item_obtained";
+              }
+            } else {
+              // Items with no effects are treated as item obtained
+              actionType = "item_obtained";
+            }
             break;
+          }
           case "buy":
             actionType = "item_obtained";
             break;
