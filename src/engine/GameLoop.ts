@@ -120,7 +120,6 @@ export class GameLoop {
           this.handlePetDeath(actions, stateChanges);
         }
         if (petChanges.includes("pet_grew")) {
-          // Add legacy actions for compatibility
           actions.push({
             type: SYSTEM_ACTION_TYPES.PET_GROWTH,
             payload: {
@@ -131,7 +130,6 @@ export class GameLoop {
             source: "system",
           });
 
-          // FIXED: Also emit level_up for quest system
           actions.push({
             type: QUEST_ACTION_TYPES.LEVEL_UP,
             payload: {
@@ -142,7 +140,6 @@ export class GameLoop {
             source: "system",
           });
 
-          // Note: Future ActionCoordinator integration point
           this.dispatchPetGrowthAction(actions);
         }
         if (petChanges.includes("pet_pooped")) {
@@ -352,12 +349,8 @@ export class GameLoop {
   private dispatchPetGrowthAction(_actions: GameAction[]): void {
     if (!this.gameState?.currentPet) return;
 
-    // For now, just log that this could be integrated with ActionCoordinator
     // Future enhancement: Create unified action and dispatch through ActionCoordinator
     console.log("Pet growth action could be dispatched through ActionCoordinator for automatic quest progression");
-
-    // The legacy actions are already added above, so no additional work needed here
-    // This method is a placeholder for future ActionCoordinator integration
   }
 
   /**
@@ -710,7 +703,7 @@ export class GameLoop {
   /**
    * Update activity statistics for completed activity
    */
-  private static updateActivityStatistics(
+  static updateActivityStatistics(
     gameState: GameState,
     activityType: ActivityType,
     activityDuration: number,
@@ -751,15 +744,20 @@ export class GameLoop {
     gameState.activityStats.totals.itemsEarned += itemsEarned;
     gameState.activityStats.totals.experienceEarned += experienceEarned;
 
-    // Also update the legacy metrics for backward compatibility
-    if (activityType === "foraging") {
-      gameState.metrics.totalForaging += 1;
-    } else if (activityType === "fishing") {
-      gameState.metrics.totalFishing += 1;
-    } else if (activityType === "mining") {
-      gameState.metrics.totalMining += 1;
-    } else if (activityType === "training") {
-      gameState.metrics.totalTraining += 1;
+    // Update legacy metrics for backward compatibility
+    switch (activityType) {
+      case "foraging":
+        gameState.metrics.totalForaging += 1;
+        break;
+      case "fishing":
+        gameState.metrics.totalFishing += 1;
+        break;
+      case "mining":
+        gameState.metrics.totalMining += 1;
+        break;
+      case "training":
+        gameState.metrics.totalTraining += 1;
+        break;
     }
   }
 

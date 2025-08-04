@@ -62,270 +62,175 @@ function createTestPet(overrides: Partial<Pet> = {}): Pet {
   };
 }
 
-describe("PetSystem - Pet Care Actions", () => {
+describe("PetSystem - Proposal Generation", () => {
   let pet: Pet;
 
   beforeEach(() => {
     pet = createTestPet();
   });
 
-  describe("feedPet", () => {
-    test("should successfully feed a hungry pet", () => {
+  describe("generateCareProposals", () => {
+    test("should generate feed proposal with correct values", () => {
       pet.satiety = 30;
-      pet.satietyTicksLeft = 3000;
-
-      const result = PetSystem.feedPet(pet, 25);
-
-      expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("feed");
-      expect(pet.satiety).toBeGreaterThan(30);
-      expect(pet.satietyTicksLeft).toBeGreaterThan(3000);
+      const proposals = PetSystem.generateCareProposals(pet, "feed", 25);
+      
+      expect(proposals).toHaveLength(1);
+      expect(proposals[0].description).toContain("Feed pet (25 satiety)");
+      
+      const satietyChange = proposals[0].changes.find(c => c.property === "satietyTicksLeft");
+      const careTimeChange = proposals[0].changes.find(c => c.property === "lastCareTime");
+      expect(satietyChange).toBeDefined();
+      expect(careTimeChange).toBeDefined();
     });
 
-    test("should fail to feed a sick pet", () => {
-      pet.health = "sick";
-      pet.satiety = 30;
-
-      const result = PetSystem.feedPet(pet, 25);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("too sick to eat");
-    });
-
-    test("should fail to feed a full pet", () => {
-      pet.satiety = 100;
-
-      const result = PetSystem.feedPet(pet, 25);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("not hungry");
-    });
-
-    test("should cap satiety at maximum", () => {
-      pet.satiety = 90;
-
-      const result = PetSystem.feedPet(pet, 50);
-
-      expect(result.success).toBe(true);
-      expect(pet.satiety).toBeLessThanOrEqual(100);
-    });
-
-    test("should update lastCareTime", async () => {
-      const beforeTime = pet.lastCareTime;
-      pet.satiety = 30;
-
-      // Add small delay to ensure timestamp difference
-      await new Promise(resolve => setTimeout(resolve, 5));
-
-      const afterTime = Date.now();
-      PetSystem.feedPet(pet, 25);
-
-      expect(pet.lastCareTime).toBeGreaterThanOrEqual(afterTime);
-      expect(pet.lastCareTime).toBeGreaterThan(beforeTime);
-    });
-  });
-
-  describe("giveDrink", () => {
-    test("should successfully give drink to dehydrated pet", () => {
+    test("should generate drink proposal with correct values", () => {
       pet.hydration = 30;
-      pet.hydrationTicksLeft = 2400;
-
-      const result = PetSystem.giveDrink(pet, 30);
-
-      expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("drink");
-      expect(pet.hydration).toBeGreaterThan(30);
-      expect(pet.hydrationTicksLeft).toBeGreaterThan(2400);
+      const proposals = PetSystem.generateCareProposals(pet, "drink", 30);
+      
+      expect(proposals).toHaveLength(1);
+      expect(proposals[0].description).toContain("Give drink to pet (30 hydration)");
+      
+      const hydrationChange = proposals[0].changes.find(c => c.property === "hydrationTicksLeft");
+      expect(hydrationChange).toBeDefined();
     });
 
-    test("should fail to give drink to sick pet", () => {
-      pet.health = "sick";
-      pet.hydration = 30;
-
-      const result = PetSystem.giveDrink(pet, 30);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("too sick to drink");
-    });
-
-    test("should fail to give drink to pet that's not dehydrated", () => {
-      pet.hydration = 100;
-
-      const result = PetSystem.giveDrink(pet, 30);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("not dehydrated");
-    });
-  });
-
-  describe("playWithPet", () => {
-    test("should successfully play with pet", () => {
+    test("should generate play proposal with energy cost", () => {
       pet.happiness = 30;
       pet.currentEnergy = 50;
-      const initialEnergy = pet.currentEnergy;
-
-      const result = PetSystem.playWithPet(pet, 20, 15);
-
-      expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("play");
-      expect(result.data?.energyCost).toBe(15);
-      expect(pet.happiness).toBeGreaterThan(30);
-      expect(pet.currentEnergy).toBe(initialEnergy - 15);
+      const proposals = PetSystem.generateCareProposals(pet, "play", 20);
+      
+      expect(proposals).toHaveLength(1);
+      expect(proposals[0].description).toContain("Play with pet (20 happiness)");
+      
+      const happinessChange = proposals[0].changes.find(c => c.property === "happinessTicksLeft");
+      const energyChange = proposals[0].changes.find(c => c.property === "currentEnergy");
+      expect(happinessChange).toBeDefined();
+      expect(energyChange).toBeDefined();
     });
 
-    test("should fail when pet has insufficient energy", () => {
+    test("should generate clean proposal", () => {
+      pet.poopCount = 2;
+      const proposals = PetSystem.generateCareProposals(pet, "clean");
+      
+      expect(proposals).toHaveLength(1);
+      expect(proposals[0].description).toBe("Clean pet");
+      
+      const poopChange = proposals[0].changes.find(c => c.property === "poopCount");
+      const sickChange = proposals[0].changes.find(c => c.property === "sickByPoopTicksLeft");
+      expect(poopChange?.newValue).toBe(0);
+      expect(sickChange?.newValue).toBe(PET_CONSTANTS.SICK_BY_POOP_TICKS);
+    });
+
+    test("should generate medicine proposal with cure effect", () => {
+      pet.health = "sick";
+      const effects = [{ type: "cure" as const, value: 0 }];
+      const proposals = PetSystem.generateCareProposals(pet, "medicine", undefined, effects);
+      
+      expect(proposals).toHaveLength(1);
+      
+      const healthChange = proposals[0].changes.find(c => c.property === "health");
+      expect(healthChange?.newValue).toBe("healthy");
+    });
+
+    test("should generate sleep proposal", () => {
+      pet.state = "idle";
+      const proposals = PetSystem.generateCareProposals(pet, "sleep");
+      
+      expect(proposals).toHaveLength(1);
+      
+      const stateChange = proposals[0].changes.find(c => c.property === "state");
+      expect(stateChange?.newValue).toBe("sleeping");
+    });
+
+    test("should generate wake proposal", () => {
+      pet.state = "sleeping";
+      const proposals = PetSystem.generateCareProposals(pet, "wake");
+      
+      expect(proposals).toHaveLength(1);
+      
+      const stateChange = proposals[0].changes.find(c => c.property === "state");
+      expect(stateChange?.newValue).toBe("idle");
+    });
+  });
+
+  describe("validateCareProposal", () => {
+    test("should validate feed proposal successfully for hungry pet", () => {
+      pet.satiety = 30;
+      const proposals = PetSystem.generateCareProposals(pet, "feed", 25);
+      const validation = PetSystem.validateCareProposal(proposals[0], pet, "feed");
+      
+      expect(validation.isValid).toBe(true);
+      expect(validation.errors).toHaveLength(0);
+    });
+
+    test("should reject feed proposal for full pet", () => {
+      pet.satiety = 100;
+      const proposals = PetSystem.generateCareProposals(pet, "feed", 25);
+      const validation = PetSystem.validateCareProposal(proposals[0], pet, "feed");
+      
+      expect(validation.isValid).toBe(false);
+      expect(validation.errors).toContain("Pet is not hungry right now");
+    });
+
+    test("should reject play proposal for pet with insufficient energy", () => {
       pet.currentEnergy = 5;
-
-      const result = PetSystem.playWithPet(pet, 20, 10);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("doesn't have enough energy");
+      const proposals = PetSystem.generateCareProposals(pet, "play", 20);
+      const validation = PetSystem.validateCareProposal(proposals[0], pet, "play");
+      
+      expect(validation.isValid).toBe(false);
+      expect(validation.errors).toContain("Pet has insufficient energy to play");
     });
 
-    test("should fail when pet is sick", () => {
-      pet.health = "sick";
-      pet.currentEnergy = 50;
-
-      const result = PetSystem.playWithPet(pet, 20);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("too sick to play");
+    test("should reject clean proposal when no poop", () => {
+      pet.poopCount = 0;
+      const proposals = PetSystem.generateCareProposals(pet, "clean");
+      const validation = PetSystem.validateCareProposal(proposals[0], pet, "clean");
+      
+      expect(validation.isValid).toBe(false);
+      expect(validation.errors).toContain("There's no poop to clean right now");
     });
 
-    test("should fail when pet is already very happy", () => {
-      pet.happiness = 100;
-      pet.currentEnergy = 50;
-
-      const result = PetSystem.playWithPet(pet, 20);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("already very happy");
+    test("should reject actions on dead pet", () => {
+      pet.life = 0;
+      const proposals = PetSystem.generateCareProposals(pet, "feed", 25);
+      const validation = PetSystem.validateCareProposal(proposals[0], pet, "feed");
+      
+      expect(validation.isValid).toBe(false);
+      expect(validation.errors).toContain("Cannot perform actions on a deceased pet");
     });
   });
 
-  describe("cleanPoop", () => {
-    test("should successfully clean poop when needed", () => {
-      pet.poopCount = 2; // Pet has uncleaned poop
-
-      const result = PetSystem.cleanPoop(pet);
-
-      expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("clean");
-      expect(pet.poopCount).toBe(0); // All poop cleaned
-      expect(pet.poopTicksLeft).toBeGreaterThan(0);
-      expect(pet.sickByPoopTicksLeft).toBe(PET_CONSTANTS.SICK_BY_POOP_TICKS);
-    });
-
-    test("should fail when there's no poop to clean", () => {
-      pet.poopCount = 0; // No uncleaned poop
-
-      const result = PetSystem.cleanPoop(pet);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("no poop to clean");
-    });
-
-    test("should clean multiple poops at once", () => {
-      pet.poopCount = 5; // Maximum poop count
-
-      const result = PetSystem.cleanPoop(pet);
-
-      expect(result.success).toBe(true);
-      expect(pet.poopCount).toBe(0); // All poop cleaned regardless of count
+  describe("applyCareChanges", () => {
+    test("should apply changes directly to pet", () => {
+      const originalSatiety = pet.satietyTicksLeft;
+      const changes = { satietyTicksLeft: originalSatiety + 1000, lastCareTime: Date.now() };
+      
+      PetSystem.applyCareChanges(pet, changes);
+      
+      expect(pet.satietyTicksLeft).toBe(originalSatiety + 1000);
+      expect(pet.lastCareTime).toBe(changes.lastCareTime);
     });
   });
 
-  describe("treatPet", () => {
-    test("should successfully cure sick pet with medicine", () => {
-      pet.health = "sick";
-      const medicine = [{ type: "cure" as const, value: 0 }];
-
-      const result = PetSystem.treatPet(pet, medicine);
-
-      expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("medicine");
-      expect(pet.health as string).toEqual("healthy");
+  describe("isActionEffective", () => {
+    test("should return true for feed when pet is hungry", () => {
+      pet.satiety = 50;
+      expect(PetSystem.isActionEffective(pet, "feed")).toBe(true);
     });
 
-    test("should successfully heal injured pet", () => {
-      pet.health = "injured";
-      pet.currentHealth = 30;
-      const medicine = [{ type: "health" as const, value: 20 }];
-
-      const result = PetSystem.treatPet(pet, medicine);
-
-      expect(result.success).toBe(true);
-      expect(pet.currentHealth).toBe(50); // Capped at maxHealth
+    test("should return false for feed when pet is full", () => {
+      pet.satiety = 100;
+      expect(PetSystem.isActionEffective(pet, "feed")).toBe(false);
     });
 
-    test("should fail when pet doesn't need treatment", () => {
-      pet.health = "healthy";
-      pet.currentHealth = pet.maxHealth;
-      const medicine = [{ type: "cure" as const, value: 0 }];
-
-      const result = PetSystem.treatPet(pet, medicine);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("doesn't need this treatment");
+    test("should return true for clean when pet has poop", () => {
+      pet.poopCount = 1;
+      expect(PetSystem.isActionEffective(pet, "clean")).toBe(true);
     });
 
-    test("should fail with invalid medicine", () => {
-      pet.health = "sick";
-      const notMedicine = [{ type: "satiety" as const, value: 20 }];
-
-      const result = PetSystem.treatPet(pet, notMedicine);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("cannot treat");
-    });
-  });
-
-  describe("sleep and wake", () => {
-    test("should put pet to sleep successfully", () => {
-      pet.state = "idle";
-
-      const result = PetSystem.putPetToSleep(pet);
-
-      expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("sleep");
-      expect(pet.state as string).toEqual("sleeping");
-    });
-
-    test("should fail to put already sleeping pet to sleep", () => {
-      pet.state = "sleeping";
-
-      const result = PetSystem.putPetToSleep(pet);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("already sleeping");
-    });
-
-    test("should fail to put travelling pet to sleep", () => {
-      pet.state = "travelling";
-
-      const result = PetSystem.putPetToSleep(pet);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("cannot sleep while travelling");
-    });
-
-    test("should wake sleeping pet successfully", () => {
-      pet.state = "sleeping";
-
-      const result = PetSystem.wakePetUp(pet);
-
-      expect(result.success).toBe(true);
-      expect(result.data?.type).toBe("wake");
-      expect(pet.state as string).toEqual("idle");
-    });
-
-    test("should fail to wake non-sleeping pet", () => {
-      pet.state = "idle";
-
-      const result = PetSystem.wakePetUp(pet);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("not sleeping");
+    test("should return false for clean when pet is clean", () => {
+      pet.poopCount = 0;
+      expect(PetSystem.isActionEffective(pet, "clean")).toBe(false);
     });
   });
 });
@@ -661,6 +566,30 @@ describe("PetSystem - Status and Events", () => {
 
       expect(event?.event).toBe("pet_will_poop");
       expect(event?.severity).toBe("low");
+    });
+  });
+
+  describe("calculateDisplayStats", () => {
+    test("should calculate display stats from tick counters", () => {
+      pet.satietyTicksLeft = 1000;
+      pet.hydrationTicksLeft = 800;
+      pet.happinessTicksLeft = 1200;
+      pet.poopCount = 2;
+
+      const stats = PetSystem.calculateDisplayStats(pet);
+
+      expect(stats.satiety).toBeGreaterThan(0);
+      expect(stats.hydration).toBeGreaterThan(0);
+      expect(stats.happiness).toBeGreaterThan(0);
+      expect(stats.needsPoop).toBe(true);
+    });
+
+    test("should indicate no poop needed when clean", () => {
+      pet.poopCount = 0;
+
+      const stats = PetSystem.calculateDisplayStats(pet);
+
+      expect(stats.needsPoop).toBe(false);
     });
   });
 });

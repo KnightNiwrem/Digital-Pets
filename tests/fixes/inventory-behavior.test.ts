@@ -244,33 +244,4 @@ describe("Inventory Behavior Fixes", () => {
     });
   });
 
-  describe("Baseline: Legacy ItemSystem.useItem should still work", () => {
-    it("should maintain backward compatibility with legacy useItem for durability items", () => {
-      // Create a fresh pet with low happiness for testing
-      const lowHappinessPet = { ...testPet, happiness: 5, happinessTicksLeft: 600 };
-      const originalHappiness = lowHappinessPet.happiness;
-      
-      // This ensures we don't break existing functionality
-      const result = ItemSystem.useItem(testInventory, lowHappinessPet, "ball");
-      
-      expect(result.success).toBe(true);
-      expect(result.data!.pet.happiness).toBeGreaterThan(originalHappiness);
-      
-      const ballSlot = ItemSystem.getInventoryItem(result.data!.inventory, "ball")!;
-      const ballItem = ballSlot.item as DurabilityItem;
-      expect(ballItem.currentDurability).toBe(19); // 20 - 1 = 19
-    });
-
-    it("should maintain backward compatibility with legacy useItem for consumable items", () => {
-      // Create a fresh pet with low satiety for testing
-      const lowSatietyPet = { ...testPet, satiety: 5, satietyTicksLeft: 500 };
-      const originalSatiety = lowSatietyPet.satiety;
-      
-      const result = ItemSystem.useItem(testInventory, lowSatietyPet, "apple");
-      
-      expect(result.success).toBe(true);
-      expect(result.data!.pet.satiety).toBeGreaterThan(originalSatiety);
-      expect(result.data!.inventory.slots.find(s => s.item.id === "apple")!.quantity).toBe(2);
-    });
-  });
 });

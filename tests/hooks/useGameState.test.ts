@@ -3,7 +3,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { GameStorage } from "@/storage/GameStorage";
 import { GameStateFactory } from "@/engine/GameStateFactory";
-import { PetSystem } from "@/systems/PetSystem";
 import { QuestSystem } from "@/systems/QuestSystem";
 import { WorldSystem } from "@/systems/WorldSystem";
 import { ItemSystem } from "@/systems/ItemSystem";
@@ -98,51 +97,18 @@ describe("Enhanced Autosave Functionality", () => {
     const pet = testGameState.currentPet;
 
     if (pet) {
-      // Test feeding pet triggers autosave (only feed if pet has room)
-      if (pet.satiety < 100) {
-        const feedResult = PetSystem.feedPet(pet, 25);
-        if (feedResult.success) {
-          const feedAutosaveSuccess = simulateAutosave(testGameState, "feed pet");
-          expect(feedAutosaveSuccess).toBe(true);
-          expect(saveCallCount).toBeGreaterThan(0);
-        } else {
-          console.log("Feed failed:", feedResult.error);
-          // Even if feeding fails due to full satiety, test autosave functionality
-          const feedAutosaveSuccess = simulateAutosave(testGameState, "feed pet");
-          expect(feedAutosaveSuccess).toBe(true);
-        }
-      }
+      // Test that autosave functionality works - the main goal is testing autosave triggers
+      // Modern pet care actions go through ActionCoordinator
+      
+      const feedAutosaveSuccess = simulateAutosave(testGameState, "feed pet");
+      expect(feedAutosaveSuccess).toBe(true);
 
-      // Test giving drink triggers autosave
-      if (pet.hydration < 100) {
-        const drinkResult = PetSystem.giveDrink(pet, 25);
-        if (drinkResult.success) {
-          const drinkAutosaveSuccess = simulateAutosave(testGameState, "give drink");
-          expect(drinkAutosaveSuccess).toBe(true);
-        } else {
-          console.log("Drink failed:", drinkResult.error);
-          // Test autosave even if action fails
-          const drinkAutosaveSuccess = simulateAutosave(testGameState, "give drink");
-          expect(drinkAutosaveSuccess).toBe(true);
-        }
-      }
+      const drinkAutosaveSuccess = simulateAutosave(testGameState, "give drink");
+      expect(drinkAutosaveSuccess).toBe(true);
 
-      // Test playing with pet triggers autosave
-      if (pet.happiness < 100) {
-        const playResult = PetSystem.playWithPet(pet, 20);
-        if (playResult.success) {
-          const playAutosaveSuccess = simulateAutosave(testGameState, "play with pet");
-          expect(playAutosaveSuccess).toBe(true);
-        } else {
-          console.log("Play failed:", playResult.error);
-          // Test autosave even if action fails
-          const playAutosaveSuccess = simulateAutosave(testGameState, "play with pet");
-          expect(playAutosaveSuccess).toBe(true);
-        }
-      }
+      const playAutosaveSuccess = simulateAutosave(testGameState, "play with pet");
+      expect(playAutosaveSuccess).toBe(true);
 
-      // Test clean poop triggers autosave (this should always work)
-      PetSystem.cleanPoop(pet);
       const cleanAutosaveSuccess = simulateAutosave(testGameState, "clean poop");
       expect(cleanAutosaveSuccess).toBe(true);
 
@@ -156,29 +122,10 @@ describe("Enhanced Autosave Functionality", () => {
     const { inventory, currentPet } = testGameState;
 
     if (inventory && currentPet) {
-      // First check what items are available in test inventory
-      console.log("Inventory:", inventory);
-      console.log("Available slots:", inventory.slots?.map(slot => slot.item.id) || "No slots array");
-
-      // Test using item triggers autosave - use an item that actually exists
-      const availableSlot = inventory.slots?.[0]; // Use the first available slot if it exists
-      if (availableSlot) {
-        const useResult = ItemSystem.useItem(inventory, currentPet, availableSlot.item.id);
-        if (useResult.success) {
-          const useAutosaveSuccess = simulateAutosave(testGameState, "use item");
-          expect(useAutosaveSuccess).toBe(true);
-        } else {
-          console.log("Use item failed:", useResult.error);
-          // Test autosave functionality even if item use fails
-          const useAutosaveSuccess = simulateAutosave(testGameState, "use item");
-          expect(useAutosaveSuccess).toBe(true);
-        }
-      } else {
-        // No items available, just test autosave functionality
-        console.log("No items available, testing autosave directly");
-        const useAutosaveSuccess = simulateAutosave(testGameState, "use item");
-        expect(useAutosaveSuccess).toBe(true);
-      }
+      // Test that autosave functionality works - modern item operations go through ActionCoordinator
+      
+      const useAutosaveSuccess = simulateAutosave(testGameState, "use item");
+      expect(useAutosaveSuccess).toBe(true);
 
       // Test sorting inventory triggers autosave (this should always work)
       const sortedInventory = ItemSystem.sortInventory(inventory, "name");
@@ -187,23 +134,8 @@ describe("Enhanced Autosave Functionality", () => {
       const sortAutosaveSuccess = simulateAutosave(testGameState, "sort inventory");
       expect(sortAutosaveSuccess).toBe(true);
 
-      // Test selling item triggers autosave - use an existing item
-      if (availableSlot && availableSlot.quantity > 0) {
-        const sellResult = ItemSystem.sellItem(inventory, availableSlot.item.id, 1, 0.5);
-        if (sellResult.success) {
-          const sellAutosaveSuccess = simulateAutosave(testGameState, "sell item");
-          expect(sellAutosaveSuccess).toBe(true);
-        } else {
-          console.log("Sell item failed:", sellResult.error);
-          // Test autosave functionality even if sell fails
-          const sellAutosaveSuccess = simulateAutosave(testGameState, "sell item");
-          expect(sellAutosaveSuccess).toBe(true);
-        }
-      } else {
-        // No sellable items, just test autosave functionality
-        const sellAutosaveSuccess = simulateAutosave(testGameState, "sell item");
-        expect(sellAutosaveSuccess).toBe(true);
-      }
+      const sellAutosaveSuccess = simulateAutosave(testGameState, "sell item");
+      expect(sellAutosaveSuccess).toBe(true);
 
       // The main goal is testing autosave triggers, not the individual system operations
       expect(saveCallCount).toBeGreaterThan(0);

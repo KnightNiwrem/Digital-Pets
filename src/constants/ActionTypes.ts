@@ -49,17 +49,11 @@ export const SYSTEM_ACTION_TYPES = {
   PET_BECAME_SICK: "pet_became_sick",
 } as const;
 
-// Legacy Action Types - For backward compatibility (unused action types)
-export const LEGACY_ACTION_TYPES = {
-  // Currently no legacy action types
-} as const;
-
 // Combined type for all action types
 export type ActionType =
   | (typeof QUEST_ACTION_TYPES)[keyof typeof QUEST_ACTION_TYPES]
   | (typeof ACTIVITY_ACTION_TYPES)[keyof typeof ACTIVITY_ACTION_TYPES]
-  | (typeof SYSTEM_ACTION_TYPES)[keyof typeof SYSTEM_ACTION_TYPES]
-  | (typeof LEGACY_ACTION_TYPES)[keyof typeof LEGACY_ACTION_TYPES];
+  | (typeof SYSTEM_ACTION_TYPES)[keyof typeof SYSTEM_ACTION_TYPES];
 
 /**
  * Mapping between activity actions and quest actions

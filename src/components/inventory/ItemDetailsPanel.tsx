@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ItemIcon } from "./ItemIcon";
-import { ItemSystem } from "@/systems/ItemSystem";
 import type { InventorySlot, DurabilityItem } from "@/types/Item";
 import type { Pet } from "@/types/Pet";
 import { ITEM_CONSTANTS } from "@/types/Item";
@@ -29,8 +28,20 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
   const isLowDurability =
     durabilityItem && durabilityItem.currentDurability <= ITEM_CONSTANTS.DURABILITY_WARNING_THRESHOLD;
 
-  // Check if item can be used
-  const canUseResult = ItemSystem.validateItemUsage(pet, item);
+  // Basic item usage validation (detailed validation happens in ActionCoordinator)
+  const canUseItem = (() => {
+    // Check if item has zero durability
+    if (durabilityItem && durabilityItem.currentDurability <= 0) {
+      return { success: false, error: "Item is broken and cannot be used" };
+    }
+
+    // Check if pet is in a state that prevents item usage
+    if (pet.state === "travelling") {
+      return { success: false, error: "Cannot use items while pet is travelling" };
+    }
+
+    return { success: true };
+  })();
 
   const sellValue = ItemPricing.getStandardSellPrice(item.value);
 
@@ -107,12 +118,12 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
         )}
 
         {/* Usage validation */}
-        {!canUseResult.success && (
+        {!canUseItem.success && (
           <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <Info className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm text-yellow-800 font-medium">Cannot use item</p>
-              <p className="text-xs text-yellow-700">{canUseResult.error}</p>
+              <p className="text-xs text-yellow-700">{canUseItem.error}</p>
             </div>
           </div>
         )}
@@ -120,7 +131,7 @@ export function ItemDetailsPanel({ slot, pet, onUseItem, onSellItem, onClose }: 
         {/* Actions */}
         <div className="space-y-3 pt-2 border-t">
           {/* Use item */}
-          <Button onClick={onUseItem} disabled={!canUseResult.success} className="w-full">
+          <Button onClick={onUseItem} disabled={!canUseItem.success} className="w-full">
             <Play className="h-4 w-4 mr-2" />
             Use Item
           </Button>

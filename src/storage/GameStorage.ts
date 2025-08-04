@@ -62,10 +62,7 @@ export class GameStorage {
         };
       }
 
-      // Apply any necessary migrations
-      const migratedState = this.migrateGameState(gameState);
-
-      return { success: true, data: migratedState };
+      return { success: true, data: gameState };
     } catch (error) {
       console.error("Failed to load game:", error);
       return {
@@ -238,46 +235,6 @@ export class GameStorage {
     }
 
     return { valid: errors.length === 0, errors };
-  }
-
-  /**
-   * Migrate old save data to current version
-   */
-  private static migrateGameState(gameState: GameState): GameState {
-    // Create a copy to avoid mutating the original
-    const migrated = { ...gameState };
-
-    // Initialize activity log if missing (for backward compatibility)
-    if (!migrated.activityLog) {
-      migrated.activityLog = [];
-    }
-
-    // Ensure activity log doesn't exceed maximum entries
-    if (migrated.activityLog && migrated.activityLog.length > 100) {
-      migrated.activityLog = migrated.activityLog.slice(0, 100);
-    }
-
-    // Validate and clean up log entries
-    if (migrated.activityLog) {
-      migrated.activityLog = migrated.activityLog.filter(
-        entry =>
-          entry &&
-          typeof entry.id === "string" &&
-          typeof entry.activityId === "string" &&
-          typeof entry.locationId === "string" &&
-          typeof entry.status === "string" &&
-          typeof entry.energyCost === "number" &&
-          typeof entry.startTime === "number" &&
-          Array.isArray(entry.results)
-      );
-    }
-
-    // Version-specific migrations would go here
-    // For now, just ensure version is current
-    migrated.metadata.version = GAME_CONSTANTS.SAVE_VERSION;
-    migrated.metadata.gameVersion = GAME_CONSTANTS.SAVE_VERSION;
-
-    return migrated;
   }
 
   /**
