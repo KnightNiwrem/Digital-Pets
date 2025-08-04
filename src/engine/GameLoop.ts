@@ -948,6 +948,29 @@ export class GameLoop {
         if (gameState.currentPet?.state === "travelling") {
           gameState.currentPet.state = "idle";
         }
+
+        // FIXED: Update travel log entry from "started" to "completed" (same as online travel completion)
+        const destinationLocation = getLocationById(destinationId);
+        const destinationName = destinationLocation ? destinationLocation.name : destinationId;
+
+        // Find the most recent travel log entry with "started" status for this destination
+        const travelLogEntry = gameState.activityLog.find(
+          entry => entry.activityId === destinationName && entry.status === "started"
+        );
+
+        if (travelLogEntry) {
+          ActivityLogSystem.updateLogEntry(gameState, travelLogEntry.id, {
+            status: "completed",
+            endTime: now,
+            results: [
+              {
+                type: "none",
+                amount: 0,
+                description: `Arrived at ${destinationName}`,
+              },
+            ],
+          });
+        }
       }
     }
 
