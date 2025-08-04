@@ -219,6 +219,11 @@ describe("Inventory Behavior Fixes", () => {
       const tutorialQuest = initialActiveQuests.find(q => q.questId === "pet_care_basics");
       expect(tutorialQuest).toBeDefined();
 
+      // Get the initial 'feed_pet' objective and verify it starts at 0
+      const initialFeedObjective = tutorialQuest!.objectives.find(obj => obj.id === "feed_pet");
+      expect(initialFeedObjective).toBeDefined();
+      expect(initialFeedObjective!.currentAmount).toBe(0);
+
       // Use apple (care item) via ActionCoordinator
       const useAction = ActionFactory.createItemAction("use", "apple", 1);
       const result = await ActionCoordinator.dispatchAction(testGameState, useAction);
@@ -228,13 +233,13 @@ describe("Inventory Behavior Fixes", () => {
       const newGameState = result.data!.gameState;
 
       // Quest progress should be updated
-      // This test will initially fail, but should pass after implementing the fix
       const updatedQuest = newGameState.questLog.activeQuests.find(q => q.questId === "pet_care_basics");
+      expect(updatedQuest).toBeDefined();
 
-      // The quest system should have detected the care action and updated progress
-      // Check that the quest objectives are being tracked
-      expect(updatedQuest?.objectives).toBeDefined();
-      expect(updatedQuest?.objectives.length).toBeGreaterThan(0);
+      // Specifically assert that the 'feed_pet' objective's currentAmount increases from 0 to 1
+      const updatedFeedObjective = updatedQuest!.objectives.find(obj => obj.id === "feed_pet");
+      expect(updatedFeedObjective).toBeDefined();
+      expect(updatedFeedObjective!.currentAmount).toBe(1);
     });
   });
 
