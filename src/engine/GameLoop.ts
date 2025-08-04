@@ -743,22 +743,6 @@ export class GameLoop {
     gameState.activityStats.totals.goldEarned += goldEarned;
     gameState.activityStats.totals.itemsEarned += itemsEarned;
     gameState.activityStats.totals.experienceEarned += experienceEarned;
-
-    // Update legacy metrics for backward compatibility
-    switch (activityType) {
-      case "foraging":
-        gameState.metrics.totalForaging += 1;
-        break;
-      case "fishing":
-        gameState.metrics.totalFishing += 1;
-        break;
-      case "mining":
-        gameState.metrics.totalMining += 1;
-        break;
-      case "training":
-        gameState.metrics.totalTraining += 1;
-        break;
-    }
   }
 
   /**

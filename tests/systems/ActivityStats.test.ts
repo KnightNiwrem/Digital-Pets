@@ -67,9 +67,6 @@ describe("Activity Statistics Tracking", () => {
       expect(testGameState.activityStats.totals.goldEarned).toBe(10);
       expect(testGameState.activityStats.totals.itemsEarned).toBe(2);
       expect(testGameState.activityStats.totals.experienceEarned).toBe(5);
-
-      // Check legacy metrics are updated
-      expect(testGameState.metrics.totalForaging).toBe(1);
     });
 
     it("should update fishing statistics correctly", () => {
@@ -87,8 +84,6 @@ describe("Activity Statistics Tracking", () => {
       expect(testGameState.activityStats.fishing.goldEarned).toBe(15);
       expect(testGameState.activityStats.fishing.itemsEarned).toBe(1);
       expect(testGameState.activityStats.fishing.experienceEarned).toBe(8);
-
-      expect(testGameState.metrics.totalFishing).toBe(1);
     });
 
     it("should update mining statistics correctly", () => {
@@ -106,8 +101,6 @@ describe("Activity Statistics Tracking", () => {
       expect(testGameState.activityStats.mining.goldEarned).toBe(25);
       expect(testGameState.activityStats.mining.itemsEarned).toBe(3);
       expect(testGameState.activityStats.mining.experienceEarned).toBe(12);
-
-      expect(testGameState.metrics.totalMining).toBe(1);
     });
 
     it("should update training statistics correctly", () => {
@@ -121,8 +114,6 @@ describe("Activity Statistics Tracking", () => {
       expect(testGameState.activityStats.training.goldEarned).toBe(0);
       expect(testGameState.activityStats.training.itemsEarned).toBe(0);
       expect(testGameState.activityStats.training.experienceEarned).toBe(20);
-
-      expect(testGameState.metrics.totalTraining).toBe(1);
     });
 
     it("should accumulate statistics from multiple activities", () => {
@@ -176,26 +167,6 @@ describe("Activity Statistics Tracking", () => {
 
       expect(testGameState.activityStats.totals.completions).toBe(1);
       expect(testGameState.activityStats.totals.timeSpent).toBe(20);
-    });
-  });
-
-  describe("Legacy Metrics Compatibility", () => {
-    it("should update legacy metrics for backward compatibility", () => {
-      const testGameState = GameStateFactory.createNewGameWithStarter("Fresh Pet", "wild_beast");
-      const rewards: ActivityReward[] = [{ type: "gold", amount: 1, probability: 1 }];
-
-      // Test all activity types update their respective legacy metrics
-      (GameLoop as any).updateActivityStatistics(testGameState, "foraging" as ActivityType, 20, rewards);
-      expect(testGameState.metrics.totalForaging).toBe(1);
-
-      (GameLoop as any).updateActivityStatistics(testGameState, "fishing" as ActivityType, 30, rewards);
-      expect(testGameState.metrics.totalFishing).toBe(1);
-
-      (GameLoop as any).updateActivityStatistics(testGameState, "mining" as ActivityType, 40, rewards);
-      expect(testGameState.metrics.totalMining).toBe(1);
-
-      (GameLoop as any).updateActivityStatistics(testGameState, "training" as ActivityType, 60, rewards);
-      expect(testGameState.metrics.totalTraining).toBe(1);
     });
   });
 

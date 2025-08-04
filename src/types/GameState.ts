@@ -66,10 +66,6 @@ export interface GameMetrics {
 
   // Activity tracking
   totalBattles: number;
-  totalForaging: number;
-  totalFishing: number;
-  totalMining: number;
-  totalTraining: number;
 
   // Economic tracking
   totalGoldEarned: number;
