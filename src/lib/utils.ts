@@ -905,6 +905,11 @@ export class ActivityLogUtils {
    * Get display name for activity ID
    */
   static getActivityDisplayName(activityId: string): string {
+    // Handle null/undefined activityId values
+    if (!activityId || typeof activityId !== "string") {
+      return "Unknown Activity";
+    }
+
     // Convert snake_case to Title Case
     return activityId
       .split("_")
@@ -916,6 +921,11 @@ export class ActivityLogUtils {
    * Get display name for location ID
    */
   static getLocationDisplayName(locationId: string): string {
+    // Handle null/undefined locationId values
+    if (!locationId || typeof locationId !== "string") {
+      return "Unknown Location";
+    }
+
     // Convert snake_case to Title Case
     return locationId
       .split("_")

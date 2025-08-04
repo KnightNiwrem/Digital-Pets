@@ -215,6 +215,10 @@ interface ActivityLogEntryCardProps {
 function ActivityLogEntryCard({ entry }: ActivityLogEntryCardProps) {
   const statusBadgeClass = ActivityLogUtils.getStatusBadgeClass(entry.status);
 
+  // Handle invalid entry data defensively
+  const safeStatus = entry.status || "unknown";
+  const safeStatusDisplay = safeStatus.charAt(0).toUpperCase() + safeStatus.slice(1);
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -223,7 +227,7 @@ function ActivityLogEntryCard({ entry }: ActivityLogEntryCardProps) {
             <div className="flex items-center space-x-3 mb-2">
               <h3 className="font-medium text-gray-900">{ActivityLogUtils.getActivityDisplayName(entry.activityId)}</h3>
               <span className={`px-2 py-1 text-xs font-medium rounded-full border ${statusBadgeClass}`}>
-                {entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}
+                {safeStatusDisplay}
               </span>
             </div>
 
