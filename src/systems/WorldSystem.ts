@@ -279,13 +279,14 @@ export class WorldSystem {
               return { success: false, error: `Requires ${req.value}` };
             }
             break;
-          case "quest_completed":
+          case "quest_completed": {
             // Check if the required quest has been completed
             const completedQuests = QuestSystem.getCompletedQuests(gameState);
             if (!completedQuests.includes(req.value as string)) {
               return { success: false, error: `Requires completion of quest: ${req.value}` };
             }
             break;
+          }
           case "pet_species":
             if (pet.species.id !== req.value) {
               return { success: false, error: `Requires ${req.value} species pet` };
