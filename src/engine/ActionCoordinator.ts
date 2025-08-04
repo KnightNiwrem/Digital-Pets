@@ -1924,6 +1924,8 @@ class QuestSystemProposalGenerator implements ProposalGenerator {
 
         switch (itemAction.payload.operation) {
           case "use":
+            // TODO: For quest progression, detect if this is a care action
+            // For now, keeping original behavior to avoid breaking other systems
             actionType = "item_obtained";
             break;
           case "buy":
