@@ -1205,9 +1205,26 @@ class PetSystemProposalGenerator implements ProposalGenerator {
  */
 class ItemSystemProposalGenerator implements ProposalGenerator {
   generateProposals(action: unknown, context: ProposalContext): SystemProposal[] {
-    const itemAction = action as ItemAction;
-    if (itemAction.type !== "item_operation") return [];
+    const proposals: SystemProposal[] = [];
 
+    // Handle item operations
+    if ((action as UnifiedGameAction).type === "item_operation") {
+      const itemAction = action as ItemAction;
+      proposals.push(...this.generateItemOperationProposals(itemAction, context));
+    }
+
+    // Handle pet care actions with items
+    if ((action as UnifiedGameAction).type === "pet_care") {
+      const petCareAction = action as PetCareAction;
+      if (petCareAction.payload.itemId) {
+        proposals.push(...this.generatePetCareItemConsumptionProposals(petCareAction, context));
+      }
+    }
+
+    return proposals;
+  }
+
+  private generateItemOperationProposals(itemAction: ItemAction, context: ProposalContext): SystemProposal[] {
     const proposals: SystemProposal[] = [];
 
     switch (itemAction.payload.operation) {
@@ -1335,6 +1352,75 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
           });
         }
         break;
+      }
+    }
+
+    return proposals;
+  }
+
+  private generatePetCareItemConsumptionProposals(
+    petCareAction: PetCareAction,
+    context: ProposalContext
+  ): SystemProposal[] {
+    const proposals: SystemProposal[] = [];
+    const itemId = petCareAction.payload.itemId;
+
+    if (!itemId) return proposals;
+
+    // Get the item to determine how to handle consumption
+    const item = getItemById(itemId);
+    if (!item) return proposals;
+
+    // Get current inventory slot to check current state
+    const inventorySlot = context.currentState.inventory.slots.find(slot => slot.item.id === itemId);
+    if (!inventorySlot) return proposals;
+
+    if (item.stackable) {
+      // Consumable item - remove one from inventory
+      proposals.push(
+        ProposalFactory.createInventoryUpdateProposal(
+          "item_system",
+          `Consume ${item.name} for ${petCareAction.payload.careType}`,
+          itemId,
+          -1, // Remove one item
+          100
+        )
+      );
+    } else {
+      // Durability item - handle durability reduction or removal
+      const durabilityItem = inventorySlot.item as DurabilityItem;
+      const newDurability = durabilityItem.currentDurability - durabilityItem.durabilityLossPerUse;
+
+      if (newDurability <= 0) {
+        // Item is broken, remove from inventory
+        proposals.push(
+          ProposalFactory.createInventoryUpdateProposal(
+            "item_system",
+            `Remove broken ${item.name} after ${petCareAction.payload.careType}`,
+            itemId,
+            -1, // Remove the broken item
+            100
+          )
+        );
+      } else {
+        // Update durability
+        proposals.push({
+          id: ProposalFactory.generateId("item_system"),
+          systemId: "item_system",
+          description: `Use ${item.name} for ${petCareAction.payload.careType} (durability: ${newDurability}/${durabilityItem.maxDurability})`,
+          priority: 100,
+          changes: [
+            {
+              type: "inventory_update" as const,
+              target: itemId,
+              property: "currentDurability",
+              newValue: newDurability,
+              operation: "set" as const,
+              metadata: { operation: "update_durability" },
+            },
+          ],
+          dependencies: [],
+        });
       }
     }
 
