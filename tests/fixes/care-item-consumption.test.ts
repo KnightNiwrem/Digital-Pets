@@ -18,6 +18,10 @@ describe("Care Item Consumption Fix (Issue #108)", () => {
   it("should reduce quantity when using consumable food item for feeding", async () => {
     const gameState = createTestGameState();
     
+    // Set pet to be hungry so feeding is allowed
+    gameState.currentPet!.satiety = 50;
+    gameState.currentPet!.satietyTicksLeft = 1000;
+    
     const fishItem = getItemById("fish");
     expect(fishItem).toBeDefined();
     expect(fishItem!.stackable).toBe(true);
@@ -44,6 +48,10 @@ describe("Care Item Consumption Fix (Issue #108)", () => {
   it("should reduce quantity when using consumable drink item for hydration", async () => {
     const gameState = createTestGameState();
     
+    // Set pet to be thirsty so drinking is allowed
+    gameState.currentPet!.hydration = 50;
+    gameState.currentPet!.hydrationTicksLeft = 1000;
+    
     const waterItem = getItemById("water_bottle");
     expect(waterItem).toBeDefined();
     expect(waterItem!.stackable).toBe(true);
@@ -64,6 +72,10 @@ describe("Care Item Consumption Fix (Issue #108)", () => {
   it("should remove item when last consumable is used", async () => {
     const gameState = createTestGameState();
     
+    // Set pet to be hungry so feeding is allowed
+    gameState.currentPet!.satiety = 50;
+    gameState.currentPet!.satietyTicksLeft = 1000;
+    
     const appleItem = getItemById("apple");
     expect(appleItem).toBeDefined();
     expect(appleItem!.stackable).toBe(true);
@@ -83,6 +95,11 @@ describe("Care Item Consumption Fix (Issue #108)", () => {
 
   it("should reduce durability when using durability item for playing", async () => {
     const gameState = createTestGameState();
+    
+    // Set pet to need happiness and have energy for playing
+    gameState.currentPet!.happiness = 50;
+    gameState.currentPet!.happinessTicksLeft = 1000;
+    gameState.currentPet!.currentEnergy = 50;
     
     const ballItem = getItemById("ball");
     expect(ballItem).toBeDefined();
@@ -112,6 +129,10 @@ describe("Care Item Consumption Fix (Issue #108)", () => {
 
   it("should validate that pet stats are updated along with item consumption", async () => {
     const gameState = createTestGameState();
+    
+    // Set pet to be hungry so feeding is allowed
+    gameState.currentPet!.satiety = 50;
+    gameState.currentPet!.satietyTicksLeft = 1000;
     
     const fishItem = getItemById("fish");
     expect(fishItem).toBeDefined();
