@@ -1169,7 +1169,7 @@ class PetSystemProposalGenerator implements ProposalGenerator {
     return proposals;
   }
 
-  validateProposal(_proposal: SystemProposal, context: ProposalContext): ValidationResult {
+  validateProposal(proposal: SystemProposal, context: ProposalContext): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -1181,6 +1181,39 @@ class PetSystemProposalGenerator implements ProposalGenerator {
     // Validate pet is not dead
     if (context.activePet && context.activePet.life <= 0) {
       errors.push("Cannot perform actions on deceased pet");
+    }
+
+    // Validate care actions based on proposal description
+    if (context.activePet && proposal.description) {
+      const description = proposal.description.toLowerCase();
+
+      if (description.includes("feed") && context.activePet.satiety >= 100) {
+        errors.push("Pet is not hungry right now");
+      }
+
+      if (description.includes("drink") && context.activePet.hydration >= 100) {
+        errors.push("Pet is not thirsty right now");
+      }
+
+      if (description.includes("play") && context.activePet.happiness >= 100) {
+        errors.push("Pet is already very happy");
+      }
+
+      if (description.includes("play") && context.activePet.currentEnergy < 10) {
+        errors.push("Pet has insufficient energy to play");
+      }
+
+      if (description.includes("clean") && context.activePet.poopCount === 0) {
+        errors.push("There's no poop to clean right now");
+      }
+
+      if (
+        description.includes("healing") &&
+        context.activePet.health === "healthy" &&
+        context.activePet.currentHealth >= context.activePet.maxHealth
+      ) {
+        errors.push("Pet doesn't need medicine - already healthy");
+      }
     }
 
     return {
@@ -1427,11 +1460,65 @@ class ItemSystemProposalGenerator implements ProposalGenerator {
     return proposals;
   }
 
-  validateProposal(_proposal: SystemProposal, _context: ProposalContext): ValidationResult {
+  validateProposal(proposal: SystemProposal, context: ProposalContext): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Add inventory-specific validations here
+    // For item usage proposals, validate that the effects would be beneficial
+    if (proposal.description && proposal.description.includes("Use ") && context.activePet) {
+      const pet = context.activePet;
+
+      // Extract item ID from proposal changes
+      const inventoryChange = proposal.changes.find(c => c.type === "inventory_update");
+      if (inventoryChange && inventoryChange.target) {
+        const itemId = inventoryChange.target;
+        const item = context.availableItems.find(i => i.id === itemId);
+
+        if (item) {
+          // Check if any of the item's effects would be beneficial
+          let hasUsefulEffect = false;
+
+          for (const effect of item.effects) {
+            switch (effect.type) {
+              case "satiety":
+                if (pet.satiety < 100) hasUsefulEffect = true;
+                else errors.push("Pet is not hungry right now");
+                break;
+              case "hydration":
+                if (pet.hydration < 100) hasUsefulEffect = true;
+                else errors.push("Pet is not thirsty right now");
+                break;
+              case "happiness":
+                if (pet.happiness < 100 && pet.currentEnergy >= 10) hasUsefulEffect = true;
+                else if (pet.happiness >= 100) errors.push("Pet is already very happy");
+                else if (pet.currentEnergy < 10) errors.push("Pet has insufficient energy to play");
+                break;
+              case "health":
+              case "cure":
+                if (pet.health !== "healthy" || pet.currentHealth < pet.maxHealth) hasUsefulEffect = true;
+                else errors.push("Pet doesn't need medicine - already healthy");
+                break;
+              case "clean":
+                if (pet.poopCount > 0) hasUsefulEffect = true;
+                else errors.push("There's no poop to clean right now");
+                break;
+              case "energy":
+                if (pet.currentEnergy < pet.maxEnergy) hasUsefulEffect = true;
+                else warnings.push("Pet already has full energy");
+                break;
+              default:
+                hasUsefulEffect = true; // Other effects are always useful
+            }
+          }
+
+          // If no effects are useful and we haven't already added specific errors
+          if (!hasUsefulEffect && errors.length === 0) {
+            warnings.push("This item may not be beneficial to your pet right now");
+          }
+        }
+      }
+    }
+
     return {
       isValid: errors.length === 0,
       errors,
