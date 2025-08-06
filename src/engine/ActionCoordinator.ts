@@ -166,6 +166,37 @@ class ActionValidator {
         break;
       }
 
+      case "medicine": {
+        // Validate item exists if specified
+        if (action.payload.itemId) {
+          const item = getItemById(action.payload.itemId);
+          if (!item) {
+            errors.push(`Item not found: ${action.payload.itemId}`);
+          } else {
+            // Check if player owns the item
+            const inventorySlot = gameState.inventory.slots.find(slot => slot.item.id === action.payload.itemId);
+            if (!inventorySlot || inventorySlot.quantity <= 0) {
+              errors.push(`Item not in inventory or insufficient quantity: ${action.payload.itemId}`);
+            }
+
+            // Validate item type matches medicine care type
+            const hasRelevantEffect = item.effects.some(effect => effect.type === "health" || effect.type === "cure");
+
+            if (!hasRelevantEffect) {
+              warnings.push(`Item ${item.name} may not be suitable for medicine action`);
+            }
+
+            // Check if pet actually needs medicine
+            if (pet.health === "healthy" && pet.currentHealth >= pet.maxHealth) {
+              errors.push("Pet doesn't need medicine - already healthy");
+            }
+          }
+        } else {
+          errors.push("Medicine action requires an item");
+        }
+        break;
+      }
+
       default:
         errors.push(`Unknown pet care type: ${action.payload.careType}`);
     }
@@ -1047,6 +1078,36 @@ class PetSystemProposalGenerator implements ProposalGenerator {
 
       case "wake":
         proposals.push(ProposalFactory.createPetUpdateProposal("pet_system", "Wake pet up", { state: "idle" }, 100));
+        break;
+
+      case "medicine":
+        if (petCareAction.payload.itemId) {
+          const item = getItemById(petCareAction.payload.itemId);
+          if (item) {
+            const updates: Record<string, unknown> = {};
+
+            // Apply health effects
+            const healthEffect = item.effects.find(e => e.type === "health");
+            if (healthEffect && context.activePet.currentHealth < context.activePet.maxHealth) {
+              updates.currentHealth = Math.min(
+                context.activePet.maxHealth,
+                context.activePet.currentHealth + healthEffect.value
+              );
+            }
+
+            // Apply cure effects
+            const cureEffect = item.effects.find(e => e.type === "cure");
+            if (cureEffect && context.activePet.health !== "healthy") {
+              updates.health = "healthy";
+            }
+
+            if (Object.keys(updates).length > 0) {
+              proposals.push(
+                ProposalFactory.createPetUpdateProposal("pet_system", `Treat pet with ${item.name}`, updates, 100)
+              );
+            }
+          }
+        }
         break;
     }
 
