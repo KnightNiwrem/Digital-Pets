@@ -46,46 +46,17 @@ function GameContent({
         return <PlaceholderScreen name="Skills" />;
       case "quests":
         return <PlaceholderScreen name="Quests" />;
+      case "debug":
+        // Debug tab triggers a dialog in Navigation, not a screen change
+        return <CareScreen />;
       default:
         return <CareScreen />;
     }
   };
 
   return (
-    <Layout>
+    <Layout activeTab={activeTab} onTabChange={onTabChange}>
       <div className="pb-20">{renderScreen()}</div>
-      <div className="fixed bottom-0 left-0 right-0">
-        <nav className="border-t bg-card">
-          <div className="container mx-auto px-2">
-            <div className="flex justify-around py-2">
-              {(
-                [
-                  { id: "care", label: "Care", icon: "🏠" },
-                  { id: "inventory", label: "Items", icon: "🎒" },
-                  { id: "map", label: "Map", icon: "🗺️" },
-                  { id: "training", label: "Train", icon: "💪" },
-                  { id: "skills", label: "Skills", icon: "⭐" },
-                  { id: "quests", label: "Quests", icon: "📜" },
-                ] as const
-              ).map((tab) => (
-                <button
-                  type="button"
-                  key={tab.id}
-                  onClick={() => onTabChange(tab.id)}
-                  className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
-                    activeTab === tab.id
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent"
-                  }`}
-                >
-                  <span className="text-lg">{tab.icon}</span>
-                  <span className="text-xs">{tab.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </nav>
-      </div>
     </Layout>
   );
 }
