@@ -100,6 +100,8 @@ export function GameProvider({ children }: GameProviderProps) {
     if (result.success) {
       setState(result.state);
       setLoadError(null);
+    } else {
+      setLoadError(result.error);
     }
   }, []);
 
