@@ -1,5 +1,9 @@
 # Instructions for Agents
 
+## Project Status
+
+This project is **not live yet**. Breaking changes to reach the ideal code state are expected and acceptable. There is no need to worry about backwards compatibility at this point.
+
 ## Tech Stack
 
 - **Runtime/Bundler**: Bun (v1.3+)
