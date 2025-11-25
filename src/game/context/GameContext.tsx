@@ -28,8 +28,8 @@ export interface GameContextActions {
  * Game context value combining state and actions.
  */
 export interface GameContextValue {
-  /** Current game state */
-  state: GameState;
+  /** Current game state (null during loading or on error) */
+  state: GameState | null;
   /** Whether the game is loading */
   isLoading: boolean;
   /** Load error message if any */
@@ -39,23 +39,11 @@ export interface GameContextValue {
 }
 
 /**
- * Default context value (used before initialization).
- */
-const defaultContextValue: GameContextValue = {
-  state: null as unknown as GameState,
-  isLoading: true,
-  loadError: null,
-  actions: {
-    updateState: () => {},
-    save: () => false,
-    resetGame: () => {},
-  },
-};
-
-/**
  * React context for game state.
  */
-export const GameContext = createContext<GameContextValue>(defaultContextValue);
+export const GameContext = createContext<GameContextValue | undefined>(
+  undefined,
+);
 
 /**
  * Props for GameProvider.
@@ -116,7 +104,7 @@ export function GameProvider({ children }: GameProviderProps) {
   }, []);
 
   const contextValue: GameContextValue = {
-    state: state as GameState,
+    state,
     isLoading,
     loadError,
     actions: {

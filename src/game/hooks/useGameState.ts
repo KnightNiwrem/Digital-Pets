@@ -12,7 +12,7 @@ import { GameContext, type GameContextValue } from "@/game/context/GameContext";
 export function useGameState(): GameContextValue {
   const context = useContext(GameContext);
 
-  if (context.state === null && !context.isLoading) {
+  if (context === undefined) {
     throw new Error("useGameState must be used within a GameProvider");
   }
 
