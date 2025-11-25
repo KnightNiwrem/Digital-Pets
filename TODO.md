@@ -9,22 +9,22 @@ A feature-focused implementation plan with interleaved UI and logic for visual t
 Core types and base infrastructure.
 
 ### 0.1 Base Types
-- [ ] Create `src/game/types/common.ts` - MicroValue, Timestamp, Tick types
-- [ ] Create `src/game/types/constants.ts` - GrowthStage, DamageType, ItemCategory, Rarity as `const` objects with derived union types
-- [ ] Create `src/game/types/stats.ts` - CareStats, BattleStats interfaces
-- [ ] Create `src/game/types/gameState.ts` - GameState, PlayerState interfaces
-- [ ] Create `src/game/types/pet.ts` - Pet, PetState interfaces
+- [x] Create `src/game/types/common.ts` - MicroValue, Timestamp, Tick types
+- [x] Create `src/game/types/constants.ts` - GrowthStage, DamageType, ItemCategory, Rarity as `const` objects with derived union types
+- [x] Create `src/game/types/stats.ts` - CareStats, BattleStats interfaces
+- [x] Create `src/game/types/gameState.ts` - GameState, PlayerState interfaces
+- [x] Create `src/game/types/pet.ts` - Pet, PetState interfaces
 
 ### 0.2 Base Infrastructure
-- [ ] Create `src/game/state/persistence.ts` - localStorage save/load scaffolding
-- [ ] Create `src/game/context/GameContext.tsx` - React context provider shell
-- [ ] Create `src/game/hooks/useGameState.ts` - Basic state hook
+- [x] Create `src/game/state/persistence.ts` - localStorage save/load scaffolding
+- [x] Create `src/game/context/GameContext.tsx` - React context provider shell
+- [x] Create `src/game/hooks/useGameState.ts` - Basic state hook
 
 ### 0.3 Base UI Layout
-- [ ] Create `src/components/game/Layout.tsx` - Main game layout shell
-- [ ] Create `src/components/game/Header.tsx` - Header placeholder
-- [ ] Create `src/components/game/Navigation.tsx` - Tab navigation between screens
-- [ ] Update `src/App.tsx` - Integrate game layout
+- [x] Create `src/components/game/Layout.tsx` - Main game layout shell
+- [x] Create `src/components/game/Header.tsx` - Header placeholder
+- [x] Create `src/components/game/Navigation.tsx` - Tab navigation between screens
+- [x] Update `src/App.tsx` - Integrate game layout
 
 **✓ Testable:** App loads with navigation tabs visible
 
