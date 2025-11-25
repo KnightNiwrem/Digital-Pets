@@ -2,13 +2,7 @@
  * Starting data for new game and pet creation.
  */
 
-import {
-  type BattleStats,
-  createPetId,
-  type DamageResistances,
-  type GrowthStage,
-  type Pet,
-} from "@/game/types";
+import { createPetId, type GrowthStage, type Pet } from "@/game/types";
 import { GROWTH_STAGE_DEFINITIONS } from "./growthStages";
 import { getSpeciesById } from "./species";
 
@@ -68,8 +62,8 @@ export function createNewPet(name: string, speciesId: string): Pet {
     careLifeStats: {
       careLife: stageDef.careLifeMax,
     },
-    battleStats: { ...species.baseStats } as BattleStats,
-    resistances: { ...species.resistances } as DamageResistances,
+    battleStats: { ...species.baseStats },
+    resistances: { ...species.resistances },
     poop: {
       count: 0,
       ticksUntilNext: 480, // 4 hours until first poop

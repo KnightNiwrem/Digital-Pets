@@ -3,7 +3,7 @@
  */
 
 import { createDefaultStarterPet } from "@/game/data/starting";
-import type { GameState, Pet } from "@/game/types";
+import { CURRENT_SAVE_VERSION, type GameState, type Pet } from "@/game/types";
 
 /**
  * Create initial game state with a default starter pet.
@@ -13,7 +13,7 @@ export function createInitialGameStateWithPet(): GameState {
   const pet = createDefaultStarterPet();
 
   return {
-    version: 1,
+    version: CURRENT_SAVE_VERSION,
     lastSaveTime: Date.now(),
     totalTicks: 0,
     pet,
@@ -32,7 +32,7 @@ export function createInitialGameStateWithPet(): GameState {
  */
 export function createGameStateWithPet(pet: Pet): GameState {
   return {
-    version: 1,
+    version: CURRENT_SAVE_VERSION,
     lastSaveTime: Date.now(),
     totalTicks: 0,
     pet,

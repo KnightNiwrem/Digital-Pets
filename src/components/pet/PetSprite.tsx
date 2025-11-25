@@ -22,7 +22,7 @@ export function PetSprite({
   return (
     <div
       className={cn(
-        "flex items-center justify-center text-8xl select-none transition-all duration-300",
+        "relative flex items-center justify-center text-8xl select-none transition-all duration-300",
         isSleeping && "opacity-70 grayscale",
         className,
       )}
