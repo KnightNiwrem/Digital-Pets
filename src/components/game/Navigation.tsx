@@ -58,7 +58,7 @@ export function Navigation({
 
   return (
     <>
-      <nav className="border-t bg-card sticky bottom-0">
+      <nav className="border-t bg-card fixed bottom-0 left-0 right-0">
         <div className="container mx-auto px-2">
           <div className="flex justify-around py-2">
             {TABS.map((tab) => (
