@@ -1,0 +1,145 @@
+/**
+ * Growth stage definitions with thresholds and properties.
+ */
+
+import type { MicroValue, Tick } from "@/game/types/common";
+import type { GrowthStage } from "@/game/types/constants";
+
+/**
+ * Definition for a growth stage.
+ */
+export interface GrowthStageDefinition {
+  /** Growth stage identifier */
+  stage: GrowthStage;
+  /** Display name */
+  name: string;
+  /** Number of substages within this stage */
+  substageCount: number;
+  /** Minimum age in ticks to reach this stage */
+  minAgeTicks: Tick;
+  /** Base maximum for care stats (micro-units) */
+  baseCareStatMax: MicroValue;
+  /** Base maximum for energy (micro-units) */
+  baseEnergyMax: MicroValue;
+  /** Maximum care life (micro-units) */
+  careLifeMax: MicroValue;
+}
+
+/**
+ * Growth stage definitions.
+ * Target: ~12 months real time to reach Adult.
+ *
+ * Tick reference:
+ * - 1 day = 2880 ticks
+ * - 1 week = 20,160 ticks
+ * - 1 month ≈ 86,400 ticks (30 days)
+ */
+export const GROWTH_STAGE_DEFINITIONS: Record<
+  GrowthStage,
+  GrowthStageDefinition
+> = {
+  baby: {
+    stage: "baby",
+    name: "Baby",
+    substageCount: 3,
+    minAgeTicks: 0,
+    baseCareStatMax: 50_000,
+    baseEnergyMax: 50_000,
+    careLifeMax: 72_000,
+  },
+  child: {
+    stage: "child",
+    name: "Child",
+    substageCount: 3,
+    minAgeTicks: 172_800, // ~2 months
+    baseCareStatMax: 80_000,
+    baseEnergyMax: 75_000,
+    careLifeMax: 120_000,
+  },
+  teen: {
+    stage: "teen",
+    name: "Teen",
+    substageCount: 3,
+    minAgeTicks: 432_000, // ~5 months
+    baseCareStatMax: 120_000,
+    baseEnergyMax: 100_000,
+    careLifeMax: 168_000,
+  },
+  youngAdult: {
+    stage: "youngAdult",
+    name: "Young Adult",
+    substageCount: 3,
+    minAgeTicks: 691_200, // ~8 months
+    baseCareStatMax: 160_000,
+    baseEnergyMax: 150_000,
+    careLifeMax: 240_000,
+  },
+  adult: {
+    stage: "adult",
+    name: "Adult",
+    substageCount: 3,
+    minAgeTicks: 1_036_800, // ~12 months
+    baseCareStatMax: 200_000,
+    baseEnergyMax: 200_000,
+    careLifeMax: 336_000,
+  },
+};
+
+/**
+ * Get growth stage definition by stage.
+ */
+export function getGrowthStageDefinition(
+  stage: GrowthStage,
+): GrowthStageDefinition {
+  return GROWTH_STAGE_DEFINITIONS[stage];
+}
+
+/**
+ * Determine growth stage from age in ticks.
+ */
+export function getStageFromAge(ageTicks: Tick): GrowthStage {
+  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.adult.minAgeTicks) return "adult";
+  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.youngAdult.minAgeTicks)
+    return "youngAdult";
+  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.teen.minAgeTicks) return "teen";
+  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.child.minAgeTicks) return "child";
+  return "baby";
+}
+
+/**
+ * Calculate substage within the current growth stage.
+ */
+export function getSubstage(stage: GrowthStage, ageTicks: Tick): number {
+  const def = GROWTH_STAGE_DEFINITIONS[stage];
+  const stageOrder: GrowthStage[] = [
+    "baby",
+    "child",
+    "teen",
+    "youngAdult",
+    "adult",
+  ];
+  const stageIndex = stageOrder.indexOf(stage);
+  const nextStageIndex = stageIndex + 1;
+
+  // If adult, calculate substage based on time in adult stage
+  if (nextStageIndex >= stageOrder.length) {
+    const timeInStage = ageTicks - def.minAgeTicks;
+    // Each substage is roughly equal portion of remaining progression
+    const substageLength = 86_400; // ~1 month per substage
+    return Math.min(
+      def.substageCount,
+      Math.floor(timeInStage / substageLength) + 1,
+    );
+  }
+
+  const nextStageDef =
+    GROWTH_STAGE_DEFINITIONS[stageOrder[nextStageIndex] as GrowthStage];
+  const stageDuration = nextStageDef.minAgeTicks - def.minAgeTicks;
+  const timeInStage = ageTicks - def.minAgeTicks;
+  const substageLength = stageDuration / def.substageCount;
+
+  return Math.min(
+    def.substageCount,
+    Math.floor(timeInStage / substageLength) + 1,
+  );
+}

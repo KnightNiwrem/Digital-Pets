@@ -35,24 +35,24 @@ Core types and base infrastructure.
 First visual pet with care stat bars.
 
 ### 1.1 Types & Data
-- [ ] Create `src/game/types/species.ts` - Species interface
-- [ ] Create `src/game/data/growthStages.ts` - Growth stage definitions
-- [ ] Create `src/game/data/species.ts` - Initial species (2-3 starter species)
-- [ ] Create `src/game/data/starting.ts` - New game pet creation
+- [x] Create `src/game/types/species.ts` - Species interface
+- [x] Create `src/game/data/growthStages.ts` - Growth stage definitions
+- [x] Create `src/game/data/species.ts` - Initial species (2-3 starter species)
+- [x] Create `src/game/data/starting.ts` - New game pet creation
 
 ### 1.2 Pet State Logic
-- [ ] Create `src/game/state/initialState.ts` - Create new pet with starting stats
-- [ ] Create `src/game/state/selectors.ts` - Pet stat selectors
+- [x] Create `src/game/state/initialState.ts` - Create new pet with starting stats
+- [x] Create `src/game/state/selectors.ts` - Pet stat selectors
 
 ### 1.3 Pet Display UI
-- [ ] Create `src/components/pet/PetSprite.tsx` - Pet visual (placeholder/emoji initially)
-- [ ] Create `src/components/pet/PetInfo.tsx` - Name, species, age, stage display
-- [ ] Create `src/components/pet/PetStatus.tsx` - Care stat bars (Satiety, Hydration, Happiness)
-- [ ] Create `src/components/pet/EnergyBar.tsx` - Energy display
-- [ ] Create `src/components/screens/CareScreen.tsx` - Main care screen with pet display
+- [x] Create `src/components/pet/PetSprite.tsx` - Pet visual (placeholder/emoji initially)
+- [x] Create `src/components/pet/PetInfo.tsx` - Name, species, age, stage display
+- [x] Create `src/components/pet/PetStatus.tsx` - Care stat bars (Satiety, Hydration, Happiness)
+- [x] Create `src/components/pet/EnergyBar.tsx` - Energy display
+- [x] Create `src/components/screens/CareScreen.tsx` - Main care screen with pet display
 
 ### 1.4 Debug Tools
-- [ ] Add delete save data tab/button in Navigation for testing
+- [x] Add delete save data tab/button in Navigation for testing
 
 **✓ Testable:** See pet with name, species, and care stat bars on Care screen
 
