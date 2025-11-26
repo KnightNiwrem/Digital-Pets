@@ -4,6 +4,24 @@
 
 import { createDefaultStarterPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION, type GameState, type Pet } from "@/game/types";
+import type { Inventory, InventoryItem } from "@/game/types/gameState";
+
+/**
+ * Starting inventory items for new players.
+ */
+const STARTING_ITEMS: readonly InventoryItem[] = [
+  { itemId: "food_kibble", quantity: 10, currentDurability: null },
+  { itemId: "food_apple", quantity: 5, currentDurability: null },
+  { itemId: "drink_water", quantity: 10, currentDurability: null },
+  { itemId: "drink_juice", quantity: 5, currentDurability: null },
+] as const;
+
+/**
+ * Create starting inventory for new players.
+ */
+function createStartingInventory(): Inventory {
+  return { items: [...STARTING_ITEMS] };
+}
 
 /**
  * Create initial game state with a default starter pet.
@@ -18,7 +36,7 @@ export function createInitialGameStateWithPet(): GameState {
     totalTicks: 0,
     pet,
     player: {
-      inventory: { items: [] },
+      inventory: createStartingInventory(),
       currency: { coins: 100 },
       currentLocationId: "home",
     },
@@ -37,7 +55,7 @@ export function createGameStateWithPet(pet: Pet): GameState {
     totalTicks: 0,
     pet,
     player: {
-      inventory: { items: [] },
+      inventory: createStartingInventory(),
       currency: { coins: 100 },
       currentLocationId: "home",
     },
