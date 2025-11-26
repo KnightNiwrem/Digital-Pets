@@ -49,7 +49,7 @@ export function FeedButton() {
       />
       <ErrorDialog
         open={errorMessage !== null}
-        onOpenChange={(open) => !open && setErrorMessage(null)}
+        onOpenChange={() => setErrorMessage(null)}
         message={errorMessage ?? ""}
       />
     </>
