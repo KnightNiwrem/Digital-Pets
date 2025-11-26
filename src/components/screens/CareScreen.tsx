@@ -57,6 +57,7 @@ export function CareScreen() {
   const poop = selectPoop(state);
   const growthProgress = selectGrowthProgress(state);
 
+  // Check all required data is available
   if (
     !petInfo ||
     !careStats ||

@@ -3,6 +3,8 @@
  */
 
 import { expect, test } from "bun:test";
+import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import type { GrowthStage } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import {
   applyStatGains,
@@ -15,6 +17,16 @@ import {
   getTicksUntilNextSubstage,
   processGrowthTick,
 } from "./growth";
+
+/**
+ * Calculate the substage length for the baby stage.
+ */
+function getBabySubstageLength(): number {
+  const babyDef = GROWTH_STAGE_DEFINITIONS.baby;
+  const childDef = GROWTH_STAGE_DEFINITIONS.child;
+  const stageDuration = childDef.minAgeTicks - babyDef.minAgeTicks;
+  return Math.floor(stageDuration / babyDef.substageCount);
+}
 
 function createTestPet(overrides: Partial<Pet> = {}): Pet {
   return {
@@ -164,13 +176,12 @@ test("processGrowthTick does not transition when within same stage", () => {
 });
 
 test("processGrowthTick transitions stage when reaching threshold", () => {
-  // Child stage starts at 172_800 ticks
   const pet = createTestPet({
     growth: {
       stage: "baby",
       substage: 3,
       birthTime: Date.now(),
-      ageTicks: 172_799,
+      ageTicks: GROWTH_STAGE_DEFINITIONS.child.minAgeTicks - 1,
     },
     battleStats: {
       strength: 10,
@@ -190,15 +201,53 @@ test("processGrowthTick transitions stage when reaching threshold", () => {
   expect(result.battleStats.strength).toBe(13);
 });
 
+// Parameterized tests for stage transitions
+const stageTransitions: {
+  from: GrowthStage;
+  to: GrowthStage;
+  startStrength: number;
+  endStrength: number;
+}[] = [
+  { from: "child", to: "teen", startStrength: 13, endStrength: 16 },
+  { from: "teen", to: "youngAdult", startStrength: 16, endStrength: 19 },
+  { from: "youngAdult", to: "adult", startStrength: 19, endStrength: 22 },
+];
+
+for (const { from, to, startStrength, endStrength } of stageTransitions) {
+  test(`processGrowthTick transitions from ${from} to ${to}`, () => {
+    const pet = createTestPet({
+      growth: {
+        stage: from,
+        substage: 3,
+        birthTime: Date.now(),
+        ageTicks: GROWTH_STAGE_DEFINITIONS[to].minAgeTicks - 1,
+      },
+      battleStats: {
+        strength: startStrength,
+        endurance: startStrength,
+        agility: startStrength,
+        precision: startStrength,
+        fortitude: startStrength,
+        cunning: startStrength,
+      },
+    });
+    const result = processGrowthTick(pet);
+
+    expect(result.stageTransitioned).toBe(true);
+    expect(result.growth.stage).toBe(to);
+    expect(result.previousStage).toBe(from);
+    expect(result.battleStats.strength).toBe(endStrength);
+  });
+}
+
 test("processGrowthTick transitions substage within stage", () => {
-  // Baby has 3 substages over 172_800 ticks = ~57_600 ticks per substage
-  // Substage 2 starts at tick 57_600
+  const substageLength = getBabySubstageLength();
   const pet = createTestPet({
     growth: {
       stage: "baby",
       substage: 1,
       birthTime: Date.now(),
-      ageTicks: 57_599,
+      ageTicks: substageLength - 1,
     },
   });
   const result = processGrowthTick(pet);
@@ -210,12 +259,13 @@ test("processGrowthTick transitions substage within stage", () => {
 });
 
 test("processGrowthTick does not modify battle stats on substage transition", () => {
+  const substageLength = getBabySubstageLength();
   const pet = createTestPet({
     growth: {
       stage: "baby",
       substage: 1,
       birthTime: Date.now(),
-      ageTicks: 57_599,
+      ageTicks: substageLength - 1,
     },
     battleStats: {
       strength: 10,
@@ -256,28 +306,36 @@ test("getNextStage returns null for adult", () => {
 // getTicksUntilNextStage tests
 test("getTicksUntilNextStage returns correct ticks for baby at start", () => {
   const ticks = getTicksUntilNextStage("baby", 0);
-  expect(ticks).toBe(172_800); // Child stage starts at 172_800
+  expect(ticks).toBe(GROWTH_STAGE_DEFINITIONS.child.minAgeTicks);
 });
 
 test("getTicksUntilNextStage returns correct ticks for baby halfway", () => {
-  const ticks = getTicksUntilNextStage("baby", 86_400);
-  expect(ticks).toBe(86_400); // Half way to child
+  const halfwayTicks = GROWTH_STAGE_DEFINITIONS.child.minAgeTicks / 2;
+  const ticks = getTicksUntilNextStage("baby", halfwayTicks);
+  expect(ticks).toBe(halfwayTicks);
 });
 
 test("getTicksUntilNextStage returns null for adult", () => {
-  const ticks = getTicksUntilNextStage("adult", 1_036_800);
+  const ticks = getTicksUntilNextStage(
+    "adult",
+    GROWTH_STAGE_DEFINITIONS.adult.minAgeTicks,
+  );
   expect(ticks).toBeNull();
 });
 
 // getTicksUntilNextSubstage tests
 test("getTicksUntilNextSubstage returns ticks for substage 1", () => {
+  const expectedSubstageLength = getBabySubstageLength();
   const ticks = getTicksUntilNextSubstage("baby", 1, 0);
-  // Baby has 3 substages over 172_800 ticks = 57_600 per substage
-  expect(ticks).toBe(57_600);
+  expect(ticks).toBe(expectedSubstageLength);
 });
 
 test("getTicksUntilNextSubstage returns null at max substage", () => {
-  const ticks = getTicksUntilNextSubstage("baby", 3, 172_000);
+  const ticks = getTicksUntilNextSubstage(
+    "baby",
+    3,
+    GROWTH_STAGE_DEFINITIONS.child.minAgeTicks - 800,
+  );
   expect(ticks).toBeNull();
 });
 
@@ -287,14 +345,25 @@ test("getStageProgressPercent returns 0 at stage start", () => {
 });
 
 test("getStageProgressPercent returns 50 halfway through stage", () => {
-  expect(getStageProgressPercent("baby", 86_400)).toBe(50);
+  const halfwayTicks = GROWTH_STAGE_DEFINITIONS.child.minAgeTicks / 2;
+  expect(getStageProgressPercent("baby", halfwayTicks)).toBe(50);
 });
 
 test("getStageProgressPercent returns 100 at stage end", () => {
-  expect(getStageProgressPercent("baby", 172_800)).toBe(100);
+  expect(
+    getStageProgressPercent("baby", GROWTH_STAGE_DEFINITIONS.child.minAgeTicks),
+  ).toBe(100);
 });
 
 // formatTicksDuration tests
+test("formatTicksDuration formats 0 ticks", () => {
+  expect(formatTicksDuration(0)).toBe("0m");
+});
+
+test("formatTicksDuration formats 1 tick (less than a minute)", () => {
+  expect(formatTicksDuration(1)).toBe("0m");
+});
+
 test("formatTicksDuration formats minutes", () => {
   expect(formatTicksDuration(2)).toBe("1m"); // 2 ticks = 60 seconds = 1 minute
 });
