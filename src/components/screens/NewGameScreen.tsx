@@ -102,13 +102,17 @@ export function NewGameScreen({ onStartGame }: NewGameScreenProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Choose Your Pet</CardTitle>
+            <CardTitle id="species-selection-title">Choose Your Pet</CardTitle>
             <CardDescription>
               Select a species to start your journey with.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              role="radiogroup"
+              aria-labelledby="species-selection-title"
+            >
               {starterSpecies.map((species) => (
                 <SpeciesCard
                   key={species.id}
