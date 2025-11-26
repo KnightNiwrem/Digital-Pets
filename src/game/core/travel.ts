@@ -32,7 +32,13 @@ export function checkLocationRequirements(
   }
 
   // Check growth stage requirement
-  if (requirements.stage && state.pet) {
+  if (requirements.stage) {
+    if (!state.pet) {
+      return {
+        met: false,
+        reason: "You need a pet to access this location.",
+      };
+    }
     if (!meetsStageRequirement(state.pet.growth.stage, requirements.stage)) {
       return {
         met: false,

@@ -17,13 +17,10 @@ interface LocationDetailProps {
 }
 
 /**
- * Get display name for facility type.
+ * Display data for facility types.
  */
-function getFacilityDisplay(facility: FacilityType): {
-  name: string;
-  emoji: string;
-} {
-  const facilities: Record<FacilityType, { name: string; emoji: string }> = {
+const FACILITY_DISPLAY: Record<FacilityType, { name: string; emoji: string }> =
+  {
     [FacilityType.RestArea]: { name: "Rest Area", emoji: "🛏️" },
     [FacilityType.FoodStation]: { name: "Food Station", emoji: "🍽️" },
     [FacilityType.WaterStation]: { name: "Water Station", emoji: "💧" },
@@ -37,7 +34,28 @@ function getFacilityDisplay(facility: FacilityType): {
     [FacilityType.ForageZone]: { name: "Forage Zone", emoji: "🌿" },
     [FacilityType.BattleArea]: { name: "Battle Area", emoji: "⚔️" },
   };
-  return facilities[facility] ?? { name: facility, emoji: "❓" };
+
+/**
+ * Display data for location types.
+ */
+const LOCATION_TYPE_DISPLAY: Record<
+  LocationType,
+  { name: string; color: string }
+> = {
+  [LocationType.Home]: { name: "Home", color: "text-blue-600" },
+  [LocationType.Town]: { name: "Town", color: "text-amber-600" },
+  [LocationType.Wild]: { name: "Wild Area", color: "text-green-600" },
+  [LocationType.Dungeon]: { name: "Dungeon", color: "text-purple-600" },
+};
+
+/**
+ * Get display name for facility type.
+ */
+function getFacilityDisplay(facility: FacilityType): {
+  name: string;
+  emoji: string;
+} {
+  return FACILITY_DISPLAY[facility] ?? { name: facility, emoji: "❓" };
 }
 
 /**
@@ -47,13 +65,12 @@ function getLocationTypeDisplay(type: LocationType): {
   name: string;
   color: string;
 } {
-  const types: Record<LocationType, { name: string; color: string }> = {
-    [LocationType.Home]: { name: "Home", color: "text-blue-600" },
-    [LocationType.Town]: { name: "Town", color: "text-amber-600" },
-    [LocationType.Wild]: { name: "Wild Area", color: "text-green-600" },
-    [LocationType.Dungeon]: { name: "Dungeon", color: "text-purple-600" },
-  };
-  return types[type] ?? { name: type, color: "text-muted-foreground" };
+  return (
+    LOCATION_TYPE_DISPLAY[type] ?? {
+      name: type,
+      color: "text-muted-foreground",
+    }
+  );
 }
 
 /**
