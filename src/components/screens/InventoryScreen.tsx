@@ -46,10 +46,7 @@ export function InventoryScreen() {
           ? inventoryItems
           : inventoryItems.filter((invItem) => {
               const itemDef = getItemById(invItem.itemId);
-              return (
-                itemDef?.category ===
-                ItemCategory[categoryFilter as keyof typeof ItemCategory]
-              );
+              return itemDef?.category === ItemCategory[categoryFilter];
             }),
     [inventoryItems, categoryFilter],
   );

@@ -4,6 +4,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toDisplay } from "@/game/types/common";
+import type { ItemCategory, Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
 
@@ -16,8 +17,8 @@ interface ItemDetailProps {
  * Get display text for item category.
  * Includes mappings for future item types (medicine, battle, equipment, material, key).
  */
-function getCategoryLabel(category: string): string {
-  const labels: Record<string, string> = {
+function getCategoryLabel(category: ItemCategory): string {
+  const labels: Record<ItemCategory, string> = {
     food: "Food",
     drink: "Drink",
     toy: "Toy",
@@ -28,21 +29,23 @@ function getCategoryLabel(category: string): string {
     material: "Material",
     key: "Key Item",
   };
-  return labels[category] ?? category;
+  return labels[category];
 }
 
 /**
  * Get display text for item rarity.
  */
-function getRarityLabel(rarity: string): string {
+function getRarityLabel(rarity: Rarity): string {
   return rarity.charAt(0).toUpperCase() + rarity.slice(1);
 }
 
 /**
  * Get CSS class for rarity text color.
  */
-function getRarityTextClass(rarity: string): string {
+function getRarityTextClass(rarity: Rarity): string {
   switch (rarity) {
+    case "common":
+      return "text-muted-foreground";
     case "uncommon":
       return "text-green-600 dark:text-green-400";
     case "rare":
@@ -51,8 +54,6 @@ function getRarityTextClass(rarity: string): string {
       return "text-purple-600 dark:text-purple-400";
     case "legendary":
       return "text-yellow-600 dark:text-yellow-400";
-    default:
-      return "text-muted-foreground";
   }
 }
 
