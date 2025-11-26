@@ -1,8 +1,13 @@
 /**
- * Care state actions for feeding, watering, and cleaning.
+ * Care state actions for feeding, watering, cleaning, and playing.
  */
 
-import { useCleaningItem, useDrinkItem, useFoodItem } from "@/game/core/items";
+import {
+  useCleaningItem,
+  useDrinkItem,
+  useFoodItem,
+  useToyItem,
+} from "@/game/core/items";
 import type { GameState } from "@/game/types/gameState";
 
 /**
@@ -33,4 +38,14 @@ export function waterPet(state: GameState, itemId: string): CareActionResult {
  */
 export function cleanPet(state: GameState, itemId: string): CareActionResult {
   return useCleaningItem(state, itemId);
+}
+
+/**
+ * Play with the pet using the specified toy item.
+ */
+export function playWithPet(
+  state: GameState,
+  itemId: string,
+): CareActionResult {
+  return useToyItem(state, itemId);
 }

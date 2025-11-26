@@ -140,16 +140,16 @@ Poop accumulates, requires cleaning items.
 Toys restore Happiness with durability.
 
 ### 5.1 Types & Data
-- [ ] Update `src/game/types/item.ts` - Toy interface with durability
-- [ ] Create `src/game/data/items/toys.ts` - Toy items
+- [x] Update `src/game/types/item.ts` - Toy interface with durability
+- [x] Create `src/game/data/items/toys.ts` - Toy items
 
 ### 5.2 Toy Logic
-- [ ] Update `src/game/core/items.ts` - Use toys, reduce durability
+- [x] Update `src/game/core/items.ts` - Use toys, reduce durability
 
 ### 5.3 Toy UI
-- [ ] Create `src/components/care/PlayButton.tsx` - Toy selection
-- [ ] Update ItemSelector to show durability for toys
-- [ ] Update CareScreen.tsx - Add play button
+- [x] Create `src/components/care/PlayButton.tsx` - Toy selection
+- [x] Update ItemSelector to show durability for toys
+- [x] Update CareScreen.tsx - Add play button
 
 **✓ Testable:** Use toy → Happiness increases, toy durability decreases
 

@@ -13,13 +13,13 @@ import {
 import { getInventoryItemsByCategory } from "@/game/core/inventory";
 import { getItemById } from "@/game/data/items";
 import type { Inventory, InventoryItem } from "@/game/types/gameState";
-import type { Item } from "@/game/types/item";
+import type { Item, ToyItem } from "@/game/types/item";
 
 interface ItemSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   inventory: Inventory;
-  category: "food" | "drink" | "cleaning";
+  category: "food" | "drink" | "cleaning" | "toy";
   title: string;
   description: string;
   onSelect: (itemId: string) => void;
@@ -32,6 +32,11 @@ interface ItemButtonProps {
 }
 
 function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
+  const isToy = itemDef.category === "toy";
+  const toyDef = isToy ? (itemDef as ToyItem) : null;
+  const durability = inventoryItem.currentDurability;
+  const maxDurability = toyDef?.maxDurability;
+
   return (
     <Button
       variant="outline"
@@ -41,9 +46,15 @@ function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
     >
       <span className="text-2xl">{itemDef.icon}</span>
       <span className="text-sm font-medium">{itemDef.name}</span>
-      <span className="text-xs text-muted-foreground">
-        ×{inventoryItem.quantity}
-      </span>
+      {isToy && durability !== null && maxDurability ? (
+        <span className="text-xs text-muted-foreground">
+          {durability}/{maxDurability}
+        </span>
+      ) : (
+        <span className="text-xs text-muted-foreground">
+          ×{inventoryItem.quantity}
+        </span>
+      )}
     </Button>
   );
 }

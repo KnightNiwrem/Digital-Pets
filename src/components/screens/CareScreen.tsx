@@ -5,6 +5,7 @@
 import {
   CleanButton,
   FeedButton,
+  PlayButton,
   PoopIndicator,
   WaterButton,
 } from "@/components/care";
@@ -110,6 +111,7 @@ export function CareScreen() {
           <div className="flex gap-2">
             <FeedButton />
             <WaterButton />
+            <PlayButton />
             <CleanButton />
           </div>
         </CardContent>

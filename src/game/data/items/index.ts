@@ -7,10 +7,12 @@ import type {
   DrinkItem,
   FoodItem,
   Item,
+  ToyItem,
 } from "@/game/types/item";
 import { CLEANING_ITEMS, getCleaningItemById } from "./cleaning";
 import { DRINK_ITEMS, getDrinkItemById } from "./drinks";
 import { FOOD_ITEMS, getFoodItemById } from "./food";
+import { getToyItemById, TOY_ITEMS } from "./toys";
 
 /**
  * All items in the game.
@@ -19,6 +21,7 @@ export const ALL_ITEMS: readonly Item[] = [
   ...FOOD_ITEMS,
   ...DRINK_ITEMS,
   ...CLEANING_ITEMS,
+  ...TOY_ITEMS,
 ] as const;
 
 /**
@@ -58,8 +61,20 @@ export function getAllCleaningItems(): CleaningItem[] {
   return [...CLEANING_ITEMS];
 }
 
+/**
+ * Get all toy items.
+ */
+export function getAllToyItems(): ToyItem[] {
+  return [...TOY_ITEMS];
+}
+
 // Re-export individual lookup functions
-export { getCleaningItemById, getDrinkItemById, getFoodItemById };
+export {
+  getCleaningItemById,
+  getDrinkItemById,
+  getFoodItemById,
+  getToyItemById,
+};
 
 // Re-export item arrays
-export { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS };
+export { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS, TOY_ITEMS };
