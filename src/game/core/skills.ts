@@ -20,7 +20,8 @@ const BASE_XP = 50;
 /**
  * Total XP required to reach level n from level 1.
  * Formula: baseXP × n × (n + 1) / 2
- * This is a triangular number formula where XP requirements increase linearly.
+ * This is a triangular number formula. Total cumulative XP grows quadratically,
+ * while XP required per level increases linearly.
  */
 export function xpToLevel(level: number): number {
   if (level <= 1) return 0;
@@ -160,20 +161,11 @@ export function getSkillProgress(skill: Skill): number {
 
 /**
  * Get skill effect modifier based on level.
- * Returns a multiplier (e.g., 1.05 for 5% bonus per level).
+ * Returns a multiplier (e.g., 1.0 at level 1, 1.05 at level 2, 1.10 at level 3).
  */
 export function getSkillEffectMultiplier(level: number): number {
   // 5% bonus per level above 1
   return 1 + (level - 1) * 0.05;
-}
-
-/**
- * Get foraging drop rate bonus from skill level.
- * Returns percentage bonus (0-100+).
- */
-export function getForagingDropBonus(level: number): number {
-  // 5% per level above 1
-  return (level - 1) * 5;
 }
 
 /**

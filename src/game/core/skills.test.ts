@@ -13,7 +13,6 @@ import {
 import {
   addSkillXp,
   addXpToPlayerSkill,
-  getForagingDropBonus,
   getSkillEffectMultiplier,
   getSkillProgress,
   getSkillTier,
@@ -205,19 +204,6 @@ test("getSkillEffectMultiplier returns 1.05 at level 2", () => {
 
 test("getSkillEffectMultiplier returns 1.5 at level 11", () => {
   expect(getSkillEffectMultiplier(11)).toBeCloseTo(1.5);
-});
-
-// Foraging drop bonus
-test("getForagingDropBonus returns 0 at level 1", () => {
-  expect(getForagingDropBonus(1)).toBe(0);
-});
-
-test("getForagingDropBonus returns 5 at level 2", () => {
-  expect(getForagingDropBonus(2)).toBe(5);
-});
-
-test("getForagingDropBonus returns 50 at level 11", () => {
-  expect(getForagingDropBonus(11)).toBe(50);
 });
 
 // Skill requirements

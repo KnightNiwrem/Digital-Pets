@@ -106,3 +106,22 @@ test("applyExplorationResults still grants XP when no items found", () => {
   expect(xpGained).toBe(15); // Base XP only
   expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(15);
 });
+
+test("applyExplorationResults does not grant XP when exploration fails", () => {
+  const state = createTestState();
+  const result: ExplorationResult = {
+    success: false,
+    message: "Exploration failed",
+    itemsFound: [],
+  };
+
+  const {
+    xpGained,
+    leveledUp,
+    state: newState,
+  } = applyExplorationResults(state, result);
+
+  expect(xpGained).toBe(0);
+  expect(leveledUp).toBe(false);
+  expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(0);
+});

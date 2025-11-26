@@ -89,12 +89,22 @@ export function cancelExploration(state: GameState): ExplorationActionResult {
 /**
  * Apply exploration results to game state (called when exploration completes).
  * Adds found items to inventory and grants foraging XP.
+ * XP is only granted for successful explorations.
  */
 export function applyExplorationResults(
   state: GameState,
   result: ExplorationResult,
 ): { state: GameState; xpGained: number; leveledUp: boolean } {
-  // Always grant base XP for completing exploration
+  // Do not grant XP for failed explorations
+  if (!result.success) {
+    return {
+      state,
+      xpGained: 0,
+      leveledUp: false,
+    };
+  }
+
+  // Calculate XP: base + bonus per item found
   const itemCount = result.itemsFound.reduce(
     (sum, drop) => sum + drop.quantity,
     0,
@@ -116,28 +126,22 @@ export function applyExplorationResults(
     },
   };
 
-  if (!result.success || result.itemsFound.length === 0) {
-    return {
-      state: updatedState,
-      xpGained: xpResult.xpGained,
-      leveledUp: xpResult.leveledUp,
+  // Add each found item to inventory
+  if (result.itemsFound.length > 0) {
+    let currentInventory = updatedState.player.inventory;
+
+    for (const drop of result.itemsFound) {
+      currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
+    }
+
+    updatedState = {
+      ...updatedState,
+      player: {
+        ...updatedState.player,
+        inventory: currentInventory,
+      },
     };
   }
-
-  // Add each found item to inventory
-  let currentInventory = updatedState.player.inventory;
-
-  for (const drop of result.itemsFound) {
-    currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
-  }
-
-  updatedState = {
-    ...updatedState,
-    player: {
-      ...updatedState.player,
-      inventory: currentInventory,
-    },
-  };
 
   return {
     state: updatedState,
