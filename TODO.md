@@ -117,19 +117,19 @@ Consumable items to restore care stats.
 Poop accumulates, requires cleaning items.
 
 ### 4.1 Types & Data
-- [ ] Create `src/game/data/items/cleaning.ts` - Cleaning items
-- [ ] Update items index
+- [x] Create `src/game/data/items/cleaning.ts` - Cleaning items
+- [x] Update items index
 
 ### 4.2 Poop Logic
-- [ ] Create `src/game/core/care/poop.ts` - Poop generation per tick, poop effects
+- [x] Create `src/game/core/care/poop.ts` - Poop generation per tick, poop effects
 
 ### 4.3 Cleaning Logic
-- [ ] Update `src/game/core/items.ts` - Use cleaning items
+- [x] Update `src/game/core/items.ts` - Use cleaning items
 
 ### 4.4 Poop UI
-- [ ] Create `src/components/care/PoopIndicator.tsx` - Show poop count
-- [ ] Create `src/components/care/CleanButton.tsx` - Cleaning item selection
-- [ ] Update CareScreen.tsx - Add poop display and clean button
+- [x] Create `src/components/care/PoopIndicator.tsx` - Show poop count
+- [x] Create `src/components/care/CleanButton.tsx` - Cleaning item selection
+- [x] Update CareScreen.tsx - Add poop display and clean button
 
 **✓ Testable:** See poop accumulate over time, use cleaning item to remove
 
@@ -179,11 +179,11 @@ Pet can sleep to restore energy faster.
 Full inventory management UI.
 
 ### 7.1 Inventory UI
-- [ ] Create `src/components/screens/InventoryScreen.tsx` - Inventory screen
-- [ ] Create `src/components/inventory/ItemGrid.tsx` - Item display grid
-- [ ] Create `src/components/inventory/ItemSlot.tsx` - Single item with count/durability
-- [ ] Create `src/components/inventory/ItemDetail.tsx` - Item info panel
-- [ ] Update Navigation - Add inventory tab
+- [x] Create `src/components/screens/InventoryScreen.tsx` - Inventory screen
+- [x] Create `src/components/inventory/ItemGrid.tsx` - Item display grid
+- [x] Create `src/components/inventory/ItemSlot.tsx` - Single item with count/durability
+- [x] Create `src/components/inventory/ItemDetail.tsx` - Item info panel
+- [x] Update Navigation - Add inventory tab
 
 **✓ Testable:** Navigate to Inventory → See all items, view item details
 
@@ -234,7 +234,7 @@ Pet ages and grows through stages.
 ### 10.2 Growth UI
 - [x] Update PetInfo.tsx - Show age, stage, substage
 - [x] Create `src/components/pet/GrowthProgress.tsx` - Progress to next stage
-- [ ] Add stage transition notification/animation
+- [x] Add stage transition notification/animation
 
 **✓ Testable:** See age increase, progress bar to next stage (can test by adjusting time)
 

@@ -26,7 +26,9 @@ import {
 } from "@/game/state/persistence";
 import {
   createInitialGameState,
+  type GameNotification,
   type GameState,
+  type GrowthStage,
   MIN_OFFLINE_REPORT_MS,
   type OfflineReport,
   type Pet,
@@ -46,6 +48,8 @@ export interface GameContextActions {
   startNewGame: (petName: string, speciesId: string) => void;
   /** Dismiss the offline report */
   dismissOfflineReport: () => void;
+  /** Dismiss a notification */
+  dismissNotification: () => void;
 }
 
 /**
@@ -62,6 +66,8 @@ export interface GameContextValue {
   hasSaveData: boolean;
   /** Offline report to display (null if none or dismissed) */
   offlineReport: OfflineReport | null;
+  /** Current notification to display (null if none or dismissed) */
+  notification: GameNotification | null;
   /** Available actions */
   actions: GameContextActions;
 }
@@ -92,13 +98,37 @@ export function GameProvider({ children }: GameProviderProps) {
   const [offlineReport, setOfflineReport] = useState<OfflineReport | null>(
     null,
   );
+  const [notification, setNotification] = useState<GameNotification | null>(
+    null,
+  );
   const gameManagerRef = useRef<GameManager | null>(null);
+  const previousStageRef = useRef<GrowthStage | null>(null);
 
-  const updateState = useCallback(
+  // Wrapper for updateState that detects stage transitions
+  const updateStateWithNotifications = useCallback(
     (updater: (state: GameState) => GameState) => {
       setState((prev) => {
         if (!prev) return prev;
-        return updater(prev);
+        const newState = updater(prev);
+
+        // Check for stage transition
+        if (
+          prev.pet &&
+          newState.pet &&
+          prev.pet.growth.stage !== newState.pet.growth.stage
+        ) {
+          // Queue the notification (will be set after state update)
+          setTimeout(() => {
+            setNotification({
+              type: "stageTransition",
+              previousStage: prev.pet?.growth.stage ?? "baby",
+              newStage: newState.pet?.growth.stage ?? "baby",
+              petName: newState.pet?.identity.name ?? "",
+            });
+          }, 0);
+        }
+
+        return newState;
       });
     },
     [],
@@ -106,6 +136,10 @@ export function GameProvider({ children }: GameProviderProps) {
 
   const dismissOfflineReport = useCallback(() => {
     setOfflineReport(null);
+  }, []);
+
+  const dismissNotification = useCallback(() => {
+    setNotification(null);
   }, []);
 
   /**
@@ -160,11 +194,11 @@ export function GameProvider({ children }: GameProviderProps) {
       }
 
       // Create game manager and start the loop
-      const manager = createGameManager(updateState);
+      const manager = createGameManager(updateStateWithNotifications);
       gameManagerRef.current = manager;
       manager.start();
     },
-    [processOffline, updateState],
+    [processOffline, updateStateWithNotifications],
   );
 
   // Load game on mount and start game loop
@@ -267,12 +301,14 @@ export function GameProvider({ children }: GameProviderProps) {
     loadError,
     hasSaveData,
     offlineReport,
+    notification,
     actions: {
-      updateState,
+      updateState: updateStateWithNotifications,
       save,
       resetGame,
       startNewGame,
       dismissOfflineReport,
+      dismissNotification,
     },
   };
 
