@@ -15,6 +15,14 @@ export interface CareStatsSnapshot {
 }
 
 /**
+ * Maximum stat values for the pet at the time of the report.
+ */
+export interface MaxStatsSnapshot {
+  careStatMax: MicroValue;
+  energyMax: MicroValue;
+}
+
+/**
  * Report of changes during offline time.
  */
 export interface OfflineReport {
@@ -30,6 +38,8 @@ export interface OfflineReport {
   beforeStats: CareStatsSnapshot | null;
   /** Care stats after offline processing */
   afterStats: CareStatsSnapshot | null;
+  /** Maximum stat values for the pet */
+  maxStats: MaxStatsSnapshot | null;
   /** Poop count before offline processing */
   poopBefore: number;
   /** Poop count after offline processing */
