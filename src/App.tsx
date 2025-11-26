@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import {
+  ExplorationCompleteNotification,
   Layout,
   type NavigationTab,
   OfflineReport,
@@ -119,6 +120,15 @@ function GameContent({
         <TrainingCompleteNotification
           facilityName={notification.facilityName}
           statsGained={notification.statsGained}
+          petName={notification.petName}
+          onDismiss={actions.dismissNotification}
+        />
+      )}
+      {notification?.type === "explorationComplete" && (
+        <ExplorationCompleteNotification
+          locationName={notification.locationName}
+          itemsFound={notification.itemsFound}
+          message={notification.message}
           petName={notification.petName}
           onDismiss={actions.dismissNotification}
         />

@@ -180,6 +180,21 @@ export function GameProvider({ children }: GameProviderProps) {
     previousTrainingRef.current = currentTraining;
   }, [state?.pet]);
 
+  // Detect exploration completion via useEffect (using lastExplorationResult from state)
+  useEffect(() => {
+    // Check if there's a new exploration result to display
+    if (state?.lastExplorationResult && state?.pet) {
+      const result = state.lastExplorationResult;
+      setNotification({
+        type: "explorationComplete",
+        locationName: result.locationName,
+        itemsFound: result.itemsFound,
+        message: result.message,
+        petName: state.pet.identity.name,
+      });
+    }
+  }, [state?.lastExplorationResult, state?.pet]);
+
   const dismissOfflineReport = useCallback(() => {
     setOfflineReport(null);
   }, []);

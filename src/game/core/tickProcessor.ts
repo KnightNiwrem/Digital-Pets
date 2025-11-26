@@ -8,6 +8,7 @@ import {
 } from "@/game/core/exploration/forage";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { processPetTick } from "@/game/core/tick";
+import { getLocation } from "@/game/data/locations";
 import { applyExplorationResults } from "@/game/state/actions/exploration";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
@@ -39,6 +40,8 @@ export function processGameTick(state: GameState): GameState {
     pet: updatedPet,
     totalTicks: state.totalTicks + 1,
     lastSaveTime: now(),
+    // Clear any previous exploration result
+    lastExplorationResult: undefined,
   };
 
   // Process exploration at game state level (needs access to inventory)
@@ -50,12 +53,19 @@ export function processGameTick(state: GameState): GameState {
 
     if (newExploration === null) {
       // Exploration completed - apply item drops to inventory
+      const locationId = updatedPet.activeExploration.locationId;
+      const location = getLocation(locationId);
       const { pet: completedPet, result } =
         applyExplorationCompletion(updatedPet);
       updatedState = applyExplorationResults(
         { ...updatedState, pet: completedPet },
         result,
       );
+      // Store the result for UI notification
+      updatedState.lastExplorationResult = {
+        ...result,
+        locationName: location?.name ?? "Unknown Location",
+      };
     } else {
       updatedState = {
         ...updatedState,

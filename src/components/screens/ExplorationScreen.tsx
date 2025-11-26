@@ -3,11 +3,7 @@
  */
 
 import { useState } from "react";
-import {
-  ActivitySelect,
-  ExplorationProgress,
-  ResultsPanel,
-} from "@/components/exploration";
+import { ActivitySelect, ExplorationProgress } from "@/components/exploration";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import {
@@ -20,7 +16,6 @@ import {
   cancelExploration,
   startForaging,
 } from "@/game/state/actions/exploration";
-import type { ExplorationDrop } from "@/game/types/activity";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
 import { LocationType } from "@/game/types/location";
@@ -31,10 +26,6 @@ import { LocationType } from "@/game/types/location";
 export function ExplorationScreen() {
   const { state, isLoading, actions } = useGameState();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [explorationResults, setExplorationResults] = useState<{
-    message: string;
-    itemsFound: ExplorationDrop[];
-  } | null>(null);
 
   if (isLoading) {
     return (
@@ -84,11 +75,6 @@ export function ExplorationScreen() {
     }
   };
 
-  // Handle closing results panel
-  const handleCloseResults = () => {
-    setExplorationResults(null);
-  };
-
   return (
     <>
       <div className="space-y-4">
@@ -110,7 +96,7 @@ export function ExplorationScreen() {
               </div>
             </div>
           </CardHeader>
-          {!isExploring && !explorationResults && (
+          {!isExploring && (
             <CardContent>
               {isWildArea ? (
                 <p className="text-sm text-muted-foreground">
@@ -126,15 +112,6 @@ export function ExplorationScreen() {
           )}
         </Card>
 
-        {/* Exploration Results */}
-        {explorationResults && (
-          <ResultsPanel
-            itemsFound={explorationResults.itemsFound}
-            message={explorationResults.message}
-            onClose={handleCloseResults}
-          />
-        )}
-
         {/* Active Exploration Progress */}
         {isExploring && pet.activeExploration && (
           <ExplorationProgress
@@ -144,7 +121,7 @@ export function ExplorationScreen() {
         )}
 
         {/* Exploration Activities */}
-        {!isExploring && !explorationResults && isWildArea && (
+        {!isExploring && isWildArea && (
           <>
             <h2 className="text-lg font-semibold px-1">Activities</h2>
             <ActivitySelect

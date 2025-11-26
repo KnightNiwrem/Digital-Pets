@@ -117,7 +117,7 @@ export const WOODS_FORAGE: ForageTable = {
       quantity: [1, 2],
     },
     {
-      itemId: "toy_plushie",
+      itemId: "toy_plush",
       baseDropRate: 0.08,
       rarity: "uncommon",
       minSkillLevel: 2,
