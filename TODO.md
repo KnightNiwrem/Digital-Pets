@@ -227,13 +227,13 @@ Catch up on missed time when returning.
 Pet ages and grows through stages.
 
 ### 10.1 Growth Logic
-- [ ] Create `src/game/core/growth.ts` - Age accumulation, stage checks
-- [ ] Update tickProcessor - Include growth processing
-- [ ] Stage transition stat updates
+- [x] Create `src/game/core/growth.ts` - Age accumulation, stage checks
+- [x] Update tickProcessor - Include growth processing
+- [x] Stage transition stat updates
 
 ### 10.2 Growth UI
-- [ ] Update PetInfo.tsx - Show age, stage, substage
-- [ ] Create `src/components/pet/GrowthProgress.tsx` - Progress to next stage
+- [x] Update PetInfo.tsx - Show age, stage, substage
+- [x] Create `src/components/pet/GrowthProgress.tsx` - Progress to next stage
 - [ ] Add stage transition notification/animation
 
 **✓ Testable:** See age increase, progress bar to next stage (can test by adjusting time)
