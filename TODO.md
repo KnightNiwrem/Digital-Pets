@@ -245,21 +245,21 @@ Pet ages and grows through stages.
 World map with connected locations.
 
 ### 11.1 Types & Data
-- [ ] Create `src/game/types/location.ts` - Location interfaces
-- [ ] Create `src/game/data/locations/home.ts` - Home base
-- [ ] Create `src/game/data/locations/towns.ts` - Initial town
-- [ ] Create `src/game/data/locations/wild.ts` - 1-2 wild areas
-- [ ] Create `src/game/data/locations/index.ts` - World graph
+- [x] Create `src/game/types/location.ts` - Location interfaces
+- [x] Create `src/game/data/locations/home.ts` - Home base
+- [x] Create `src/game/data/locations/towns.ts` - Initial town
+- [x] Create `src/game/data/locations/wild.ts` - 1-2 wild areas
+- [x] Create `src/game/data/locations/index.ts` - World graph
 
 ### 11.2 Travel Logic
-- [ ] Create `src/game/core/travel.ts` - Travel cost, access checks
-- [ ] Create `src/game/state/actions/travel.ts` - Travel action
+- [x] Create `src/game/core/travel.ts` - Travel cost, access checks
+- [x] Create `src/game/state/actions/travel.ts` - Travel action
 
 ### 11.3 Map UI
-- [ ] Create `src/components/screens/MapScreen.tsx` - World map
-- [ ] Create `src/components/map/LocationNode.tsx` - Location display
-- [ ] Create `src/components/map/LocationDetail.tsx` - Location info
-- [ ] Update Navigation - Add Map tab
+- [x] Create `src/components/screens/MapScreen.tsx` - World map
+- [x] Create `src/components/map/LocationNode.tsx` - Location display
+- [x] Create `src/components/map/LocationDetail.tsx` - Location info
+- [x] Update Navigation - Add Map tab
 
 **✓ Testable:** View map → See connected locations → Travel to adjacent location
 

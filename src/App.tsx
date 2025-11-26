@@ -13,6 +13,7 @@ import {
 import {
   CareScreen,
   InventoryScreen,
+  MapScreen,
   NewGameScreen,
 } from "@/components/screens";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ function GameContent({
       case "inventory":
         return <InventoryScreen />;
       case "map":
-        return <PlaceholderScreen name="Map" />;
+        return <MapScreen />;
       case "training":
         return <PlaceholderScreen name="Training" />;
       case "skills":
