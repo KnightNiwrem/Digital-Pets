@@ -182,6 +182,7 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
         hydration: newHydration,
       },
       energyStats: {
+        ...state.pet.energyStats,
         energy: newEnergy,
       },
     },
