@@ -16,12 +16,6 @@ import type { StatGrowthRate } from "@/game/types/species";
 import type { BattleStats } from "@/game/types/stats";
 
 /**
- * Duration in ticks for each adult substage (~1 month).
- * @deprecated Use TICKS_PER_MONTH from @/game/types/common instead.
- */
-export const ADULT_SUBSTAGE_TICKS = TICKS_PER_MONTH;
-
-/**
  * Seconds per tick, derived from TICK_DURATION_MS.
  */
 const SECONDS_PER_TICK = TICK_DURATION_MS / 1000;
