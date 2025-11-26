@@ -15,6 +15,12 @@ import type { StatGrowthRate } from "@/game/types/species";
 import type { BattleStats } from "@/game/types/stats";
 
 /**
+ * Duration in ticks for each adult substage (~1 month).
+ * 1 tick = 30 seconds, so 86_400 ticks = 30 days.
+ */
+export const ADULT_SUBSTAGE_TICKS = 86_400;
+
+/**
  * Result of processing growth for a tick.
  */
 export interface GrowthTickResult {
@@ -170,10 +176,9 @@ export function getTicksUntilNextSubstage(
   // Calculate substage length
   if (nextStageIndex >= GROWTH_STAGE_ORDER.length) {
     // Adult stage: fixed substage length
-    const substageLength = 86_400; // ~1 month per substage
     const timeInStage = ageTicks - def.minAgeTicks;
-    const currentSubstageEnd = substage * substageLength;
-    return Math.max(0, currentSubstageEnd - timeInStage);
+    const nextSubstageStartTick = substage * ADULT_SUBSTAGE_TICKS;
+    return Math.max(0, nextSubstageStartTick - timeInStage);
   }
 
   const nextStage = GROWTH_STAGE_ORDER[nextStageIndex];
@@ -183,9 +188,9 @@ export function getTicksUntilNextSubstage(
   const stageDuration = nextStageDef.minAgeTicks - def.minAgeTicks;
   const substageLength = stageDuration / def.substageCount;
   const timeInStage = ageTicks - def.minAgeTicks;
-  const currentSubstageEnd = substage * substageLength;
+  const nextSubstageStartTick = substage * substageLength;
 
-  return Math.max(0, Math.floor(currentSubstageEnd - timeInStage));
+  return Math.max(0, Math.floor(nextSubstageStartTick - timeInStage));
 }
 
 /**
@@ -215,7 +220,7 @@ export function getStageProgressPercent(
   if (!nextStage) {
     // Adult stage: calculate based on substages
     const timeInStage = ageTicks - def.minAgeTicks;
-    const totalDuration = def.substageCount * 86_400; // 3 months for adult
+    const totalDuration = def.substageCount * ADULT_SUBSTAGE_TICKS;
     return Math.min(100, Math.floor((timeInStage / totalDuration) * 100));
   }
 
