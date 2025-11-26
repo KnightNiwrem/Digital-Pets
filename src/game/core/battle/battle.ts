@@ -425,6 +425,7 @@ export function resolveTurnEnd(state: BattleState): BattleState {
 
   // Start new turn
   const newTurnOrder = determineTurnOrder(playerAfter, enemyAfter);
+  const firstActor = newTurnOrder[0];
 
   return {
     ...state,
@@ -432,7 +433,8 @@ export function resolveTurnEnd(state: BattleState): BattleState {
     enemy: enemyAfter,
     log: newLog,
     turn: state.turn + 1,
-    phase: BattlePhase.PlayerTurn,
+    phase:
+      firstActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn,
     turnOrder: newTurnOrder,
     turnOrderIndex: 0,
     playerActed: false,

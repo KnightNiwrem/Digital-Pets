@@ -39,7 +39,7 @@ function createTestCombatant(overrides: Partial<Combatant> = {}): Combatant {
   };
 }
 
-test("initializeBattle sets phase to PlayerTurn", () => {
+test("initializeBattle sets phase to PlayerTurn when player has equal or higher initiative", () => {
   const player = createTestCombatant({ name: "Player Pet", isPlayer: true });
   const enemy = createTestCombatant({ name: "Enemy Pet", isPlayer: false });
 
@@ -47,6 +47,31 @@ test("initializeBattle sets phase to PlayerTurn", () => {
 
   expect(state.phase).toBe(BattlePhase.PlayerTurn);
   expect(state.turn).toBe(1);
+});
+
+test("initializeBattle sets phase to EnemyTurn when enemy has higher initiative", () => {
+  const battleStats = createDefaultBattleStats();
+  battleStats.agility = 5; // Low agility = low initiative
+  const player = createTestCombatant({
+    name: "Slow Pet",
+    isPlayer: true,
+    battleStats,
+    derivedStats: calculateDerivedStats(battleStats),
+  });
+
+  const fastBattleStats = createDefaultBattleStats();
+  fastBattleStats.agility = 20; // High agility = high initiative
+  const enemy = createTestCombatant({
+    name: "Fast Enemy",
+    isPlayer: false,
+    battleStats: fastBattleStats,
+    derivedStats: calculateDerivedStats(fastBattleStats),
+  });
+
+  const state = initializeBattle(player, enemy);
+
+  expect(state.phase).toBe(BattlePhase.EnemyTurn);
+  expect(state.turnOrder[0]).toBe("enemy");
 });
 
 test("initializeBattle sets correct combatants", () => {
