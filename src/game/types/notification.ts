@@ -2,6 +2,7 @@
  * Types for game notifications.
  */
 
+import type { ExplorationDrop } from "./activity";
 import type { GrowthStage } from "./constants";
 import type { BattleStats } from "./stats";
 
@@ -32,8 +33,24 @@ export interface TrainingCompleteNotification {
 }
 
 /**
+ * Notification for exploration completion.
+ */
+export interface ExplorationCompleteNotification {
+  type: "explorationComplete";
+  /** Location name where exploration occurred */
+  locationName: string;
+  /** Items found during exploration */
+  itemsFound: ExplorationDrop[];
+  /** Result message */
+  message: string;
+  /** Pet name */
+  petName: string;
+}
+
+/**
  * Union type for all notification types.
  */
 export type GameNotification =
   | StageTransitionNotification
-  | TrainingCompleteNotification;
+  | TrainingCompleteNotification
+  | ExplorationCompleteNotification;

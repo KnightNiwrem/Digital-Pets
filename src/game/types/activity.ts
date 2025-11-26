@@ -109,3 +109,53 @@ export interface TrainingResult {
   /** Stats gained (if successful) */
   statsGained?: Partial<BattleStats>;
 }
+
+/**
+ * Exploration activity types.
+ */
+export const ExplorationActivityType = {
+  Forage: "forage",
+} as const;
+
+export type ExplorationActivityType =
+  (typeof ExplorationActivityType)[keyof typeof ExplorationActivityType];
+
+/**
+ * A single item drop from exploration.
+ */
+export interface ExplorationDrop {
+  /** Item ID that was found */
+  itemId: string;
+  /** Quantity found */
+  quantity: number;
+}
+
+/**
+ * Active exploration state stored on the pet.
+ */
+export interface ActiveExploration {
+  /** Activity type being performed */
+  activityType: ExplorationActivityType;
+  /** Location ID where exploration is occurring */
+  locationId: string;
+  /** Forage table ID being used */
+  forageTableId: string;
+  /** Tick when exploration started */
+  startTick: Tick;
+  /** Total ticks required */
+  durationTicks: Tick;
+  /** Ticks remaining */
+  ticksRemaining: Tick;
+}
+
+/**
+ * Exploration completion result.
+ */
+export interface ExplorationResult {
+  /** Whether exploration completed successfully */
+  success: boolean;
+  /** Message describing the result */
+  message: string;
+  /** Items found during exploration */
+  itemsFound: ExplorationDrop[];
+}

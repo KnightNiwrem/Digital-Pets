@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import {
+  ExplorationCompleteNotification,
   Layout,
   type NavigationTab,
   OfflineReport,
@@ -13,6 +14,7 @@ import {
 } from "@/components/game";
 import {
   CareScreen,
+  ExplorationScreen,
   InventoryScreen,
   MapScreen,
   NewGameScreen,
@@ -81,6 +83,8 @@ function GameContent({
         return <InventoryScreen />;
       case "map":
         return <MapScreen />;
+      case "exploration":
+        return <ExplorationScreen />;
       case "training":
         return <TrainingScreen />;
       case "skills":
@@ -116,6 +120,15 @@ function GameContent({
         <TrainingCompleteNotification
           facilityName={notification.facilityName}
           statsGained={notification.statsGained}
+          petName={notification.petName}
+          onDismiss={actions.dismissNotification}
+        />
+      )}
+      {notification?.type === "explorationComplete" && (
+        <ExplorationCompleteNotification
+          locationName={notification.locationName}
+          itemsFound={notification.itemsFound}
+          message={notification.message}
           petName={notification.petName}
           onDismiss={actions.dismissNotification}
         />

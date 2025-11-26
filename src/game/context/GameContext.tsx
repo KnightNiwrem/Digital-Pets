@@ -28,6 +28,7 @@ import {
 import {
   type ActiveTraining,
   createInitialGameState,
+  type ExplorationResult,
   type GameNotification,
   type GameState,
   type GrowthStage,
@@ -106,6 +107,9 @@ export function GameProvider({ children }: GameProviderProps) {
   const gameManagerRef = useRef<GameManager | null>(null);
   const previousStageRef = useRef<GrowthStage | null>(null);
   const previousTrainingRef = useRef<ActiveTraining | null>(null);
+  const previousExplorationResultRef = useRef<
+    (ExplorationResult & { locationName: string }) | null
+  >(null);
 
   // Standard updateState that just updates the state
   const updateState = useCallback(
@@ -179,6 +183,31 @@ export function GameProvider({ children }: GameProviderProps) {
 
     previousTrainingRef.current = currentTraining;
   }, [state?.pet]);
+
+  // Detect exploration completion via useEffect (using ref-based pattern for consistency)
+  useEffect(() => {
+    const currentResult = state?.lastExplorationResult ?? null;
+    const previousResult = previousExplorationResultRef.current;
+
+    // Reset ref when pet is null
+    if (!state?.pet) {
+      previousExplorationResultRef.current = null;
+      return;
+    }
+
+    // Only show notification for new results (avoid duplicates on re-renders)
+    if (currentResult && currentResult !== previousResult) {
+      setNotification({
+        type: "explorationComplete",
+        locationName: currentResult.locationName,
+        itemsFound: currentResult.itemsFound,
+        message: currentResult.message,
+        petName: state.pet.identity.name,
+      });
+    }
+
+    previousExplorationResultRef.current = currentResult;
+  }, [state?.lastExplorationResult, state?.pet]);
 
   const dismissOfflineReport = useCallback(() => {
     setOfflineReport(null);

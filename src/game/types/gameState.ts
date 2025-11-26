@@ -2,6 +2,7 @@
  * Game state types for overall game and player state.
  */
 
+import type { ExplorationResult } from "./activity";
 import type { Tick, Timestamp } from "./common";
 import type { Pet } from "./pet";
 
@@ -77,6 +78,8 @@ export interface GameState {
   quests: QuestProgress[];
   /** Whether the game has been initialized */
   isInitialized: boolean;
+  /** Last exploration result (for UI notification, cleared after display) */
+  lastExplorationResult?: ExplorationResult & { locationName: string };
 }
 
 /**
