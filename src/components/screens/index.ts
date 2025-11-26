@@ -3,3 +3,4 @@
  */
 
 export { CareScreen } from "./CareScreen";
+export { InventoryScreen } from "./InventoryScreen";
