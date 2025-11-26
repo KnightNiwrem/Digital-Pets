@@ -42,6 +42,7 @@ function SpeciesCard({ species, isSelected, onSelect }: SpeciesCardProps) {
       tabIndex={0}
       role="radio"
       aria-checked={isSelected}
+      aria-label={`Select ${species.name}`}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -89,6 +90,21 @@ export function NewGameScreen({ onStartGame }: NewGameScreenProps) {
   };
 
   const isValid = petName.trim().length > 0 && selectedSpecies !== null;
+
+  if (starterSpecies.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="mx-auto max-w-2xl">
+          <div className="flex flex-col items-center justify-center min-h-[300px]">
+            <h1 className="text-4xl font-bold mb-4">🐾 Digital Pets</h1>
+            <p className="text-destructive text-lg">
+              No starter species available. Please contact support.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4">

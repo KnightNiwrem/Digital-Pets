@@ -24,7 +24,7 @@ import {
   loadGame,
   saveGame,
 } from "@/game/state/persistence";
-import { createInitialGameState, type GameState } from "@/game/types";
+import { createInitialGameState, type GameState, type Pet } from "@/game/types";
 
 /**
  * Actions available through the game context.
@@ -139,7 +139,12 @@ export function GameProvider({ children }: GameProviderProps) {
       } else if (!result.success) {
         setLoadError(result.error);
       }
-      // If save exists but not initialized, wait for startNewGame to be called
+      // If save exists but is not initialized (e.g., from a previous incomplete game creation),
+      // delete the corrupted save and let user start fresh
+      if (result.success && !result.state.isInitialized) {
+        deleteSave();
+        setHasSaveData(false);
+      }
     }
     // If no save, wait for startNewGame to be called
     setIsLoading(false);
@@ -183,8 +188,16 @@ export function GameProvider({ children }: GameProviderProps) {
         gameManagerRef.current.stop();
       }
 
-      // Create new pet with given name and species
-      const pet = createNewPet(petName, speciesId);
+      // Create new pet with given name and species, handle errors gracefully
+      let pet: Pet;
+      try {
+        pet = createNewPet(petName, speciesId);
+      } catch (error) {
+        setLoadError(
+          error instanceof Error ? error.message : "Failed to create pet",
+        );
+        return;
+      }
 
       // Create initial game state with pet and starting items
       const newState: GameState = {
