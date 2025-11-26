@@ -29,7 +29,7 @@ interface ExplorationCompleteNotificationProps {
 export function ExplorationCompleteNotification({
   locationName,
   itemsFound,
-  message,
+  message: _message,
   petName,
   onDismiss,
 }: ExplorationCompleteNotificationProps) {
