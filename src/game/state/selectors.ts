@@ -2,10 +2,13 @@
  * Selectors for deriving values from game state.
  */
 
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import {
+  GROWTH_STAGE_DEFINITIONS,
+  type GrowthStageDefinition,
+} from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import type { GameState, Pet } from "@/game/types";
-import { toDisplay } from "@/game/types/common";
+import { TICKS_PER_DAY, toDisplay } from "@/game/types/common";
 import { type CareThreshold, getCareThreshold } from "@/game/types/constants";
 import type { Species } from "@/game/types/species";
 
@@ -23,6 +26,27 @@ export function selectPetSpecies(state: GameState): Species | null {
   const pet = state.pet;
   if (!pet) return null;
   return getSpeciesById(pet.identity.speciesId) ?? null;
+}
+
+/**
+ * Internal helper to get core pet data needed by multiple selectors.
+ */
+interface PetContext {
+  pet: Pet;
+  species: Species;
+  stageDef: GrowthStageDefinition;
+}
+
+function getPetContext(state: GameState): PetContext | null {
+  const pet = state.pet;
+  if (!pet) return null;
+
+  const species = getSpeciesById(pet.identity.speciesId);
+  if (!species) return null;
+
+  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
+
+  return { pet, species, stageDef };
 }
 
 /**
@@ -47,13 +71,10 @@ export interface CareStatDisplay {
  * Get care stats with display values and percentages.
  */
 export function selectCareStats(state: GameState): CareStatDisplay | null {
-  const pet = state.pet;
-  if (!pet) return null;
+  const ctx = getPetContext(state);
+  if (!ctx) return null;
 
-  const species = getSpeciesById(pet.identity.speciesId);
-  if (!species) return null;
-
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
+  const { pet, species, stageDef } = ctx;
   const careMax = Math.floor(
     stageDef.baseCareStatMax * species.careCapMultiplier,
   );
@@ -96,13 +117,10 @@ export interface EnergyDisplay {
  * Get energy with display values.
  */
 export function selectEnergy(state: GameState): EnergyDisplay | null {
-  const pet = state.pet;
-  if (!pet) return null;
+  const ctx = getPetContext(state);
+  if (!ctx) return null;
 
-  const species = getSpeciesById(pet.identity.speciesId);
-  if (!species) return null;
-
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
+  const { pet, species, stageDef } = ctx;
   const energyMax = Math.floor(
     stageDef.baseEnergyMax * species.careCapMultiplier,
   );
@@ -134,16 +152,13 @@ export interface PetInfoDisplay {
  * Get pet info for display.
  */
 export function selectPetInfo(state: GameState): PetInfoDisplay | null {
-  const pet = state.pet;
-  if (!pet) return null;
+  const ctx = getPetContext(state);
+  if (!ctx) return null;
 
-  const species = getSpeciesById(pet.identity.speciesId);
-  if (!species) return null;
+  const { pet, species, stageDef } = ctx;
 
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
-
-  // Convert age in ticks to days (2880 ticks per day)
-  const ageDays = Math.floor(pet.growth.ageTicks / 2880);
+  // Convert age in ticks to days
+  const ageDays = Math.floor(pet.growth.ageTicks / TICKS_PER_DAY);
 
   return {
     name: pet.identity.name,

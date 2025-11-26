@@ -3,7 +3,7 @@
  */
 
 import type { MicroValue, Tick } from "@/game/types/common";
-import type { GrowthStage } from "@/game/types/constants";
+import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 
 /**
  * Definition for a growth stage.
@@ -111,18 +111,11 @@ export function getStageFromAge(ageTicks: Tick): GrowthStage {
  */
 export function getSubstage(stage: GrowthStage, ageTicks: Tick): number {
   const def = GROWTH_STAGE_DEFINITIONS[stage];
-  const stageOrder: GrowthStage[] = [
-    "baby",
-    "child",
-    "teen",
-    "youngAdult",
-    "adult",
-  ];
-  const stageIndex = stageOrder.indexOf(stage);
+  const stageIndex = GROWTH_STAGE_ORDER.indexOf(stage);
   const nextStageIndex = stageIndex + 1;
 
   // If adult, calculate substage based on time in adult stage
-  if (nextStageIndex >= stageOrder.length) {
+  if (nextStageIndex >= GROWTH_STAGE_ORDER.length) {
     const timeInStage = ageTicks - def.minAgeTicks;
     // Each substage is roughly equal portion of remaining progression
     const substageLength = 86_400; // ~1 month per substage
@@ -132,8 +125,11 @@ export function getSubstage(stage: GrowthStage, ageTicks: Tick): number {
     );
   }
 
-  const nextStageDef =
-    GROWTH_STAGE_DEFINITIONS[stageOrder[nextStageIndex] as GrowthStage];
+  // TypeScript doesn't know nextStageIndex is valid after the length check above
+  const nextStage = GROWTH_STAGE_ORDER[nextStageIndex];
+  if (!nextStage) return 1; // Safety fallback, should never happen
+
+  const nextStageDef = GROWTH_STAGE_DEFINITIONS[nextStage];
   const stageDuration = nextStageDef.minAgeTicks - def.minAgeTicks;
   const timeInStage = ageTicks - def.minAgeTicks;
   const substageLength = stageDuration / def.substageCount;
