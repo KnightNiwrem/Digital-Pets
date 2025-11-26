@@ -7,6 +7,7 @@ import {
   FeedButton,
   PlayButton,
   PoopIndicator,
+  SleepToggle,
   WaterButton,
 } from "@/components/care";
 import { EnergyBar, PetInfo, PetSprite, PetStatus } from "@/components/pet";
@@ -102,18 +103,44 @@ export function CareScreen() {
         </CardContent>
       </Card>
 
+      {/* Sleep Status */}
+      {petInfo.isSleeping && (
+        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
+              <span className="text-2xl">💤</span>
+              <span className="font-medium">Your pet is sleeping...</span>
+            </div>
+            <p className="text-center text-sm text-blue-600 dark:text-blue-400 mt-2">
+              Energy regenerates faster while sleeping. Care stats decay more
+              slowly.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Care Actions */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg">Actions</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
           <div className="flex gap-2">
-            <FeedButton />
-            <WaterButton />
-            <PlayButton />
-            <CleanButton />
+            <SleepToggle />
           </div>
+          {!petInfo.isSleeping && (
+            <div className="flex gap-2">
+              <FeedButton />
+              <WaterButton />
+              <PlayButton />
+              <CleanButton />
+            </div>
+          )}
+          {petInfo.isSleeping && (
+            <p className="text-sm text-muted-foreground text-center">
+              Wake up your pet to feed, water, play, or clean.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

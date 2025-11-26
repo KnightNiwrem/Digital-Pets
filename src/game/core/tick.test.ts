@@ -4,11 +4,8 @@
 
 import { expect, test } from "bun:test";
 import type { Pet } from "@/game/types/pet";
-import {
-  ENERGY_REGEN_AWAKE,
-  ENERGY_REGEN_SLEEPING,
-  processPetTick,
-} from "./tick";
+import { ENERGY_REGEN_AWAKE, ENERGY_REGEN_SLEEPING } from "./energy";
+import { processPetTick } from "./tick";
 
 function createTestPet(overrides: Partial<Pet> = {}): Pet {
   return {
