@@ -11,10 +11,8 @@ import {
   WaterButton,
 } from "@/components/care";
 import { EnergyBar, PetInfo, PetSprite, PetStatus } from "@/components/pet";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameState } from "@/game/hooks/useGameState";
-import { createInitialGameStateWithPet } from "@/game/state/initialState";
 import {
   selectCareStats,
   selectEnergy,
@@ -27,7 +25,7 @@ import {
  * Main care screen showing pet status and care actions.
  */
 export function CareScreen() {
-  const { state, isLoading, actions } = useGameState();
+  const { state, isLoading } = useGameState();
 
   if (isLoading) {
     return (
@@ -38,24 +36,10 @@ export function CareScreen() {
   }
 
   if (!state?.pet) {
-    const handleCreatePet = () => {
-      const newState = createInitialGameStateWithPet();
-      actions.updateState(() => newState);
-    };
-
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Welcome to Digital Pets!</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            You don't have a pet yet. Create your first companion to get
-            started!
-          </p>
-          <Button onClick={handleCreatePet}>Create Pet</Button>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">No pet found.</p>
+      </div>
     );
   }
 

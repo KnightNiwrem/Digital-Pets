@@ -10,6 +10,7 @@ import {
   InventoryScreen,
   NewGameScreen,
 } from "@/components/screens";
+import { Button } from "@/components/ui/button";
 import { GameProvider } from "@/game/context/GameContext";
 import { useGameState } from "@/game/hooks/useGameState";
 import "./index.css";
@@ -37,13 +38,23 @@ function GameContent({
   activeTab: NavigationTab;
   onTabChange: (tab: NavigationTab) => void;
 }) {
-  const { state, isLoading, actions } = useGameState();
+  const { state, isLoading, loadError, actions } = useGameState();
 
   // Show loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <p className="text-destructive">Error loading game: {loadError}</p>
+        <Button onClick={actions.resetGame}>Start New Game</Button>
       </div>
     );
   }
