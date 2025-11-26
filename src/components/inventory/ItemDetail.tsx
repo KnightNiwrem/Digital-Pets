@@ -3,6 +3,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toDisplay } from "@/game/types/common";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
 
@@ -13,6 +14,7 @@ interface ItemDetailProps {
 
 /**
  * Get display text for item category.
+ * Includes mappings for future item types (medicine, battle, equipment, material, key).
  */
 function getCategoryLabel(category: string): string {
   const labels: Record<string, string> = {
@@ -64,7 +66,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
     case "food":
       stats.push({
         label: "Satiety",
-        value: `+${(itemDef.satietyRestore / 1_000_000).toFixed(0)}%`,
+        value: `+${toDisplay(itemDef.satietyRestore)}%`,
       });
       if (itemDef.poopAcceleration) {
         stats.push({
@@ -76,19 +78,19 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
     case "drink":
       stats.push({
         label: "Hydration",
-        value: `+${(itemDef.hydrationRestore / 1_000_000).toFixed(0)}%`,
+        value: `+${toDisplay(itemDef.hydrationRestore)}%`,
       });
       if (itemDef.energyRestore) {
         stats.push({
           label: "Energy",
-          value: `+${(itemDef.energyRestore / 1_000_000).toFixed(0)}%`,
+          value: `+${toDisplay(itemDef.energyRestore)}%`,
         });
       }
       break;
     case "toy":
       stats.push({
         label: "Happiness",
-        value: `+${(itemDef.happinessRestore / 1_000_000).toFixed(0)}%`,
+        value: `+${toDisplay(itemDef.happinessRestore)}%`,
       });
       stats.push({
         label: "Durability",
@@ -100,6 +102,9 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
         label: "Poop Removed",
         value: `${itemDef.poopRemoved}`,
       });
+      break;
+    default:
+      // Future item types (medicine, battle, equipment, material, key) will be handled here
       break;
   }
 

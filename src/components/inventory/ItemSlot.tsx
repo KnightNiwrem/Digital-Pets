@@ -18,6 +18,9 @@ interface ItemSlotProps {
  */
 function getRarityClass(rarity: string): string {
   switch (rarity) {
+    case "common":
+      // Common items use the default border intentionally
+      return "border-border";
     case "uncommon":
       return "border-green-500";
     case "rare":
@@ -48,6 +51,7 @@ export function ItemSlot({
     <button
       type="button"
       onClick={onClick}
+      aria-label={`Select ${itemDef.name}`}
       className={cn(
         "relative flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all hover:bg-accent",
         getRarityClass(itemDef.rarity),
