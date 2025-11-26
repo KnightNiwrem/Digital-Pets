@@ -4,8 +4,10 @@
 
 import { useState } from "react";
 import { ActivitySelect, ExplorationProgress } from "@/components/exploration";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/error-dialog";
+import { forceEncounter } from "@/game/core/exploration/encounter";
 import {
   canStartForaging,
   getLocationForageInfo,
@@ -18,12 +20,16 @@ import {
 } from "@/game/state/actions/exploration";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
-import { LocationType } from "@/game/types/location";
+import { FacilityType, LocationType } from "@/game/types/location";
 
 /**
  * Main exploration screen component.
  */
-export function ExplorationScreen() {
+export function ExplorationScreen({
+  onStartBattle,
+}: {
+  onStartBattle?: (enemySpeciesId: string, enemyLevel: number) => void;
+}) {
   const { state, isLoading, actions } = useGameState();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -52,6 +58,11 @@ export function ExplorationScreen() {
   // Check if current location is a wild area
   const isWildArea = currentLocation?.type === LocationType.Wild;
 
+  // Check if location has battle area
+  const hasBattleArea = currentLocation?.facilities.includes(
+    FacilityType.BattleArea,
+  );
+
   // Get foraging availability
   const forageCheck = canStartForaging(pet, state.player.currentLocationId);
 
@@ -72,6 +83,22 @@ export function ExplorationScreen() {
       actions.updateState(() => result.state);
     } else {
       setErrorMessage(result.message);
+    }
+  };
+
+  // Handle seeking battle
+  const handleSeekBattle = () => {
+    if (!pet || !onStartBattle) return;
+
+    const encounterResult = forceEncounter(state.player.currentLocationId, pet);
+    if (encounterResult.hasEncounter && encounterResult.wildCombatant) {
+      // Extract species ID from the wild combatant name
+      const speciesId = encounterResult.wildCombatant.name
+        .replace("Wild ", "")
+        .toLowerCase();
+      onStartBattle(speciesId, encounterResult.level ?? 1);
+    } else {
+      setErrorMessage("No wild pets found in this area.");
     }
   };
 
@@ -131,6 +158,30 @@ export function ExplorationScreen() {
               forageMessage={forageCheck.message}
               onStartForage={handleStartForage}
             />
+
+            {/* Battle Option */}
+            {hasBattleArea && onStartBattle && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <span>⚔️</span>
+                    Seek Battle
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Search for wild pets to battle in this area.
+                  </p>
+                  <Button
+                    onClick={handleSeekBattle}
+                    className="w-full"
+                    disabled={pet.activityState !== ActivityState.Idle}
+                  >
+                    🔍 Find Wild Pet
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
 

@@ -13,6 +13,7 @@ import {
   TrainingCompleteNotification,
 } from "@/components/game";
 import {
+  BattleScreen,
   CareScreen,
   ExplorationScreen,
   InventoryScreen,
@@ -22,6 +23,11 @@ import {
 } from "@/components/screens";
 import { Button } from "@/components/ui/button";
 import { GameProvider } from "@/game/context/GameContext";
+import {
+  type BattleRewards,
+  createCombatantFromPet,
+  createWildCombatant,
+} from "@/game/core/battle/battle";
 import { useGameState } from "@/game/hooks/useGameState";
 import "./index.css";
 
@@ -51,6 +57,12 @@ function GameContent({
   const { state, isLoading, loadError, offlineReport, notification, actions } =
     useGameState();
 
+  // Battle state
+  const [battleInfo, setBattleInfo] = useState<{
+    enemySpeciesId: string;
+    enemyLevel: number;
+  } | null>(null);
+
   // Show loading state
   if (isLoading) {
     return (
@@ -75,7 +87,55 @@ function GameContent({
     return <NewGameScreen onStartGame={actions.startNewGame} />;
   }
 
+  // Handle starting a battle
+  const handleStartBattle = (enemySpeciesId: string, enemyLevel: number) => {
+    setBattleInfo({ enemySpeciesId, enemyLevel });
+    onTabChange("battle");
+  };
+
+  // Handle battle end
+  const handleBattleEnd = (victory: boolean, rewards: BattleRewards) => {
+    if (victory && state) {
+      // Award coins
+      actions.updateState((prev) => ({
+        ...prev,
+        player: {
+          ...prev.player,
+          currency: {
+            ...prev.player.currency,
+            coins: prev.player.currency.coins + rewards.coins,
+          },
+        },
+      }));
+    }
+    setBattleInfo(null);
+    onTabChange("exploration");
+  };
+
+  // Handle fleeing from battle
+  const handleFlee = () => {
+    setBattleInfo(null);
+    onTabChange("exploration");
+  };
+
   const renderScreen = () => {
+    // Battle screen (special case - not in normal navigation)
+    if (activeTab === "battle" && battleInfo && state?.pet) {
+      const playerCombatant = createCombatantFromPet(state.pet, true);
+      const enemyCombatant = createWildCombatant(
+        battleInfo.enemySpeciesId,
+        battleInfo.enemyLevel,
+      );
+      return (
+        <BattleScreen
+          playerCombatant={playerCombatant}
+          enemyCombatant={enemyCombatant}
+          onBattleEnd={handleBattleEnd}
+          onFlee={handleFlee}
+        />
+      );
+    }
+
     switch (activeTab) {
       case "care":
         return <CareScreen />;
@@ -84,13 +144,17 @@ function GameContent({
       case "map":
         return <MapScreen />;
       case "exploration":
-        return <ExplorationScreen />;
+        return <ExplorationScreen onStartBattle={handleStartBattle} />;
       case "training":
         return <TrainingScreen />;
       case "skills":
         return <PlaceholderScreen name="Skills" />;
       case "quests":
         return <PlaceholderScreen name="Quests" />;
+      case "battle":
+        // If no battle info, go back to exploration
+        onTabChange("exploration");
+        return <ExplorationScreen onStartBattle={handleStartBattle} />;
       case "debug":
         // Debug tab triggers a dialog in Navigation, not a screen change
         return <CareScreen />;

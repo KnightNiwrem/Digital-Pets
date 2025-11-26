@@ -17,6 +17,7 @@ export type NavigationTab =
   | "training"
   | "skills"
   | "quests"
+  | "battle"
   | "debug";
 
 interface NavigationProps {

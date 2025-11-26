@@ -7,6 +7,18 @@ import type { Tick, Timestamp } from "./common";
 import type { Pet } from "./pet";
 
 /**
+ * Active battle state stored in game state.
+ */
+export interface ActiveBattle {
+  /** Enemy species ID */
+  enemySpeciesId: string;
+  /** Enemy level */
+  enemyLevel: number;
+  /** Location where battle started */
+  locationId: string;
+}
+
+/**
  * Inventory item instance with quantity or durability.
  */
 export interface InventoryItem {
@@ -80,6 +92,8 @@ export interface GameState {
   isInitialized: boolean;
   /** Last exploration result (for UI notification, cleared after display) */
   lastExplorationResult?: ExplorationResult & { locationName: string };
+  /** Active battle (if in combat) */
+  activeBattle?: ActiveBattle;
 }
 
 /**
