@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { ItemSelector } from "@/components/inventory/ItemSelector";
 import { Button } from "@/components/ui/button";
+import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { feedPet } from "@/game/state/actions/care";
 
@@ -13,6 +14,7 @@ import { feedPet } from "@/game/state/actions/care";
  */
 export function FeedButton() {
   const [open, setOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { state, actions } = useGameState();
 
   if (!state) return null;
@@ -21,8 +23,7 @@ export function FeedButton() {
     actions.updateState((currentState) => {
       const result = feedPet(currentState, itemId);
       if (!result.success) {
-        // Use setTimeout to ensure alert shows after state update
-        setTimeout(() => alert(result.message), 0);
+        setErrorMessage(result.message);
       }
       return result.state;
     });
@@ -45,6 +46,11 @@ export function FeedButton() {
         title="Select Food"
         description="Choose a food item to feed your pet."
         onSelect={handleSelect}
+      />
+      <ErrorDialog
+        open={errorMessage !== null}
+        onOpenChange={(open) => !open && setErrorMessage(null)}
+        message={errorMessage ?? ""}
       />
     </>
   );
