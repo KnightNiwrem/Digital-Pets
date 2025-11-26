@@ -2,7 +2,7 @@
  * Pet types and interfaces.
  */
 
-import type { ActiveTraining } from "./activity";
+import type { ActiveExploration, ActiveTraining } from "./activity";
 import type { MicroValue, Tick, Timestamp } from "./common";
 import type { ActivityState, GrowthStage } from "./constants";
 import type {
@@ -87,6 +87,8 @@ export interface Pet {
   activityState: ActivityState;
   /** Active training session (if training) */
   activeTraining?: ActiveTraining;
+  /** Active exploration session (if exploring) */
+  activeExploration?: ActiveExploration;
 }
 
 /**

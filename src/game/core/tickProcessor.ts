@@ -2,10 +2,16 @@
  * Tick processor for batch processing multiple ticks.
  */
 
+import {
+  applyExplorationCompletion,
+  processExplorationTick,
+} from "@/game/core/exploration/forage";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { processPetTick } from "@/game/core/tick";
+import { applyExplorationResults } from "@/game/state/actions/exploration";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
+import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type {
   CareStatsSnapshot,
@@ -26,15 +32,42 @@ export function processGameTick(state: GameState): GameState {
     };
   }
 
-  // Process pet tick
+  // Process pet tick (handles training, care, growth, etc.)
   const updatedPet = processPetTick(state.pet);
-
-  return {
+  let updatedState: GameState = {
     ...state,
     pet: updatedPet,
     totalTicks: state.totalTicks + 1,
     lastSaveTime: now(),
   };
+
+  // Process exploration at game state level (needs access to inventory)
+  if (
+    updatedPet.activityState === ActivityState.Exploring &&
+    updatedPet.activeExploration
+  ) {
+    const newExploration = processExplorationTick(updatedPet.activeExploration);
+
+    if (newExploration === null) {
+      // Exploration completed - apply item drops to inventory
+      const { pet: completedPet, result } =
+        applyExplorationCompletion(updatedPet);
+      updatedState = applyExplorationResults(
+        { ...updatedState, pet: completedPet },
+        result,
+      );
+    } else {
+      updatedState = {
+        ...updatedState,
+        pet: {
+          ...updatedPet,
+          activeExploration: newExploration,
+        },
+      };
+    }
+  }
+
+  return updatedState;
 }
 
 /**

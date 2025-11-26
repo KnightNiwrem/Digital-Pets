@@ -293,17 +293,17 @@ Train to improve battle stats.
 Forage for items in wild areas.
 
 ### 13.1 Types & Data
-- [ ] Create `src/game/data/tables/forage.ts` - Forage tables per location
+- [x] Create `src/game/data/tables/forage.ts` - Forage tables per location
 
 ### 13.2 Exploration Logic
-- [ ] Create `src/game/core/exploration/forage.ts` - Forage logic, drop calculation
-- [ ] Create `src/game/state/actions/exploration.ts` - Start/complete exploration
+- [x] Create `src/game/core/exploration/forage.ts` - Forage logic, drop calculation
+- [x] Create `src/game/state/actions/exploration.ts` - Start/complete exploration
 
 ### 13.3 Exploration UI
-- [ ] Create `src/components/screens/ExplorationScreen.tsx` - Exploration interface
-- [ ] Create `src/components/exploration/ActivitySelect.tsx` - Forage option
-- [ ] Create `src/components/exploration/ExplorationProgress.tsx` - Active exploration
-- [ ] Create `src/components/exploration/ResultsPanel.tsx` - Show found items
+- [x] Create `src/components/screens/ExplorationScreen.tsx` - Exploration interface
+- [x] Create `src/components/exploration/ActivitySelect.tsx` - Forage option
+- [x] Create `src/components/exploration/ExplorationProgress.tsx` - Active exploration
+- [x] Create `src/components/exploration/ResultsPanel.tsx` - Show found items
 
 **✓ Testable:** Travel to wild area → Forage → See items added to inventory
 

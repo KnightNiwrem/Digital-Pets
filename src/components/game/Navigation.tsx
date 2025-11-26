@@ -13,6 +13,7 @@ export type NavigationTab =
   | "care"
   | "inventory"
   | "map"
+  | "exploration"
   | "training"
   | "skills"
   | "quests"
@@ -27,6 +28,7 @@ const TABS: { id: NavigationTab; label: string; icon: string }[] = [
   { id: "care", label: "Care", icon: "🏠" },
   { id: "inventory", label: "Items", icon: "🎒" },
   { id: "map", label: "Map", icon: "🗺️" },
+  { id: "exploration", label: "Explore", icon: "🌿" },
   { id: "training", label: "Train", icon: "💪" },
   { id: "skills", label: "Skills", icon: "⭐" },
   { id: "quests", label: "Quests", icon: "📜" },

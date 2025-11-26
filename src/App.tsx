@@ -13,6 +13,7 @@ import {
 } from "@/components/game";
 import {
   CareScreen,
+  ExplorationScreen,
   InventoryScreen,
   MapScreen,
   NewGameScreen,
@@ -81,6 +82,8 @@ function GameContent({
         return <InventoryScreen />;
       case "map":
         return <MapScreen />;
+      case "exploration":
+        return <ExplorationScreen />;
       case "training":
         return <TrainingScreen />;
       case "skills":
