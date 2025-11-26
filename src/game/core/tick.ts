@@ -4,6 +4,7 @@
 
 import { applyCareLifeChange } from "@/game/core/care/careLife";
 import { applyCareDecay } from "@/game/core/care/careStats";
+import { processPoopTick } from "@/game/core/care/poop";
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import type { Pet } from "@/game/types/pet";
@@ -43,7 +44,8 @@ export function processPetTick(pet: Pet): Pet {
     : ENERGY_REGEN_AWAKE;
   const newEnergy = Math.min(maxEnergy, pet.energyStats.energy + energyRegen);
 
-  // 3. Poop generation check (placeholder - will be implemented in Milestone 4)
+  // 3. Poop generation check
+  const newPoop = processPoopTick(pet);
 
   // 4. Care stat decay
   const newCareStats = applyCareDecay(pet);
@@ -68,5 +70,6 @@ export function processPetTick(pet: Pet): Pet {
     careLifeStats: {
       careLife: newCareLife,
     },
+    poop: newPoop,
   };
 }

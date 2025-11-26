@@ -2,7 +2,12 @@
  * Care Screen component showing pet status and care actions.
  */
 
-import { FeedButton, WaterButton } from "@/components/care";
+import {
+  CleanButton,
+  FeedButton,
+  PoopIndicator,
+  WaterButton,
+} from "@/components/care";
 import { EnergyBar, PetInfo, PetSprite, PetStatus } from "@/components/pet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +18,7 @@ import {
   selectEnergy,
   selectPetInfo,
   selectPetSpecies,
+  selectPoop,
 } from "@/game/state/selectors";
 
 /**
@@ -55,8 +61,9 @@ export function CareScreen() {
   const careStats = selectCareStats(state);
   const energy = selectEnergy(state);
   const species = selectPetSpecies(state);
+  const poop = selectPoop(state);
 
-  if (!petInfo || !careStats || !energy || !species) {
+  if (!petInfo || !careStats || !energy || !species || !poop) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">Error loading pet data.</p>
@@ -84,6 +91,16 @@ export function CareScreen() {
       {/* Energy */}
       <EnergyBar energy={energy} />
 
+      {/* Poop Status */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Cleanliness</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PoopIndicator count={poop.count} />
+        </CardContent>
+      </Card>
+
       {/* Care Actions */}
       <Card>
         <CardHeader className="pb-2">
@@ -93,6 +110,7 @@ export function CareScreen() {
           <div className="flex gap-2">
             <FeedButton />
             <WaterButton />
+            <CleanButton />
           </div>
         </CardContent>
       </Card>
