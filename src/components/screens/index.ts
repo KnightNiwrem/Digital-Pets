@@ -4,3 +4,4 @@
 
 export { CareScreen } from "./CareScreen";
 export { InventoryScreen } from "./InventoryScreen";
+export { NewGameScreen } from "./NewGameScreen";

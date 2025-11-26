@@ -5,8 +5,13 @@
 
 import { useState } from "react";
 import { Layout, type NavigationTab } from "@/components/game";
-import { CareScreen, InventoryScreen } from "@/components/screens";
+import {
+  CareScreen,
+  InventoryScreen,
+  NewGameScreen,
+} from "@/components/screens";
 import { GameProvider } from "@/game/context/GameContext";
+import { useGameState } from "@/game/hooks/useGameState";
 import "./index.css";
 
 /**
@@ -32,6 +37,22 @@ function GameContent({
   activeTab: NavigationTab;
   onTabChange: (tab: NavigationTab) => void;
 }) {
+  const { state, isLoading, actions } = useGameState();
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  // Show new game screen if no initialized game
+  if (!state?.isInitialized) {
+    return <NewGameScreen onStartGame={actions.startNewGame} />;
+  }
+
   const renderScreen = () => {
     switch (activeTab) {
       case "care":

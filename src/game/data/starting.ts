@@ -3,6 +3,7 @@
  */
 
 import { createPetId, type GrowthStage, type Pet } from "@/game/types";
+import type { InventoryItem } from "@/game/types/gameState";
 import { GROWTH_STAGE_DEFINITIONS } from "./growthStages";
 import { getSpeciesById } from "./species";
 
@@ -82,4 +83,34 @@ export function createNewPet(name: string, speciesId: string): Pet {
  */
 export function createDefaultStarterPet(): Pet {
   return createNewPet("Buddy", DEFAULT_STARTING_SPECIES);
+}
+
+/**
+ * Starting inventory items for new players.
+ * Provides basic care items to get started.
+ */
+export const STARTING_INVENTORY: readonly InventoryItem[] = [
+  // Food items
+  { itemId: "food_kibble", quantity: 5, currentDurability: null },
+  { itemId: "food_apple", quantity: 3, currentDurability: null },
+  // Drink items
+  { itemId: "drink_water", quantity: 5, currentDurability: null },
+  { itemId: "drink_juice", quantity: 3, currentDurability: null },
+  // Cleaning items
+  { itemId: "cleaning_tissue", quantity: 5, currentDurability: null },
+  { itemId: "cleaning_wipes", quantity: 2, currentDurability: null },
+  // Toy (with durability)
+  { itemId: "toy_ball", quantity: 1, currentDurability: 10 },
+] as const;
+
+/**
+ * Starting currency for new players.
+ */
+export const STARTING_COINS = 100;
+
+/**
+ * Get a copy of starting inventory items.
+ */
+export function getStartingInventory(): InventoryItem[] {
+  return STARTING_INVENTORY.map((item) => ({ ...item }));
 }

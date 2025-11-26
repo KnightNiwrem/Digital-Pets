@@ -12,9 +12,19 @@ import {
 } from "react";
 import { processOfflineCatchup } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
+import {
+  createNewPet,
+  getStartingInventory,
+  STARTING_COINS,
+} from "@/game/data/starting";
 import { createGameManager, type GameManager } from "@/game/GameManager";
-import { deleteSave, loadGame, saveGame } from "@/game/state/persistence";
-import type { GameState } from "@/game/types";
+import {
+  deleteSave,
+  hasSave,
+  loadGame,
+  saveGame,
+} from "@/game/state/persistence";
+import { createInitialGameState, type GameState } from "@/game/types";
 
 /**
  * Actions available through the game context.
@@ -26,6 +36,8 @@ export interface GameContextActions {
   save: () => boolean;
   /** Reset the game to initial state */
   resetGame: () => void;
+  /** Start a new game with given pet name and species */
+  startNewGame: (petName: string, speciesId: string) => void;
 }
 
 /**
@@ -38,6 +50,8 @@ export interface GameContextValue {
   isLoading: boolean;
   /** Load error message if any */
   loadError: string | null;
+  /** Whether a save exists (for showing new game vs load game) */
+  hasSaveData: boolean;
   /** Available actions */
   actions: GameContextActions;
 }
@@ -64,6 +78,7 @@ export function GameProvider({ children }: GameProviderProps) {
   const [state, setState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [hasSaveData, setHasSaveData] = useState(false);
   const gameManagerRef = useRef<GameManager | null>(null);
 
   const updateState = useCallback(
@@ -114,12 +129,19 @@ export function GameProvider({ children }: GameProviderProps) {
 
   // Load game on mount and start game loop
   useEffect(() => {
-    const result = loadGame();
-    if (result.success) {
-      startGame(result.state);
-    } else {
-      setLoadError(result.error);
+    const saveExists = hasSave();
+    setHasSaveData(saveExists);
+
+    if (saveExists) {
+      const result = loadGame();
+      if (result.success && result.state.isInitialized) {
+        startGame(result.state);
+      } else if (!result.success) {
+        setLoadError(result.error);
+      }
+      // If save exists but not initialized, wait for startNewGame to be called
     }
+    // If no save, wait for startNewGame to be called
     setIsLoading(false);
 
     // Cleanup on unmount
@@ -149,23 +171,44 @@ export function GameProvider({ children }: GameProviderProps) {
     }
 
     deleteSave();
-    const result = loadGame();
-    if (result.success) {
-      startGame(result.state);
-      setLoadError(null);
-    } else {
-      setLoadError(result.error);
-    }
-  }, [startGame]);
+    setHasSaveData(false);
+    setState(null);
+  }, []);
+
+  const startNewGame = useCallback(
+    (petName: string, speciesId: string) => {
+      // Create new pet with given name and species
+      const pet = createNewPet(petName, speciesId);
+
+      // Create initial game state with pet and starting items
+      const newState: GameState = {
+        ...createInitialGameState(),
+        pet,
+        player: {
+          inventory: { items: getStartingInventory() },
+          currency: { coins: STARTING_COINS },
+          currentLocationId: "home",
+        },
+        isInitialized: true,
+      };
+
+      // Start the game with the new state
+      setHasSaveData(true);
+      startGame(newState);
+    },
+    [startGame],
+  );
 
   const contextValue: GameContextValue = {
     state,
     isLoading,
     loadError,
+    hasSaveData,
     actions: {
       updateState,
       save,
       resetGame,
+      startNewGame,
     },
   };
 

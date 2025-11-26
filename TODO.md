@@ -194,12 +194,12 @@ Full inventory management UI.
 New game flow with starting items.
 
 ### 8.1 Starting Data
-- [ ] Update `src/game/data/starting.ts` - Starting inventory items
-- [ ] Create species selection logic
+- [x] Update `src/game/data/starting.ts` - Starting inventory items
+- [x] Create species selection logic
 
 ### 8.2 New Game UI
-- [ ] Create `src/components/screens/NewGameScreen.tsx` - Species selection, pet naming
-- [ ] Update App.tsx - Show NewGame if no save, else load saved game
+- [x] Create `src/components/screens/NewGameScreen.tsx` - Species selection, pet naming
+- [x] Update App.tsx - Show NewGame if no save, else load saved game
 
 **✓ Testable:** First load shows new game screen, select species, name pet, start with items
 
