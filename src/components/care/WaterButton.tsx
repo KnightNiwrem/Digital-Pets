@@ -20,6 +20,10 @@ export function WaterButton() {
   const handleSelect = (itemId: string) => {
     actions.updateState((currentState) => {
       const result = waterPet(currentState, itemId);
+      if (!result.success) {
+        // Use setTimeout to ensure alert shows after state update
+        setTimeout(() => alert(result.message), 0);
+      }
       return result.state;
     });
   };
@@ -29,7 +33,7 @@ export function WaterButton() {
       <Button
         onClick={() => setOpen(true)}
         variant="secondary"
-        className="flex-1"
+        className="flex items-center gap-2 flex-1"
       >
         <span>💧</span>
         <span>Water</span>

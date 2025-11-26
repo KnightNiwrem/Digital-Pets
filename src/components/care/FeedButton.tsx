@@ -20,13 +20,20 @@ export function FeedButton() {
   const handleSelect = (itemId: string) => {
     actions.updateState((currentState) => {
       const result = feedPet(currentState, itemId);
+      if (!result.success) {
+        // Use setTimeout to ensure alert shows after state update
+        setTimeout(() => alert(result.message), 0);
+      }
       return result.state;
     });
   };
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} className="flex-1">
+      <Button
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 flex-1"
+      >
         <span>🍖</span>
         <span>Feed</span>
       </Button>

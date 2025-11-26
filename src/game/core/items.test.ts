@@ -132,3 +132,55 @@ test("useFoodItem clamps satiety to max", () => {
   // Baby stage max with florabit multiplier is 50_000 * 1.0 = 50_000
   expect(result.state.pet?.careStats.satiety).toBe(50_000);
 });
+
+test("useFoodItem applies poopAcceleration when food has it", () => {
+  const state = createTestState();
+  if (state.pet) {
+    // Set poop timer to a known value
+    state.pet.poop.ticksUntilNext = 10;
+    // Add food_meat which has poopAcceleration of 2
+    state.player.inventory.items.push({
+      itemId: "food_meat",
+      quantity: 1,
+      currentDurability: null,
+    });
+  }
+
+  const result = useFoodItem(state, "food_meat");
+  expect(result.success).toBe(true);
+  // poop timer should be reduced by 2 (from 10 to 8)
+  expect(result.state.pet?.poop.ticksUntilNext).toBe(8);
+});
+
+test("useFoodItem does not go below 0 for poop timer", () => {
+  const state = createTestState();
+  if (state.pet) {
+    // Set poop timer to a low value
+    state.pet.poop.ticksUntilNext = 1;
+    // Add food_cake which has poopAcceleration of 3
+    state.player.inventory.items.push({
+      itemId: "food_cake",
+      quantity: 1,
+      currentDurability: null,
+    });
+  }
+
+  const result = useFoodItem(state, "food_cake");
+  expect(result.success).toBe(true);
+  // poop timer should be clamped at 0, not negative
+  expect(result.state.pet?.poop.ticksUntilNext).toBe(0);
+});
+
+test("useFoodItem does not change poop timer when poopAcceleration is 0", () => {
+  const state = createTestState();
+  if (state.pet) {
+    // Set poop timer to a known value
+    state.pet.poop.ticksUntilNext = 10;
+  }
+
+  // food_kibble has poopAcceleration of 0
+  const result = useFoodItem(state, "food_kibble");
+  expect(result.success).toBe(true);
+  // poop timer should remain unchanged
+  expect(result.state.pet?.poop.ticksUntilNext).toBe(10);
+});

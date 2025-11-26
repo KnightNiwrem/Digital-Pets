@@ -114,3 +114,25 @@ test("removeItem does not modify original inventory", () => {
   expect(getItemQuantity(inventory, "food_kibble")).toBe(5);
   expect(getItemQuantity(updated, "food_kibble")).toBe(3);
 });
+
+test("addItem creates overflow stacks when quantity exceeds max", () => {
+  const inventory = createEmptyInventory();
+  // Add 150 items when maxStack is 99
+  const updated = addItem(inventory, "food_kibble", 150);
+  // Should create 2 stacks: one of 99, one of 51
+  expect(updated.items.length).toBe(2);
+  expect(updated.items[0]?.quantity).toBe(99);
+  expect(updated.items[1]?.quantity).toBe(51);
+});
+
+test("addItem fills existing stack then creates overflow", () => {
+  // Create inventory with 95 items (near max)
+  const inventory: Inventory = {
+    items: [{ itemId: "food_kibble", quantity: 95, currentDurability: null }],
+  };
+  // Add 10 items (should fill to 99 then create new stack of 6)
+  const updated = addItem(inventory, "food_kibble", 10);
+  expect(updated.items.length).toBe(2);
+  expect(updated.items[0]?.quantity).toBe(99);
+  expect(updated.items[1]?.quantity).toBe(6);
+});

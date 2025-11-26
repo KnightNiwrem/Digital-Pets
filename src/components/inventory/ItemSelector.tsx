@@ -37,6 +37,7 @@ function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
       variant="outline"
       className="h-auto p-3 flex flex-col items-center gap-1"
       onClick={() => onSelect(inventoryItem.itemId)}
+      aria-label={`Use ${itemDef.name}`}
     >
       <span className="text-2xl">{itemDef.icon}</span>
       <span className="text-sm font-medium">{itemDef.name}</span>
@@ -80,13 +81,13 @@ export function ItemSelector({
           </p>
         ) : (
           <div className="grid grid-cols-3 gap-2 py-2">
-            {items.map((invItem) => {
+            {items.map((invItem, index) => {
               const itemDef = getItemById(invItem.itemId);
               if (!itemDef) return null;
 
               return (
                 <ItemButton
-                  key={invItem.itemId}
+                  key={`${invItem.itemId}-${index}`}
                   inventoryItem={invItem}
                   itemDef={itemDef}
                   onSelect={handleSelect}

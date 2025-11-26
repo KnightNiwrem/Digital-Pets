@@ -81,6 +81,15 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
     maxCareStat,
   );
 
+  // Calculate new poop timer (apply acceleration if applicable)
+  let newTicksUntilNext = state.pet.poop.ticksUntilNext;
+  if (itemDef.poopAcceleration && itemDef.poopAcceleration > 0) {
+    newTicksUntilNext = Math.max(
+      0,
+      newTicksUntilNext - itemDef.poopAcceleration,
+    );
+  }
+
   // Remove item and update pet
   const newInventory = removeItem(state.player.inventory, itemId, 1);
 
@@ -95,6 +104,10 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
       careStats: {
         ...state.pet.careStats,
         satiety: newSatiety,
+      },
+      poop: {
+        ...state.pet.poop,
+        ticksUntilNext: newTicksUntilNext,
       },
     },
   };
