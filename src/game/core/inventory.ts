@@ -68,27 +68,33 @@ export function addItem(
   const newItems = [...inventory.items];
 
   if (itemDef.stackable) {
-    // For stackable items, find existing stack or create new one
-    const existingIndex = newItems.findIndex((item) => item.itemId === itemId);
+    // For stackable items, add to existing stack if possible, then create new stacks for overflow
+    let qtyToAdd = quantity;
 
+    // Try to fill existing stack first
+    const existingIndex = newItems.findIndex((item) => item.itemId === itemId);
     if (existingIndex >= 0) {
       const existing = newItems[existingIndex];
       if (existing) {
-        const newQuantity = Math.min(
-          existing.quantity + quantity,
-          itemDef.maxStack,
-        );
+        const spaceLeft = itemDef.maxStack - existing.quantity;
+        const addToExisting = Math.min(spaceLeft, qtyToAdd);
         newItems[existingIndex] = {
           ...existing,
-          quantity: newQuantity,
+          quantity: existing.quantity + addToExisting,
         };
+        qtyToAdd -= addToExisting;
       }
-    } else {
+    }
+
+    // Add new stacks for any remaining quantity
+    while (qtyToAdd > 0) {
+      const stackQty = Math.min(qtyToAdd, itemDef.maxStack);
       newItems.push({
         itemId,
-        quantity: Math.min(quantity, itemDef.maxStack),
+        quantity: stackQty,
         currentDurability: null,
       });
+      qtyToAdd -= stackQty;
     }
   } else {
     // For non-stackable items (durability-based), add each separately
