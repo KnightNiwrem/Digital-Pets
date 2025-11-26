@@ -110,6 +110,8 @@ export const STARTING_COINS = 100;
 
 /**
  * Get a copy of starting inventory items.
+ * Returns a new array with shallow copies of each item to prevent
+ * mutations to the readonly STARTING_INVENTORY constant.
  */
 export function getStartingInventory(): InventoryItem[] {
   return STARTING_INVENTORY.map((item) => ({ ...item }));
