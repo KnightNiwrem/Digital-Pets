@@ -160,15 +160,15 @@ Toys restore Happiness with durability.
 Pet can sleep to restore energy faster.
 
 ### 6.1 Sleep Logic
-- [ ] Create `src/game/core/energy.ts` - Energy regen based on sleep state
-- [ ] Create `src/game/core/sleep.ts` - Sleep state transitions
-- [ ] Create `src/game/state/actions/sleep.ts` - Sleep/wake actions
-- [ ] Update tickProcessor - Different decay rates while sleeping
+- [x] Create `src/game/core/energy.ts` - Energy regen based on sleep state
+- [x] Create `src/game/core/sleep.ts` - Sleep state transitions
+- [x] Create `src/game/state/actions/sleep.ts` - Sleep/wake actions
+- [x] Update tickProcessor - Different decay rates while sleeping
 
 ### 6.2 Sleep UI
-- [ ] Create `src/components/care/SleepToggle.tsx` - Put to sleep / Wake up
-- [ ] Update PetSprite.tsx - Sleeping visual state
-- [ ] Update CareScreen.tsx - Show sleep status, disable actions while sleeping
+- [x] Create `src/components/care/SleepToggle.tsx` - Put to sleep / Wake up
+- [x] Update PetSprite.tsx - Sleeping visual state
+- [x] Update CareScreen.tsx - Show sleep status, disable actions while sleeping
 
 **✓ Testable:** Put pet to sleep → See sleeping state, faster energy regen, can't feed
 

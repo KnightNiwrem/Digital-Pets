@@ -5,15 +5,11 @@
 import { applyCareLifeChange } from "@/game/core/care/careLife";
 import { applyCareDecay } from "@/game/core/care/careStats";
 import { processPoopTick } from "@/game/core/care/poop";
+import { applyEnergyRegen } from "@/game/core/energy";
+import { processSleepTick } from "@/game/core/sleep";
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import type { Pet } from "@/game/types/pet";
-
-/**
- * Energy regeneration rates per tick (micro-units).
- */
-export const ENERGY_REGEN_AWAKE: number = 8;
-export const ENERGY_REGEN_SLEEPING: number = 25;
 
 /**
  * Process a single tick for a pet.
@@ -22,10 +18,10 @@ export const ENERGY_REGEN_SLEEPING: number = 25;
  * Processing order:
  * 1. Care Life drain/recovery
  * 2. Energy regeneration
- * 3. Poop generation check (placeholder for now)
+ * 3. Poop generation check
  * 4. Care stat decay
- * 5. Sleep timer progress (placeholder for now)
- * 6. Growth stage time (placeholder for now)
+ * 5. Sleep timer progress
+ * 6. Growth stage time
  * 7. Activity timers (placeholder for now)
  */
 export function processPetTick(pet: Pet): Pet {
@@ -39,10 +35,11 @@ export function processPetTick(pet: Pet): Pet {
   const newCareLife = applyCareLifeChange(pet, maxCareStat);
 
   // 2. Energy regeneration
-  const energyRegen = pet.sleep.isSleeping
-    ? ENERGY_REGEN_SLEEPING
-    : ENERGY_REGEN_AWAKE;
-  const newEnergy = Math.min(maxEnergy, pet.energyStats.energy + energyRegen);
+  const newEnergy = applyEnergyRegen(
+    pet.energyStats.energy,
+    maxEnergy,
+    pet.sleep.isSleeping,
+  );
 
   // 3. Poop generation check
   const newPoop = processPoopTick(pet);
@@ -50,7 +47,8 @@ export function processPetTick(pet: Pet): Pet {
   // 4. Care stat decay
   const newCareStats = applyCareDecay(pet);
 
-  // 5. Sleep timer progress (placeholder - will be implemented in Milestone 6)
+  // 5. Sleep timer progress
+  const newSleep = processSleepTick(pet.sleep);
 
   // 6. Growth stage time accumulation
   const newAgeTicks = pet.growth.ageTicks + 1;
@@ -71,5 +69,6 @@ export function processPetTick(pet: Pet): Pet {
       careLife: newCareLife,
     },
     poop: newPoop,
+    sleep: newSleep,
   };
 }
