@@ -12,6 +12,7 @@ import {
 } from "react";
 import { processOfflineCatchup } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
+import { getFacility, getSession } from "@/game/data/facilities";
 import {
   createNewPet,
   getStartingInventory,
@@ -25,6 +26,7 @@ import {
   saveGame,
 } from "@/game/state/persistence";
 import {
+  type ActiveTraining,
   createInitialGameState,
   type GameNotification,
   type GameState,
@@ -103,6 +105,7 @@ export function GameProvider({ children }: GameProviderProps) {
   );
   const gameManagerRef = useRef<GameManager | null>(null);
   const previousStageRef = useRef<GrowthStage | null>(null);
+  const previousTrainingRef = useRef<ActiveTraining | null>(null);
 
   // Standard updateState that just updates the state
   const updateState = useCallback(
@@ -136,6 +139,45 @@ export function GameProvider({ children }: GameProviderProps) {
     }
 
     previousStageRef.current = currentStage;
+  }, [state?.pet]);
+
+  // Detect training completion via useEffect
+  useEffect(() => {
+    const currentTraining = state?.pet?.activeTraining ?? null;
+    const previousTraining = previousTrainingRef.current;
+
+    // Reset ref when pet is null
+    if (!state?.pet) {
+      previousTrainingRef.current = null;
+      return;
+    }
+
+    // Training completed: was training before, not training now
+    if (previousTraining && !currentTraining) {
+      const facility = getFacility(previousTraining.facilityId);
+      const session = getSession(
+        previousTraining.facilityId,
+        previousTraining.sessionType,
+      );
+
+      if (facility && session) {
+        const statsGained: Record<string, number> = {
+          [facility.primaryStat]: session.primaryStatGain,
+        };
+        if (session.secondaryStatGain > 0) {
+          statsGained[facility.secondaryStat] = session.secondaryStatGain;
+        }
+
+        setNotification({
+          type: "trainingComplete",
+          facilityName: facility.name,
+          statsGained,
+          petName: state.pet.identity.name,
+        });
+      }
+    }
+
+    previousTrainingRef.current = currentTraining;
   }, [state?.pet]);
 
   const dismissOfflineReport = useCallback(() => {

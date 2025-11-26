@@ -9,6 +9,7 @@ import {
   type NavigationTab,
   OfflineReport,
   StageTransitionNotification,
+  TrainingCompleteNotification,
 } from "@/components/game";
 import {
   CareScreen,
@@ -107,6 +108,14 @@ function GameContent({
         <StageTransitionNotification
           previousStage={notification.previousStage}
           newStage={notification.newStage}
+          petName={notification.petName}
+          onDismiss={actions.dismissNotification}
+        />
+      )}
+      {notification?.type === "trainingComplete" && (
+        <TrainingCompleteNotification
+          facilityName={notification.facilityName}
+          statsGained={notification.statsGained}
           petName={notification.petName}
           onDismiss={actions.dismissNotification}
         />
