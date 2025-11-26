@@ -63,26 +63,20 @@ export class GameManager {
 
   /**
    * Process offline catch-up based on elapsed time since last save.
-   * Returns the number of ticks processed.
    */
-  processOffline(lastSaveTime: number): number {
+  processOffline(lastSaveTime: number): void {
     const ticksElapsed = calculateElapsedTicks(lastSaveTime);
 
-    if (ticksElapsed <= 0) return 0;
-
-    let ticksProcessed = 0;
+    if (ticksElapsed <= 0) return;
 
     this.updateState((state) => {
-      const result = processOfflineCatchup(
+      const { state: newState } = processOfflineCatchup(
         state,
         ticksElapsed,
         MAX_OFFLINE_TICKS,
       );
-      ticksProcessed = result.ticksProcessed;
-      return result.state;
+      return newState;
     });
-
-    return ticksProcessed;
   }
 
   /**

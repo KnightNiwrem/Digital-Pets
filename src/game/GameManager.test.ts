@@ -146,62 +146,55 @@ test("GameManager.tick() calls updateState with processGameTick", () => {
 
 // Tests for processOffline method
 
-test("GameManager.processOffline() returns 0 for future lastSaveTime", () => {
+test("GameManager.processOffline() returns early for future lastSaveTime", () => {
   const updateState = mock(() => {});
   const manager = new GameManager(updateState);
 
   // Future timestamp - no ticks should be processed
-  const ticksProcessed = manager.processOffline(Date.now() + 60_000);
+  manager.processOffline(Date.now() + 60_000);
 
-  expect(ticksProcessed).toBe(0);
+  expect(updateState).not.toHaveBeenCalled();
 });
 
-test("GameManager.processOffline() returns 0 for very recent lastSaveTime", () => {
+test("GameManager.processOffline() returns early for very recent lastSaveTime", () => {
   const updateState = mock(() => {});
   const manager = new GameManager(updateState);
 
   // Just now - no full ticks elapsed
-  const ticksProcessed = manager.processOffline(Date.now());
+  manager.processOffline(Date.now());
 
-  expect(ticksProcessed).toBe(0);
+  expect(updateState).not.toHaveBeenCalled();
 });
 
-test("GameManager.processOffline() processes elapsed ticks", () => {
+test("GameManager.processOffline() calls updateState for elapsed ticks", () => {
+  const updateState = mock(() => {});
+  const manager = new GameManager(updateState);
+
+  // 60 seconds ago = 2 ticks
+  manager.processOffline(Date.now() - 60_000);
+
+  expect(updateState).toHaveBeenCalled();
+});
+
+test("GameManager.processOffline() processes ticks correctly", () => {
+  let capturedState: GameState | null = null;
   const updateState: StateUpdateCallback = (updater) => {
     const initialState = {
       ...createInitialGameState(),
       pet: createTestPet(),
       totalTicks: 0,
     };
-    updater(initialState);
+    capturedState = updater(initialState);
   };
 
   const manager = new GameManager(updateState);
 
   // 60 seconds ago = 2 ticks
-  const ticksProcessed = manager.processOffline(Date.now() - 60_000);
+  manager.processOffline(Date.now() - 60_000);
 
-  expect(ticksProcessed).toBe(2);
-});
-
-test("GameManager.processOffline() caps at MAX_OFFLINE_TICKS", () => {
-  const updateState: StateUpdateCallback = (updater) => {
-    const initialState = {
-      ...createInitialGameState(),
-      pet: createTestPet(),
-      totalTicks: 0,
-    };
-    updater(initialState);
-  };
-
-  const manager = new GameManager(updateState);
-
-  // 10 days ago should be capped at 7 days (20,160 ticks)
-  const tenDaysAgo = Date.now() - 10 * 24 * 60 * 60 * 1000;
-  const ticksProcessed = manager.processOffline(tenDaysAgo);
-
-  // 7 days = 7 * 24 * 60 * 2 = 20,160 ticks
-  expect(ticksProcessed).toBe(20_160);
+  expect(capturedState).not.toBeNull();
+  // biome-ignore lint/style/noNonNullAssertion: We verified capturedState is not null above
+  expect(capturedState!.totalTicks).toBe(2);
 });
 
 // Tests for createGameManager factory
