@@ -18,6 +18,7 @@ import {
   getSkillProgress,
   getSkillTier,
   getSkillTierDisplayName,
+  meetsSkillRequirement,
   xpForNextLevel,
   xpToLevel,
 } from "./skills";
@@ -217,4 +218,27 @@ test("getForagingDropBonus returns 5 at level 2", () => {
 
 test("getForagingDropBonus returns 50 at level 11", () => {
   expect(getForagingDropBonus(11)).toBe(50);
+});
+
+// Skill requirements
+test("meetsSkillRequirement returns true when level meets requirement", () => {
+  const skills = createInitialSkills();
+  expect(meetsSkillRequirement(skills, SkillType.Foraging, 1)).toBe(true);
+});
+
+test("meetsSkillRequirement returns true when level exceeds requirement", () => {
+  const skills = createInitialSkills();
+  const { skills: updatedSkills } = addXpToPlayerSkill(
+    skills,
+    SkillType.Foraging,
+    xpToLevel(5),
+  );
+  expect(meetsSkillRequirement(updatedSkills, SkillType.Foraging, 3)).toBe(
+    true,
+  );
+});
+
+test("meetsSkillRequirement returns false when level below requirement", () => {
+  const skills = createInitialSkills();
+  expect(meetsSkillRequirement(skills, SkillType.Foraging, 5)).toBe(false);
 });

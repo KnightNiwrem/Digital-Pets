@@ -14,6 +14,7 @@ import {
   getSkillEmoji,
   MAX_SKILL_LEVEL,
   type Skill,
+  type SkillTier,
 } from "@/game/types/skill";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,17 @@ interface SkillBarProps {
   skill: Skill;
   className?: string;
 }
+
+/**
+ * Tier-specific styling for badge display.
+ */
+const TIER_STYLES: Record<SkillTier, string> = {
+  master: "bg-purple-100 text-purple-700",
+  expert: "bg-blue-100 text-blue-700",
+  journeyman: "bg-green-100 text-green-700",
+  apprentice: "bg-yellow-100 text-yellow-700",
+  novice: "bg-gray-100 text-gray-700",
+};
 
 /**
  * Displays a single skill with level, tier, XP progress bar.
@@ -53,11 +65,7 @@ export function SkillBar({ skill, className }: SkillBarProps) {
           <span
             className={cn(
               "text-xs px-2 py-0.5 rounded-full",
-              tier === "master" && "bg-purple-100 text-purple-700",
-              tier === "expert" && "bg-blue-100 text-blue-700",
-              tier === "journeyman" && "bg-green-100 text-green-700",
-              tier === "apprentice" && "bg-yellow-100 text-yellow-700",
-              tier === "novice" && "bg-gray-100 text-gray-700",
+              TIER_STYLES[tier],
             )}
           >
             {tierName}

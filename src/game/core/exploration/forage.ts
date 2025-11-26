@@ -163,7 +163,7 @@ export function processExplorationTick(
  */
 export function calculateForageDrops(
   forageTable: ForageTable,
-  playerSkillLevel = 0,
+  playerSkillLevel = 1,
 ): ExplorationDrop[] {
   const drops: ExplorationDrop[] = [];
 
@@ -174,7 +174,8 @@ export function calculateForageDrops(
     }
 
     // Calculate effective drop rate with multiplicative skill bonus
-    const skillBonus = playerSkillLevel * SKILL_BONUS_PER_LEVEL;
+    // Level 1 gives 0 bonus, each level above 1 gives 5% bonus
+    const skillBonus = (playerSkillLevel - 1) * SKILL_BONUS_PER_LEVEL;
     const effectiveRate = Math.min(1, entry.baseDropRate * (1 + skillBonus));
 
     // Roll for drop

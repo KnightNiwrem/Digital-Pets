@@ -7,6 +7,7 @@ import {
   createInitialGameState,
   type GameState,
 } from "@/game/types";
+import { createInitialSkills } from "@/game/types/skill";
 
 const STORAGE_KEY = "digital_pets_save";
 
@@ -49,6 +50,11 @@ export function loadGame(): LoadResult {
     }
 
     const parsed = JSON.parse(serialized) as GameState;
+
+    // Migrate old saves to include skills
+    if (!parsed.player.skills) {
+      parsed.player.skills = createInitialSkills();
+    }
 
     // Version check for future migrations
     if (parsed.version !== CURRENT_SAVE_VERSION) {

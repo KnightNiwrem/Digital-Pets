@@ -18,8 +18,9 @@ import {
 const BASE_XP = 50;
 
 /**
- * XP required to reach level n.
+ * Total XP required to reach level n from level 1.
  * Formula: baseXP × n × (n + 1) / 2
+ * This is a triangular number formula where XP requirements increase linearly.
  */
 export function xpToLevel(level: number): number {
   if (level <= 1) return 0;

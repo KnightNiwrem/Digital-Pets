@@ -2,10 +2,10 @@
  * Skills screen showing overview of all skills.
  */
 
+import { SkillBar } from "@/components/skills/SkillBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameState } from "@/game/hooks/useGameState";
 import { SkillType } from "@/game/types/skill";
-import { SkillBar } from "../skills/SkillBar";
 
 /**
  * All skill types in display order.

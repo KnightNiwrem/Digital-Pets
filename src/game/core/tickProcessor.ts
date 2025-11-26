@@ -56,7 +56,8 @@ export function processGameTick(state: GameState): GameState {
       // Exploration completed - apply item drops to inventory
       const locationId = updatedPet.activeExploration.locationId;
       const location = getLocation(locationId);
-      const foragingLevel = state.player.skills[SkillType.Foraging].level;
+      const foragingLevel =
+        state.player.skills?.[SkillType.Foraging]?.level ?? 1;
       const { pet: completedPet, result } = applyExplorationCompletion(
         updatedPet,
         foragingLevel,
