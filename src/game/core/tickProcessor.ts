@@ -2,10 +2,16 @@
  * Tick processor for batch processing multiple ticks.
  */
 
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import { processPetTick } from "@/game/core/tick";
 import type { Tick } from "@/game/types/common";
-import { now } from "@/game/types/common";
+import { now, TICK_DURATION_MS } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
+import type {
+  CareStatsSnapshot,
+  MaxStatsSnapshot,
+  OfflineReport,
+} from "@/game/types/offline";
 
 /**
  * Process a single game tick, updating the entire game state.
@@ -58,6 +64,34 @@ export interface OfflineCatchupResult {
   ticksProcessed: Tick;
   /** Whether the maximum offline cap was reached */
   wasCapped: boolean;
+  /** Offline report for UI display */
+  report: OfflineReport;
+}
+
+/**
+ * Create care stats snapshot from game state.
+ */
+function createCareStatsSnapshot(state: GameState): CareStatsSnapshot | null {
+  if (!state.pet) return null;
+  return {
+    satiety: state.pet.careStats.satiety,
+    hydration: state.pet.careStats.hydration,
+    happiness: state.pet.careStats.happiness,
+    energy: state.pet.energyStats.energy,
+  };
+}
+
+/**
+ * Create max stats snapshot from game state based on pet's growth stage and species.
+ */
+function createMaxStatsSnapshot(state: GameState): MaxStatsSnapshot | null {
+  if (!state.pet) return null;
+  const maxStats = calculatePetMaxStats(state.pet);
+  if (!maxStats) return null;
+  return {
+    careStatMax: maxStats.careStatMax,
+    energyMax: maxStats.energyMax,
+  };
 }
 
 /**
@@ -67,15 +101,40 @@ export function processOfflineCatchup(
   state: GameState,
   ticksElapsed: Tick,
   maxOfflineTicks: Tick,
+  elapsedMs?: number,
 ): OfflineCatchupResult {
   const cappedTicks = Math.min(ticksElapsed, maxOfflineTicks);
   const wasCapped = ticksElapsed > maxOfflineTicks;
 
+  // Calculate elapsedMs from ticks if not provided
+  const reportElapsedMs = elapsedMs ?? ticksElapsed * TICK_DURATION_MS;
+
+  const beforeStats = createCareStatsSnapshot(state);
+  const maxStats = createMaxStatsSnapshot(state);
+  const poopBefore = state.pet?.poop.count ?? 0;
+  const petName = state.pet?.identity.name ?? null;
+
   const newState = processMultipleTicks(state, cappedTicks);
+
+  const afterStats = createCareStatsSnapshot(newState);
+  const poopAfter = newState.pet?.poop.count ?? 0;
+
+  const report: OfflineReport = {
+    elapsedMs: reportElapsedMs,
+    ticksProcessed: cappedTicks,
+    wasCapped,
+    petName,
+    beforeStats,
+    afterStats,
+    maxStats,
+    poopBefore,
+    poopAfter,
+  };
 
   return {
     state: newState,
     ticksProcessed: cappedTicks,
     wasCapped,
+    report,
   };
 }

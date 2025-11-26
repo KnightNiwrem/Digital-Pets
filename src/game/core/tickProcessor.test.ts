@@ -225,3 +225,89 @@ test("processOfflineCatchup handles state with no pet", () => {
   expect(result.state.totalTicks).toBe(15);
   expect(result.state.pet).toBeNull();
 });
+
+// Tests for offline report maxStats
+
+test("processOfflineCatchup report includes maxStats for valid pet", () => {
+  const pet = createTestPet({
+    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 0 },
+  });
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100);
+
+  expect(result.report.maxStats).not.toBeNull();
+  expect(result.report.maxStats?.careStatMax).toBeGreaterThan(0);
+  expect(result.report.maxStats?.energyMax).toBeGreaterThan(0);
+});
+
+test("processOfflineCatchup report maxStats is null when no pet", () => {
+  const state = createTestGameState({ pet: null, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100);
+
+  expect(result.report.maxStats).toBeNull();
+});
+
+test("processOfflineCatchup report maxStats reflects growth stage", () => {
+  const babyPet = createTestPet({
+    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 0 },
+  });
+  const adultPet = createTestPet({
+    growth: {
+      stage: "adult",
+      substage: 1,
+      birthTime: Date.now(),
+      ageTicks: 1_000_000,
+    },
+  });
+
+  const babyState = createTestGameState({ pet: babyPet, totalTicks: 0 });
+  const adultState = createTestGameState({ pet: adultPet, totalTicks: 0 });
+
+  const babyResult = processOfflineCatchup(babyState, 1, 100);
+  const adultResult = processOfflineCatchup(adultState, 1, 100);
+
+  expect(adultResult.report.maxStats?.careStatMax).toBeGreaterThan(
+    babyResult.report.maxStats?.careStatMax ?? 0,
+  );
+  expect(adultResult.report.maxStats?.energyMax).toBeGreaterThan(
+    babyResult.report.maxStats?.energyMax ?? 0,
+  );
+});
+
+test("processOfflineCatchup report includes beforeStats and afterStats", () => {
+  const pet = createTestPet({
+    careStats: {
+      satiety: 40_000,
+      hydration: 40_000,
+      happiness: 40_000,
+    },
+    energyStats: {
+      energy: 40_000,
+    },
+  });
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100);
+
+  expect(result.report.beforeStats).not.toBeNull();
+  expect(result.report.afterStats).not.toBeNull();
+  expect(result.report.beforeStats?.satiety).toBe(40_000);
+  // After processing, stats should have decayed
+  expect(result.report.afterStats?.satiety).toBeLessThan(40_000);
+});
+
+test("processOfflineCatchup calculates elapsedMs from ticks when not provided", () => {
+  const pet = createTestPet();
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100);
+
+  // 10 ticks * 30_000ms per tick = 300_000ms
+  expect(result.report.elapsedMs).toBe(300_000);
+});
+
+test("processOfflineCatchup uses provided elapsedMs", () => {
+  const pet = createTestPet();
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100, 500_000);
+
+  expect(result.report.elapsedMs).toBe(500_000);
+});
