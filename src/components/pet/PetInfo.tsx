@@ -25,7 +25,7 @@ export function PetInfo({ info }: PetInfoProps) {
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              {info.stage} (Stage {info.substage})
+              {info.stage} {info.substage}/{info.substageCount}
             </span>
             <span className="text-muted-foreground">
               {info.ageDays} day{info.ageDays !== 1 ? "s" : ""} old

@@ -10,12 +10,19 @@ import {
   SleepToggle,
   WaterButton,
 } from "@/components/care";
-import { EnergyBar, PetInfo, PetSprite, PetStatus } from "@/components/pet";
+import {
+  EnergyBar,
+  GrowthProgress,
+  PetInfo,
+  PetSprite,
+  PetStatus,
+} from "@/components/pet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameState } from "@/game/hooks/useGameState";
 import {
   selectCareStats,
   selectEnergy,
+  selectGrowthProgress,
   selectPetInfo,
   selectPetSpecies,
   selectPoop,
@@ -48,8 +55,16 @@ export function CareScreen() {
   const energy = selectEnergy(state);
   const species = selectPetSpecies(state);
   const poop = selectPoop(state);
+  const growthProgress = selectGrowthProgress(state);
 
-  if (!petInfo || !careStats || !energy || !species || !poop) {
+  if (
+    !petInfo ||
+    !careStats ||
+    !energy ||
+    !species ||
+    !poop ||
+    !growthProgress
+  ) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">Error loading pet data.</p>
@@ -70,6 +85,9 @@ export function CareScreen() {
 
       {/* Pet Info */}
       <PetInfo info={petInfo} />
+
+      {/* Growth Progress */}
+      <GrowthProgress progress={growthProgress} />
 
       {/* Care Stats */}
       <PetStatus careStats={careStats} />

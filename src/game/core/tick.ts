@@ -6,6 +6,7 @@ import { applyCareLifeChange } from "@/game/core/care/careLife";
 import { applyCareDecay } from "@/game/core/care/careStats";
 import { processPoopTick } from "@/game/core/care/poop";
 import { applyEnergyRegen } from "@/game/core/energy";
+import { processGrowthTick } from "@/game/core/growth";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { processSleepTick } from "@/game/core/sleep";
 import type { Pet } from "@/game/types/pet";
@@ -47,17 +48,15 @@ export function processPetTick(pet: Pet): Pet {
   // 5. Sleep timer progress
   const newSleep = processSleepTick(pet.sleep);
 
-  // 6. Growth stage time accumulation
-  const newAgeTicks = pet.growth.ageTicks + 1;
+  // 6. Growth stage time accumulation and stage transitions
+  const growthResult = processGrowthTick(pet);
 
   // 7. Activity timers (placeholder - will be implemented later)
 
   return {
     ...pet,
-    growth: {
-      ...pet.growth,
-      ageTicks: newAgeTicks,
-    },
+    growth: growthResult.growth,
+    battleStats: growthResult.battleStats,
     careStats: newCareStats,
     energyStats: {
       energy: newEnergy,

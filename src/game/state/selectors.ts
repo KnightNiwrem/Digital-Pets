@@ -3,13 +3,25 @@
  */
 
 import {
+  formatTicksDuration,
+  getNextStage,
+  getStageProgressPercent,
+  getTicksUntilNextStage,
+  getTicksUntilNextSubstage,
+} from "@/game/core/growth";
+import {
   GROWTH_STAGE_DEFINITIONS,
   type GrowthStageDefinition,
 } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import type { GameState, Pet } from "@/game/types";
+import type { Tick } from "@/game/types/common";
 import { TICKS_PER_DAY, toDisplay } from "@/game/types/common";
-import { type CareThreshold, getCareThreshold } from "@/game/types/constants";
+import {
+  type CareThreshold,
+  type GrowthStage,
+  getCareThreshold,
+} from "@/game/types/constants";
 import type { Species } from "@/game/types/species";
 
 /**
@@ -144,9 +156,41 @@ export interface PetInfoDisplay {
   speciesName: string;
   speciesEmoji: string;
   stage: string;
+  stageId: GrowthStage;
   substage: number;
+  substageCount: number;
   ageDays: number;
   isSleeping: boolean;
+}
+
+/**
+ * Growth progress display values.
+ */
+export interface GrowthProgressDisplay {
+  /** Current stage name */
+  currentStage: string;
+  /** Current stage ID */
+  currentStageId: GrowthStage;
+  /** Next stage name (null if adult) */
+  nextStage: string | null;
+  /** Current substage number */
+  substage: number;
+  /** Total substages in current stage */
+  substageCount: number;
+  /** Progress percentage toward next stage (0-100) */
+  stageProgressPercent: number;
+  /** Ticks until next stage (null if adult) */
+  ticksUntilNextStage: Tick | null;
+  /** Formatted time until next stage */
+  timeUntilNextStage: string | null;
+  /** Ticks until next substage (null if at max substage) */
+  ticksUntilNextSubstage: Tick | null;
+  /** Formatted time until next substage */
+  timeUntilNextSubstage: string | null;
+  /** Total age in days */
+  ageDays: number;
+  /** Total age in ticks */
+  ageTicks: Tick;
 }
 
 /**
@@ -185,8 +229,56 @@ export function selectPetInfo(state: GameState): PetInfoDisplay | null {
     speciesName: species.name,
     speciesEmoji: species.emoji,
     stage: stageDef.name,
+    stageId: pet.growth.stage,
     substage: pet.growth.substage,
+    substageCount: stageDef.substageCount,
     ageDays,
     isSleeping: pet.sleep.isSleeping,
+  };
+}
+
+/**
+ * Get growth progress for display.
+ */
+export function selectGrowthProgress(
+  state: GameState,
+): GrowthProgressDisplay | null {
+  const ctx = getPetContext(state);
+  if (!ctx) return null;
+
+  const { pet, stageDef } = ctx;
+  const { stage, substage, ageTicks } = pet.growth;
+
+  const nextStageId = getNextStage(stage);
+  const nextStageDef = nextStageId
+    ? GROWTH_STAGE_DEFINITIONS[nextStageId]
+    : null;
+
+  const ticksUntilNextStage = getTicksUntilNextStage(stage, ageTicks);
+  const ticksUntilNextSubstage = getTicksUntilNextSubstage(
+    stage,
+    substage,
+    ageTicks,
+  );
+
+  const ageDays = Math.floor(ageTicks / TICKS_PER_DAY);
+
+  return {
+    currentStage: stageDef.name,
+    currentStageId: stage,
+    nextStage: nextStageDef?.name ?? null,
+    substage,
+    substageCount: stageDef.substageCount,
+    stageProgressPercent: getStageProgressPercent(stage, ageTicks),
+    ticksUntilNextStage,
+    timeUntilNextStage: ticksUntilNextStage
+      ? formatTicksDuration(ticksUntilNextStage)
+      : null,
+    ticksUntilNextSubstage,
+    timeUntilNextSubstage: ticksUntilNextSubstage
+      ? formatTicksDuration(ticksUntilNextSubstage)
+      : null,
+    ageDays,
+    ageTicks,
   };
 }
