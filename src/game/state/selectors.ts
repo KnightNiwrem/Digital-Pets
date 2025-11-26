@@ -45,6 +45,7 @@ function getPetContext(state: GameState): PetContext | null {
   if (!species) return null;
 
   const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
+  if (!stageDef) return null;
 
   return { pet, species, stageDef };
 }
