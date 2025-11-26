@@ -173,6 +173,7 @@ export function GameProvider({ children }: GameProviderProps) {
     deleteSave();
     setHasSaveData(false);
     setState(null);
+    setLoadError(null);
   }, []);
 
   const startNewGame = useCallback(

@@ -40,6 +40,8 @@ function SpeciesCard({ species, isSelected, onSelect }: SpeciesCardProps) {
       )}
       onClick={onSelect}
       tabIndex={0}
+      role="radio"
+      aria-checked={isSelected}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
