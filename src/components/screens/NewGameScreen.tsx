@@ -83,13 +83,14 @@ export function NewGameScreen({ onStartGame }: NewGameScreenProps) {
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
   const starterSpecies = useMemo(() => getStarterSpecies(), []);
 
+  const trimmedName = petName.trim();
+  const isValid = trimmedName.length > 0 && selectedSpecies !== null;
+
   const handleStart = () => {
-    if (petName.trim() && selectedSpecies) {
-      onStartGame(petName.trim(), selectedSpecies);
+    if (isValid && selectedSpecies !== null) {
+      onStartGame(trimmedName, selectedSpecies);
     }
   };
-
-  const isValid = petName.trim().length > 0 && selectedSpecies !== null;
 
   if (starterSpecies.length === 0) {
     return (

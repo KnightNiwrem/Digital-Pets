@@ -213,8 +213,10 @@ export function GameProvider({ children }: GameProviderProps) {
       };
 
       // Start the game with the new state
-      setHasSaveData(true);
+      // Note: setHasSaveData is set after startGame for consistency,
+      // ensuring state is initialized before marking that save data exists.
       startGame(newState);
+      setHasSaveData(true);
     },
     [startGame],
   );
