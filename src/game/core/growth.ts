@@ -9,6 +9,7 @@ import {
 } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
+import { TICK_DURATION_MS, TICKS_PER_MONTH } from "@/game/types/common";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { Pet, PetGrowth } from "@/game/types/pet";
 import type { StatGrowthRate } from "@/game/types/species";
@@ -16,9 +17,14 @@ import type { BattleStats } from "@/game/types/stats";
 
 /**
  * Duration in ticks for each adult substage (~1 month).
- * 1 tick = 30 seconds, so 86_400 ticks = 30 days.
+ * @deprecated Use TICKS_PER_MONTH from @/game/types/common instead.
  */
-export const ADULT_SUBSTAGE_TICKS = 86_400;
+export const ADULT_SUBSTAGE_TICKS = TICKS_PER_MONTH;
+
+/**
+ * Seconds per tick, derived from TICK_DURATION_MS.
+ */
+const SECONDS_PER_TICK = TICK_DURATION_MS / 1000;
 
 /**
  * Result of processing growth for a tick.
@@ -177,7 +183,7 @@ export function getTicksUntilNextSubstage(
   if (nextStageIndex >= GROWTH_STAGE_ORDER.length) {
     // Adult stage: fixed substage length
     const timeInStage = ageTicks - def.minAgeTicks;
-    const nextSubstageStartTick = substage * ADULT_SUBSTAGE_TICKS;
+    const nextSubstageStartTick = substage * TICKS_PER_MONTH;
     return Math.max(0, nextSubstageStartTick - timeInStage);
   }
 
@@ -220,7 +226,7 @@ export function getStageProgressPercent(
   if (!nextStage) {
     // Adult stage: calculate based on substages
     const timeInStage = ageTicks - def.minAgeTicks;
-    const totalDuration = def.substageCount * ADULT_SUBSTAGE_TICKS;
+    const totalDuration = def.substageCount * TICKS_PER_MONTH;
     return Math.min(100, Math.floor((timeInStage / totalDuration) * 100));
   }
 
@@ -235,7 +241,7 @@ export function getStageProgressPercent(
  * Format ticks as a human-readable duration.
  */
 export function formatTicksDuration(ticks: Tick): string {
-  const totalMinutes = Math.floor((ticks * 30) / 60); // 30 seconds per tick
+  const totalMinutes = Math.floor((ticks * SECONDS_PER_TICK) / 60);
   const totalHours = Math.floor(totalMinutes / 60);
   const totalDays = Math.floor(totalHours / 24);
 

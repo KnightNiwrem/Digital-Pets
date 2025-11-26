@@ -271,13 +271,15 @@ export function selectGrowthProgress(
     substageCount: stageDef.substageCount,
     stageProgressPercent: getStageProgressPercent(stage, ageTicks),
     ticksUntilNextStage,
-    timeUntilNextStage: ticksUntilNextStage
-      ? formatTicksDuration(ticksUntilNextStage)
-      : null,
+    timeUntilNextStage:
+      ticksUntilNextStage !== null
+        ? formatTicksDuration(ticksUntilNextStage)
+        : null,
     ticksUntilNextSubstage,
-    timeUntilNextSubstage: ticksUntilNextSubstage
-      ? formatTicksDuration(ticksUntilNextSubstage)
-      : null,
+    timeUntilNextSubstage:
+      ticksUntilNextSubstage !== null
+        ? formatTicksDuration(ticksUntilNextSubstage)
+        : null,
     ageDays,
     ageTicks,
   };

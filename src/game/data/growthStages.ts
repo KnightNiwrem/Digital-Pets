@@ -3,6 +3,7 @@
  */
 
 import type { MicroValue, Tick } from "@/game/types/common";
+import { TICKS_PER_MONTH } from "@/game/types/common";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 
 /**
@@ -117,11 +118,9 @@ export function getSubstage(stage: GrowthStage, ageTicks: Tick): number {
   // If adult, calculate substage based on time in adult stage
   if (nextStageIndex >= GROWTH_STAGE_ORDER.length) {
     const timeInStage = ageTicks - def.minAgeTicks;
-    // Each substage is roughly equal portion of remaining progression
-    const substageLength = 86_400; // ~1 month per substage
     return Math.min(
       def.substageCount,
-      Math.floor(timeInStage / substageLength) + 1,
+      Math.floor(timeInStage / TICKS_PER_MONTH) + 1,
     );
   }
 

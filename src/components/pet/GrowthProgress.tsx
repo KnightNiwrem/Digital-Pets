@@ -19,13 +19,18 @@ function ProgressBar({
   percent: number;
   className?: string;
 }) {
+  const clampedPercent = Math.min(100, Math.max(0, percent));
   return (
     <div
       className={`h-2 bg-secondary rounded-full overflow-hidden ${className}`}
+      role="progressbar"
+      aria-valuenow={clampedPercent}
+      aria-valuemin={0}
+      aria-valuemax={100}
     >
       <div
         className="h-full bg-primary transition-all duration-300"
-        style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+        style={{ width: `${clampedPercent}%` }}
       />
     </div>
   );

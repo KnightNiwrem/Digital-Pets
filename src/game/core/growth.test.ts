@@ -197,8 +197,13 @@ test("processGrowthTick transitions stage when reaching threshold", () => {
   expect(result.stageTransitioned).toBe(true);
   expect(result.growth.stage).toBe("child");
   expect(result.previousStage).toBe("baby");
-  // Should have gained stats (florabit has medium growth = +3)
+  // Should have gained stats (florabit has medium growth = +3 for all stats)
   expect(result.battleStats.strength).toBe(13);
+  expect(result.battleStats.endurance).toBe(13);
+  expect(result.battleStats.agility).toBe(13);
+  expect(result.battleStats.precision).toBe(13);
+  expect(result.battleStats.fortitude).toBe(13);
+  expect(result.battleStats.cunning).toBe(13);
 });
 
 // Parameterized tests for stage transitions
