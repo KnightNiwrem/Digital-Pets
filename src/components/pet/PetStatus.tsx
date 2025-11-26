@@ -78,7 +78,9 @@ function StatBar({
         <span className={cn("flex items-center gap-1", textColorClass)}>
           <span>{icon}</span>
           <span>{label}</span>
-          {threshold === "critical" && <span className="animate-pulse">⚠️</span>}
+          {threshold === "critical" && (
+            <span className="motion-safe:animate-pulse">⚠️</span>
+          )}
         </span>
         <span className={cn("text-muted-foreground", textColorClass)}>
           {value}/{max}
@@ -89,7 +91,7 @@ function StatBar({
           className={cn(
             "h-full transition-all duration-300",
             colorClass,
-            animate && "animate-pulse",
+            animate && "motion-safe:animate-pulse",
           )}
           style={{ width: `${Math.max(0, Math.min(100, percent))}%` }}
         />
