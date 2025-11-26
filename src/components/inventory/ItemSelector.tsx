@@ -13,7 +13,7 @@ import {
 import { getInventoryItemsByCategory } from "@/game/core/inventory";
 import { getItemById } from "@/game/data/items";
 import type { Inventory, InventoryItem } from "@/game/types/gameState";
-import type { Item, ToyItem } from "@/game/types/item";
+import type { Item } from "@/game/types/item";
 
 interface ItemSelectorProps {
   open: boolean;
@@ -32,10 +32,10 @@ interface ItemButtonProps {
 }
 
 function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
-  const isToy = itemDef.category === "toy";
-  const toyDef = isToy ? (itemDef as ToyItem) : null;
   const durability = inventoryItem.currentDurability;
-  const maxDurability = toyDef?.maxDurability;
+  // TypeScript narrows itemDef to ToyItem when category === "toy"
+  const maxDurability =
+    itemDef.category === "toy" ? itemDef.maxDurability : undefined;
 
   return (
     <Button
@@ -46,7 +46,7 @@ function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
     >
       <span className="text-2xl">{itemDef.icon}</span>
       <span className="text-sm font-medium">{itemDef.name}</span>
-      {isToy && durability !== null && maxDurability ? (
+      {durability !== null && maxDurability !== undefined ? (
         <span className="text-xs text-muted-foreground">
           {durability}/{maxDurability}
         </span>
