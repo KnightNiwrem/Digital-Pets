@@ -6,12 +6,31 @@ import { getFacility, getSession } from "@/game/data/facilities";
 import type {
   ActiveTraining,
   TrainingResult,
+  TrainingSession,
   TrainingSessionType,
 } from "@/game/types/activity";
-import { type Tick, toMicro } from "@/game/types/common";
-import { ActivityState, GROWTH_STAGE_ORDER } from "@/game/types/constants";
+import { type Tick, toDisplay, toMicro } from "@/game/types/common";
+import {
+  ActivityState,
+  GROWTH_STAGE_ORDER,
+  type GrowthStage,
+} from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
+
+/**
+ * Check if a training session is available based on pet's growth stage.
+ * Exported for UI components to use for displaying session availability.
+ */
+export function isSessionAvailable(
+  session: TrainingSession,
+  petStage: GrowthStage,
+): boolean {
+  if (!session.minStage) return true;
+  const currentStageIndex = GROWTH_STAGE_ORDER.indexOf(petStage);
+  const requiredStageIndex = GROWTH_STAGE_ORDER.indexOf(session.minStage);
+  return currentStageIndex >= requiredStageIndex;
+}
 
 /**
  * Check if a pet can start training at a specific facility with a specific session.
@@ -47,19 +66,15 @@ export function canStartTraining(
   }
 
   // Check growth stage requirement
-  if (session.minStage) {
-    const currentStageIndex = GROWTH_STAGE_ORDER.indexOf(pet.growth.stage);
-    const requiredStageIndex = GROWTH_STAGE_ORDER.indexOf(session.minStage);
-    if (currentStageIndex < requiredStageIndex) {
-      return {
-        canTrain: false,
-        message: `Requires ${session.minStage} stage or higher.`,
-      };
-    }
+  if (!isSessionAvailable(session, pet.growth.stage)) {
+    return {
+      canTrain: false,
+      message: `Requires ${session.minStage} stage or higher.`,
+    };
   }
 
   // Check energy
-  const currentEnergy = Math.floor(pet.energyStats.energy / 1000);
+  const currentEnergy = toDisplay(pet.energyStats.energy);
   if (currentEnergy < session.energyCost) {
     return {
       canTrain: false,
@@ -237,25 +252,4 @@ export function cancelTraining(pet: Pet): {
 export function getTrainingProgress(training: ActiveTraining): number {
   const elapsed = training.durationTicks - training.ticksRemaining;
   return Math.round((elapsed / training.durationTicks) * 100);
-}
-
-/**
- * Get estimated time remaining in a human-readable format.
- */
-export function getTrainingTimeRemaining(training: ActiveTraining): string {
-  const ticksRemaining = training.ticksRemaining;
-  const minutes = Math.ceil((ticksRemaining * 30) / 60); // 30 seconds per tick
-
-  if (minutes < 60) {
-    return `${minutes} min`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-
-  if (remainingMinutes === 0) {
-    return `${hours}h`;
-  }
-
-  return `${hours}h ${remainingMinutes}m`;
 }

@@ -60,14 +60,7 @@ function StatRow({ stat, value }: { stat: keyof BattleStats; value: number }) {
  * Battle stats overview display.
  */
 export function StatsDisplay({ battleStats }: StatsDisplayProps) {
-  const stats: (keyof BattleStats)[] = [
-    "strength",
-    "endurance",
-    "agility",
-    "precision",
-    "fortitude",
-    "cunning",
-  ];
+  const stats = Object.keys(STAT_NAMES) as (keyof BattleStats)[];
 
   return (
     <Card>

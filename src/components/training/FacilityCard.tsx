@@ -4,13 +4,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatTicksDuration } from "@/game/core/growth";
+import { isSessionAvailable } from "@/game/core/training";
 import type {
   TrainingFacility,
   TrainingSession,
   TrainingSessionType,
 } from "@/game/types/activity";
 import type { GrowthStage } from "@/game/types/constants";
-import { GROWTH_STAGE_ORDER } from "@/game/types/constants";
 import { cn } from "@/lib/utils";
 
 interface FacilityCardProps {
@@ -22,31 +23,6 @@ interface FacilityCardProps {
     facilityId: string,
     sessionType: TrainingSessionType,
   ) => void;
-}
-
-/**
- * Format duration for display.
- */
-function formatDuration(ticks: number): string {
-  const minutes = (ticks * 30) / 60;
-  if (minutes < 60) {
-    return `${Math.round(minutes)} min`;
-  }
-  const hours = minutes / 60;
-  return `${hours}h`;
-}
-
-/**
- * Check if a session is available based on pet stage.
- */
-function isSessionAvailable(
-  session: TrainingSession,
-  petStage: GrowthStage,
-): boolean {
-  if (!session.minStage) return true;
-  const currentStageIndex = GROWTH_STAGE_ORDER.indexOf(petStage);
-  const requiredStageIndex = GROWTH_STAGE_ORDER.indexOf(session.minStage);
-  return currentStageIndex >= requiredStageIndex;
 }
 
 /**
@@ -84,7 +60,7 @@ function SessionButton({
     >
       <span className="font-medium text-xs">{session.name}</span>
       <span className="text-[10px] text-muted-foreground">
-        {formatDuration(session.durationTicks)} · ⚡{session.energyCost}
+        {formatTicksDuration(session.durationTicks)} · ⚡{session.energyCost}
       </span>
       <span className="text-[10px]">
         +{session.primaryStatGain}

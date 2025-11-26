@@ -9,7 +9,7 @@ import {
   canStartTraining,
   completeTraining,
   getTrainingProgress,
-  getTrainingTimeRemaining,
+  isSessionAvailable,
   processTrainingTick,
   startTraining,
 } from "@/game/core/training";
@@ -314,25 +314,44 @@ test("getTrainingProgress returns 100 at end", () => {
   expect(getTrainingProgress(training)).toBe(100);
 });
 
-// getTrainingTimeRemaining tests
-test("getTrainingTimeRemaining formats minutes correctly", () => {
-  const training: ActiveTraining = {
-    facilityId: "facility_strength",
-    sessionType: TrainingSessionType.Basic,
-    startTick: 0,
-    durationTicks: 100,
-    ticksRemaining: 4,
+// isSessionAvailable tests
+test("isSessionAvailable returns true when no minStage required", () => {
+  const session = {
+    type: TrainingSessionType.Basic,
+    name: "Basic",
+    description: "Basic session",
+    durationTicks: 120,
+    energyCost: 10,
+    primaryStatGain: 1,
+    secondaryStatGain: 0,
   };
-  expect(getTrainingTimeRemaining(training)).toBe("2 min");
+  expect(isSessionAvailable(session, GrowthStage.Baby)).toBe(true);
 });
 
-test("getTrainingTimeRemaining formats hours correctly", () => {
-  const training: ActiveTraining = {
-    facilityId: "facility_strength",
-    sessionType: TrainingSessionType.Basic,
-    startTick: 0,
-    durationTicks: 240,
-    ticksRemaining: 120,
+test("isSessionAvailable returns false when stage is insufficient", () => {
+  const session = {
+    type: TrainingSessionType.Advanced,
+    name: "Advanced",
+    description: "Advanced session",
+    durationTicks: 480,
+    energyCost: 50,
+    primaryStatGain: 6,
+    secondaryStatGain: 2,
+    minStage: GrowthStage.Teen,
   };
-  expect(getTrainingTimeRemaining(training)).toBe("1h");
+  expect(isSessionAvailable(session, GrowthStage.Child)).toBe(false);
+});
+
+test("isSessionAvailable returns true when stage meets requirement", () => {
+  const session = {
+    type: TrainingSessionType.Intensive,
+    name: "Intensive",
+    description: "Intensive session",
+    durationTicks: 240,
+    energyCost: 25,
+    primaryStatGain: 3,
+    secondaryStatGain: 1,
+    minStage: GrowthStage.Child,
+  };
+  expect(isSessionAvailable(session, GrowthStage.Teen)).toBe(true);
 });

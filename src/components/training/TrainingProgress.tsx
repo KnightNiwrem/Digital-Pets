@@ -4,10 +4,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  getTrainingProgress,
-  getTrainingTimeRemaining,
-} from "@/game/core/training";
+import { formatTicksDuration } from "@/game/core/growth";
+import { getTrainingProgress } from "@/game/core/training";
 import { getFacility, getSession } from "@/game/data/facilities";
 import type { ActiveTraining } from "@/game/types/activity";
 
@@ -26,7 +24,7 @@ export function TrainingProgress({
   const facility = getFacility(training.facilityId);
   const session = getSession(training.facilityId, training.sessionType);
   const progress = getTrainingProgress(training);
-  const timeRemaining = getTrainingTimeRemaining(training);
+  const timeRemaining = formatTicksDuration(training.ticksRemaining);
 
   if (!facility || !session) {
     return null;
