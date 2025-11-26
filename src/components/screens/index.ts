@@ -2,6 +2,7 @@
  * Re-export screen components.
  */
 
+export { BattleScreen } from "./BattleScreen";
 export { CareScreen } from "./CareScreen";
 export { ExplorationScreen } from "./ExplorationScreen";
 export { InventoryScreen } from "./InventoryScreen";
