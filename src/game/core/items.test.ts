@@ -301,14 +301,22 @@ test("useToyItem reduces durability by 1", () => {
 });
 
 test("useToyItem destroys toy when durability reaches 0", () => {
-  const state = createTestState();
-  // Set rope to 1 durability so it breaks after use
-  const ropeItem = state.player.inventory.items.find(
+  const baseState = createTestState();
+  // Set rope to 1 durability so it breaks after use (immutable update)
+  const ropeIndex = baseState.player.inventory.items.findIndex(
     (i) => i.itemId === "toy_rope",
   );
-  if (ropeItem) {
-    ropeItem.currentDurability = 1;
-  }
+  const state = {
+    ...baseState,
+    player: {
+      ...baseState.player,
+      inventory: {
+        items: baseState.player.inventory.items.map((item, i) =>
+          i === ropeIndex ? { ...item, currentDurability: 1 } : item,
+        ),
+      },
+    },
+  };
 
   const result = useToyItem(state, "toy_rope");
 

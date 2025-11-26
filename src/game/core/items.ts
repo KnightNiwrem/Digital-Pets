@@ -263,14 +263,17 @@ export function useCleaningItem(
 }
 
 /**
- * Find a toy inventory item by item ID with durability.
+ * Find a toy inventory item by item ID with positive durability.
  */
 function findToyInventoryItem(
   inventory: InventoryItem[],
   itemId: string,
 ): { item: InventoryItem; index: number } | undefined {
   const index = inventory.findIndex(
-    (item) => item.itemId === itemId && item.currentDurability !== null,
+    (item) =>
+      item.itemId === itemId &&
+      item.currentDurability !== null &&
+      item.currentDurability > 0,
   );
   if (index === -1) return undefined;
   const item = inventory[index];
@@ -314,7 +317,15 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
   }
 
   const { item: toyItem, index: toyIndex } = toyResult;
-  const currentDurability = toyItem.currentDurability ?? itemDef.maxDurability;
+  // findToyInventoryItem guarantees currentDurability is non-null and > 0
+  if (toyItem.currentDurability === null) {
+    return {
+      success: false,
+      state,
+      message: `Corrupted inventory: ${itemDef.name} is missing durability!`,
+    };
+  }
+  const currentDurability = toyItem.currentDurability;
 
   // Calculate new happiness (clamped to max)
   const maxCareStat = getMaxCareStat(state);
