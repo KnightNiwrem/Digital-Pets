@@ -25,6 +25,11 @@ import {
 import type { Combatant } from "@/game/core/battle/turn";
 import type { Move } from "@/game/types/move";
 
+/** Delay for enemy turn processing (ms) */
+const ENEMY_TURN_DELAY_MS = 800;
+/** Delay for turn resolution processing (ms) */
+const TURN_RESOLUTION_DELAY_MS = 500;
+
 interface BattleScreenProps {
   playerCombatant: Combatant;
   enemyCombatant: Combatant;
@@ -54,7 +59,7 @@ export function BattleScreen({
       const timeout = setTimeout(() => {
         setBattleState((prev) => executeEnemyTurn(prev));
         setIsProcessing(false);
-      }, 800);
+      }, ENEMY_TURN_DELAY_MS);
       return () => clearTimeout(timeout);
     }
   }, [battleState.phase, isProcessing]);
@@ -66,7 +71,7 @@ export function BattleScreen({
       const timeout = setTimeout(() => {
         setBattleState((prev) => resolveTurnEnd(prev));
         setIsProcessing(false);
-      }, 500);
+      }, TURN_RESOLUTION_DELAY_MS);
       return () => clearTimeout(timeout);
     }
   }, [battleState.phase, isProcessing]);

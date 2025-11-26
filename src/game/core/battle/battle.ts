@@ -21,6 +21,11 @@ import {
 export type { Combatant } from "./turn";
 
 /**
+ * Level scaling factor per level for wild combatants (10% per level).
+ */
+const LEVEL_SCALING_FACTOR = 0.1;
+
+/**
  * Battle phase states.
  */
 export const BattlePhase = {
@@ -124,7 +129,7 @@ export function createWildCombatant(
   }
 
   // Scale stats by level
-  const levelMultiplier = 1 + (level - 1) * 0.1;
+  const levelMultiplier = 1 + (level - 1) * LEVEL_SCALING_FACTOR;
   const battleStats: BattleStats = {
     strength: Math.floor(species.baseStats.strength * levelMultiplier),
     endurance: Math.floor(species.baseStats.endurance * levelMultiplier),
@@ -384,18 +389,18 @@ export function resolveTurnEnd(state: BattleState): BattleState {
 
   const newLog = [...state.log];
 
-  // Log DoT damage
+  // Log DoT damage (generic message as multiple DoT types may be active)
   if (playerDot > 0) {
     newLog.push({
       turn: state.turn,
-      message: `${state.player.name} took ${playerDot} poison damage!`,
+      message: `${state.player.name} took ${playerDot} damage over time!`,
       type: "damage",
     });
   }
   if (enemyDot > 0) {
     newLog.push({
       turn: state.turn,
-      message: `${state.enemy.name} took ${enemyDot} poison damage!`,
+      message: `${state.enemy.name} took ${enemyDot} damage over time!`,
       type: "damage",
     });
   }
