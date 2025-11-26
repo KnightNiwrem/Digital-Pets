@@ -42,10 +42,22 @@ const LOCATION_TYPE_DISPLAY: Record<
   LocationType,
   { name: string; color: string }
 > = {
-  [LocationType.Home]: { name: "Home", color: "text-blue-600" },
-  [LocationType.Town]: { name: "Town", color: "text-amber-600" },
-  [LocationType.Wild]: { name: "Wild Area", color: "text-green-600" },
-  [LocationType.Dungeon]: { name: "Dungeon", color: "text-purple-600" },
+  [LocationType.Home]: {
+    name: "Home",
+    color: "text-blue-600 dark:text-blue-400",
+  },
+  [LocationType.Town]: {
+    name: "Town",
+    color: "text-amber-600 dark:text-amber-400",
+  },
+  [LocationType.Wild]: {
+    name: "Wild Area",
+    color: "text-green-600 dark:text-green-400",
+  },
+  [LocationType.Dungeon]: {
+    name: "Dungeon",
+    color: "text-purple-600 dark:text-purple-400",
+  },
 };
 
 /**

@@ -17,6 +17,10 @@ function meetsStageRequirement(
 ): boolean {
   const currentIndex = GROWTH_STAGE_ORDER.indexOf(currentStage);
   const requiredIndex = GROWTH_STAGE_ORDER.indexOf(requiredStage);
+  // Return false if either stage is unknown
+  if (currentIndex === -1 || requiredIndex === -1) {
+    return false;
+  }
   return currentIndex >= requiredIndex;
 }
 
