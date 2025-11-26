@@ -4,6 +4,7 @@
 
 import { expect, test } from "bun:test";
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import type { GrowthStage } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import {
   applyStatGains,
@@ -16,6 +17,16 @@ import {
   getTicksUntilNextSubstage,
   processGrowthTick,
 } from "./growth";
+
+/**
+ * Calculate the substage length for the baby stage.
+ */
+function getBabySubstageLength(): number {
+  const babyDef = GROWTH_STAGE_DEFINITIONS.baby;
+  const childDef = GROWTH_STAGE_DEFINITIONS.child;
+  const stageDuration = childDef.minAgeTicks - babyDef.minAgeTicks;
+  return Math.floor(stageDuration / babyDef.substageCount);
+}
 
 function createTestPet(overrides: Partial<Pet> = {}): Pet {
   return {
@@ -190,87 +201,47 @@ test("processGrowthTick transitions stage when reaching threshold", () => {
   expect(result.battleStats.strength).toBe(13);
 });
 
-test("processGrowthTick transitions child to teen", () => {
-  const pet = createTestPet({
-    growth: {
-      stage: "child",
-      substage: 3,
-      birthTime: Date.now(),
-      ageTicks: GROWTH_STAGE_DEFINITIONS.teen.minAgeTicks - 1,
-    },
-    battleStats: {
-      strength: 13,
-      endurance: 13,
-      agility: 13,
-      precision: 13,
-      fortitude: 13,
-      cunning: 13,
-    },
+// Parameterized tests for stage transitions
+const stageTransitions: {
+  from: GrowthStage;
+  to: GrowthStage;
+  startStrength: number;
+  endStrength: number;
+}[] = [
+  { from: "child", to: "teen", startStrength: 13, endStrength: 16 },
+  { from: "teen", to: "youngAdult", startStrength: 16, endStrength: 19 },
+  { from: "youngAdult", to: "adult", startStrength: 19, endStrength: 22 },
+];
+
+for (const { from, to, startStrength, endStrength } of stageTransitions) {
+  test(`processGrowthTick transitions from ${from} to ${to}`, () => {
+    const pet = createTestPet({
+      growth: {
+        stage: from,
+        substage: 3,
+        birthTime: Date.now(),
+        ageTicks: GROWTH_STAGE_DEFINITIONS[to].minAgeTicks - 1,
+      },
+      battleStats: {
+        strength: startStrength,
+        endurance: startStrength,
+        agility: startStrength,
+        precision: startStrength,
+        fortitude: startStrength,
+        cunning: startStrength,
+      },
+    });
+    const result = processGrowthTick(pet);
+
+    expect(result.stageTransitioned).toBe(true);
+    expect(result.growth.stage).toBe(to);
+    expect(result.previousStage).toBe(from);
+    expect(result.battleStats.strength).toBe(endStrength);
   });
-  const result = processGrowthTick(pet);
-
-  expect(result.stageTransitioned).toBe(true);
-  expect(result.growth.stage).toBe("teen");
-  expect(result.previousStage).toBe("child");
-  expect(result.battleStats.strength).toBe(16);
-});
-
-test("processGrowthTick transitions teen to youngAdult", () => {
-  const pet = createTestPet({
-    growth: {
-      stage: "teen",
-      substage: 3,
-      birthTime: Date.now(),
-      ageTicks: GROWTH_STAGE_DEFINITIONS.youngAdult.minAgeTicks - 1,
-    },
-    battleStats: {
-      strength: 16,
-      endurance: 16,
-      agility: 16,
-      precision: 16,
-      fortitude: 16,
-      cunning: 16,
-    },
-  });
-  const result = processGrowthTick(pet);
-
-  expect(result.stageTransitioned).toBe(true);
-  expect(result.growth.stage).toBe("youngAdult");
-  expect(result.previousStage).toBe("teen");
-  expect(result.battleStats.strength).toBe(19);
-});
-
-test("processGrowthTick transitions youngAdult to adult", () => {
-  const pet = createTestPet({
-    growth: {
-      stage: "youngAdult",
-      substage: 3,
-      birthTime: Date.now(),
-      ageTicks: GROWTH_STAGE_DEFINITIONS.adult.minAgeTicks - 1,
-    },
-    battleStats: {
-      strength: 19,
-      endurance: 19,
-      agility: 19,
-      precision: 19,
-      fortitude: 19,
-      cunning: 19,
-    },
-  });
-  const result = processGrowthTick(pet);
-
-  expect(result.stageTransitioned).toBe(true);
-  expect(result.growth.stage).toBe("adult");
-  expect(result.previousStage).toBe("youngAdult");
-  expect(result.battleStats.strength).toBe(22);
-});
+}
 
 test("processGrowthTick transitions substage within stage", () => {
-  // Baby has 3 substages, calculate tick for substage transition
-  const babyDef = GROWTH_STAGE_DEFINITIONS.baby;
-  const childDef = GROWTH_STAGE_DEFINITIONS.child;
-  const stageDuration = childDef.minAgeTicks - babyDef.minAgeTicks;
-  const substageLength = Math.floor(stageDuration / babyDef.substageCount);
+  const substageLength = getBabySubstageLength();
   const pet = createTestPet({
     growth: {
       stage: "baby",
@@ -288,10 +259,7 @@ test("processGrowthTick transitions substage within stage", () => {
 });
 
 test("processGrowthTick does not modify battle stats on substage transition", () => {
-  const babyDef = GROWTH_STAGE_DEFINITIONS.baby;
-  const childDef = GROWTH_STAGE_DEFINITIONS.child;
-  const stageDuration = childDef.minAgeTicks - babyDef.minAgeTicks;
-  const substageLength = Math.floor(stageDuration / babyDef.substageCount);
+  const substageLength = getBabySubstageLength();
   const pet = createTestPet({
     growth: {
       stage: "baby",
@@ -357,12 +325,7 @@ test("getTicksUntilNextStage returns null for adult", () => {
 
 // getTicksUntilNextSubstage tests
 test("getTicksUntilNextSubstage returns ticks for substage 1", () => {
-  const babyDef = GROWTH_STAGE_DEFINITIONS.baby;
-  const childDef = GROWTH_STAGE_DEFINITIONS.child;
-  const stageDuration = childDef.minAgeTicks - babyDef.minAgeTicks;
-  const expectedSubstageLength = Math.floor(
-    stageDuration / babyDef.substageCount,
-  );
+  const expectedSubstageLength = getBabySubstageLength();
   const ticks = getTicksUntilNextSubstage("baby", 1, 0);
   expect(ticks).toBe(expectedSubstageLength);
 });
