@@ -6,9 +6,8 @@ import { applyCareLifeChange } from "@/game/core/care/careLife";
 import { applyCareDecay } from "@/game/core/care/careStats";
 import { processPoopTick } from "@/game/core/care/poop";
 import { applyEnergyRegen } from "@/game/core/energy";
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import { processSleepTick } from "@/game/core/sleep";
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
-import { getSpeciesById } from "@/game/data/species";
 import type { Pet } from "@/game/types/pet";
 
 /**
@@ -25,11 +24,9 @@ import type { Pet } from "@/game/types/pet";
  * 7. Activity timers (placeholder for now)
  */
 export function processPetTick(pet: Pet): Pet {
-  const species = getSpeciesById(pet.identity.speciesId);
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
-  const careCapMultiplier = species?.careCapMultiplier ?? 1.0;
-  const maxCareStat = Math.floor(stageDef.baseCareStatMax * careCapMultiplier);
-  const maxEnergy = Math.floor(stageDef.baseEnergyMax * careCapMultiplier);
+  const maxStats = calculatePetMaxStats(pet);
+  const maxCareStat = maxStats?.careStatMax ?? 0;
+  const maxEnergy = maxStats?.energyMax ?? 0;
 
   // 1. Care Life drain/recovery (evaluated on current care stat state)
   const newCareLife = applyCareLifeChange(pet, maxCareStat);

@@ -2,9 +2,8 @@
  * Tick processor for batch processing multiple ticks.
  */
 
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import { processPetTick } from "@/game/core/tick";
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
-import { getSpeciesById } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
@@ -87,18 +86,11 @@ function createCareStatsSnapshot(state: GameState): CareStatsSnapshot | null {
  */
 function createMaxStatsSnapshot(state: GameState): MaxStatsSnapshot | null {
   if (!state.pet) return null;
-
-  const species = getSpeciesById(state.pet.identity.speciesId);
-  if (!species) return null;
-
-  const stageDef = GROWTH_STAGE_DEFINITIONS[state.pet.growth.stage];
-  if (!stageDef) return null;
-
+  const maxStats = calculatePetMaxStats(state.pet);
+  if (!maxStats) return null;
   return {
-    careStatMax: Math.floor(
-      stageDef.baseCareStatMax * species.careCapMultiplier,
-    ),
-    energyMax: Math.floor(stageDef.baseEnergyMax * species.careCapMultiplier),
+    careStatMax: maxStats.careStatMax,
+    energyMax: maxStats.energyMax,
   };
 }
 
