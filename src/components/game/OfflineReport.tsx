@@ -92,15 +92,16 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
     petName,
     beforeStats,
     afterStats,
+    maxStats,
     poopBefore,
     poopAfter,
   } = report;
 
   const poopChange = poopAfter - poopBefore;
 
-  // Get max values for display (using adult stage values as approximation)
-  const maxCareStat = 200_000;
-  const maxEnergy = 200_000;
+  // Use max values from report, with fallback for safety
+  const maxCareStat = maxStats?.careStatMax ?? 200_000;
+  const maxEnergy = maxStats?.energyMax ?? 200_000;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onDismiss()}>
@@ -158,7 +159,8 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
 
             {(afterStats.satiety === 0 ||
               afterStats.hydration === 0 ||
-              afterStats.happiness === 0) && (
+              afterStats.happiness === 0 ||
+              afterStats.energy === 0) && (
               <p className="text-destructive text-sm">
                 ⚠️ Some needs are critical! Take care of your pet immediately.
               </p>

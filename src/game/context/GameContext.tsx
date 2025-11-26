@@ -120,7 +120,10 @@ export function GameProvider({ children }: GameProviderProps) {
 
       const currentTime = Date.now();
       const elapsedMs = currentTime - gameState.lastSaveTime;
-      const ticksElapsed = calculateElapsedTicks(gameState.lastSaveTime);
+      const ticksElapsed = calculateElapsedTicks(
+        gameState.lastSaveTime,
+        currentTime,
+      );
 
       if (ticksElapsed <= 0) return { state: gameState, report: null };
 
