@@ -17,18 +17,11 @@ function getPoopStyle(count: number): {
   textClass: string;
   animate: boolean;
 } {
-  if (count >= 7) {
-    return {
-      bgClass: "bg-destructive",
-      textClass: "text-destructive-foreground",
-      animate: true,
-    };
-  }
   if (count >= 5) {
     return {
       bgClass: "bg-destructive",
       textClass: "text-destructive-foreground",
-      animate: false,
+      animate: count >= 7,
     };
   }
   if (count >= 3) {
