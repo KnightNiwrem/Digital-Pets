@@ -6,6 +6,7 @@ export * from "./common";
 export * from "./constants";
 export * from "./gameState";
 export * from "./item";
+export * from "./offline";
 export * from "./pet";
 export * from "./species";
 export * from "./stats";

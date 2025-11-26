@@ -24,7 +24,13 @@ import {
   loadGame,
   saveGame,
 } from "@/game/state/persistence";
-import { createInitialGameState, type GameState, type Pet } from "@/game/types";
+import {
+  createInitialGameState,
+  type GameState,
+  MIN_OFFLINE_REPORT_MS,
+  type OfflineReport,
+  type Pet,
+} from "@/game/types";
 
 /**
  * Actions available through the game context.
@@ -38,6 +44,8 @@ export interface GameContextActions {
   resetGame: () => void;
   /** Start a new game with given pet name and species */
   startNewGame: (petName: string, speciesId: string) => void;
+  /** Dismiss the offline report */
+  dismissOfflineReport: () => void;
 }
 
 /**
@@ -52,6 +60,8 @@ export interface GameContextValue {
   loadError: string | null;
   /** Whether a save exists (for showing new game vs load game) */
   hasSaveData: boolean;
+  /** Offline report to display (null if none or dismissed) */
+  offlineReport: OfflineReport | null;
   /** Available actions */
   actions: GameContextActions;
 }
@@ -79,6 +89,9 @@ export function GameProvider({ children }: GameProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [hasSaveData, setHasSaveData] = useState(false);
+  const [offlineReport, setOfflineReport] = useState<OfflineReport | null>(
+    null,
+  );
   const gameManagerRef = useRef<GameManager | null>(null);
 
   const updateState = useCallback(
@@ -91,23 +104,42 @@ export function GameProvider({ children }: GameProviderProps) {
     [],
   );
 
+  const dismissOfflineReport = useCallback(() => {
+    setOfflineReport(null);
+  }, []);
+
   /**
-   * Process offline ticks and return the updated state.
+   * Process offline ticks and return the updated state plus report.
    * This is done before setting state to avoid race conditions.
    */
-  const processOffline = useCallback((gameState: GameState): GameState => {
-    if (!gameState.lastSaveTime) return gameState;
+  const processOffline = useCallback(
+    (
+      gameState: GameState,
+    ): { state: GameState; report: OfflineReport | null } => {
+      if (!gameState.lastSaveTime) return { state: gameState, report: null };
 
-    const ticksElapsed = calculateElapsedTicks(gameState.lastSaveTime);
-    if (ticksElapsed <= 0) return gameState;
+      const currentTime = Date.now();
+      const elapsedMs = currentTime - gameState.lastSaveTime;
+      const ticksElapsed = calculateElapsedTicks(gameState.lastSaveTime);
 
-    const { state: newState } = processOfflineCatchup(
-      gameState,
-      ticksElapsed,
-      MAX_OFFLINE_TICKS,
-    );
-    return newState;
-  }, []);
+      if (ticksElapsed <= 0) return { state: gameState, report: null };
+
+      const result = processOfflineCatchup(
+        gameState,
+        ticksElapsed,
+        MAX_OFFLINE_TICKS,
+        elapsedMs,
+      );
+
+      // Only return report if significant time passed
+      const shouldShowReport = elapsedMs >= MIN_OFFLINE_REPORT_MS;
+      return {
+        state: result.state,
+        report: shouldShowReport ? result.report : null,
+      };
+    },
+    [],
+  );
 
   /**
    * Start the game with the given state.
@@ -116,8 +148,13 @@ export function GameProvider({ children }: GameProviderProps) {
   const startGame = useCallback(
     (gameState: GameState) => {
       // Process offline ticks before setting state to avoid race condition
-      const stateWithOffline = processOffline(gameState);
+      const { state: stateWithOffline, report } = processOffline(gameState);
       setState(stateWithOffline);
+
+      // Set offline report if applicable
+      if (report) {
+        setOfflineReport(report);
+      }
 
       // Create game manager and start the loop
       const manager = createGameManager(updateState);
@@ -226,11 +263,13 @@ export function GameProvider({ children }: GameProviderProps) {
     isLoading,
     loadError,
     hasSaveData,
+    offlineReport,
     actions: {
       updateState,
       save,
       resetGame,
       startNewGame,
+      dismissOfflineReport,
     },
   };
 

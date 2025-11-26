@@ -4,7 +4,7 @@
  */
 
 import { useState } from "react";
-import { Layout, type NavigationTab } from "@/components/game";
+import { Layout, type NavigationTab, OfflineReport } from "@/components/game";
 import {
   CareScreen,
   InventoryScreen,
@@ -38,7 +38,8 @@ function GameContent({
   activeTab: NavigationTab;
   onTabChange: (tab: NavigationTab) => void;
 }) {
-  const { state, isLoading, loadError, actions } = useGameState();
+  const { state, isLoading, loadError, offlineReport, actions } =
+    useGameState();
 
   // Show loading state
   if (isLoading) {
@@ -89,6 +90,12 @@ function GameContent({
   return (
     <Layout activeTab={activeTab} onTabChange={onTabChange}>
       <div className="pb-20">{renderScreen()}</div>
+      {offlineReport && (
+        <OfflineReport
+          report={offlineReport}
+          onDismiss={actions.dismissOfflineReport}
+        />
+      )}
     </Layout>
   );
 }

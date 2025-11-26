@@ -210,13 +210,13 @@ New game flow with starting items.
 Catch up on missed time when returning.
 
 ### 9.1 Offline Logic
-- [ ] Update GameManager - Calculate elapsed ticks on load
-- [ ] Process batch ticks for offline catch-up
-- [ ] Implement time cap (7 days max)
+- [x] Update GameManager - Calculate elapsed ticks on load
+- [x] Process batch ticks for offline catch-up
+- [x] Implement time cap (7 days max)
 
 ### 9.2 Offline UI
-- [ ] Create `src/components/game/OfflineReport.tsx` - Show what happened while away
-- [ ] Display on return if significant time passed
+- [x] Create `src/components/game/OfflineReport.tsx` - Show what happened while away
+- [x] Display on return if significant time passed
 
 **✓ Testable:** Close browser, wait, reopen → See stats have changed, optional report
 
