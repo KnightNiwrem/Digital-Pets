@@ -270,19 +270,19 @@ World map with connected locations.
 Train to improve battle stats.
 
 ### 12.1 Types & Data
-- [ ] Create `src/game/types/activity.ts` - Training activity interface
-- [ ] Create `src/game/data/facilities.ts` - Training facility definitions
+- [x] Create `src/game/types/activity.ts` - Training activity interface
+- [x] Create `src/game/data/facilities.ts` - Training facility definitions
 
 ### 12.2 Training Logic
-- [ ] Create `src/game/core/training.ts` - Start training, complete training, stat gains
-- [ ] Create `src/game/state/actions/training.ts` - Training actions
-- [ ] Update tickProcessor - Progress training timer
+- [x] Create `src/game/core/training.ts` - Start training, complete training, stat gains
+- [x] Create `src/game/state/actions/training.ts` - Training actions
+- [x] Update tickProcessor - Progress training timer
 
 ### 12.3 Training UI
-- [ ] Create `src/components/screens/TrainingScreen.tsx` - Training interface
-- [ ] Create `src/components/training/FacilityCard.tsx` - Training option
-- [ ] Create `src/components/training/TrainingProgress.tsx` - Active training indicator
-- [ ] Create `src/components/training/StatsDisplay.tsx` - Battle stats overview
+- [x] Create `src/components/screens/TrainingScreen.tsx` - Training interface
+- [x] Create `src/components/training/FacilityCard.tsx` - Training option
+- [x] Create `src/components/training/TrainingProgress.tsx` - Active training indicator
+- [x] Create `src/components/training/StatsDisplay.tsx` - Battle stats overview
 
 **✓ Testable:** Start training → See progress → Complete → Stats increased
 

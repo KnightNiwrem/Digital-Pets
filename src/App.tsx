@@ -9,12 +9,14 @@ import {
   type NavigationTab,
   OfflineReport,
   StageTransitionNotification,
+  TrainingCompleteNotification,
 } from "@/components/game";
 import {
   CareScreen,
   InventoryScreen,
   MapScreen,
   NewGameScreen,
+  TrainingScreen,
 } from "@/components/screens";
 import { Button } from "@/components/ui/button";
 import { GameProvider } from "@/game/context/GameContext";
@@ -80,7 +82,7 @@ function GameContent({
       case "map":
         return <MapScreen />;
       case "training":
-        return <PlaceholderScreen name="Training" />;
+        return <TrainingScreen />;
       case "skills":
         return <PlaceholderScreen name="Skills" />;
       case "quests":
@@ -106,6 +108,14 @@ function GameContent({
         <StageTransitionNotification
           previousStage={notification.previousStage}
           newStage={notification.newStage}
+          petName={notification.petName}
+          onDismiss={actions.dismissNotification}
+        />
+      )}
+      {notification?.type === "trainingComplete" && (
+        <TrainingCompleteNotification
+          facilityName={notification.facilityName}
+          statsGained={notification.statsGained}
           petName={notification.petName}
           onDismiss={actions.dismissNotification}
         />

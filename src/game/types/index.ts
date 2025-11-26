@@ -2,6 +2,7 @@
  * Re-export all game types from a single entry point.
  */
 
+export * from "./activity";
 export * from "./common";
 export * from "./constants";
 export * from "./gameState";

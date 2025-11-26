@@ -9,6 +9,11 @@ import { applyEnergyRegen } from "@/game/core/energy";
 import { processGrowthTick } from "@/game/core/growth";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { processSleepTick } from "@/game/core/sleep";
+import {
+  applyTrainingCompletion,
+  processTrainingTick,
+} from "@/game/core/training";
+import { ActivityState } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 
 /**
@@ -22,7 +27,7 @@ import type { Pet } from "@/game/types/pet";
  * 4. Care stat decay
  * 5. Sleep timer progress
  * 6. Growth stage time
- * 7. Activity timers (placeholder for now)
+ * 7. Activity timers (training, etc.)
  */
 export function processPetTick(pet: Pet): Pet {
   const maxStats = calculatePetMaxStats(pet);
@@ -51,9 +56,8 @@ export function processPetTick(pet: Pet): Pet {
   // 6. Growth stage time accumulation and stage transitions
   const growthResult = processGrowthTick(pet);
 
-  // 7. Activity timers (placeholder - will be implemented later)
-
-  return {
+  // 7. Process training timer
+  let updatedPet: Pet = {
     ...pet,
     growth: growthResult.growth,
     battleStats: growthResult.battleStats,
@@ -67,4 +71,24 @@ export function processPetTick(pet: Pet): Pet {
     poop: newPoop,
     sleep: newSleep,
   };
+
+  // Process active training
+  if (
+    updatedPet.activityState === ActivityState.Training &&
+    updatedPet.activeTraining
+  ) {
+    const newTraining = processTrainingTick(updatedPet.activeTraining);
+
+    if (newTraining === null) {
+      // Training completed - apply stat gains
+      updatedPet = applyTrainingCompletion(updatedPet);
+    } else {
+      updatedPet = {
+        ...updatedPet,
+        activeTraining: newTraining,
+      };
+    }
+  }
+
+  return updatedPet;
 }
