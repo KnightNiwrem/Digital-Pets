@@ -16,6 +16,11 @@ import { FacilityType, LocationType } from "@/game/types/location";
 import type { Pet } from "@/game/types/pet";
 
 /**
+ * Skill bonus multiplier per level (5% multiplicative bonus).
+ */
+const SKILL_BONUS_PER_LEVEL = 0.05;
+
+/**
  * Check if a pet can start foraging at the current location.
  */
 export function canStartForaging(
@@ -168,8 +173,8 @@ export function calculateForageDrops(
       continue;
     }
 
-    // Calculate effective drop rate with skill bonus
-    const skillBonus = playerSkillLevel * 0.05; // 5% bonus per skill level
+    // Calculate effective drop rate with multiplicative skill bonus
+    const skillBonus = playerSkillLevel * SKILL_BONUS_PER_LEVEL;
     const effectiveRate = Math.min(1, entry.baseDropRate * (1 + skillBonus));
 
     // Roll for drop
@@ -285,6 +290,9 @@ export function cancelExploration(pet: Pet): {
  * Get exploration progress as a percentage.
  */
 export function getExplorationProgress(exploration: ActiveExploration): number {
+  if (exploration.durationTicks === 0) {
+    return 100; // Instant completion
+  }
   const elapsed = exploration.durationTicks - exploration.ticksRemaining;
   return Math.round((elapsed / exploration.durationTicks) * 100);
 }
