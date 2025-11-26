@@ -2,7 +2,7 @@
  * Battle screen for combat encounters.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BattleArena,
   BattleLog,
@@ -78,21 +78,24 @@ export function BattleScreen({
     setBattleState((prev) => executePlayerTurn(prev, move));
   };
 
-  const handleBattleComplete = () => {
+  // Memoize battle completion info to avoid recalculating
+  const battleResult = useMemo(() => {
+    if (!isBattleComplete(battleState)) return null;
     const isVictory = battleState.phase === BattlePhase.Victory;
     const rewards = calculateBattleRewards(battleState, isVictory);
-    onBattleEnd(isVictory, rewards);
-  };
+    return { isVictory, rewards };
+  }, [battleState]);
 
   // Show victory/defeat screen
-  if (isBattleComplete(battleState)) {
-    const isVictory = battleState.phase === BattlePhase.Victory;
-    const rewards = calculateBattleRewards(battleState, isVictory);
+  if (battleResult) {
+    const handleContinue = () => {
+      onBattleEnd(battleResult.isVictory, battleResult.rewards);
+    };
     return (
       <VictoryScreen
-        isVictory={isVictory}
-        rewards={rewards}
-        onContinue={handleBattleComplete}
+        isVictory={battleResult.isVictory}
+        rewards={battleResult.rewards}
+        onContinue={handleContinue}
       />
     );
   }

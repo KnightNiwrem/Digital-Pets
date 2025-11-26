@@ -101,6 +101,7 @@ export function createCombatantFromPet(pet: Pet, isPlayer: boolean): Combatant {
 
   return {
     name: pet.identity.name,
+    speciesId: pet.identity.speciesId,
     battleStats: pet.battleStats,
     derivedStats,
     resistances: species?.resistances ?? pet.resistances,
@@ -137,6 +138,7 @@ export function createWildCombatant(
 
   return {
     name: `Wild ${species.name}`,
+    speciesId,
     battleStats,
     derivedStats,
     resistances: species.resistances,
@@ -154,9 +156,11 @@ export function initializeBattle(
   enemy: Combatant,
 ): BattleState {
   const turnOrder = determineTurnOrder(player, enemy);
+  const firstActor = turnOrder[0];
 
   return {
-    phase: BattlePhase.PlayerTurn,
+    phase:
+      firstActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn,
     turn: 1,
     player,
     enemy,

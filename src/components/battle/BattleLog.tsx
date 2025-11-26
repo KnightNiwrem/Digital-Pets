@@ -17,18 +17,17 @@ interface BattleLogProps {
  */
 export function BattleLog({ entries, maxEntries = 8 }: BattleLogProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const entriesLength = entries.length;
 
   // Auto-scroll to bottom when new entries are added
-  const lastEntryCount = useRef(0);
   useEffect(() => {
-    if (entries.length !== lastEntryCount.current) {
-      lastEntryCount.current = entries.length;
+    if (entriesLength > 0) {
       scrollRef.current?.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  });
+  }, [entriesLength]);
 
   const visibleEntries = entries.slice(-maxEntries);
 

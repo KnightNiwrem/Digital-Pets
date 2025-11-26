@@ -59,7 +59,7 @@ export function ExplorationScreen({
   const isWildArea = currentLocation?.type === LocationType.Wild;
 
   // Check if location has battle area
-  const hasBattleArea = currentLocation?.facilities.includes(
+  const hasBattleArea = currentLocation?.facilities?.includes(
     FacilityType.BattleArea,
   );
 
@@ -91,12 +91,8 @@ export function ExplorationScreen({
     if (!pet || !onStartBattle) return;
 
     const encounterResult = forceEncounter(state.player.currentLocationId, pet);
-    if (encounterResult.hasEncounter && encounterResult.wildCombatant) {
-      // Extract species ID from the wild combatant name
-      const speciesId = encounterResult.wildCombatant.name
-        .replace("Wild ", "")
-        .toLowerCase();
-      onStartBattle(speciesId, encounterResult.level ?? 1);
+    if (encounterResult.hasEncounter && encounterResult.speciesId) {
+      onStartBattle(encounterResult.speciesId, encounterResult.level ?? 1);
     } else {
       setErrorMessage("No wild pets found in this area.");
     }

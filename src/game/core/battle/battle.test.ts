@@ -28,6 +28,7 @@ function createTestCombatant(overrides: Partial<Combatant> = {}): Combatant {
 
   return {
     name: "Test Pet",
+    speciesId: "florabit",
     battleStats,
     derivedStats: calculateDerivedStats(battleStats),
     resistances: createDefaultResistances(),

@@ -3,7 +3,7 @@
  * Integrates the game context and layout.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ExplorationCompleteNotification,
   Layout,
@@ -62,6 +62,13 @@ function GameContent({
     enemySpeciesId: string;
     enemyLevel: number;
   } | null>(null);
+
+  // Redirect to exploration if battle tab is accessed without battle info
+  useEffect(() => {
+    if (activeTab === "battle" && !battleInfo) {
+      onTabChange("exploration");
+    }
+  }, [activeTab, battleInfo, onTabChange]);
 
   // Show loading state
   if (isLoading) {
@@ -152,8 +159,7 @@ function GameContent({
       case "quests":
         return <PlaceholderScreen name="Quests" />;
       case "battle":
-        // If no battle info, go back to exploration
-        onTabChange("exploration");
+        // Fallback if no battle info (useEffect will redirect)
         return <ExplorationScreen onStartBattle={handleStartBattle} />;
       case "debug":
         // Debug tab triggers a dialog in Navigation, not a screen change

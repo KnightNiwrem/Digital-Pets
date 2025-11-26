@@ -14,18 +14,31 @@ interface PetBattleCardProps {
 }
 
 /**
+ * Clamp a percentage between 0 and 100, handling edge cases.
+ */
+function clampPercent(value: number, max: number): number {
+  if (max <= 0) return 0;
+  return Math.min(100, Math.max(0, (value / max) * 100));
+}
+
+/**
  * Displays a pet's battle status including HP bar, stamina, and effects.
  */
 export function PetBattleCard({ combatant, position }: PetBattleCardProps) {
-  const { derivedStats, statusEffects, name } = combatant;
-  const hpPercent = (derivedStats.currentHealth / derivedStats.maxHealth) * 100;
-  const staminaPercent =
-    (derivedStats.currentStamina / derivedStats.maxStamina) * 100;
+  const { derivedStats, statusEffects, name, speciesId } = combatant;
+  const hpPercent = clampPercent(
+    derivedStats.currentHealth,
+    derivedStats.maxHealth,
+  );
+  const staminaPercent = clampPercent(
+    derivedStats.currentStamina,
+    derivedStats.maxStamina,
+  );
 
   const { buffs, debuffs, other } = getEffectSummary(statusEffects);
 
   // Get species emoji for display
-  const species = getSpeciesById(name.replace("Wild ", "").toLowerCase());
+  const species = getSpeciesById(speciesId);
   const emoji = species?.emoji ?? "🐾";
 
   return (
@@ -60,7 +73,7 @@ export function PetBattleCard({ combatant, position }: PetBattleCardProps) {
                     ? "bg-yellow-500"
                     : "bg-red-500",
               )}
-              style={{ width: `${Math.max(0, hpPercent)}%` }}
+              style={{ width: `${hpPercent}%` }}
             />
           </div>
         </div>
@@ -76,7 +89,7 @@ export function PetBattleCard({ combatant, position }: PetBattleCardProps) {
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${Math.max(0, staminaPercent)}%` }}
+              style={{ width: `${staminaPercent}%` }}
             />
           </div>
         </div>

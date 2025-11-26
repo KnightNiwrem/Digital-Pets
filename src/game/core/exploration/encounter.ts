@@ -29,6 +29,8 @@ export interface EncounterResult {
   wildCombatant?: Combatant;
   /** Level of the encountered pet */
   level?: number;
+  /** Species ID of the encountered pet */
+  speciesId?: string;
 }
 
 /**
@@ -171,6 +173,7 @@ function generateEncounter(
       encounterType: EncounterType.WildBattle,
       wildCombatant,
       level: finalLevel,
+      speciesId,
     };
   }
 

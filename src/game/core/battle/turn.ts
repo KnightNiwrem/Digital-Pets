@@ -23,6 +23,8 @@ import {
 export interface Combatant {
   /** Display name */
   name: string;
+  /** Species ID for lookups */
+  speciesId: string;
   /** Base battle stats */
   battleStats: BattleStats;
   /** Derived stats (health, stamina, etc.) */

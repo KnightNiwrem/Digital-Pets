@@ -8,6 +8,19 @@ import { type Combatant, canUseMove } from "@/game/core/battle/turn";
 import type { Move, MoveSlot } from "@/game/types/move";
 import { cn } from "@/lib/utils";
 
+const DAMAGE_TYPE_EMOJIS: Record<string, string> = {
+  slashing: "⚔️",
+  piercing: "🗡️",
+  crushing: "🔨",
+  chemical: "🧪",
+  thermal: "🔥",
+  electric: "⚡",
+};
+
+function getDamageTypeEmoji(type: string): string {
+  return DAMAGE_TYPE_EMOJIS[type] ?? "💥";
+}
+
 interface MoveSelectProps {
   combatant: Combatant;
   onSelectMove: (move: Move) => void;
@@ -53,18 +66,6 @@ function MoveButton({ slot, combatant, onSelect, disabled }: MoveButtonProps) {
   const { move, currentCooldown } = slot;
   const { canUse, reason } = canUseMove(combatant, slot);
   const isDisabled = disabled || !canUse;
-
-  const getDamageTypeEmoji = (type: string): string => {
-    const emojis: Record<string, string> = {
-      slashing: "⚔️",
-      piercing: "🗡️",
-      crushing: "🔨",
-      chemical: "🧪",
-      thermal: "🔥",
-      electric: "⚡",
-    };
-    return emojis[type] ?? "💥";
-  };
 
   return (
     <Button
