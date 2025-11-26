@@ -2,6 +2,7 @@
  * Single item slot displaying an item with count or durability.
  */
 
+import type { Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
 import { cn } from "@/lib/utils";
@@ -16,8 +17,11 @@ interface ItemSlotProps {
 /**
  * Get the CSS class for rarity styling.
  */
-function getRarityClass(rarity: string): string {
+function getRarityClass(rarity: Rarity): string {
   switch (rarity) {
+    case "common":
+      // Common items use the default border intentionally
+      return "border-border";
     case "uncommon":
       return "border-green-500";
     case "rare":
@@ -26,8 +30,6 @@ function getRarityClass(rarity: string): string {
       return "border-purple-500";
     case "legendary":
       return "border-yellow-500";
-    default:
-      return "border-border";
   }
 }
 
@@ -48,6 +50,7 @@ export function ItemSlot({
     <button
       type="button"
       onClick={onClick}
+      aria-label={`Select ${itemDef.name}`}
       className={cn(
         "relative flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all hover:bg-accent",
         getRarityClass(itemDef.rarity),
