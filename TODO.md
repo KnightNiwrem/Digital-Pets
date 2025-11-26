@@ -314,25 +314,25 @@ Forage for items in wild areas.
 Turn-based 1v1 combat.
 
 ### 14.1 Types & Data
-- [ ] Create `src/game/types/move.ts` - Move, StatusEffect interfaces
-- [ ] Create `src/game/data/moves.ts` - Default moves + some learnable
-- [ ] Create `src/game/data/tables/encounters.ts` - Wild encounters
+- [x] Create `src/game/types/move.ts` - Move, StatusEffect interfaces
+- [x] Create `src/game/data/moves.ts` - Default moves + some learnable
+- [x] Create `src/game/data/tables/encounters.ts` - Wild encounters
 
 ### 14.2 Battle Logic
-- [ ] Create `src/game/core/battle/stats.ts` - Derived stat calculations
-- [ ] Create `src/game/core/battle/damage.ts` - Damage formula
-- [ ] Create `src/game/core/battle/turn.ts` - Turn order, action resolution
-- [ ] Create `src/game/core/battle/status.ts` - Status effects
-- [ ] Create `src/game/core/battle/battle.ts` - Battle state machine
-- [ ] Create `src/game/core/exploration/encounter.ts` - Encounter generation
+- [x] Create `src/game/core/battle/stats.ts` - Derived stat calculations
+- [x] Create `src/game/core/battle/damage.ts` - Damage formula
+- [x] Create `src/game/core/battle/turn.ts` - Turn order, action resolution
+- [x] Create `src/game/core/battle/status.ts` - Status effects
+- [x] Create `src/game/core/battle/battle.ts` - Battle state machine
+- [x] Create `src/game/core/exploration/encounter.ts` - Encounter generation
 
 ### 14.3 Battle UI
-- [ ] Create `src/components/screens/BattleScreen.tsx` - Battle interface
-- [ ] Create `src/components/battle/BattleArena.tsx` - Both pets
-- [ ] Create `src/components/battle/PetBattleCard.tsx` - HP, status
-- [ ] Create `src/components/battle/MoveSelect.tsx` - Move selection
-- [ ] Create `src/components/battle/BattleLog.tsx` - Turn actions
-- [ ] Create `src/components/battle/VictoryScreen.tsx` - Results
+- [x] Create `src/components/screens/BattleScreen.tsx` - Battle interface
+- [x] Create `src/components/battle/BattleArena.tsx` - Both pets
+- [x] Create `src/components/battle/PetBattleCard.tsx` - HP, status
+- [x] Create `src/components/battle/MoveSelect.tsx` - Move selection
+- [x] Create `src/components/battle/BattleLog.tsx` - Turn actions
+- [x] Create `src/components/battle/VictoryScreen.tsx` - Results
 
 **✓ Testable:** Explore → Encounter wild pet → Battle → Win/Lose → See results
 
@@ -343,16 +343,16 @@ Turn-based 1v1 combat.
 Non-battle skills for exploration.
 
 ### 15.1 Types & Data
-- [ ] Create `src/game/types/skill.ts` - Skill interface
+- [x] Create `src/game/types/skill.ts` - Skill interface
 
 ### 15.2 Skills Logic
-- [ ] Create `src/game/core/skills.ts` - XP gain, level ups
-- [ ] Update forage logic - Skill affects drop rates
+- [x] Create `src/game/core/skills.ts` - XP gain, level ups
+- [x] Update forage logic - Skill affects drop rates
 
 ### 15.3 Skills UI
-- [ ] Create `src/components/screens/SkillsScreen.tsx` - Skills overview
-- [ ] Create `src/components/skills/SkillBar.tsx` - Single skill display
-- [ ] Update Navigation - Add Skills tab
+- [x] Create `src/components/screens/SkillsScreen.tsx` - Skills overview
+- [x] Create `src/components/skills/SkillBar.tsx` - Single skill display
+- [x] Update Navigation - Add Skills tab
 
 **✓ Testable:** Forage → Gain Foraging XP → Level up → Better drops
 

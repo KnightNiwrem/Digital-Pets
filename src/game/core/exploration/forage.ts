@@ -163,7 +163,7 @@ export function processExplorationTick(
  */
 export function calculateForageDrops(
   forageTable: ForageTable,
-  playerSkillLevel = 0,
+  playerSkillLevel = 1,
 ): ExplorationDrop[] {
   const drops: ExplorationDrop[] = [];
 
@@ -174,7 +174,8 @@ export function calculateForageDrops(
     }
 
     // Calculate effective drop rate with multiplicative skill bonus
-    const skillBonus = playerSkillLevel * SKILL_BONUS_PER_LEVEL;
+    // Level 1 gives 0 bonus, each level above 1 gives 5% bonus
+    const skillBonus = (playerSkillLevel - 1) * SKILL_BONUS_PER_LEVEL;
     const effectiveRate = Math.min(1, entry.baseDropRate * (1 + skillBonus));
 
     // Roll for drop
@@ -199,7 +200,10 @@ export function calculateForageDrops(
 /**
  * Complete a foraging session and calculate drops.
  */
-export function completeForaging(pet: Pet): ExplorationResult {
+export function completeForaging(
+  pet: Pet,
+  foragingSkillLevel = 1,
+): ExplorationResult {
   if (!pet.activeExploration) {
     return {
       success: false,
@@ -219,8 +223,8 @@ export function completeForaging(pet: Pet): ExplorationResult {
     };
   }
 
-  // Calculate drops (skill level is 0 for now, will be updated with skills system)
-  const itemsFound = calculateForageDrops(forageTable, 0);
+  // Calculate drops using skill level
+  const itemsFound = calculateForageDrops(forageTable, foragingSkillLevel);
 
   if (itemsFound.length === 0) {
     return {
@@ -242,11 +246,14 @@ export function completeForaging(pet: Pet): ExplorationResult {
  * Apply exploration completion to pet state.
  * Returns the updated pet with exploration cleared.
  */
-export function applyExplorationCompletion(pet: Pet): {
+export function applyExplorationCompletion(
+  pet: Pet,
+  foragingSkillLevel = 1,
+): {
   pet: Pet;
   result: ExplorationResult;
 } {
-  const result = completeForaging(pet);
+  const result = completeForaging(pet, foragingSkillLevel);
 
   return {
     pet: {

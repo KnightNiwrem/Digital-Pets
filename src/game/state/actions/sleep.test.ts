@@ -5,6 +5,7 @@
 import { expect, test } from "bun:test";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
+import { createInitialSkills } from "@/game/types/skill";
 import {
   createDefaultBattleStats,
   createDefaultResistances,
@@ -56,6 +57,7 @@ function createTestGameState(isSleeping: boolean): GameState {
       inventory: { items: [] },
       currency: { coins: 0 },
       currentLocationId: "home",
+      skills: createInitialSkills(),
     },
     quests: [],
     isInitialized: true,
@@ -72,6 +74,7 @@ function createEmptyGameState(): GameState {
       inventory: { items: [] },
       currency: { coins: 0 },
       currentLocationId: "home",
+      skills: createInitialSkills(),
     },
     quests: [],
     isInitialized: true,

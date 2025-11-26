@@ -19,6 +19,7 @@ import type {
   MaxStatsSnapshot,
   OfflineReport,
 } from "@/game/types/offline";
+import { SkillType } from "@/game/types/skill";
 
 /**
  * Process a single game tick, updating the entire game state.
@@ -55,12 +56,17 @@ export function processGameTick(state: GameState): GameState {
       // Exploration completed - apply item drops to inventory
       const locationId = updatedPet.activeExploration.locationId;
       const location = getLocation(locationId);
-      const { pet: completedPet, result } =
-        applyExplorationCompletion(updatedPet);
-      updatedState = applyExplorationResults(
+      const foragingLevel =
+        state.player.skills?.[SkillType.Foraging]?.level ?? 1;
+      const { pet: completedPet, result } = applyExplorationCompletion(
+        updatedPet,
+        foragingLevel,
+      );
+      const explorationResult = applyExplorationResults(
         { ...updatedState, pet: completedPet },
         result,
       );
+      updatedState = explorationResult.state;
       // Store the result for UI notification
       updatedState.lastExplorationResult = {
         ...result,

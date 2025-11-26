@@ -6,6 +6,7 @@ import { expect, test } from "bun:test";
 import { createNewPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import type { GameState } from "@/game/types/gameState";
+import { createInitialSkills } from "@/game/types/skill";
 import {
   useCleaningItem,
   useDrinkItem,
@@ -40,6 +41,7 @@ function createTestState(): GameState {
       },
       currency: { coins: 100 },
       currentLocationId: "home",
+      skills: createInitialSkills(),
     },
     quests: [],
     isInitialized: true,

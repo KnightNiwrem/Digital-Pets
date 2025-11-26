@@ -19,6 +19,7 @@ import {
   InventoryScreen,
   MapScreen,
   NewGameScreen,
+  SkillsScreen,
   TrainingScreen,
 } from "@/components/screens";
 import { Button } from "@/components/ui/button";
@@ -155,7 +156,7 @@ function GameContent({
       case "training":
         return <TrainingScreen />;
       case "skills":
-        return <PlaceholderScreen name="Skills" />;
+        return <SkillsScreen />;
       case "quests":
         return <PlaceholderScreen name="Quests" />;
       case "battle":

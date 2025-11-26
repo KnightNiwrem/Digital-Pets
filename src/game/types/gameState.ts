@@ -5,6 +5,7 @@
 import type { ExplorationResult } from "./activity";
 import type { Tick, Timestamp } from "./common";
 import type { Pet } from "./pet";
+import { createInitialSkills, type PlayerSkills } from "./skill";
 
 /**
  * Active battle state stored in game state.
@@ -56,6 +57,8 @@ export interface PlayerState {
   currency: Currency;
   /** Current location ID */
   currentLocationId: string;
+  /** Player skills */
+  skills: PlayerSkills;
 }
 
 /**
@@ -117,6 +120,7 @@ export function createInitialGameState(): GameState {
       inventory: { items: [] },
       currency: { coins: 0 },
       currentLocationId: "home",
+      skills: createInitialSkills(),
     },
     quests: [],
     isInitialized: false,
