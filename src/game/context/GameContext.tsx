@@ -177,6 +177,11 @@ export function GameProvider({ children }: GameProviderProps) {
 
   const startNewGame = useCallback(
     (petName: string, speciesId: string) => {
+      // Stop any existing game loop before starting a new one
+      if (gameManagerRef.current) {
+        gameManagerRef.current.stop();
+      }
+
       // Create new pet with given name and species
       const pet = createNewPet(petName, speciesId);
 

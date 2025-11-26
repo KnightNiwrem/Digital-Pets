@@ -2,7 +2,7 @@
  * New game screen for species selection and pet naming.
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,18 +22,16 @@ interface NewGameScreenProps {
   onStartGame: (petName: string, speciesId: string) => void;
 }
 
-/**
- * Species selection card component.
- */
-function SpeciesCard({
-  species,
-  isSelected,
-  onSelect,
-}: {
+interface SpeciesCardProps {
   species: Species;
   isSelected: boolean;
   onSelect: () => void;
-}) {
+}
+
+/**
+ * Species selection card component.
+ */
+function SpeciesCard({ species, isSelected, onSelect }: SpeciesCardProps) {
   return (
     <Card
       className={cn(
@@ -41,6 +39,13 @@ function SpeciesCard({
         isSelected && "ring-2 ring-primary border-primary",
       )}
       onClick={onSelect}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
@@ -73,7 +78,7 @@ function SpeciesCard({
 export function NewGameScreen({ onStartGame }: NewGameScreenProps) {
   const [petName, setPetName] = useState("");
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
-  const starterSpecies = getStarterSpecies();
+  const starterSpecies = useMemo(() => getStarterSpecies(), []);
 
   const handleStart = () => {
     if (petName.trim() && selectedSpecies) {
@@ -131,6 +136,11 @@ export function NewGameScreen({ onStartGame }: NewGameScreenProps) {
                 value={petName}
                 onChange={(e) => setPetName(e.target.value)}
                 maxLength={20}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && isValid) {
+                    handleStart();
+                  }
+                }}
               />
             </div>
           </CardContent>
