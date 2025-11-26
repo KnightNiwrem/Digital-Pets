@@ -2,6 +2,7 @@
  * Care Screen component showing pet status and care actions.
  */
 
+import { FeedButton, WaterButton } from "@/components/care";
 import { EnergyBar, PetInfo, PetSprite, PetStatus } from "@/components/pet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,6 +83,19 @@ export function CareScreen() {
 
       {/* Energy */}
       <EnergyBar energy={energy} />
+
+      {/* Care Actions */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <FeedButton />
+            <WaterButton />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

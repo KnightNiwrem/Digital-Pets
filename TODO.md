@@ -89,24 +89,24 @@ Stats decay over time, visible in real-time.
 Consumable items to restore care stats.
 
 ### 3.1 Types & Data
-- [ ] Create `src/game/types/item.ts` - Item, Food, Drink interfaces
-- [ ] Create `src/game/data/items/food.ts` - Food items (3-5 items)
-- [ ] Create `src/game/data/items/drinks.ts` - Drink items (3-5 items)
-- [ ] Create `src/game/data/items/index.ts` - Combined item database
+- [x] Create `src/game/types/item.ts` - Item, Food, Drink interfaces
+- [x] Create `src/game/data/items/food.ts` - Food items (3-5 items)
+- [x] Create `src/game/data/items/drinks.ts` - Drink items (3-5 items)
+- [x] Create `src/game/data/items/index.ts` - Combined item database
 
 ### 3.2 Inventory Logic
-- [ ] Create `src/game/core/inventory.ts` - Add, remove, find items
-- [ ] Create `src/game/state/actions/inventory.ts` - Inventory state actions
+- [x] Create `src/game/core/inventory.ts` - Add, remove, find items
+- [x] Create `src/game/state/actions/inventory.ts` - Inventory state actions
 
 ### 3.3 Item Usage Logic
-- [ ] Create `src/game/core/items.ts` - Use food/drink items
-- [ ] Create `src/game/state/actions/care.ts` - Feed, water actions
+- [x] Create `src/game/core/items.ts` - Use food/drink items
+- [x] Create `src/game/state/actions/care.ts` - Feed, water actions
 
 ### 3.4 Care Action UI
-- [ ] Create `src/components/care/FeedButton.tsx` - Open food selection
-- [ ] Create `src/components/care/WaterButton.tsx` - Open drink selection
-- [ ] Create `src/components/inventory/ItemSelector.tsx` - Item selection modal
-- [ ] Update CareScreen.tsx - Add feed/water buttons
+- [x] Create `src/components/care/FeedButton.tsx` - Open food selection
+- [x] Create `src/components/care/WaterButton.tsx` - Open drink selection
+- [x] Create `src/components/inventory/ItemSelector.tsx` - Item selection modal
+- [x] Update CareScreen.tsx - Add feed/water buttons
 
 **✓ Testable:** Click Feed → Select food → See Satiety increase. Same for Water.
 
