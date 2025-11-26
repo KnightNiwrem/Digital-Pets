@@ -197,3 +197,16 @@ test("calculateCareLifeChange returns 0 when stats between 0% and 50%", () => {
 
   expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(0);
 });
+
+test("calculateCareLifeChange handles maxCareStat of 0", () => {
+  const pet = createTestPet({
+    careStats: {
+      satiety: 40_000,
+      hydration: 40_000,
+      happiness: 40_000,
+    },
+  });
+
+  // Should return 0 (no recovery) when maxCareStat is 0 to avoid division by zero
+  expect(calculateCareLifeChange(pet, 0)).toBe(0);
+});

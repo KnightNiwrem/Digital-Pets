@@ -10,6 +10,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { processOfflineCatchup } from "@/game/core/tickProcessor";
+import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
 import { createGameManager, type GameManager } from "@/game/GameManager";
 import { deleteSave, loadGame, saveGame } from "@/game/state/persistence";
 import type { GameState } from "@/game/types";
@@ -74,23 +76,47 @@ export function GameProvider({ children }: GameProviderProps) {
     [],
   );
 
+  /**
+   * Process offline ticks and return the updated state.
+   * This is done before setting state to avoid race conditions.
+   */
+  const processOffline = useCallback((gameState: GameState): GameState => {
+    if (!gameState.lastSaveTime) return gameState;
+
+    const ticksElapsed = calculateElapsedTicks(gameState.lastSaveTime);
+    if (ticksElapsed <= 0) return gameState;
+
+    const { state: newState } = processOfflineCatchup(
+      gameState,
+      ticksElapsed,
+      MAX_OFFLINE_TICKS,
+    );
+    return newState;
+  }, []);
+
+  /**
+   * Start the game with the given state.
+   * Processes offline ticks before setting state, then starts the game loop.
+   */
+  const startGame = useCallback(
+    (gameState: GameState) => {
+      // Process offline ticks before setting state to avoid race condition
+      const stateWithOffline = processOffline(gameState);
+      setState(stateWithOffline);
+
+      // Create game manager and start the loop
+      const manager = createGameManager(updateState);
+      gameManagerRef.current = manager;
+      manager.start();
+    },
+    [processOffline, updateState],
+  );
+
   // Load game on mount and start game loop
   useEffect(() => {
     const result = loadGame();
     if (result.success) {
-      setState(result.state);
-
-      // Create game manager and process offline ticks
-      const manager = createGameManager(updateState);
-      gameManagerRef.current = manager;
-
-      // Process any offline time
-      if (result.state.lastSaveTime) {
-        manager.processOffline(result.state.lastSaveTime);
-      }
-
-      // Start the game loop
-      manager.start();
+      startGame(result.state);
     } else {
       setLoadError(result.error);
     }
@@ -102,7 +128,7 @@ export function GameProvider({ children }: GameProviderProps) {
         gameManagerRef.current.stop();
       }
     };
-  }, [updateState]);
+  }, [startGame]);
 
   // Auto-save on state change (debounced would be better in production)
   useEffect(() => {
@@ -125,17 +151,12 @@ export function GameProvider({ children }: GameProviderProps) {
     deleteSave();
     const result = loadGame();
     if (result.success) {
-      setState(result.state);
+      startGame(result.state);
       setLoadError(null);
-
-      // Create a new game manager and start the loop
-      const manager = createGameManager(updateState);
-      gameManagerRef.current = manager;
-      manager.start();
     } else {
       setLoadError(result.error);
     }
-  }, [updateState]);
+  }, [startGame]);
 
   const contextValue: GameContextValue = {
     state,

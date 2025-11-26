@@ -41,6 +41,7 @@ function countCriticalStats(pet: Pet): number {
  * Get care stat percentages for recovery calculation.
  */
 function getCareStatPercentages(pet: Pet, maxCareStat: MicroValue): number[] {
+  if (maxCareStat === 0) return [0, 0, 0];
   const satietyPercent = (pet.careStats.satiety / maxCareStat) * 100;
   const hydrationPercent = (pet.careStats.hydration / maxCareStat) * 100;
   const happinessPercent = (pet.careStats.happiness / maxCareStat) * 100;
@@ -56,37 +57,34 @@ export function calculateCareLifeChange(
   maxCareStat: MicroValue,
 ): MicroValue {
   const criticalCount = countCriticalStats(pet);
+  let totalDrain = 0;
 
-  // If any stats are critical, calculate drain
+  // Calculate drain from critical stats
   if (criticalCount > 0) {
-    let drain = 0;
-
     switch (criticalCount) {
       case 1:
-        drain = CARE_LIFE_DRAIN_1_STAT;
+        totalDrain += CARE_LIFE_DRAIN_1_STAT;
         break;
       case 2:
-        drain = CARE_LIFE_DRAIN_2_STATS;
+        totalDrain += CARE_LIFE_DRAIN_2_STATS;
         break;
       case 3:
-        drain = CARE_LIFE_DRAIN_3_STATS;
+        totalDrain += CARE_LIFE_DRAIN_3_STATS;
         break;
     }
-
-    // Additional drain from high poop
-    if (pet.poop.count >= 7) {
-      drain += CARE_LIFE_DRAIN_POOP;
-    }
-
-    return -drain;
   }
 
-  // If poop is 7+, drain even if stats are okay
+  // Add drain from high poop count
   if (pet.poop.count >= 7) {
-    return -CARE_LIFE_DRAIN_POOP;
+    totalDrain += CARE_LIFE_DRAIN_POOP;
   }
 
-  // Check for recovery conditions
+  // If there's any drain, apply it and exit
+  if (totalDrain > 0) {
+    return -totalDrain;
+  }
+
+  // If no drain, check for recovery conditions
   const percentages = getCareStatPercentages(pet, maxCareStat);
   const minPercent = Math.min(...percentages);
 
@@ -100,7 +98,7 @@ export function calculateCareLifeChange(
     return CARE_LIFE_RECOVERY_ABOVE_50;
   }
 
-  // No change if between 0% and 50%
+  // No change if stats are between 0% and 50% and no other drain conditions met
   return 0;
 }
 
