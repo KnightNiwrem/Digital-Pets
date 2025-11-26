@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { Layout, type NavigationTab } from "@/components/game";
-import { CareScreen } from "@/components/screens";
+import { CareScreen, InventoryScreen } from "@/components/screens";
 import { GameProvider } from "@/game/context/GameContext";
 import "./index.css";
 
@@ -37,7 +37,7 @@ function GameContent({
       case "care":
         return <CareScreen />;
       case "inventory":
-        return <PlaceholderScreen name="Inventory" />;
+        return <InventoryScreen />;
       case "map":
         return <PlaceholderScreen name="Map" />;
       case "training":
