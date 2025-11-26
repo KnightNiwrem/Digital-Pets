@@ -213,8 +213,8 @@ export function GameProvider({ children }: GameProviderProps) {
       };
 
       // Start the game with the new state
-      // Note: setHasSaveData is set after startGame to ensure state is set first,
-      // and the auto-save effect (line 161-165) will persist the save immediately.
+      // Note: setHasSaveData is set after startGame for consistency,
+      // ensuring state is initialized before marking that save data exists.
       startGame(newState);
       setHasSaveData(true);
     },
