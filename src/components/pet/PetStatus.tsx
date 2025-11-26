@@ -37,6 +37,27 @@ function getThresholdColor(threshold: CareThreshold): string {
 }
 
 /**
+ * Get text color based on threshold for low stat warnings.
+ */
+function getThresholdTextColor(threshold: CareThreshold): string {
+  switch (threshold) {
+    case "distressed":
+      return "text-red-500";
+    case "critical":
+      return "text-red-700 font-semibold";
+    default:
+      return "";
+  }
+}
+
+/**
+ * Check if stat should show warning animation.
+ */
+function shouldAnimate(threshold: CareThreshold): boolean {
+  return threshold === "distressed" || threshold === "critical";
+}
+
+/**
  * Individual stat bar component.
  */
 function StatBar({
@@ -48,21 +69,28 @@ function StatBar({
   threshold,
 }: StatBarProps) {
   const colorClass = getThresholdColor(threshold);
+  const textColorClass = getThresholdTextColor(threshold);
+  const animate = shouldAnimate(threshold);
 
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
-        <span className="flex items-center gap-1">
+        <span className={cn("flex items-center gap-1", textColorClass)}>
           <span>{icon}</span>
           <span>{label}</span>
+          {threshold === "critical" && <span className="animate-pulse">⚠️</span>}
         </span>
-        <span className="text-muted-foreground">
+        <span className={cn("text-muted-foreground", textColorClass)}>
           {value}/{max}
         </span>
       </div>
       <div className="h-3 w-full bg-secondary rounded-full overflow-hidden">
         <div
-          className={cn("h-full transition-all duration-300", colorClass)}
+          className={cn(
+            "h-full transition-all duration-300",
+            colorClass,
+            animate && "animate-pulse",
+          )}
           style={{ width: `${Math.max(0, Math.min(100, percent))}%` }}
         />
       </div>

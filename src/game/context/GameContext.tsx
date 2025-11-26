@@ -7,8 +7,10 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
+import { createGameManager, type GameManager } from "@/game/GameManager";
 import { deleteSave, loadGame, saveGame } from "@/game/state/persistence";
 import type { GameState } from "@/game/types";
 
@@ -54,30 +56,13 @@ interface GameProviderProps {
 
 /**
  * Game context provider component.
- * Handles loading, saving, and state management.
+ * Handles loading, saving, state management, and game loop.
  */
 export function GameProvider({ children }: GameProviderProps) {
   const [state, setState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-
-  // Load game on mount
-  useEffect(() => {
-    const result = loadGame();
-    if (result.success) {
-      setState(result.state);
-    } else {
-      setLoadError(result.error);
-    }
-    setIsLoading(false);
-  }, []);
-
-  // Auto-save on state change (debounced would be better in production)
-  useEffect(() => {
-    if (state && !isLoading) {
-      saveGame(state);
-    }
-  }, [state, isLoading]);
+  const gameManagerRef = useRef<GameManager | null>(null);
 
   const updateState = useCallback(
     (updater: (state: GameState) => GameState) => {
@@ -89,21 +74,68 @@ export function GameProvider({ children }: GameProviderProps) {
     [],
   );
 
+  // Load game on mount and start game loop
+  useEffect(() => {
+    const result = loadGame();
+    if (result.success) {
+      setState(result.state);
+
+      // Create game manager and process offline ticks
+      const manager = createGameManager(updateState);
+      gameManagerRef.current = manager;
+
+      // Process any offline time
+      if (result.state.lastSaveTime) {
+        manager.processOffline(result.state.lastSaveTime);
+      }
+
+      // Start the game loop
+      manager.start();
+    } else {
+      setLoadError(result.error);
+    }
+    setIsLoading(false);
+
+    // Cleanup on unmount
+    return () => {
+      if (gameManagerRef.current) {
+        gameManagerRef.current.stop();
+      }
+    };
+  }, [updateState]);
+
+  // Auto-save on state change (debounced would be better in production)
+  useEffect(() => {
+    if (state && !isLoading) {
+      saveGame(state);
+    }
+  }, [state, isLoading]);
+
   const save = useCallback(() => {
     if (!state) return false;
     return saveGame(state);
   }, [state]);
 
   const resetGame = useCallback(() => {
+    // Stop the current game loop
+    if (gameManagerRef.current) {
+      gameManagerRef.current.stop();
+    }
+
     deleteSave();
     const result = loadGame();
     if (result.success) {
       setState(result.state);
       setLoadError(null);
+
+      // Create a new game manager and start the loop
+      const manager = createGameManager(updateState);
+      gameManagerRef.current = manager;
+      manager.start();
     } else {
       setLoadError(result.error);
     }
-  }, []);
+  }, [updateState]);
 
   const contextValue: GameContextValue = {
     state,

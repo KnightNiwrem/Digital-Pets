@@ -63,22 +63,22 @@ First visual pet with care stat bars.
 Stats decay over time, visible in real-time.
 
 ### 2.1 Time System
-- [ ] Create `src/game/core/time.ts` - Timestamp utilities
-- [ ] Create `src/game/core/tick.ts` - Single tick processing logic
-- [ ] Create `src/game/core/tickProcessor.ts` - Tick processor with correct order
+- [x] Create `src/game/core/time.ts` - Timestamp utilities
+- [x] Create `src/game/core/tick.ts` - Single tick processing logic
+- [x] Create `src/game/core/tickProcessor.ts` - Tick processor with correct order
 
 ### 2.2 Care Decay Logic
-- [ ] Create `src/game/core/care/careStats.ts` - Care stat decay per tick
-- [ ] Create `src/game/core/care/careLife.ts` - Care life drain/recovery
+- [x] Create `src/game/core/care/careStats.ts` - Care stat decay per tick
+- [x] Create `src/game/core/care/careLife.ts` - Care life drain/recovery
 
 ### 2.3 Game Loop
-- [ ] Create `src/game/GameManager.ts` - Tick scheduling, runs every 30 seconds
-- [ ] Integrate GameManager into GameContext
-- [ ] Connect tick updates to state
+- [x] Create `src/game/GameManager.ts` - Tick scheduling, runs every 30 seconds
+- [x] Integrate GameManager into GameContext
+- [x] Connect tick updates to state
 
 ### 2.4 UI Updates
-- [ ] Update PetStatus.tsx - Show decay in real-time
-- [ ] Add visual indicators for low stats (color changes)
+- [x] Update PetStatus.tsx - Show decay in real-time
+- [x] Add visual indicators for low stats (color changes)
 
 **✓ Testable:** Watch care stats slowly decrease over time in the UI
 
