@@ -26,7 +26,9 @@ import {
 } from "@/game/state/persistence";
 import {
   createInitialGameState,
+  type GameNotification,
   type GameState,
+  type GrowthStage,
   MIN_OFFLINE_REPORT_MS,
   type OfflineReport,
   type Pet,
@@ -46,6 +48,8 @@ export interface GameContextActions {
   startNewGame: (petName: string, speciesId: string) => void;
   /** Dismiss the offline report */
   dismissOfflineReport: () => void;
+  /** Dismiss a notification */
+  dismissNotification: () => void;
 }
 
 /**
@@ -62,6 +66,8 @@ export interface GameContextValue {
   hasSaveData: boolean;
   /** Offline report to display (null if none or dismissed) */
   offlineReport: OfflineReport | null;
+  /** Current notification to display (null if none or dismissed) */
+  notification: GameNotification | null;
   /** Available actions */
   actions: GameContextActions;
 }
@@ -92,8 +98,13 @@ export function GameProvider({ children }: GameProviderProps) {
   const [offlineReport, setOfflineReport] = useState<OfflineReport | null>(
     null,
   );
+  const [notification, setNotification] = useState<GameNotification | null>(
+    null,
+  );
   const gameManagerRef = useRef<GameManager | null>(null);
+  const previousStageRef = useRef<GrowthStage | null>(null);
 
+  // Standard updateState that just updates the state
   const updateState = useCallback(
     (updater: (state: GameState) => GameState) => {
       setState((prev) => {
@@ -104,8 +115,35 @@ export function GameProvider({ children }: GameProviderProps) {
     [],
   );
 
+  // Detect stage transitions via useEffect (idiomatic React pattern)
+  useEffect(() => {
+    const currentStage = state?.pet?.growth.stage ?? null;
+    const previousStage = previousStageRef.current;
+
+    // Reset ref when pet is null (game reset or no pet yet)
+    if (!state?.pet) {
+      previousStageRef.current = null;
+      return;
+    }
+
+    if (currentStage && previousStage && currentStage !== previousStage) {
+      setNotification({
+        type: "stageTransition",
+        previousStage: previousStage,
+        newStage: currentStage,
+        petName: state.pet.identity.name,
+      });
+    }
+
+    previousStageRef.current = currentStage;
+  }, [state?.pet]);
+
   const dismissOfflineReport = useCallback(() => {
     setOfflineReport(null);
+  }, []);
+
+  const dismissNotification = useCallback(() => {
+    setNotification(null);
   }, []);
 
   /**
@@ -267,12 +305,14 @@ export function GameProvider({ children }: GameProviderProps) {
     loadError,
     hasSaveData,
     offlineReport,
+    notification,
     actions: {
       updateState,
       save,
       resetGame,
       startNewGame,
       dismissOfflineReport,
+      dismissNotification,
     },
   };
 

@@ -4,7 +4,12 @@
  */
 
 import { useState } from "react";
-import { Layout, type NavigationTab, OfflineReport } from "@/components/game";
+import {
+  Layout,
+  type NavigationTab,
+  OfflineReport,
+  StageTransitionNotification,
+} from "@/components/game";
 import {
   CareScreen,
   InventoryScreen,
@@ -38,7 +43,7 @@ function GameContent({
   activeTab: NavigationTab;
   onTabChange: (tab: NavigationTab) => void;
 }) {
-  const { state, isLoading, loadError, offlineReport, actions } =
+  const { state, isLoading, loadError, offlineReport, notification, actions } =
     useGameState();
 
   // Show loading state
@@ -94,6 +99,14 @@ function GameContent({
         <OfflineReport
           report={offlineReport}
           onDismiss={actions.dismissOfflineReport}
+        />
+      )}
+      {notification?.type === "stageTransition" && (
+        <StageTransitionNotification
+          previousStage={notification.previousStage}
+          newStage={notification.newStage}
+          petName={notification.petName}
+          onDismiss={actions.dismissNotification}
         />
       )}
     </Layout>
