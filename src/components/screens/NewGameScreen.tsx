@@ -87,7 +87,7 @@ export function NewGameScreen({ onStartGame }: NewGameScreenProps) {
   const isValid = trimmedName.length > 0 && selectedSpecies !== null;
 
   const handleStart = () => {
-    if (isValid) {
+    if (isValid && selectedSpecies !== null) {
       onStartGame(trimmedName, selectedSpecies);
     }
   };
