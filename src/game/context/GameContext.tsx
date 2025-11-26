@@ -104,35 +104,38 @@ export function GameProvider({ children }: GameProviderProps) {
   const gameManagerRef = useRef<GameManager | null>(null);
   const previousStageRef = useRef<GrowthStage | null>(null);
 
-  // Wrapper for updateState that detects stage transitions
-  const updateStateWithNotifications = useCallback(
+  // Standard updateState that just updates the state
+  const updateState = useCallback(
     (updater: (state: GameState) => GameState) => {
       setState((prev) => {
         if (!prev) return prev;
-        const newState = updater(prev);
-
-        // Check for stage transition
-        if (
-          prev.pet &&
-          newState.pet &&
-          prev.pet.growth.stage !== newState.pet.growth.stage
-        ) {
-          // Queue the notification (will be set after state update)
-          setTimeout(() => {
-            setNotification({
-              type: "stageTransition",
-              previousStage: prev.pet?.growth.stage ?? "baby",
-              newStage: newState.pet?.growth.stage ?? "baby",
-              petName: newState.pet?.identity.name ?? "",
-            });
-          }, 0);
-        }
-
-        return newState;
+        return updater(prev);
       });
     },
     [],
   );
+
+  // Detect stage transitions via useEffect (idiomatic React pattern)
+  useEffect(() => {
+    const currentStage = state?.pet?.growth.stage ?? null;
+    const previousStage = previousStageRef.current;
+
+    if (
+      state?.pet &&
+      currentStage &&
+      previousStage &&
+      currentStage !== previousStage
+    ) {
+      setNotification({
+        type: "stageTransition",
+        previousStage: previousStage,
+        newStage: currentStage,
+        petName: state.pet.identity.name,
+      });
+    }
+
+    previousStageRef.current = currentStage;
+  }, [state?.pet]);
 
   const dismissOfflineReport = useCallback(() => {
     setOfflineReport(null);
@@ -194,11 +197,11 @@ export function GameProvider({ children }: GameProviderProps) {
       }
 
       // Create game manager and start the loop
-      const manager = createGameManager(updateStateWithNotifications);
+      const manager = createGameManager(updateState);
       gameManagerRef.current = manager;
       manager.start();
     },
-    [processOffline, updateStateWithNotifications],
+    [processOffline, updateState],
   );
 
   // Load game on mount and start game loop
@@ -303,7 +306,7 @@ export function GameProvider({ children }: GameProviderProps) {
     offlineReport,
     notification,
     actions: {
-      updateState: updateStateWithNotifications,
+      updateState,
       save,
       resetGame,
       startNewGame,

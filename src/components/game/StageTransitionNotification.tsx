@@ -4,7 +4,13 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { GrowthStage } from "@/game/types/constants";
 import { cn } from "@/lib/utils";
 
@@ -16,39 +22,39 @@ interface StageTransitionNotificationProps {
 }
 
 /**
+ * Display names for each growth stage.
+ */
+const STAGE_DISPLAY_NAMES: Record<GrowthStage, string> = {
+  baby: "Baby",
+  child: "Child",
+  teen: "Teen",
+  youngAdult: "Young Adult",
+  adult: "Adult",
+};
+
+/**
+ * Emojis for each growth stage.
+ */
+const STAGE_EMOJIS: Record<GrowthStage, string> = {
+  baby: "🐣",
+  child: "🌱",
+  teen: "🌿",
+  youngAdult: "🌳",
+  adult: "⭐",
+};
+
+/**
  * Get display name for a growth stage.
  */
 function getStageDisplayName(stage: GrowthStage): string {
-  switch (stage) {
-    case "baby":
-      return "Baby";
-    case "child":
-      return "Child";
-    case "teen":
-      return "Teen";
-    case "youngAdult":
-      return "Young Adult";
-    case "adult":
-      return "Adult";
-  }
+  return STAGE_DISPLAY_NAMES[stage];
 }
 
 /**
  * Get emoji for a growth stage.
  */
 function getStageEmoji(stage: GrowthStage): string {
-  switch (stage) {
-    case "baby":
-      return "🐣";
-    case "child":
-      return "🌱";
-    case "teen":
-      return "🌿";
-    case "youngAdult":
-      return "🌳";
-    case "adult":
-      return "⭐";
-  }
+  return STAGE_EMOJIS[stage];
 }
 
 /**
@@ -69,21 +75,27 @@ export function StageTransitionNotification({
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card
+    <Dialog open onOpenChange={(open) => !open && onDismiss()}>
+      <DialogContent
         className={cn(
-          "m-4 max-w-sm w-full shadow-lg border-2 border-primary",
+          "sm:max-w-sm",
           isAnimating && "animate-in zoom-in-95 duration-300",
         )}
       >
-        <CardHeader className="text-center pb-2">
-          <div className="text-6xl mb-2">{getStageEmoji(newStage)}</div>
-          <CardTitle className="text-xl">Stage Evolution!</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-lg">
-            <span className="font-semibold">{petName}</span> has grown!
-          </p>
+        <DialogHeader className="text-center">
+          <div className="text-6xl mb-2 text-center">
+            {getStageEmoji(newStage)}
+          </div>
+          <DialogTitle className="text-xl text-center">
+            Stage Evolution!
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            <span className="font-semibold text-foreground">{petName}</span> has
+            grown!
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
           <div className="flex items-center justify-center gap-3">
             <div className="text-center">
               <div className="text-2xl">{getStageEmoji(previousStage)}</div>
@@ -99,14 +111,14 @@ export function StageTransitionNotification({
               </div>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             Stats have increased and new abilities may be unlocked!
           </p>
           <Button onClick={onDismiss} className="w-full">
             Continue
           </Button>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
