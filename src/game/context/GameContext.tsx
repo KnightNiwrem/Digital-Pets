@@ -120,12 +120,13 @@ export function GameProvider({ children }: GameProviderProps) {
     const currentStage = state?.pet?.growth.stage ?? null;
     const previousStage = previousStageRef.current;
 
-    if (
-      state?.pet &&
-      currentStage &&
-      previousStage &&
-      currentStage !== previousStage
-    ) {
+    // Reset ref when pet is null (game reset or no pet yet)
+    if (!state?.pet) {
+      previousStageRef.current = null;
+      return;
+    }
+
+    if (currentStage && previousStage && currentStage !== previousStage) {
       setNotification({
         type: "stageTransition",
         previousStage: previousStage,
