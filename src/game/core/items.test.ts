@@ -6,7 +6,7 @@ import { expect, test } from "bun:test";
 import { createNewPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import type { GameState } from "@/game/types/gameState";
-import { useDrinkItem, useFoodItem } from "./items";
+import { useCleaningItem, useDrinkItem, useFoodItem } from "./items";
 
 function createTestState(): GameState {
   const pet = createNewPet("TestPet", "florabit");
@@ -26,6 +26,8 @@ function createTestState(): GameState {
           { itemId: "food_kibble", quantity: 5, currentDurability: null },
           { itemId: "drink_water", quantity: 5, currentDurability: null },
           { itemId: "drink_energy", quantity: 2, currentDurability: null },
+          { itemId: "cleaning_tissue", quantity: 3, currentDurability: null },
+          { itemId: "cleaning_sponge", quantity: 2, currentDurability: null },
         ],
       },
       currency: { coins: 100 },
@@ -183,4 +185,89 @@ test("useFoodItem does not change poop timer when poopAcceleration is 0", () => 
   expect(result.success).toBe(true);
   // poop timer should remain unchanged
   expect(result.state.pet?.poop.ticksUntilNext).toBe(10);
+});
+
+test("useCleaningItem removes poop and consumes item", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.poop.count = 3;
+  }
+
+  const result = useCleaningItem(state, "cleaning_tissue");
+
+  expect(result.success).toBe(true);
+  // Tissue removes 1 poop
+  expect(result.state.pet?.poop.count).toBe(2);
+  // Item should be consumed
+  const tissueItem = result.state.player.inventory.items.find(
+    (i) => i.itemId === "cleaning_tissue",
+  );
+  expect(tissueItem?.quantity).toBe(2);
+});
+
+test("useCleaningItem fails when no pet exists", () => {
+  const state = createTestState();
+  state.pet = null;
+
+  const result = useCleaningItem(state, "cleaning_tissue");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("No pet");
+});
+
+test("useCleaningItem fails with invalid cleaning item", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.poop.count = 1;
+  }
+
+  const result = useCleaningItem(state, "food_kibble");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("Invalid cleaning item");
+});
+
+test("useCleaningItem fails when item not in inventory", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.poop.count = 1;
+  }
+
+  const result = useCleaningItem(state, "cleaning_vacuum");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("inventory");
+});
+
+test("useCleaningItem fails when no poop to clean", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.poop.count = 0;
+  }
+
+  const result = useCleaningItem(state, "cleaning_tissue");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("Nothing to clean");
+});
+
+test("useCleaningItem reduces poop but not below zero", () => {
+  const state = createTestState();
+  if (state.pet) {
+    // Set poop to 2, use sponge which removes 3
+    state.pet.poop.count = 2;
+  }
+
+  const result = useCleaningItem(state, "cleaning_sponge");
+  expect(result.success).toBe(true);
+  // Should be clamped at 0, not negative
+  expect(result.state.pet?.poop.count).toBe(0);
+});
+
+test("useCleaningItem with sponge removes more poop than tissue", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.poop.count = 5;
+  }
+
+  const result = useCleaningItem(state, "cleaning_sponge");
+  expect(result.success).toBe(true);
+  // Sponge removes 3 poop
+  expect(result.state.pet?.poop.count).toBe(2);
 });

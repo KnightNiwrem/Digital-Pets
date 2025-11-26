@@ -19,7 +19,7 @@ interface ItemSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   inventory: Inventory;
-  category: "food" | "drink";
+  category: "food" | "drink" | "cleaning";
   title: string;
   description: string;
   onSelect: (itemId: string) => void;

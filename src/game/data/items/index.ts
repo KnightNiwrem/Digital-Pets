@@ -2,7 +2,13 @@
  * Combined item database with lookup functions.
  */
 
-import type { DrinkItem, FoodItem, Item } from "@/game/types/item";
+import type {
+  CleaningItem,
+  DrinkItem,
+  FoodItem,
+  Item,
+} from "@/game/types/item";
+import { CLEANING_ITEMS, getCleaningItemById } from "./cleaning";
 import { DRINK_ITEMS, getDrinkItemById } from "./drinks";
 import { FOOD_ITEMS, getFoodItemById } from "./food";
 
@@ -12,6 +18,7 @@ import { FOOD_ITEMS, getFoodItemById } from "./food";
 export const ALL_ITEMS: readonly Item[] = [
   ...FOOD_ITEMS,
   ...DRINK_ITEMS,
+  ...CLEANING_ITEMS,
 ] as const;
 
 /**
@@ -44,8 +51,15 @@ export function getAllDrinkItems(): DrinkItem[] {
   return [...DRINK_ITEMS];
 }
 
+/**
+ * Get all cleaning items.
+ */
+export function getAllCleaningItems(): CleaningItem[] {
+  return [...CLEANING_ITEMS];
+}
+
 // Re-export individual lookup functions
-export { getDrinkItemById, getFoodItemById };
+export { getCleaningItemById, getDrinkItemById, getFoodItemById };
 
 // Re-export item arrays
-export { DRINK_ITEMS, FOOD_ITEMS };
+export { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS };

@@ -150,6 +150,25 @@ export interface PetInfoDisplay {
 }
 
 /**
+ * Poop display values.
+ */
+export interface PoopDisplay {
+  count: number;
+}
+
+/**
+ * Get poop info for display.
+ */
+export function selectPoop(state: GameState): PoopDisplay | null {
+  const pet = state.pet;
+  if (!pet) return null;
+
+  return {
+    count: pet.poop.count,
+  };
+}
+
+/**
  * Get pet info for display.
  */
 export function selectPetInfo(state: GameState): PetInfoDisplay | null {

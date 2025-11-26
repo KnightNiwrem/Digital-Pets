@@ -1,13 +1,14 @@
 /**
- * Item usage logic for consuming food and drinks.
+ * Item usage logic for consuming food, drinks, and cleaning items.
  */
 
+import { removePoop } from "@/game/core/care/poop";
 import { hasItem, removeItem } from "@/game/core/inventory";
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
 import { getItemById } from "@/game/data/items";
 import { getSpeciesById } from "@/game/data/species";
 import type { GameState } from "@/game/types/gameState";
-import { isDrinkItem, isFoodItem } from "@/game/types/item";
+import { isCleaningItem, isDrinkItem, isFoodItem } from "@/game/types/item";
 
 /**
  * Result of using an item.
@@ -192,5 +193,66 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
     success: true,
     state: newState,
     message: `Gave ${itemDef.name}!`,
+  };
+}
+
+/**
+ * Use a cleaning item to remove poop.
+ */
+export function useCleaningItem(
+  state: GameState,
+  itemId: string,
+): UseItemResult {
+  // Check if pet exists
+  if (!state.pet) {
+    return { success: false, state, message: "No pet to clean!" };
+  }
+
+  // Check if item exists and is cleaning
+  const itemDef = getItemById(itemId);
+  if (!itemDef || !isCleaningItem(itemDef)) {
+    return { success: false, state, message: "Invalid cleaning item!" };
+  }
+
+  // Check if player has the item
+  if (!hasItem(state.player.inventory, itemId)) {
+    return {
+      success: false,
+      state,
+      message: `No ${itemDef.name} in inventory!`,
+    };
+  }
+
+  // Check if there's poop to clean
+  if (state.pet.poop.count === 0) {
+    return { success: false, state, message: "Nothing to clean!" };
+  }
+
+  // Calculate new poop count
+  const newPoopCount = removePoop(state.pet.poop.count, itemDef.poopRemoved);
+
+  // Remove item and update pet
+  const newInventory = removeItem(state.player.inventory, itemId, 1);
+
+  const newState: GameState = {
+    ...state,
+    player: {
+      ...state.player,
+      inventory: newInventory,
+    },
+    pet: {
+      ...state.pet,
+      poop: {
+        ...state.pet.poop,
+        count: newPoopCount,
+      },
+    },
+  };
+
+  const cleaned = state.pet.poop.count - newPoopCount;
+  return {
+    success: true,
+    state: newState,
+    message: `Cleaned ${cleaned} poop with ${itemDef.name}!`,
   };
 }
