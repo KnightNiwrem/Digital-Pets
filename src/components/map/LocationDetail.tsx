@@ -2,8 +2,10 @@
  * Location detail component showing information about a selected location.
  */
 
+import { NPCDisplay } from "@/components/npc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getNpcsAtLocation } from "@/game/data/npcs";
 import type { Location } from "@/game/types/location";
 import { FacilityType, LocationType } from "@/game/types/location";
 
@@ -14,6 +16,7 @@ interface LocationDetailProps {
   travelMessage?: string;
   energyCost?: number;
   onTravel: () => void;
+  onNpcClick?: (npcId: string) => void;
 }
 
 /**
@@ -95,8 +98,10 @@ export function LocationDetail({
   travelMessage,
   energyCost,
   onTravel,
+  onNpcClick,
 }: LocationDetailProps) {
   const typeDisplay = getLocationTypeDisplay(location.type);
+  const npcs = isCurrentLocation ? getNpcsAtLocation(location.id) : [];
 
   return (
     <Card>
@@ -144,6 +149,22 @@ export function LocationDetail({
                   </span>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* NPCs (only shown for current location) */}
+        {isCurrentLocation && npcs.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium mb-2">People Here</h4>
+            <div className="flex flex-col gap-2">
+              {npcs.map((npc) => (
+                <NPCDisplay
+                  key={npc.id}
+                  npc={npc}
+                  onClick={() => onNpcClick?.(npc.id)}
+                />
+              ))}
             </div>
           </div>
         )}

@@ -10,6 +10,7 @@ export * from "./item";
 export * from "./location";
 export * from "./move";
 export * from "./notification";
+export * from "./npc";
 export * from "./offline";
 export * from "./pet";
 export * from "./skill";

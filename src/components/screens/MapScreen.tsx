@@ -4,6 +4,7 @@
 
 import { useMemo, useState } from "react";
 import { LocationDetail, LocationNode } from "@/components/map";
+import { DialogueScreen } from "@/components/npc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { getConnectedLocations, getLocation } from "@/game/data/locations";
@@ -20,6 +21,7 @@ export function MapScreen() {
     null,
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [talkingToNpcId, setTalkingToNpcId] = useState<string | null>(null);
 
   // Get current location
   const currentLocationId = state?.player.currentLocationId ?? "home";
@@ -69,6 +71,23 @@ export function MapScreen() {
     }
   };
 
+  // Handle NPC click
+  const handleNpcClick = (npcId: string) => {
+    setTalkingToNpcId(npcId);
+  };
+
+  // Handle dialogue close
+  const handleDialogueClose = () => {
+    setTalkingToNpcId(null);
+  };
+
+  // Handle shop open (placeholder for Milestone 17)
+  const handleOpenShop = (_npcId: string) => {
+    // Shop functionality will be implemented in Milestone 17
+    setErrorMessage("Shop is coming soon!");
+    setTalkingToNpcId(null);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -82,6 +101,17 @@ export function MapScreen() {
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">Error loading map data.</p>
       </div>
+    );
+  }
+
+  // If talking to an NPC, show dialogue screen
+  if (talkingToNpcId) {
+    return (
+      <DialogueScreen
+        npcId={talkingToNpcId}
+        onClose={handleDialogueClose}
+        onOpenShop={handleOpenShop}
+      />
     );
   }
 
@@ -152,6 +182,7 @@ export function MapScreen() {
             travelMessage={travelInfo[selectedLocation.id]?.message}
             energyCost={travelInfo[selectedLocation.id]?.energyCost}
             onTravel={() => handleTravel(selectedLocation.id)}
+            onNpcClick={handleNpcClick}
           />
         )}
 
@@ -162,6 +193,7 @@ export function MapScreen() {
             isCurrentLocation={true}
             canTravel={false}
             onTravel={() => {}}
+            onNpcClick={handleNpcClick}
           />
         )}
       </div>
