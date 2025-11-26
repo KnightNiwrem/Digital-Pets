@@ -6,13 +6,19 @@ import { expect, test } from "bun:test";
 import { createNewPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import type { GameState } from "@/game/types/gameState";
-import { useCleaningItem, useDrinkItem, useFoodItem } from "./items";
+import {
+  useCleaningItem,
+  useDrinkItem,
+  useFoodItem,
+  useToyItem,
+} from "./items";
 
 function createTestState(): GameState {
   const pet = createNewPet("TestPet", "florabit");
   // Reduce stats to test restoration
   pet.careStats.satiety = 10_000;
   pet.careStats.hydration = 10_000;
+  pet.careStats.happiness = 10_000;
   pet.energyStats.energy = 10_000;
 
   return {
@@ -28,6 +34,8 @@ function createTestState(): GameState {
           { itemId: "drink_energy", quantity: 2, currentDurability: null },
           { itemId: "cleaning_tissue", quantity: 3, currentDurability: null },
           { itemId: "cleaning_sponge", quantity: 2, currentDurability: null },
+          { itemId: "toy_ball", quantity: 1, currentDurability: 10 },
+          { itemId: "toy_rope", quantity: 1, currentDurability: 3 },
         ],
       },
       currency: { coins: 100 },
@@ -270,4 +278,102 @@ test("useCleaningItem with sponge removes more poop than tissue", () => {
   expect(result.success).toBe(true);
   // Sponge removes 3 poop
   expect(result.state.pet?.poop.count).toBe(2);
+});
+
+// Toy tests
+test("useToyItem restores happiness", () => {
+  const state = createTestState();
+  const result = useToyItem(state, "toy_ball");
+
+  expect(result.success).toBe(true);
+  expect(result.state.pet?.careStats.happiness).toBeGreaterThan(10_000);
+});
+
+test("useToyItem reduces durability by 1", () => {
+  const state = createTestState();
+  const result = useToyItem(state, "toy_ball");
+
+  expect(result.success).toBe(true);
+  const toyItem = result.state.player.inventory.items.find(
+    (i) => i.itemId === "toy_ball",
+  );
+  expect(toyItem?.currentDurability).toBe(9);
+});
+
+test("useToyItem destroys toy when durability reaches 0", () => {
+  const baseState = createTestState();
+  // Set rope to 1 durability so it breaks after use (immutable update)
+  const ropeIndex = baseState.player.inventory.items.findIndex(
+    (i) => i.itemId === "toy_rope",
+  );
+  const state = {
+    ...baseState,
+    player: {
+      ...baseState.player,
+      inventory: {
+        items: baseState.player.inventory.items.map((item, i) =>
+          i === ropeIndex ? { ...item, currentDurability: 1 } : item,
+        ),
+      },
+    },
+  };
+
+  const result = useToyItem(state, "toy_rope");
+
+  expect(result.success).toBe(true);
+  expect(result.message).toContain("broke");
+  // Toy should be removed from inventory
+  const toyItem = result.state.player.inventory.items.find(
+    (i) => i.itemId === "toy_rope",
+  );
+  expect(toyItem).toBeUndefined();
+});
+
+test("useToyItem fails when pet is sleeping", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.sleep.isSleeping = true;
+  }
+
+  const result = useToyItem(state, "toy_ball");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("sleeping");
+});
+
+test("useToyItem fails when no pet exists", () => {
+  const state = createTestState();
+  state.pet = null;
+
+  const result = useToyItem(state, "toy_ball");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("No pet");
+});
+
+test("useToyItem fails when toy not in inventory", () => {
+  const state = createTestState();
+
+  const result = useToyItem(state, "toy_plush");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("inventory");
+});
+
+test("useToyItem fails with invalid toy item", () => {
+  const state = createTestState();
+
+  const result = useToyItem(state, "food_kibble");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("Invalid toy item");
+});
+
+test("useToyItem clamps happiness to max", () => {
+  const state = createTestState();
+  if (state.pet) {
+    // Set happiness near max
+    state.pet.careStats.happiness = 49_000;
+  }
+
+  const result = useToyItem(state, "toy_ball");
+  expect(result.success).toBe(true);
+  // Baby stage max with florabit multiplier is 50_000
+  expect(result.state.pet?.careStats.happiness).toBe(50_000);
 });

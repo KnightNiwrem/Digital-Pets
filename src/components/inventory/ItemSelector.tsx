@@ -19,7 +19,7 @@ interface ItemSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   inventory: Inventory;
-  category: "food" | "drink" | "cleaning";
+  category: "food" | "drink" | "cleaning" | "toy";
   title: string;
   description: string;
   onSelect: (itemId: string) => void;
@@ -32,6 +32,11 @@ interface ItemButtonProps {
 }
 
 function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
+  const durability = inventoryItem.currentDurability;
+  // TypeScript narrows itemDef to ToyItem when category === "toy"
+  const maxDurability =
+    itemDef.category === "toy" ? itemDef.maxDurability : undefined;
+
   return (
     <Button
       variant="outline"
@@ -41,9 +46,15 @@ function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
     >
       <span className="text-2xl">{itemDef.icon}</span>
       <span className="text-sm font-medium">{itemDef.name}</span>
-      <span className="text-xs text-muted-foreground">
-        ×{inventoryItem.quantity}
-      </span>
+      {durability !== null && maxDurability !== undefined ? (
+        <span className="text-xs text-muted-foreground">
+          {durability}/{maxDurability}
+        </span>
+      ) : (
+        <span className="text-xs text-muted-foreground">
+          ×{inventoryItem.quantity}
+        </span>
+      )}
     </Button>
   );
 }

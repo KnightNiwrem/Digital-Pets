@@ -14,6 +14,7 @@ const STARTING_ITEMS: readonly InventoryItem[] = [
   { itemId: "food_apple", quantity: 5, currentDurability: null },
   { itemId: "drink_water", quantity: 10, currentDurability: null },
   { itemId: "drink_juice", quantity: 5, currentDurability: null },
+  { itemId: "toy_ball", quantity: 1, currentDurability: 10 },
 ] as const;
 
 /**
