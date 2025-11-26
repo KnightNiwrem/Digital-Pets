@@ -354,6 +354,7 @@ export function GameProvider({ children }: GameProviderProps) {
         ...createInitialGameState(),
         pet,
         player: {
+          ...createInitialGameState().player,
           inventory: { items: getStartingInventory() },
           currency: { coins: STARTING_COINS },
           currentLocationId: "home",

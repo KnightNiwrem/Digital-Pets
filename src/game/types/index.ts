@@ -12,5 +12,6 @@ export * from "./move";
 export * from "./notification";
 export * from "./offline";
 export * from "./pet";
+export * from "./skill";
 export * from "./species";
 export * from "./stats";

@@ -80,6 +80,7 @@ function createTestState(options: {
     ...createInitialGameState(),
     pet,
     player: {
+      ...createInitialGameState().player,
       inventory: { items: [] },
       currency: { coins: 0 },
       currentLocationId,
