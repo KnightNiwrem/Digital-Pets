@@ -3,6 +3,7 @@
  */
 
 import { putToSleep, wakeUp } from "@/game/core/sleep";
+import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 
 /**
@@ -35,6 +36,7 @@ export function sleepPet(state: GameState): SleepActionResult {
       pet: {
         ...state.pet,
         sleep: result.sleep,
+        ...(result.success && { activityState: ActivityState.Sleeping }),
       },
     },
     message: result.message,
@@ -62,6 +64,7 @@ export function wakePet(state: GameState): SleepActionResult {
       pet: {
         ...state.pet,
         sleep: result.sleep,
+        ...(result.success && { activityState: ActivityState.Idle }),
       },
     },
     message: result.message,

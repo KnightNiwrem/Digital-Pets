@@ -21,7 +21,10 @@ export function SleepToggle() {
 
   const handleToggle = () => {
     actions.updateState((currentState) => {
-      const result = isSleeping
+      if (!currentState.pet) {
+        return currentState;
+      }
+      const result = currentState.pet.sleep.isSleeping
         ? wakePet(currentState)
         : sleepPet(currentState);
       if (!result.success) {
