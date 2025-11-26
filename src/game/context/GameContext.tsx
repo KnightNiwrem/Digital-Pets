@@ -193,6 +193,7 @@ export function GameProvider({ children }: GameProviderProps) {
       try {
         pet = createNewPet(petName, speciesId);
       } catch (error) {
+        console.error("Failed to create new pet:", error);
         setLoadError(
           error instanceof Error ? error.message : "Failed to create pet",
         );
