@@ -108,8 +108,8 @@ export function NewGameScreen({ onStartGame }: NewGameScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="mx-auto max-w-2xl space-y-8">
+    <div className="h-full overflow-y-auto bg-background p-4">
+      <div className="mx-auto max-w-2xl space-y-8 pb-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">🐾 Digital Pets</h1>
           <p className="text-muted-foreground mt-2">
