@@ -117,7 +117,8 @@ export function BattleScreen({
       }, ENEMY_TURN_DELAY_MS);
       return () => clearTimeout(timeout);
     }
-  }, [battleState.phase, isProcessing, triggerAttackAnimation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [battleState.phase, triggerAttackAnimation]);
 
   // Process turn resolution automatically
   useEffect(() => {

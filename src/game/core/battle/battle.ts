@@ -301,13 +301,25 @@ export function executePlayerTurn(state: BattleState, move: Move): BattleState {
     };
   }
 
-  // Move to enemy turn
+  // Determine next phase
+  const nextIndex = state.turnOrderIndex + 1;
+  let nextPhase: BattlePhase;
+
+  if (nextIndex >= state.turnOrder.length) {
+    nextPhase = BattlePhase.TurnResolution;
+  } else {
+    const nextActor = state.turnOrder[nextIndex];
+    nextPhase =
+      nextActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn;
+  }
+
   return {
     ...state,
     player: actor,
     enemy: target,
     log: newLog,
-    phase: BattlePhase.EnemyTurn,
+    phase: nextPhase,
+    turnOrderIndex: nextIndex,
     playerActed: true,
   };
 }
@@ -360,13 +372,25 @@ export function executeEnemyTurn(state: BattleState): BattleState {
     };
   }
 
-  // Move to turn resolution
+  // Determine next phase
+  const nextIndex = state.turnOrderIndex + 1;
+  let nextPhase: BattlePhase;
+
+  if (nextIndex >= state.turnOrder.length) {
+    nextPhase = BattlePhase.TurnResolution;
+  } else {
+    const nextActor = state.turnOrder[nextIndex];
+    nextPhase =
+      nextActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn;
+  }
+
   return {
     ...state,
     player: target,
     enemy: actor,
     log: newLog,
-    phase: BattlePhase.TurnResolution,
+    phase: nextPhase,
+    turnOrderIndex: nextIndex,
     enemyActed: true,
   };
 }
