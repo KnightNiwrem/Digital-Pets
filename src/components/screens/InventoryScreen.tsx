@@ -95,7 +95,7 @@ export function InventoryScreen() {
         </CardHeader>
         <CardContent>
           {/* Category Filters */}
-          <div className="flex gap-1 overflow-x-auto pb-2">
+          <div className="flex gap-1 overflow-x-auto pb-2 no-scrollbar">
             {CATEGORY_FILTERS.map((filter) => (
               <button
                 type="button"

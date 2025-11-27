@@ -10,7 +10,8 @@
   }
 
   body {
-    @apply h-full overflow-hidden min-w-[320px] relative m-0 bg-background text-foreground;
+    @apply h-full overflow-hidden min-w-[320px] relative m-0 bg-background
+      text-foreground;
   }
 
   #root {
@@ -158,6 +159,14 @@
 
   .animate-battle-hit {
     animation: battle-hit 0.5s ease-out;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 

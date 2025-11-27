@@ -194,17 +194,19 @@ export function CareScreen() {
           <CardTitle className="text-lg">Actions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex gap-2">
-            <SleepToggle />
-          </div>
-          {!petInfo.isSleeping && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <FeedButton onSuccess={handleFeedSuccess} />
-              <WaterButton onSuccess={handleWaterSuccess} />
-              <PlayButton onSuccess={handlePlaySuccess} />
-              <CleanButton onSuccess={handleCleanSuccess} />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
+              <SleepToggle />
             </div>
-          )}
+            {!petInfo.isSleeping && (
+              <>
+                <FeedButton onSuccess={handleFeedSuccess} />
+                <WaterButton onSuccess={handleWaterSuccess} />
+                <PlayButton onSuccess={handlePlaySuccess} />
+                <CleanButton onSuccess={handleCleanSuccess} />
+              </>
+            )}
+          </div>
           {petInfo.isSleeping && (
             <p className="text-sm text-muted-foreground text-center">
               Wake up your pet to feed, water, play, or clean.

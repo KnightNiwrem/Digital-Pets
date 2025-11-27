@@ -167,7 +167,7 @@ export function BattleScreen({
   const isPlayerTurn = battleState.phase === BattlePhase.PlayerTurn;
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 pb-4">
       {/* Turn indicator */}
       <Card>
         <CardContent className="py-2 px-4 flex items-center justify-between">
