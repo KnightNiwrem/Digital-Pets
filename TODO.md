@@ -385,13 +385,13 @@ Interactable NPCs in towns.
 Buy items from merchants.
 
 ### 17.1 Shop Logic
-- [ ] Add shop inventory to NPC merchants
-- [ ] Create buy/sell functions
+- [x] Add shop inventory to NPC merchants
+- [x] Create buy/sell functions
 
 ### 17.2 Shop UI
-- [ ] Create `src/components/screens/ShopScreen.tsx` - Shop interface
-- [ ] Create `src/components/shop/ShopInventory.tsx` - Items for sale
-- [ ] Create `src/components/shop/BuySellPanel.tsx` - Transaction interface
+- [x] Create `src/components/screens/ShopScreen.tsx` - Shop interface
+- [x] Create `src/components/shop/ShopInventory.tsx` - Items for sale
+- [x] Create `src/components/shop/BuySellPanel.tsx` - Transaction interface
 
 **✓ Testable:** Visit merchant NPC → Open shop → Buy item → See in inventory
 
