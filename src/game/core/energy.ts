@@ -6,9 +6,13 @@ import type { MicroValue } from "@/game/types/common";
 
 /**
  * Energy regeneration rates per tick (micro-units).
+ *
+ * Per spec (training.md):
+ * - Awake: +40 per tick → ~4800 micro/hour = ~4.8 display/hour
+ * - Sleeping: +120 per tick → ~14400 micro/hour = ~14.4 display/hour
  */
-export const ENERGY_REGEN_AWAKE: MicroValue = 8;
-export const ENERGY_REGEN_SLEEPING: MicroValue = 25;
+export const ENERGY_REGEN_AWAKE: MicroValue = 40;
+export const ENERGY_REGEN_SLEEPING: MicroValue = 120;
 
 /**
  * Get energy regeneration rate based on sleep state.
