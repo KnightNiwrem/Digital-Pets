@@ -105,7 +105,6 @@ export function BattleScreen({
   );
 
   // Process game loop (Enemy Turn & Turn Resolution)
-  // Process game loop (Enemy Turn & Turn Resolution)
   useEffect(() => {
     if (battleState.phase === BattlePhase.EnemyTurn) {
       setIsProcessing(true);
