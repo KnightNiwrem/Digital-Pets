@@ -86,7 +86,7 @@ export interface BattleState {
   /** Battle log entries */
   log: BattleLogEntry[];
   /** Turn order for current turn */
-  turnOrder: [("player" | "enemy"), ("player" | "enemy")];
+  turnOrder: ["player" | "enemy", "player" | "enemy"];
   /** Index in turn order */
   turnOrderIndex: number;
   /** Whether player has acted this turn */
