@@ -49,13 +49,9 @@ function grantReward(
         reward.target,
         reward.quantity,
       );
-      // Check if item was actually added by comparing inventory
-      const itemAdded =
-        newInventory.items.length !== state.player.inventory.items.length ||
-        newInventory.items.some((item, i) => {
-          const prev = state.player.inventory.items[i];
-          return !prev || item.quantity !== prev.quantity;
-        });
+      // Check if item was actually added by comparing inventory reference
+      // addItem returns the original inventory unchanged when item doesn't exist
+      const itemAdded = newInventory !== state.player.inventory;
       const newState: GameState = {
         ...state,
         player: {
