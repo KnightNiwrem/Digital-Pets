@@ -96,6 +96,8 @@ export interface ActiveTraining {
   durationTicks: Tick;
   /** Ticks remaining */
   ticksRemaining: Tick;
+  /** Energy cost paid to start (in micro units, for refund on cancel) */
+  energyCost: number;
 }
 
 /**
@@ -146,6 +148,8 @@ export interface ActiveExploration {
   durationTicks: Tick;
   /** Ticks remaining */
   ticksRemaining: Tick;
+  /** Energy cost paid to start (in micro units, for refund on cancel) */
+  energyCost: number;
 }
 
 /**

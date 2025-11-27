@@ -404,6 +404,7 @@ test("processGameTick updates quest progress when training completes", () => {
       ticksRemaining: 1, // Will complete on this tick
       durationTicks: 10,
       startTick: 0,
+      energyCost: 0,
     },
   });
 
@@ -439,6 +440,7 @@ test("processGameTick updates quest progress when exploration completes", () => 
       ticksRemaining: 1, // Will complete on this tick
       durationTicks: 10,
       startTick: 0,
+      energyCost: 0,
     },
   });
 
