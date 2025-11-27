@@ -24,6 +24,16 @@ export interface GrowthStageDefinition {
   baseEnergyMax: MicroValue;
   /** Maximum care life (micro-units) */
   careLifeMax: MicroValue;
+  /**
+   * Minimum sleep ticks required per day.
+   * Per spec (training.md):
+   * - Baby: 1920 ticks (16 hours)
+   * - Child: 1680 ticks (14 hours)
+   * - Teen: 1440 ticks (12 hours)
+   * - Young Adult: 1200 ticks (10 hours)
+   * - Adult: 960 ticks (8 hours)
+   */
+  minSleepTicks: Tick;
 }
 
 /**
@@ -47,6 +57,7 @@ export const GROWTH_STAGE_DEFINITIONS: Record<
     baseCareStatMax: 50_000,
     baseEnergyMax: 50_000,
     careLifeMax: 72_000,
+    minSleepTicks: 1920, // 16 hours
   },
   child: {
     stage: "child",
@@ -56,6 +67,7 @@ export const GROWTH_STAGE_DEFINITIONS: Record<
     baseCareStatMax: 80_000,
     baseEnergyMax: 75_000,
     careLifeMax: 120_000,
+    minSleepTicks: 1680, // 14 hours
   },
   teen: {
     stage: "teen",
@@ -65,6 +77,7 @@ export const GROWTH_STAGE_DEFINITIONS: Record<
     baseCareStatMax: 120_000,
     baseEnergyMax: 100_000,
     careLifeMax: 168_000,
+    minSleepTicks: 1440, // 12 hours
   },
   youngAdult: {
     stage: "youngAdult",
@@ -74,6 +87,7 @@ export const GROWTH_STAGE_DEFINITIONS: Record<
     baseCareStatMax: 160_000,
     baseEnergyMax: 150_000,
     careLifeMax: 240_000,
+    minSleepTicks: 1200, // 10 hours
   },
   adult: {
     stage: "adult",
@@ -83,6 +97,7 @@ export const GROWTH_STAGE_DEFINITIONS: Record<
     baseCareStatMax: 200_000,
     baseEnergyMax: 200_000,
     careLifeMax: 336_000,
+    minSleepTicks: 960, // 8 hours
   },
 };
 

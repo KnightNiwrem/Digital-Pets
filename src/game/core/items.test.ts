@@ -25,6 +25,7 @@ function createTestState(): GameState {
   return {
     version: CURRENT_SAVE_VERSION,
     lastSaveTime: Date.now(),
+    lastDailyReset: Date.now(),
     totalTicks: 0,
     pet,
     player: {

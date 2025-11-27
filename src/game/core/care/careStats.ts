@@ -3,24 +3,15 @@
  */
 
 import { calculatePetMaxStats } from "@/game/core/petStats";
-import type { MicroValue } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
+import {
+  CARE_DECAY_AWAKE,
+  CARE_DECAY_SLEEPING,
+  POOP_HAPPINESS_MULTIPLIERS,
+} from "./constants";
 
-/**
- * Care stat decay rates per tick (micro-units).
- */
-export const CARE_DECAY_AWAKE: MicroValue = 50;
-export const CARE_DECAY_SLEEPING: MicroValue = 25;
-
-/**
- * Poop multipliers for happiness decay.
- */
-const POOP_HAPPINESS_MULTIPLIERS: readonly [number, number][] = [
-  [7, 3.0], // 7+ poop: ×3
-  [5, 2.0], // 5-6 poop: ×2
-  [3, 1.5], // 3-4 poop: ×1.5
-  [0, 1.0], // 0-2 poop: ×1 (normal)
-];
+// Re-export constants for backwards compatibility with tests
+export { CARE_DECAY_AWAKE, CARE_DECAY_SLEEPING };
 
 /**
  * Get the happiness decay multiplier based on poop count.
