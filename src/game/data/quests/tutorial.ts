@@ -125,7 +125,7 @@ export const tutorialTraining: Quest = {
     },
     {
       type: RewardType.XP,
-      target: "foraging",
+      target: "taming",
       quantity: 25,
     },
   ],

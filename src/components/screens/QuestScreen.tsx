@@ -87,21 +87,29 @@ export function QuestScreen() {
   // Handle quest accept
   const handleAcceptQuest = () => {
     if (!selectedQuestId) return;
+    let success = false;
     updateState((prevState) => {
       const result = startQuest(prevState, selectedQuestId);
+      success = result.success;
       return result.state;
     });
-    setActiveTab("active");
+    if (success) {
+      setActiveTab("active");
+    }
   };
 
   // Handle quest complete
   const handleCompleteQuest = () => {
     if (!selectedQuestId) return;
+    let success = false;
     updateState((prevState) => {
       const result = completeQuest(prevState, selectedQuestId);
+      success = result.success;
       return result.state;
     });
-    setSelectedQuestId(null);
+    if (success) {
+      setSelectedQuestId(null);
+    }
   };
 
   if (!state) {

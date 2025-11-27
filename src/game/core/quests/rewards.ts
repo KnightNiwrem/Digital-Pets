@@ -49,6 +49,13 @@ function grantReward(
         reward.target,
         reward.quantity,
       );
+      // Check if item was actually added by comparing inventory
+      const itemAdded =
+        newInventory.items.length !== state.player.inventory.items.length ||
+        newInventory.items.some((item, i) => {
+          const prev = state.player.inventory.items[i];
+          return !prev || item.quantity !== prev.quantity;
+        });
       const newState: GameState = {
         ...state,
         player: {
@@ -58,13 +65,16 @@ function grantReward(
       };
       return {
         state: newState,
-        summary: `${reward.quantity}x ${reward.target}`,
+        summary: itemAdded ? `${reward.quantity}x ${reward.target}` : "",
       };
     }
 
     case RewardType.XP: {
       const skillType = reward.target as SkillType;
       if (!Object.values(SkillType).includes(skillType)) {
+        console.warn(
+          `[QuestReward] Invalid skill type "${reward.target}" in XP reward. Reward skipped.`,
+        );
         return { state, summary: "" };
       }
       const { skills } = addXpToPlayerSkill(
