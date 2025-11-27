@@ -54,7 +54,7 @@ export function checkLocationRequirements(
   // Check quest requirement
   if (requirements.questId) {
     const questCompleted = state.quests.some(
-      (q) => q.questId === requirements.questId && q.isCompleted,
+      (q) => q.questId === requirements.questId && q.state === "completed",
     );
     if (!questCompleted) {
       return {

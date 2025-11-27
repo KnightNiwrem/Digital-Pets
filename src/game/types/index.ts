@@ -13,6 +13,7 @@ export * from "./notification";
 export * from "./npc";
 export * from "./offline";
 export * from "./pet";
+export * from "./quest";
 export * from "./skill";
 export * from "./species";
 export * from "./stats";

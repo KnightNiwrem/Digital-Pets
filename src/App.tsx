@@ -19,6 +19,7 @@ import {
   InventoryScreen,
   MapScreen,
   NewGameScreen,
+  QuestScreen,
   SkillsScreen,
   TrainingScreen,
 } from "@/components/screens";
@@ -31,19 +32,6 @@ import {
 } from "@/game/core/battle/battle";
 import { useGameState } from "@/game/hooks/useGameState";
 import "./index.css";
-
-/**
- * Placeholder screen for tabs not yet implemented.
- */
-function PlaceholderScreen({ name }: { name: string }) {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <p className="text-muted-foreground">
-        {name} screen will be implemented in a future milestone.
-      </p>
-    </div>
-  );
-}
 
 /**
  * Main game content that renders based on active tab.
@@ -158,7 +146,7 @@ function GameContent({
       case "skills":
         return <SkillsScreen />;
       case "quests":
-        return <PlaceholderScreen name="Quests" />;
+        return <QuestScreen />;
       case "battle":
         // Fallback if no battle info (useEffect will redirect)
         return <ExplorationScreen onStartBattle={handleStartBattle} />;

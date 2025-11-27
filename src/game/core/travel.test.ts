@@ -39,9 +39,8 @@ function createTestState(options: {
     },
     quests: quests.map((q) => ({
       questId: q.questId,
-      currentObjective: 0,
+      state: q.isCompleted ? "completed" : "active",
       objectiveProgress: {},
-      isCompleted: q.isCompleted,
     })),
     isInitialized: true,
   };
