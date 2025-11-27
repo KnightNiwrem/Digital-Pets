@@ -3,68 +3,14 @@
  */
 
 import { expect, mock, test } from "bun:test";
+import { createTestPet } from "@/game/testing/createTestPet";
 import type { GameState } from "@/game/types/gameState";
 import { createInitialGameState } from "@/game/types/gameState";
-import type { Pet } from "@/game/types/pet";
 import {
   createGameManager,
   GameManager,
   type StateUpdateCallback,
 } from "./GameManager";
-
-function createTestPet(overrides: Partial<Pet> = {}): Pet {
-  return {
-    identity: {
-      id: "test_pet",
-      name: "Test Pet",
-      speciesId: "florabit",
-    },
-    growth: {
-      stage: "baby",
-      substage: 1,
-      birthTime: Date.now(),
-      ageTicks: 0,
-    },
-    careStats: {
-      satiety: 40_000,
-      hydration: 40_000,
-      happiness: 40_000,
-    },
-    energyStats: {
-      energy: 40_000,
-    },
-    careLifeStats: {
-      careLife: 72_000,
-    },
-    battleStats: {
-      strength: 10,
-      endurance: 10,
-      agility: 10,
-      precision: 10,
-      fortitude: 10,
-      cunning: 10,
-    },
-    resistances: {
-      slashing: 0,
-      piercing: 0,
-      crushing: 0,
-      chemical: 0,
-      thermal: 0,
-      electric: 0,
-    },
-    poop: {
-      count: 0,
-      ticksUntilNext: 480,
-    },
-    sleep: {
-      isSleeping: false,
-      sleepStartTime: null,
-      sleepTicksToday: 0,
-    },
-    activityState: "idle",
-    ...overrides,
-  };
-}
 
 // Tests for GameManager lifecycle
 

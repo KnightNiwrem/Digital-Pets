@@ -3,12 +3,7 @@
  */
 
 import { expect, test } from "bun:test";
-import { now } from "@/game/types/common";
-import type { Pet } from "@/game/types/pet";
-import {
-  createDefaultBattleStats,
-  createDefaultResistances,
-} from "@/game/types/stats";
+import { createTestPet } from "@/game/testing/createTestPet";
 import {
   getInitialPoopTimer,
   MAX_POOP_COUNT,
@@ -17,47 +12,6 @@ import {
   processPoopTick,
   removePoop,
 } from "./poop";
-
-// Helper to create a minimal pet for testing
-function createTestPet(overrides: Partial<Pet> = {}): Pet {
-  return {
-    identity: {
-      id: "test-pet",
-      name: "Test Pet",
-      speciesId: "species_blob",
-    },
-    growth: {
-      stage: "baby",
-      substage: 1,
-      birthTime: now(),
-      ageTicks: 0,
-    },
-    careStats: {
-      satiety: 50000,
-      hydration: 50000,
-      happiness: 50000,
-    },
-    energyStats: {
-      energy: 50000,
-    },
-    careLifeStats: {
-      careLife: 72000,
-    },
-    battleStats: createDefaultBattleStats(),
-    resistances: createDefaultResistances(),
-    poop: {
-      count: 0,
-      ticksUntilNext: POOP_INTERVAL_AWAKE,
-    },
-    sleep: {
-      isSleeping: false,
-      sleepStartTime: null,
-      sleepTicksToday: 0,
-    },
-    activityState: "idle",
-    ...overrides,
-  };
-}
 
 test("getInitialPoopTimer returns awake interval", () => {
   expect(getInitialPoopTimer()).toBe(POOP_INTERVAL_AWAKE);
@@ -88,7 +42,7 @@ test("processPoopTick generates poop when timer reaches 0", () => {
 test("processPoopTick uses sleeping interval when pet is asleep", () => {
   const pet = createTestPet({
     poop: { count: 0, ticksUntilNext: 1 },
-    sleep: { isSleeping: true, sleepStartTime: now(), sleepTicksToday: 0 },
+    sleep: { isSleeping: true, sleepStartTime: Date.now(), sleepTicksToday: 0 },
   });
 
   const result = processPoopTick(pet);

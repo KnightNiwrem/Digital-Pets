@@ -13,68 +13,11 @@ import {
   processTrainingTick,
   startTraining,
 } from "@/game/core/training";
+import { createTestPet } from "@/game/testing/createTestPet";
 import type { ActiveTraining } from "@/game/types/activity";
 import { TrainingSessionType } from "@/game/types/activity";
 import { TICKS_PER_HOUR, toMicro } from "@/game/types/common";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
-import type { Pet } from "@/game/types/pet";
-
-/**
- * Create a test pet with default values.
- */
-function createTestPet(overrides: Partial<Pet> = {}): Pet {
-  return {
-    identity: {
-      id: "test-pet-1",
-      name: "TestPet",
-      speciesId: "florabit",
-    },
-    growth: {
-      stage: GrowthStage.Child,
-      substage: 1,
-      birthTime: Date.now(),
-      ageTicks: 0,
-    },
-    careStats: {
-      satiety: toMicro(50),
-      hydration: toMicro(50),
-      happiness: toMicro(50),
-    },
-    energyStats: {
-      energy: toMicro(50),
-    },
-    careLifeStats: {
-      careLife: toMicro(100),
-    },
-    battleStats: {
-      strength: 10,
-      endurance: 10,
-      agility: 10,
-      precision: 10,
-      fortitude: 10,
-      cunning: 10,
-    },
-    resistances: {
-      slashing: 0,
-      piercing: 0,
-      crushing: 0,
-      chemical: 0,
-      thermal: 0,
-      electric: 0,
-    },
-    poop: {
-      count: 0,
-      ticksUntilNext: 120,
-    },
-    sleep: {
-      isSleeping: false,
-      sleepStartTime: null,
-      sleepTicksToday: 0,
-    },
-    activityState: ActivityState.Idle,
-    ...overrides,
-  };
-}
 
 // canStartTraining tests
 test("canStartTraining returns true when pet is idle with enough energy", () => {

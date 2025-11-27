@@ -3,14 +3,14 @@
  */
 
 import { expect, test } from "bun:test";
+import {
+  createSleepingTestPet,
+  createTestPet,
+} from "@/game/testing/createTestPet";
 import { toMicro } from "@/game/types/common";
-import { ActivityState, GrowthStage } from "@/game/types/constants";
+import { GrowthStage } from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import type { Pet } from "@/game/types/pet";
-import {
-  createDefaultBattleStats,
-  createDefaultResistances,
-} from "@/game/types/stats";
 import {
   calculateTravelCost,
   canTravel,
@@ -18,61 +18,13 @@ import {
   travel,
 } from "./travel";
 
-function createTestPet(options: {
-  isSleeping?: boolean;
-  energy?: number;
-  stage?: GrowthStage;
-}): Pet {
-  const {
-    isSleeping = false,
-    energy = 50_000,
-    stage = GrowthStage.Baby,
-  } = options;
-  return {
-    identity: {
-      id: "test-pet",
-      name: "Test Pet",
-      speciesId: "florabit",
-    },
-    growth: {
-      stage,
-      substage: 1,
-      birthTime: Date.now(),
-      ageTicks: 0,
-    },
-    careStats: {
-      satiety: 50_000,
-      hydration: 50_000,
-      happiness: 50_000,
-    },
-    energyStats: {
-      energy,
-    },
-    careLifeStats: {
-      careLife: 72_000,
-    },
-    battleStats: createDefaultBattleStats(),
-    resistances: createDefaultResistances(),
-    poop: {
-      count: 0,
-      ticksUntilNext: 480,
-    },
-    sleep: {
-      isSleeping,
-      sleepStartTime: isSleeping ? Date.now() : null,
-      sleepTicksToday: 0,
-    },
-    activityState: isSleeping ? ActivityState.Sleeping : ActivityState.Idle,
-  };
-}
-
 function createTestState(options: {
   pet?: Pet | null;
   currentLocationId?: string;
   quests?: { questId: string; isCompleted: boolean }[];
 }): GameState {
   const {
-    pet = createTestPet({}),
+    pet = createTestPet(),
     currentLocationId = "home",
     quests = [],
   } = options;
@@ -112,7 +64,7 @@ test("checkLocationRequirements returns not met when pet is null and stage requi
 
 test("checkLocationRequirements returns not met when stage insufficient", () => {
   const state = createTestState({
-    pet: createTestPet({ stage: GrowthStage.Baby }),
+    pet: createTestPet({ growth: { stage: GrowthStage.Baby } }),
   });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(false);
@@ -121,7 +73,7 @@ test("checkLocationRequirements returns not met when stage insufficient", () => 
 
 test("checkLocationRequirements returns met when stage sufficient", () => {
   const state = createTestState({
-    pet: createTestPet({ stage: GrowthStage.Child }),
+    pet: createTestPet({ growth: { stage: GrowthStage.Child } }),
   });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(true);
@@ -129,7 +81,7 @@ test("checkLocationRequirements returns met when stage sufficient", () => {
 
 test("checkLocationRequirements returns met when stage exceeds requirement", () => {
   const state = createTestState({
-    pet: createTestPet({ stage: GrowthStage.Adult }),
+    pet: createTestPet({ growth: { stage: GrowthStage.Adult } }),
   });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(true);
@@ -185,7 +137,7 @@ test("canTravel fails when no pet", () => {
 });
 
 test("canTravel fails when pet is sleeping", () => {
-  const state = createTestState({ pet: createTestPet({ isSleeping: true }) });
+  const state = createTestState({ pet: createSleepingTestPet() });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
   expect(result.message).toContain("sleeping");
@@ -206,7 +158,9 @@ test("canTravel fails for disconnected locations", () => {
 });
 
 test("canTravel fails when energy insufficient", () => {
-  const state = createTestState({ pet: createTestPet({ energy: toMicro(2) }) });
+  const state = createTestState({
+    pet: createTestPet({ energyStats: { energy: toMicro(2) } }),
+  });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
   expect(result.message).toContain("Not enough energy");
@@ -215,7 +169,7 @@ test("canTravel fails when energy insufficient", () => {
 
 test("canTravel succeeds with sufficient energy", () => {
   const state = createTestState({
-    pet: createTestPet({ energy: toMicro(50) }),
+    pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
   });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(true);
@@ -225,7 +179,10 @@ test("canTravel succeeds with sufficient energy", () => {
 
 test("canTravel fails when stage requirement not met", () => {
   const state = createTestState({
-    pet: createTestPet({ stage: GrowthStage.Baby, energy: toMicro(50) }),
+    pet: createTestPet({
+      growth: { stage: GrowthStage.Baby },
+      energyStats: { energy: toMicro(50) },
+    }),
     currentLocationId: "meadow",
   });
   const result = canTravel(state, "misty_woods");
@@ -235,7 +192,10 @@ test("canTravel fails when stage requirement not met", () => {
 
 test("canTravel succeeds when stage requirement met", () => {
   const state = createTestState({
-    pet: createTestPet({ stage: GrowthStage.Child, energy: toMicro(50) }),
+    pet: createTestPet({
+      growth: { stage: GrowthStage.Child },
+      energyStats: { energy: toMicro(50) },
+    }),
     currentLocationId: "meadow",
   });
   const result = canTravel(state, "misty_woods");
@@ -254,7 +214,7 @@ test("travel fails when canTravel fails", () => {
 test("travel succeeds and deducts energy", () => {
   const initialEnergy = toMicro(50);
   const state = createTestState({
-    pet: createTestPet({ energy: initialEnergy }),
+    pet: createTestPet({ energyStats: { energy: initialEnergy } }),
   });
   const result = travel(state, "meadow");
 
@@ -266,7 +226,7 @@ test("travel succeeds and deducts energy", () => {
 
 test("travel preserves other state properties", () => {
   const state = createTestState({
-    pet: createTestPet({ energy: toMicro(50) }),
+    pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
   });
   state.player.currency.coins = 100;
   const result = travel(state, "meadow");
@@ -277,7 +237,7 @@ test("travel preserves other state properties", () => {
 
 test("travel does not mutate original state", () => {
   const state = createTestState({
-    pet: createTestPet({ energy: toMicro(50) }),
+    pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
   });
   const originalLocation = state.player.currentLocationId;
   const originalEnergy = state.pet?.energyStats.energy;
@@ -290,7 +250,9 @@ test("travel does not mutate original state", () => {
 
 test("travel energy cannot go below 0", () => {
   // Set energy to exactly the cost
-  const state = createTestState({ pet: createTestPet({ energy: toMicro(5) }) });
+  const state = createTestState({
+    pet: createTestPet({ energyStats: { energy: toMicro(5) } }),
+  });
   const result = travel(state, "meadow");
 
   expect(result.success).toBe(true);
