@@ -133,10 +133,3 @@ export const TOY_ITEMS = {
 
 /** Array of all toy items for iteration. */
 export const TOY_ITEMS_LIST: readonly ToyItem[] = Object.values(TOY_ITEMS);
-
-/**
- * Get a toy item by ID.
- */
-export function getToyItemById(id: string): ToyItem | undefined {
-  return TOY_ITEMS_LIST.find((item) => item.id === id);
-}

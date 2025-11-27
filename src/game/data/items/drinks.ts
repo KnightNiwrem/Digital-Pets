@@ -127,10 +127,3 @@ export const DRINK_ITEMS = {
 /** Array of all drink items for iteration. */
 export const DRINK_ITEMS_LIST: readonly DrinkItem[] =
   Object.values(DRINK_ITEMS);
-
-/**
- * Get a drink item by ID.
- */
-export function getDrinkItemById(id: string): DrinkItem | undefined {
-  return DRINK_ITEMS_LIST.find((item) => item.id === id);
-}

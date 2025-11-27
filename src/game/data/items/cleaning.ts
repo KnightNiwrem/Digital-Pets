@@ -87,10 +87,3 @@ export const CLEANING_ITEMS = {
 /** Array of all cleaning items for iteration. */
 export const CLEANING_ITEMS_LIST: readonly CleaningItem[] =
   Object.values(CLEANING_ITEMS);
-
-/**
- * Get a cleaning item by ID.
- */
-export function getCleaningItemById(id: string): CleaningItem | undefined {
-  return CLEANING_ITEMS_LIST.find((item) => item.id === id);
-}

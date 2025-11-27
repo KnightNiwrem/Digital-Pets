@@ -112,10 +112,3 @@ export const MATERIAL_ITEMS = {
 /** Array of all material items for iteration. */
 export const MATERIAL_ITEMS_LIST: readonly MaterialItem[] =
   Object.values(MATERIAL_ITEMS);
-
-/**
- * Get a material item by ID.
- */
-export function getMaterialItemById(id: string): MaterialItem | undefined {
-  return MATERIAL_ITEMS_LIST.find((item) => item.id === id);
-}
