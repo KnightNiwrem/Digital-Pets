@@ -110,6 +110,7 @@ export function startTraining(
     startTick: currentTick,
     durationTicks: session.durationTicks,
     ticksRemaining: session.durationTicks,
+    energyCost: toMicro(session.energyCost),
   };
 
   const newEnergy = pet.energyStats.energy - toMicro(session.energyCost);
@@ -219,20 +220,24 @@ export function applyTrainingCompletion(pet: Pet): Pet {
 
 /**
  * Cancel an active training session.
- * Energy is not refunded.
+ * Energy is refunded to the pet.
  */
 export function cancelTraining(pet: Pet): {
   success: boolean;
   pet: Pet;
   message: string;
+  energyRefunded: number;
 } {
   if (!pet.activeTraining) {
     return {
       success: false,
       pet,
       message: "No training session to cancel.",
+      energyRefunded: 0,
     };
   }
+
+  const energyRefunded = pet.activeTraining.energyCost;
 
   return {
     success: true,
@@ -240,8 +245,12 @@ export function cancelTraining(pet: Pet): {
       ...pet,
       activityState: ActivityState.Idle,
       activeTraining: undefined,
+      energyStats: {
+        energy: pet.energyStats.energy + energyRefunded,
+      },
     },
-    message: "Training cancelled. Energy spent is not refunded.",
+    message: "Training cancelled. Energy has been refunded.",
+    energyRefunded,
   };
 }
 

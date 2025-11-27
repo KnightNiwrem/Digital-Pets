@@ -141,6 +141,7 @@ test("processTrainingTick decrements ticksRemaining", () => {
     startTick: 0,
     durationTicks: 120,
     ticksRemaining: 120,
+    energyCost: 0,
   };
   const result = processTrainingTick(training);
   expect(result?.ticksRemaining).toBe(119);
@@ -153,6 +154,7 @@ test("processTrainingTick returns null when training completes", () => {
     startTick: 0,
     durationTicks: 120,
     ticksRemaining: 1,
+    energyCost: 0,
   };
   const result = processTrainingTick(training);
   expect(result).toBeNull();
@@ -168,6 +170,7 @@ test("completeTraining returns correct stat gains", () => {
       startTick: 0,
       durationTicks: 120,
       ticksRemaining: 0,
+      energyCost: 0,
     },
   });
   const result = completeTraining(pet);
@@ -191,6 +194,7 @@ test("applyTrainingCompletion clears training and applies stats", () => {
       startTick: 0,
       durationTicks: 120,
       ticksRemaining: 0,
+      energyCost: 0,
     },
   });
   const result = applyTrainingCompletion(pet);
@@ -200,7 +204,9 @@ test("applyTrainingCompletion clears training and applies stats", () => {
 });
 
 // cancelTraining tests
-test("cancelTraining clears training state", () => {
+test("cancelTraining clears training state and refunds energy", () => {
+  const initialEnergy = toMicro(50);
+  const energyCost = toMicro(10);
   const pet = createTestPet({
     activityState: ActivityState.Training,
     activeTraining: {
@@ -209,18 +215,23 @@ test("cancelTraining clears training state", () => {
       startTick: 0,
       durationTicks: 120,
       ticksRemaining: 60,
+      energyCost,
     },
+    energyStats: { energy: initialEnergy - energyCost },
   });
   const result = cancelTraining(pet);
   expect(result.success).toBe(true);
   expect(result.pet.activityState).toBe(ActivityState.Idle);
   expect(result.pet.activeTraining).toBeUndefined();
+  expect(result.energyRefunded).toBe(energyCost);
+  expect(result.pet.energyStats.energy).toBe(initialEnergy);
 });
 
 test("cancelTraining fails when no training active", () => {
   const pet = createTestPet();
   const result = cancelTraining(pet);
   expect(result.success).toBe(false);
+  expect(result.energyRefunded).toBe(0);
 });
 
 // getTrainingProgress tests
@@ -231,6 +242,7 @@ test("getTrainingProgress returns correct percentage", () => {
     startTick: 0,
     durationTicks: 100,
     ticksRemaining: 50,
+    energyCost: 0,
   };
   expect(getTrainingProgress(training)).toBe(50);
 });
@@ -242,6 +254,7 @@ test("getTrainingProgress returns 0 at start", () => {
     startTick: 0,
     durationTicks: 100,
     ticksRemaining: 100,
+    energyCost: 0,
   };
   expect(getTrainingProgress(training)).toBe(0);
 });
@@ -253,6 +266,7 @@ test("getTrainingProgress returns 100 at end", () => {
     startTick: 0,
     durationTicks: 100,
     ticksRemaining: 0,
+    energyCost: 0,
   };
   expect(getTrainingProgress(training)).toBe(100);
 });

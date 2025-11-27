@@ -158,6 +158,7 @@ test("processExplorationTick decrements ticksRemaining", () => {
     startTick: 0,
     durationTicks: 3,
     ticksRemaining: 3,
+    energyCost: 0,
   };
 
   const result = processExplorationTick(exploration);
@@ -173,6 +174,7 @@ test("processExplorationTick returns null when exploration completes", () => {
     startTick: 0,
     durationTicks: 3,
     ticksRemaining: 1,
+    energyCost: 0,
   };
 
   const result = processExplorationTick(exploration);
@@ -281,6 +283,7 @@ test("completeForaging returns success with active exploration", () => {
       startTick: 0,
       durationTicks: 2,
       ticksRemaining: 0,
+      energyCost: 0,
     },
   });
 
@@ -300,6 +303,7 @@ test("applyExplorationCompletion clears exploration state", () => {
       startTick: 0,
       durationTicks: 2,
       ticksRemaining: 0,
+      energyCost: 0,
     },
   });
 
@@ -310,7 +314,9 @@ test("applyExplorationCompletion clears exploration state", () => {
 });
 
 // cancelExploration tests
-test("cancelExploration clears exploration state", () => {
+test("cancelExploration clears exploration state and refunds energy", () => {
+  const initialEnergy = toMicro(50);
+  const energyCost = toMicro(10);
   const pet = createTestPet({
     activityState: ActivityState.Exploring,
     activeExploration: {
@@ -320,19 +326,24 @@ test("cancelExploration clears exploration state", () => {
       startTick: 0,
       durationTicks: 2,
       ticksRemaining: 1,
+      energyCost,
     },
+    energyStats: { energy: initialEnergy - energyCost },
   });
 
   const result = cancelExploration(pet);
   expect(result.success).toBe(true);
   expect(result.pet.activityState).toBe(ActivityState.Idle);
   expect(result.pet.activeExploration).toBeUndefined();
+  expect(result.energyRefunded).toBe(energyCost);
+  expect(result.pet.energyStats.energy).toBe(initialEnergy);
 });
 
 test("cancelExploration fails when no exploration active", () => {
   const pet = createTestPet();
   const result = cancelExploration(pet);
   expect(result.success).toBe(false);
+  expect(result.energyRefunded).toBe(0);
 });
 
 // getExplorationProgress tests
@@ -344,6 +355,7 @@ test("getExplorationProgress returns correct percentage", () => {
     startTick: 0,
     durationTicks: 10,
     ticksRemaining: 5,
+    energyCost: 0,
   };
 
   const progress = getExplorationProgress(exploration);
@@ -358,6 +370,7 @@ test("getExplorationProgress returns 0 at start", () => {
     startTick: 0,
     durationTicks: 10,
     ticksRemaining: 10,
+    energyCost: 0,
   };
 
   const progress = getExplorationProgress(exploration);
@@ -372,6 +385,7 @@ test("getExplorationProgress returns 100 at end", () => {
     startTick: 0,
     durationTicks: 10,
     ticksRemaining: 0,
+    energyCost: 0,
   };
 
   const progress = getExplorationProgress(exploration);
@@ -386,6 +400,7 @@ test("getExplorationProgress handles zero duration", () => {
     startTick: 0,
     durationTicks: 0,
     ticksRemaining: 0,
+    energyCost: 0,
   };
 
   const progress = getExplorationProgress(exploration);

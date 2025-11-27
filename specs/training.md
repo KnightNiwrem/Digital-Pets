@@ -114,6 +114,15 @@ Training sessions have:
 
 Advanced training may have growth stage requirements.
 
+### Cancellation and Energy Refund
+
+Training sessions can be cancelled at any time before completion. When a training session is cancelled:
+
+- The pet returns to Idle state
+- **Energy is fully refunded** to the pet
+- No stat gains are awarded
+- No cooldown is applied
+
 ### Training Modifiers
 
 Training effectiveness may be modified by:

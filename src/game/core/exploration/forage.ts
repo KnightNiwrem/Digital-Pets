@@ -125,6 +125,7 @@ export function startForaging(
     startTick: currentTick,
     durationTicks: forageTable.baseDurationTicks,
     ticksRemaining: forageTable.baseDurationTicks,
+    energyCost: toMicro(forageTable.baseEnergyCost),
   };
 
   const newEnergy =
@@ -273,20 +274,24 @@ export function applyExplorationCompletion(
 
 /**
  * Cancel an active exploration session.
- * Energy is not refunded.
+ * Energy is refunded to the pet.
  */
 export function cancelExploration(pet: Pet): {
   success: boolean;
   pet: Pet;
   message: string;
+  energyRefunded: number;
 } {
   if (!pet.activeExploration) {
     return {
       success: false,
       pet,
       message: "No exploration session to cancel.",
+      energyRefunded: 0,
     };
   }
+
+  const energyRefunded = pet.activeExploration.energyCost;
 
   return {
     success: true,
@@ -294,8 +299,12 @@ export function cancelExploration(pet: Pet): {
       ...pet,
       activityState: ActivityState.Idle,
       activeExploration: undefined,
+      energyStats: {
+        energy: pet.energyStats.energy + energyRefunded,
+      },
     },
-    message: "Exploration cancelled. Energy spent is not refunded.",
+    message: "Exploration cancelled. Energy has been refunded.",
+    energyRefunded,
   };
 }
 

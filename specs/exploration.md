@@ -96,6 +96,16 @@ Each location has encounter tables for events during exploration.
 | Scouting | Medium |
 | Deep Exploration | High |
 
+### Cancellation and Energy Refund
+
+Exploration sessions can be cancelled at any time before completion. When an exploration session is cancelled:
+
+- The pet returns to Idle state
+- **Energy is fully refunded** to the pet
+- No items are found
+- No skill XP is awarded
+- No cooldown is applied
+
 ### Wild Pet Level Calculation
 
 ```
