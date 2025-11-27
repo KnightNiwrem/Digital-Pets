@@ -11,7 +11,7 @@ import type {
 } from "@/game/types/activity";
 import { ExplorationActivityType } from "@/game/types/activity";
 import { type Tick, toDisplay, toMicro } from "@/game/types/common";
-import { ActivityState } from "@/game/types/constants";
+import { ActivityState, getActivityDisplayName } from "@/game/types/constants";
 import { FacilityType, LocationType } from "@/game/types/location";
 import type { Pet } from "@/game/types/pet";
 
@@ -29,14 +29,7 @@ export function canStartForaging(
 ): { canForage: boolean; message: string } {
   // Check if pet is already doing an activity
   if (pet.activityState !== ActivityState.Idle) {
-    const activityName =
-      pet.activityState === ActivityState.Sleeping
-        ? "sleeping"
-        : pet.activityState === ActivityState.Training
-          ? "training"
-          : pet.activityState === ActivityState.Exploring
-            ? "already exploring"
-            : pet.activityState;
+    const activityName = getActivityDisplayName(pet.activityState);
     return {
       canForage: false,
       message: `Cannot forage while ${activityName}.`,

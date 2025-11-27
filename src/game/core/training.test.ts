@@ -52,7 +52,7 @@ test("canStartTraining fails when pet is already training", () => {
     TrainingSessionType.Basic,
   );
   expect(result.canTrain).toBe(false);
-  expect(result.message).toContain("already training");
+  expect(result.message).toContain("training");
 });
 
 test("canStartTraining fails when not enough energy", () => {

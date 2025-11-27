@@ -110,6 +110,25 @@ export const ActivityState = {
 export type ActivityState = (typeof ActivityState)[keyof typeof ActivityState];
 
 /**
+ * Get a human-readable display name for an activity state.
+ * Used for error messages when an action cannot be performed.
+ */
+export function getActivityDisplayName(activity: ActivityState): string {
+  switch (activity) {
+    case ActivityState.Sleeping:
+      return "sleeping";
+    case ActivityState.Training:
+      return "training";
+    case ActivityState.Exploring:
+      return "exploring";
+    case ActivityState.Battling:
+      return "battling";
+    case ActivityState.Idle:
+      return "idle";
+  }
+}
+
+/**
  * Care stat thresholds for UI/feedback purposes.
  */
 export const CareThreshold = {

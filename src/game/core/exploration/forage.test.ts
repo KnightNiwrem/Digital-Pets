@@ -78,7 +78,7 @@ test("canStartForaging fails when pet is already exploring", () => {
   });
   const result = canStartForaging(pet, "meadow");
   expect(result.canForage).toBe(false);
-  expect(result.message).toContain("already exploring");
+  expect(result.message).toContain("exploring");
 });
 
 test("canStartForaging fails when pet is training", () => {
