@@ -108,14 +108,21 @@ export function startForaging(
     return { success: false, pet, message: check.message };
   }
 
-  // canStartForaging already validated these exist
-  const location = getLocation(currentLocationId)!;
-  const forageTable = getForageTable(location.forageTableId!)!;
+  // canStartForaging already validated these exist, so we safely narrow the types
+  const location = getLocation(currentLocationId);
+  if (!location || !location.forageTableId) {
+    return { success: false, pet, message: "Location not found." };
+  }
+
+  const forageTable = getForageTable(location.forageTableId);
+  if (!forageTable) {
+    return { success: false, pet, message: "Forage data not found." };
+  }
 
   const activeExploration: ActiveExploration = {
     activityType: ExplorationActivityType.Forage,
     locationId: currentLocationId,
-    forageTableId: location.forageTableId!,
+    forageTableId: location.forageTableId,
     startTick: currentTick,
     durationTicks: forageTable.baseDurationTicks,
     ticksRemaining: forageTable.baseDurationTicks,

@@ -3,12 +3,10 @@
  */
 
 import { expect, test } from "bun:test";
-import { ActivityState, GrowthStage } from "@/game/types/constants";
-import type { Pet } from "@/game/types/pet";
 import {
-  createDefaultBattleStats,
-  createDefaultResistances,
-} from "@/game/types/stats";
+  createSleepingTestPet,
+  createTestPet,
+} from "@/game/testing/createTestPet";
 import {
   canPerformCareActions,
   processSleepTick,
@@ -16,47 +14,8 @@ import {
   wakeUp,
 } from "./sleep";
 
-function createTestPet(isSleeping: boolean): Pet {
-  return {
-    identity: {
-      id: "test-pet",
-      name: "Test Pet",
-      speciesId: "slime",
-    },
-    growth: {
-      stage: GrowthStage.Baby,
-      substage: 1,
-      birthTime: Date.now(),
-      ageTicks: 0,
-    },
-    careStats: {
-      satiety: 50_000,
-      hydration: 50_000,
-      happiness: 50_000,
-    },
-    energyStats: {
-      energy: 25_000,
-    },
-    careLifeStats: {
-      careLife: 72_000,
-    },
-    battleStats: createDefaultBattleStats(),
-    resistances: createDefaultResistances(),
-    poop: {
-      count: 0,
-      ticksUntilNext: 480,
-    },
-    sleep: {
-      isSleeping,
-      sleepStartTime: isSleeping ? Date.now() : null,
-      sleepTicksToday: 0,
-    },
-    activityState: isSleeping ? ActivityState.Sleeping : ActivityState.Idle,
-  };
-}
-
 test("putToSleep succeeds when pet is awake", () => {
-  const pet = createTestPet(false);
+  const pet = createTestPet();
   const result = putToSleep(pet);
 
   expect(result.success).toBe(true);
@@ -66,7 +25,7 @@ test("putToSleep succeeds when pet is awake", () => {
 });
 
 test("putToSleep fails when pet is already sleeping", () => {
-  const pet = createTestPet(true);
+  const pet = createSleepingTestPet();
   const result = putToSleep(pet);
 
   expect(result.success).toBe(false);
@@ -74,7 +33,7 @@ test("putToSleep fails when pet is already sleeping", () => {
 });
 
 test("wakeUp succeeds when pet is sleeping", () => {
-  const pet = createTestPet(true);
+  const pet = createSleepingTestPet();
   const result = wakeUp(pet);
 
   expect(result.success).toBe(true);
@@ -84,7 +43,7 @@ test("wakeUp succeeds when pet is sleeping", () => {
 });
 
 test("wakeUp fails when pet is already awake", () => {
-  const pet = createTestPet(false);
+  const pet = createTestPet();
   const result = wakeUp(pet);
 
   expect(result.success).toBe(false);
@@ -115,11 +74,11 @@ test("processSleepTick does not accumulate when awake", () => {
 });
 
 test("canPerformCareActions returns false when sleeping", () => {
-  const pet = createTestPet(true);
+  const pet = createSleepingTestPet();
   expect(canPerformCareActions(pet)).toBe(false);
 });
 
 test("canPerformCareActions returns true when awake", () => {
-  const pet = createTestPet(false);
+  const pet = createTestPet();
   expect(canPerformCareActions(pet)).toBe(true);
 });
