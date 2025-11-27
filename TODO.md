@@ -363,18 +363,18 @@ Non-battle skills for exploration.
 Interactable NPCs in towns.
 
 ### 16.1 Types & Data
-- [ ] Create `src/game/types/npc.ts` - NPC, Dialogue interfaces
-- [ ] Create `src/game/data/npcs.ts` - Initial NPCs
-- [ ] Create `src/game/data/dialogues.ts` - Dialogue trees
+- [x] Create `src/game/types/npc.ts` - NPC, Dialogue interfaces
+- [x] Create `src/game/data/npcs.ts` - Initial NPCs
+- [x] Create `src/game/data/dialogues.ts` - Dialogue trees
 
 ### 16.2 Dialogue Logic
-- [ ] Create `src/game/core/dialogue.ts` - Dialogue navigation
+- [x] Create `src/game/core/dialogue.ts` - Dialogue navigation
 
 ### 16.3 NPC UI
-- [ ] Create `src/components/npc/NPCDisplay.tsx` - NPC visual
-- [ ] Create `src/components/npc/DialogueBox.tsx` - Dialogue display
-- [ ] Create `src/components/npc/DialogueChoices.tsx` - Response options
-- [ ] Update LocationDetail - Show NPCs in location
+- [x] Create `src/components/npc/NPCDisplay.tsx` - NPC visual
+- [x] Create `src/components/npc/DialogueBox.tsx` - Dialogue display
+- [x] Create `src/components/npc/DialogueChoices.tsx` - Response options
+- [x] Update LocationDetail - Show NPCs in location
 
 **✓ Testable:** Visit town → Click NPC → Read dialogue → Make choices
 
