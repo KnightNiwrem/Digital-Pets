@@ -191,7 +191,11 @@ export function selectChoice(
     };
   }
 
-  if (!currentNode.choices || choiceIndex >= currentNode.choices.length) {
+  if (
+    !currentNode.choices ||
+    choiceIndex < 0 ||
+    choiceIndex >= currentNode.choices.length
+  ) {
     return {
       success: false,
       message: "Invalid choice index.",
@@ -202,10 +206,11 @@ export function selectChoice(
   }
 
   const choice = currentNode.choices[choiceIndex];
+  // With noUncheckedIndexedAccess, TypeScript needs explicit check
   if (!choice) {
     return {
       success: false,
-      message: "Choice not found.",
+      message: "Invalid choice index.",
       state,
       node: currentNode,
       ended: false,

@@ -41,7 +41,7 @@ const ROLE_DISPLAY: Record<NpcRole, { name: string; color: string }> = {
  * Get display info for an NPC role.
  */
 function getRoleDisplay(role: NpcRole): { name: string; color: string } {
-  return ROLE_DISPLAY[role] ?? { name: role, color: "text-muted-foreground" };
+  return ROLE_DISPLAY[role];
 }
 
 /**

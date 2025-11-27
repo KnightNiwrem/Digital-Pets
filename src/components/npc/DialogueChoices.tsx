@@ -18,7 +18,7 @@ export function DialogueChoices({ choices, onSelect }: DialogueChoicesProps) {
     <div className="flex flex-col gap-2">
       {choices.map((choice, index) => (
         <Button
-          key={choice.nextNodeId}
+          key={`choice-${index}-${choice.nextNodeId}`}
           variant="outline"
           className="justify-start text-left h-auto py-3 px-4"
           onClick={() => onSelect(index)}

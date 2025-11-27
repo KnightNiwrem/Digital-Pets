@@ -12,7 +12,6 @@ import {
   startDialogue,
 } from "@/game/core/dialogue";
 import { getNpc } from "@/game/data/npcs";
-import type { DialogueNode, DialogueState } from "@/game/types/npc";
 import { DialogueNodeType } from "@/game/types/npc";
 
 interface DialogueScreenProps {
@@ -31,17 +30,16 @@ export function DialogueScreen({
 }: DialogueScreenProps) {
   const npc = getNpc(npcId);
 
-  // Initialize dialogue state
-  const [dialogueState, setDialogueState] = useState<DialogueState | null>(
-    () => {
-      const result = startDialogue(npcId);
-      return result.success && result.state ? result.state : null;
-    },
-  );
-  const [currentNode, setCurrentNode] = useState<DialogueNode | null>(() => {
+  // Initialize dialogue state with a single startDialogue call
+  const [dialogue, setDialogue] = useState(() => {
     const result = startDialogue(npcId);
-    return result.success && result.node ? result.node : null;
+    return {
+      state: result.success && result.state ? result.state : null,
+      node: result.success && result.node ? result.node : null,
+    };
   });
+
+  const { state: dialogueState, node: currentNode } = dialogue;
 
   // Handle clicking to advance message nodes
   const handleAdvance = useCallback(() => {
@@ -51,8 +49,7 @@ export function DialogueScreen({
     if (result.ended) {
       onClose();
     } else if (result.success && result.state && result.node) {
-      setDialogueState(result.state);
-      setCurrentNode(result.node);
+      setDialogue({ state: result.state, node: result.node });
     }
   }, [dialogueState, onClose]);
 
@@ -63,19 +60,7 @@ export function DialogueScreen({
 
       const result = selectChoice(dialogueState, index);
       if (result.success && result.state && result.node) {
-        // Check if this leads to a shop
-        if (result.node.type === DialogueNodeType.Shop) {
-          setDialogueState(result.state);
-          setCurrentNode(result.node);
-          return;
-        }
-
-        setDialogueState(result.state);
-        setCurrentNode(result.node);
-
-        if (result.ended) {
-          // Don't close immediately for end nodes - let user see final message
-        }
+        setDialogue({ state: result.state, node: result.node });
       }
     },
     [dialogueState],
