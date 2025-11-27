@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getItemById } from "@/game/data/items";
-import { toDisplay } from "@/game/types/common";
+import { toDisplay, toDisplayCare } from "@/game/types/common";
 import type {
   OfflineExplorationResult,
   OfflineReport as OfflineReportType,
@@ -52,21 +52,24 @@ function formatElapsedTime(ms: number): string {
 
 /**
  * Stat change indicator showing the difference between before and after values.
+ * Uses a configurable display function for rounding (defaults to floor for energy).
  */
 function StatChange({
   label,
   before,
   after,
   max,
+  displayFn = toDisplay,
 }: {
   label: string;
   before: number;
   after: number;
   max: number;
+  displayFn?: (value: number) => number;
 }) {
-  const beforeDisplay = toDisplay(before);
-  const afterDisplay = toDisplay(after);
-  const maxDisplay = toDisplay(max);
+  const beforeDisplay = displayFn(before);
+  const afterDisplay = displayFn(after);
+  const maxDisplay = displayFn(max);
   const change = afterDisplay - beforeDisplay;
 
   return (
@@ -251,18 +254,21 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
                     before={beforeStats.satiety}
                     after={afterStats.satiety}
                     max={maxCareStat}
+                    displayFn={toDisplayCare}
                   />
                   <StatChange
                     label="Hydration"
                     before={beforeStats.hydration}
                     after={afterStats.hydration}
                     max={maxCareStat}
+                    displayFn={toDisplayCare}
                   />
                   <StatChange
                     label="Happiness"
                     before={beforeStats.happiness}
                     after={afterStats.happiness}
                     max={maxCareStat}
+                    displayFn={toDisplayCare}
                   />
                   <StatChange
                     label="Energy"

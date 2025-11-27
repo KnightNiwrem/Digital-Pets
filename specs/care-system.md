@@ -32,10 +32,12 @@ To avoid floating point arithmetic, care stats use internal micro-units:
 
 **Display Value Calculation:**
 ```
-displayValue = floor(microValue / 1000)
+displayValue = ceil(microValue / 1000)
 ```
 
-A stat is considered 0 when its display value is 0, even if micro-value is greater than 0.
+This uses ceiling rounding, meaning any remaining micro-units round up to the next display value. For example, a microSatiety of 50,001 produces a display value of 51.
+
+A stat is considered 0 only when its micro-value is exactly 0.
 
 ### Stat Maximum by Growth Stage
 

@@ -20,6 +20,7 @@ import {
   formatTicksAsTime,
   TICKS_PER_DAY,
   toDisplay,
+  toDisplayCare,
 } from "@/game/types/common";
 import {
   type CareThreshold,
@@ -95,10 +96,10 @@ export function selectCareStats(state: GameState): CareStatDisplay | null {
   const maxStats = calculatePetMaxStats(pet);
   if (!maxStats) return null;
 
-  const satiety = toDisplay(pet.careStats.satiety);
-  const hydration = toDisplay(pet.careStats.hydration);
-  const happiness = toDisplay(pet.careStats.happiness);
-  const max = toDisplay(maxStats.careStatMax);
+  const satiety = toDisplayCare(pet.careStats.satiety);
+  const hydration = toDisplayCare(pet.careStats.hydration);
+  const happiness = toDisplayCare(pet.careStats.happiness);
+  const max = toDisplayCare(maxStats.careStatMax);
 
   const satietyPercent = max > 0 ? Math.round((satiety / max) * 100) : 0;
   const hydrationPercent = max > 0 ? Math.round((hydration / max) * 100) : 0;
