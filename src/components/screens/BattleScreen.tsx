@@ -104,9 +104,10 @@ export function BattleScreen({
     [],
   );
 
-  // Process enemy turn automatically after player acts
+  // Process game loop (Enemy Turn & Turn Resolution)
+  // Process game loop (Enemy Turn & Turn Resolution)
   useEffect(() => {
-    if (battleState.phase === BattlePhase.EnemyTurn && !isProcessing) {
+    if (battleState.phase === BattlePhase.EnemyTurn) {
       setIsProcessing(true);
       // Small delay for dramatic effect
       const timeout = setTimeout(() => {
@@ -117,12 +118,8 @@ export function BattleScreen({
       }, ENEMY_TURN_DELAY_MS);
       return () => clearTimeout(timeout);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [battleState.phase, triggerAttackAnimation]);
 
-  // Process turn resolution automatically
-  useEffect(() => {
-    if (battleState.phase === BattlePhase.TurnResolution && !isProcessing) {
+    if (battleState.phase === BattlePhase.TurnResolution) {
       setIsProcessing(true);
       const timeout = setTimeout(() => {
         setBattleState((prev) => resolveTurnEnd(prev));
@@ -130,7 +127,7 @@ export function BattleScreen({
       }, TURN_RESOLUTION_DELAY_MS);
       return () => clearTimeout(timeout);
     }
-  }, [battleState.phase, isProcessing]);
+  }, [battleState.phase, triggerAttackAnimation]);
 
   const handleSelectMove = (move: Move) => {
     if (battleState.phase !== BattlePhase.PlayerTurn || isProcessing) {
