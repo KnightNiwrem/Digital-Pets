@@ -14,6 +14,7 @@ import {
   ActivityState,
   GROWTH_STAGE_ORDER,
   type GrowthStage,
+  getActivityConflictMessage,
 } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
@@ -42,15 +43,13 @@ export function canStartTraining(
 ): { canTrain: boolean; message: string } {
   // Check if pet is already doing an activity
   if (pet.activityState !== ActivityState.Idle) {
-    const activityName =
-      pet.activityState === ActivityState.Sleeping
-        ? "sleeping"
-        : pet.activityState === ActivityState.Training
-          ? "already training"
-          : pet.activityState;
     return {
       canTrain: false,
-      message: `Cannot train while ${activityName}.`,
+      message: getActivityConflictMessage(
+        "train",
+        pet.activityState,
+        ActivityState.Training,
+      ),
     };
   }
 
