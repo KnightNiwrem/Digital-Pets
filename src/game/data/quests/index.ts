@@ -3,6 +3,9 @@
  */
 
 import type { Quest } from "@/game/types/quest";
+import { dailyQuests } from "./daily";
+import { mainQuests } from "./main";
+import { sideQuests } from "./side";
 import { tutorialQuests } from "./tutorial";
 
 /**
@@ -10,6 +13,9 @@ import { tutorialQuests } from "./tutorial";
  */
 export const quests: Record<string, Quest> = {
   ...tutorialQuests,
+  ...mainQuests,
+  ...sideQuests,
+  ...dailyQuests,
 };
 
 /**

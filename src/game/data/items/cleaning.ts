@@ -56,6 +56,30 @@ export const CLEANING_ITEMS: readonly CleaningItem[] = [
     icon: "🔌",
     poopRemoved: 5,
   },
+  {
+    id: "cleaning_brush",
+    name: "Cleaning Brush",
+    description: "A sturdy brush for scrubbing away messes.",
+    category: "cleaning",
+    rarity: "uncommon",
+    stackable: true,
+    maxStack: 30,
+    sellValue: 12,
+    icon: "🧹",
+    poopRemoved: 2,
+  },
+  {
+    id: "cleaning_spray",
+    name: "Cleaning Spray",
+    description: "A powerful cleaning spray. Very effective!",
+    category: "cleaning",
+    rarity: "rare",
+    stackable: true,
+    maxStack: 20,
+    sellValue: 35,
+    icon: "🧴",
+    poopRemoved: 4,
+  },
 ] as const;
 
 /**

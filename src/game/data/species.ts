@@ -113,6 +113,114 @@ export const SPECIES: Record<string, Species> = {
     },
     unlockMethod: "starting",
   },
+
+  // Evasive status specialist - quest unlock
+  coralite: {
+    id: "coralite",
+    name: "Coralite",
+    description:
+      "A mysterious aquatic creature covered in beautiful coral. Elusive and tricky.",
+    archetype: "status",
+    emoji: "🐚",
+    baseStats: {
+      strength: 8,
+      endurance: 10,
+      agility: 12,
+      precision: 12,
+      fortitude: 8,
+      cunning: 14,
+    },
+    statGrowth: {
+      strength: "low",
+      endurance: "medium",
+      agility: "medium",
+      precision: "high",
+      fortitude: "low",
+      cunning: "high",
+    },
+    careCapMultiplier: 0.9,
+    resistances: {
+      slashing: 0,
+      piercing: 5,
+      crushing: 5,
+      chemical: 10,
+      thermal: 0,
+      electric: 15,
+    },
+    unlockMethod: "quest",
+  },
+
+  // Fiery power tank - discovery unlock
+  emberfox: {
+    id: "emberfox",
+    name: "Emberfox",
+    description:
+      "A fierce fox-like creature wreathed in flames. Its power is unmatched but requires careful handling.",
+    archetype: "powerTank",
+    emoji: "🔥",
+    baseStats: {
+      strength: 16,
+      endurance: 12,
+      agility: 10,
+      precision: 8,
+      fortitude: 10,
+      cunning: 8,
+    },
+    statGrowth: {
+      strength: "high",
+      endurance: "high",
+      agility: "medium",
+      precision: "low",
+      fortitude: "medium",
+      cunning: "low",
+    },
+    careCapMultiplier: 1.25,
+    resistances: {
+      slashing: 0,
+      piercing: 0,
+      crushing: 0,
+      chemical: 5,
+      thermal: 25,
+      electric: 5,
+    },
+    unlockMethod: "discovery",
+  },
+
+  // Evasion specialist - discovery unlock
+  shadowmoth: {
+    id: "shadowmoth",
+    name: "Shadowmoth",
+    description:
+      "A dark, ethereal moth-like creature that flits through shadows. Nearly impossible to catch.",
+    archetype: "evasion",
+    emoji: "🦋",
+    baseStats: {
+      strength: 6,
+      endurance: 8,
+      agility: 16,
+      precision: 10,
+      fortitude: 6,
+      cunning: 14,
+    },
+    statGrowth: {
+      strength: "low",
+      endurance: "low",
+      agility: "high",
+      precision: "medium",
+      fortitude: "low",
+      cunning: "high",
+    },
+    careCapMultiplier: 0.8,
+    resistances: {
+      slashing: 5,
+      piercing: 0,
+      crushing: 0,
+      chemical: 15,
+      thermal: 0,
+      electric: 10,
+    },
+    unlockMethod: "discovery",
+  },
 };
 
 /**

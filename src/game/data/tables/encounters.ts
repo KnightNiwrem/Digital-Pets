@@ -2,7 +2,7 @@
  * Encounter table definitions for wild areas.
  */
 
-import type { GrowthStage } from "@/game/types/constants";
+import { GrowthStage } from "@/game/types/constants";
 
 /**
  * Encounter type during exploration.
@@ -80,11 +80,118 @@ export const woodsEncounters: EncounterTable = {
 };
 
 /**
+ * Whispering Coast encounter table - coastal area.
+ */
+export const coastEncounters: EncounterTable = {
+  id: "coast_encounters",
+  baseEncounterChance: 0.35,
+  entries: [
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.8,
+      speciesIds: ["sparkfin", "coralite"],
+      levelOffset: [-1, 3],
+    },
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.2,
+      speciesIds: ["florabit"],
+      levelOffset: [0, 2],
+    },
+  ],
+};
+
+/**
+ * Scorched Highlands encounter table - volcanic area.
+ */
+export const highlandsEncounters: EncounterTable = {
+  id: "highlands_encounters",
+  baseEncounterChance: 0.5,
+  entries: [
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.6,
+      speciesIds: ["rockpup", "emberfox"],
+      levelOffset: [0, 4],
+    },
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.4,
+      speciesIds: ["emberfox"],
+      levelOffset: [2, 6],
+      minStage: GrowthStage.Teen,
+    },
+  ],
+};
+
+/**
+ * Crystal Caves encounter table - dungeon.
+ */
+export const cavesEncounters: EncounterTable = {
+  id: "caves_encounters",
+  baseEncounterChance: 0.45,
+  entries: [
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.5,
+      speciesIds: ["rockpup", "coralite"],
+      levelOffset: [0, 5],
+    },
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.35,
+      speciesIds: ["sparkfin"],
+      levelOffset: [2, 6],
+    },
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.15,
+      speciesIds: ["shadowmoth"],
+      levelOffset: [4, 8],
+      minStage: GrowthStage.Child,
+    },
+  ],
+};
+
+/**
+ * Shadow Depths encounter table - end-game dungeon.
+ */
+export const depthsEncounters: EncounterTable = {
+  id: "depths_encounters",
+  baseEncounterChance: 0.6,
+  entries: [
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.4,
+      speciesIds: ["shadowmoth", "rockpup"],
+      levelOffset: [0, 6],
+    },
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.4,
+      speciesIds: ["shadowmoth", "emberfox"],
+      levelOffset: [3, 8],
+    },
+    {
+      encounterType: EncounterType.WildBattle,
+      probability: 0.2,
+      speciesIds: ["shadowmoth"],
+      levelOffset: [5, 10],
+      minStage: GrowthStage.YoungAdult,
+    },
+  ],
+};
+
+/**
  * All encounter tables indexed by ID.
  */
 export const ENCOUNTER_TABLES: Record<string, EncounterTable> = {
   meadow_encounters: meadowEncounters,
   woods_encounters: woodsEncounters,
+  coast_encounters: coastEncounters,
+  highlands_encounters: highlandsEncounters,
+  caves_encounters: cavesEncounters,
+  depths_encounters: depthsEncounters,
 };
 
 /**

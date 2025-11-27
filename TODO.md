@@ -426,24 +426,24 @@ Quest tracking and completion.
 Expand game content.
 
 ### 19.1 More Items
-- [ ] Add more food, drink, toy, cleaning items
-- [ ] Create `src/game/data/items/medicine.ts` - Medicine items
-- [ ] Create `src/game/data/items/battle.ts` - Battle consumables
-- [ ] Create `src/game/data/items/equipment.ts` - Equipment
-- [ ] Create `src/game/data/items/materials.ts` - Materials
+- [x] Add more food, drink, toy, cleaning items
+- [x] Create `src/game/data/items/medicine.ts` - Medicine items
+- [x] Create `src/game/data/items/battle.ts` - Battle consumables
+- [x] Create `src/game/data/items/equipment.ts` - Equipment
+- [x] Create `src/game/data/items/materials.ts` - Materials
 
 ### 19.2 More Locations
-- [ ] Add more wild areas
-- [ ] Create dungeon locations
+- [x] Add more wild areas
+- [x] Create dungeon locations
 
 ### 19.3 More Quests
-- [ ] Create `src/game/data/quests/main.ts` - Main story quests
-- [ ] Create `src/game/data/quests/side.ts` - Side quests
-- [ ] Create `src/game/data/quests/daily.ts` - Daily quests
+- [x] Create `src/game/data/quests/main.ts` - Main story quests
+- [x] Create `src/game/data/quests/side.ts` - Side quests
+- [x] Create `src/game/data/quests/daily.ts` - Daily quests
 
 ### 19.4 More Species
-- [ ] Add unlock requirements for species
-- [ ] Add 3-4 more species
+- [x] Add unlock requirements for species
+- [x] Add 3-4 more species
 
 **✓ Testable:** Play through expanded content
 

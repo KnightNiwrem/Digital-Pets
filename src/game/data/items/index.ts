@@ -3,15 +3,23 @@
  */
 
 import type {
+  BattleItem,
   CleaningItem,
   DrinkItem,
+  EquipmentItem,
   FoodItem,
   Item,
+  MaterialItem,
+  MedicineItem,
   ToyItem,
 } from "@/game/types/item";
+import { BATTLE_ITEMS, getBattleItemById } from "./battle";
 import { CLEANING_ITEMS, getCleaningItemById } from "./cleaning";
 import { DRINK_ITEMS, getDrinkItemById } from "./drinks";
+import { EQUIPMENT_ITEMS, getEquipmentItemById } from "./equipment";
 import { FOOD_ITEMS, getFoodItemById } from "./food";
+import { getMaterialItemById, MATERIAL_ITEMS } from "./materials";
+import { getMedicineItemById, MEDICINE_ITEMS } from "./medicine";
 import { getToyItemById, TOY_ITEMS } from "./toys";
 
 /**
@@ -22,6 +30,10 @@ export const ALL_ITEMS: readonly Item[] = [
   ...DRINK_ITEMS,
   ...CLEANING_ITEMS,
   ...TOY_ITEMS,
+  ...MEDICINE_ITEMS,
+  ...BATTLE_ITEMS,
+  ...EQUIPMENT_ITEMS,
+  ...MATERIAL_ITEMS,
 ] as const;
 
 /**
@@ -68,13 +80,54 @@ export function getAllToyItems(): ToyItem[] {
   return [...TOY_ITEMS];
 }
 
+/**
+ * Get all medicine items.
+ */
+export function getAllMedicineItems(): MedicineItem[] {
+  return [...MEDICINE_ITEMS];
+}
+
+/**
+ * Get all battle items.
+ */
+export function getAllBattleItems(): BattleItem[] {
+  return [...BATTLE_ITEMS];
+}
+
+/**
+ * Get all equipment items.
+ */
+export function getAllEquipmentItems(): EquipmentItem[] {
+  return [...EQUIPMENT_ITEMS];
+}
+
+/**
+ * Get all material items.
+ */
+export function getAllMaterialItems(): MaterialItem[] {
+  return [...MATERIAL_ITEMS];
+}
+
 // Re-export individual lookup functions
 export {
+  getBattleItemById,
   getCleaningItemById,
   getDrinkItemById,
+  getEquipmentItemById,
   getFoodItemById,
+  getMaterialItemById,
+  getMedicineItemById,
   getToyItemById,
 };
 
 // Re-export item arrays
-export { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS, TOY_ITEMS };
+export {
+  BATTLE_ITEMS,
+  CLEANING_ITEMS,
+  DRINK_ITEMS,
+  EQUIPMENT_ITEMS,
+  FOOD_ITEMS,
+  MATERIAL_ITEMS,
+  MEDICINE_ITEMS,
+  TOY_ITEMS,
+};

@@ -78,6 +78,72 @@ export const FOOD_ITEMS: readonly FoodItem[] = [
     satietyRestore: toMicro(50),
     poopAcceleration: 120, // Indulgent meal: 60 minutes
   },
+  {
+    id: "food_berries",
+    name: "Mixed Berries",
+    description: "A handful of fresh forest berries. Light and nutritious.",
+    category: "food",
+    rarity: "common",
+    stackable: true,
+    maxStack: 99,
+    sellValue: 6,
+    icon: "🫐",
+    satietyRestore: toMicro(12),
+    poopAcceleration: 20, // Very light: 10 minutes
+  },
+  {
+    id: "food_mushroom",
+    name: "Forest Mushroom",
+    description: "An earthy mushroom from the woods. Surprisingly filling.",
+    category: "food",
+    rarity: "uncommon",
+    stackable: true,
+    maxStack: 50,
+    sellValue: 12,
+    icon: "🍄",
+    satietyRestore: toMicro(25),
+    poopAcceleration: 45, // Light meal: 22.5 minutes
+  },
+  {
+    id: "food_steak",
+    name: "Premium Steak",
+    description: "A perfectly cooked premium steak. Exquisite!",
+    category: "food",
+    rarity: "rare",
+    stackable: true,
+    maxStack: 20,
+    sellValue: 40,
+    icon: "🥩",
+    satietyRestore: toMicro(60),
+    poopAcceleration: 100, // Heavy meal: 50 minutes
+  },
+  {
+    id: "food_honey",
+    name: "Wild Honey",
+    description: "Sweet golden honey harvested from wild bees.",
+    category: "food",
+    rarity: "uncommon",
+    stackable: true,
+    maxStack: 50,
+    sellValue: 20,
+    icon: "🍯",
+    satietyRestore: toMicro(18),
+    poopAcceleration: 30, // Light: 15 minutes
+  },
+  {
+    id: "food_feast",
+    name: "Grand Feast",
+    description:
+      "A legendary meal fit for royalty. Completely satisfies hunger.",
+    category: "food",
+    rarity: "epic",
+    stackable: true,
+    maxStack: 5,
+    sellValue: 100,
+    icon: "🍱",
+    satietyRestore: toMicro(100),
+    poopAcceleration: 180, // Massive meal: 90 minutes
+  },
 ] as const;
 
 /**
