@@ -7,9 +7,10 @@ import type { Pet } from "@/game/types/pet";
 import { createDefaultResistances } from "@/game/types/stats";
 
 /**
- * Default values for test pets.
+ * Factory function to create default test pet values.
+ * Using a factory ensures fresh timestamps for each call.
  */
-const DEFAULT_TEST_PET: Pet = {
+const createDefaultTestPet = (): Pet => ({
   identity: {
     id: "test-pet-1",
     name: "Test Pet",
@@ -51,7 +52,7 @@ const DEFAULT_TEST_PET: Pet = {
     sleepTicksToday: 0,
   },
   activityState: ActivityState.Idle,
-};
+});
 
 /**
  * Deep partial type for nested overrides.
@@ -97,20 +98,22 @@ function deepMerge<T extends object>(target: T, source: DeepPartial<T>): T {
  * Supports deep partial overrides for nested objects.
  */
 export function createTestPet(overrides: DeepPartial<Pet> = {}): Pet {
-  return deepMerge(structuredClone(DEFAULT_TEST_PET), overrides) as Pet;
+  return deepMerge(createDefaultTestPet(), overrides) as Pet;
 }
 
 /**
  * Create a sleeping test pet.
+ * Merges sleep overrides while ensuring the pet is always in a sleeping state.
  */
 export function createSleepingTestPet(overrides: DeepPartial<Pet> = {}): Pet {
+  const { sleep: sleepOverrides, ...otherOverrides } = overrides;
   return createTestPet({
+    ...otherOverrides,
     sleep: {
+      ...sleepOverrides,
       isSleeping: true,
-      sleepStartTime: Date.now(),
-      sleepTicksToday: 0,
+      sleepStartTime: sleepOverrides?.sleepStartTime ?? Date.now(),
     },
     activityState: ActivityState.Sleeping,
-    ...overrides,
   });
 }
