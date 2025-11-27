@@ -65,7 +65,7 @@ export const MATERIAL_ITEMS: readonly MaterialItem[] = [
     stackable: true,
     maxStack: 50,
     sellValue: 15,
-    icon: "�ite",
+    icon: "⛏️",
     craftingTags: ["ore", "metal", "mineral"],
   },
   {

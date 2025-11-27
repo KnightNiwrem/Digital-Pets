@@ -4,6 +4,7 @@
 
 import type { MicroValue } from "./common";
 import type { ItemCategory, Rarity } from "./constants";
+import type { BattleStats } from "./stats";
 
 /**
  * Base properties shared by all items.
@@ -77,10 +78,12 @@ export interface CleaningItem extends BaseItem {
  */
 export interface MedicineItem extends BaseItem {
   category: "medicine";
-  /** HP restored (if healing) */
+  /** HP restored (if healing). Ignored if isFullRestore is true. */
   healAmount?: number;
   /** Status effects cured (array of status IDs) */
   cureStatus?: string[];
+  /** If true, fully restores HP regardless of healAmount */
+  isFullRestore?: boolean;
 }
 
 /**
@@ -89,11 +92,21 @@ export interface MedicineItem extends BaseItem {
 export interface BattleItem extends BaseItem {
   category: "battle";
   /** Which stat is affected */
-  statModifier: string;
+  statModifier: keyof BattleStats;
   /** Percentage bonus (e.g., 10 for +10%) */
   modifierValue: number;
   /** Number of turns the effect lasts */
   duration: number;
+}
+
+/**
+ * Special effect for equipment items.
+ */
+export interface EquipmentSpecialEffect {
+  /** Type of special effect */
+  type: "critRate" | "dropRate" | "trainingBonus";
+  /** Effect value (percentage) */
+  value: number;
 }
 
 /**
@@ -112,7 +125,9 @@ export interface EquipmentItem extends BaseItem {
   /** Effect description */
   effect: string;
   /** Stat bonuses provided */
-  statBonuses: Partial<Record<string, number>>;
+  statBonuses: Partial<Record<keyof BattleStats, number>>;
+  /** Special effects not covered by stat bonuses */
+  specialEffects?: EquipmentSpecialEffect[];
   /** Maximum durability */
   maxDurability: number;
   /** What activity degrades durability */

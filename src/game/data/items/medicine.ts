@@ -80,7 +80,7 @@ export const MEDICINE_ITEMS: readonly MedicineItem[] = [
     maxStack: 5,
     sellValue: 200,
     icon: "✨",
-    healAmount: 999,
+    isFullRestore: true,
     cureStatus: ["poison", "burn", "freeze", "sleep", "stun", "confusion"],
   },
 ] as const;

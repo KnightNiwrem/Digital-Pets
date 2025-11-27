@@ -2,6 +2,7 @@
  * Main story quest chain.
  */
 
+import { GrowthStage } from "@/game/types/constants";
 import {
   ObjectiveType,
   type Quest,
@@ -76,7 +77,7 @@ export const mainCrystalDiscovery: Quest = {
     },
     {
       type: RequirementType.Stage,
-      target: "child",
+      target: GrowthStage.Child,
     },
   ],
   objectives: [
@@ -134,7 +135,7 @@ export const mainRisingFlames: Quest = {
     },
     {
       type: RequirementType.Stage,
-      target: "teen",
+      target: GrowthStage.Teen,
     },
   ],
   objectives: [
@@ -199,7 +200,7 @@ export const mainShadowDepths: Quest = {
     },
     {
       type: RequirementType.Stage,
-      target: "youngAdult",
+      target: GrowthStage.YoungAdult,
     },
   ],
   objectives: [

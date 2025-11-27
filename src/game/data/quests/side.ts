@@ -2,6 +2,7 @@
  * Side quests - optional quests with various rewards.
  */
 
+import { GrowthStage } from "@/game/types/constants";
 import {
   ObjectiveType,
   type Quest,
@@ -127,7 +128,7 @@ export const sideMonsterHunter: Quest = {
     },
     {
       type: RequirementType.Stage,
-      target: "child",
+      target: GrowthStage.Child,
     },
   ],
   objectives: [

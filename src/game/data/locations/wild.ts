@@ -23,6 +23,7 @@ export const sunnyMeadow: Location = {
     { targetId: "home", energyCost: 5 },
     { targetId: "willowbrook", energyCost: 5 },
     { targetId: "misty_woods", energyCost: 10, terrainModifier: 1.2 },
+    { targetId: "whispering_coast", energyCost: 15, terrainModifier: 1.3 },
   ],
   levelMin: 1,
   levelMax: 5,
@@ -50,6 +51,7 @@ export const mistyWoods: Location = {
     { targetId: "meadow", energyCost: 10, terrainModifier: 1.2 },
     { targetId: "willowbrook", energyCost: 15 },
     { targetId: "crystal_caves", energyCost: 20, terrainModifier: 1.5 },
+    { targetId: "scorched_highlands", energyCost: 25, terrainModifier: 1.4 },
   ],
   levelMin: 5,
   levelMax: 15,
@@ -134,6 +136,7 @@ export const crystalCaves: Location = {
   connections: [
     { targetId: "misty_woods", energyCost: 20, terrainModifier: 1.5 },
     { targetId: "scorched_highlands", energyCost: 20, terrainModifier: 1.3 },
+    { targetId: "shadow_depths", energyCost: 30, terrainModifier: 1.8 },
   ],
   levelMin: 10,
   levelMax: 20,
@@ -175,9 +178,9 @@ export const shadowDepths: Location = {
 };
 
 /**
- * All wild area locations.
+ * All explorable locations (wild areas and dungeons).
  */
-export const wildLocations: Location[] = [
+export const explorableLocations: Location[] = [
   sunnyMeadow,
   mistyWoods,
   whisperingCoast,
