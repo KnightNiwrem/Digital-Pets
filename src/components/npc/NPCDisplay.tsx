@@ -56,6 +56,7 @@ export function NPCDisplay({ npc, onClick }: NPCDisplayProps) {
       variant="outline"
       className="flex items-center gap-3 p-4 h-auto w-full justify-start"
       onClick={onClick}
+      aria-label={`Talk to ${npc.name}`}
     >
       <span className="text-3xl">{npc.emoji}</span>
       <div className="flex flex-col items-start">

@@ -2,6 +2,7 @@
  * Dialogue box component for displaying NPC speech.
  */
 
+import type { KeyboardEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { NPC } from "@/game/types/npc";
 
@@ -21,12 +22,25 @@ export function DialogueBox({
   onClick,
   showContinue = false,
 }: DialogueBoxProps) {
+  const handleKeyDown = onClick
+    ? (e: KeyboardEvent) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }
+    : undefined;
+
   return (
     <Card
       className={
         onClick ? "cursor-pointer hover:bg-accent/50 transition-colors" : ""
       }
       onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={handleKeyDown}
+      aria-label={onClick ? "Continue dialogue" : undefined}
     >
       <CardContent className="pt-4">
         <div className="flex gap-3">

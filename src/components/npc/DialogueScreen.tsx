@@ -109,7 +109,12 @@ export function DialogueScreen({
               <span className="text-2xl">{npc.emoji}</span>
               <CardTitle className="text-lg">{npc.name}</CardTitle>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              aria-label="Close dialogue"
+            >
               ✕
             </Button>
           </div>
