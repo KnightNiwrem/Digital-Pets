@@ -5,6 +5,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ForageTable } from "@/game/data/tables/forage";
+import { formatTicksAsTime } from "@/game/types/common";
 
 interface ActivitySelectProps {
   forageInfo: ForageTable | undefined;
@@ -66,10 +67,7 @@ export function ActivitySelect({
 
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Duration:</span>
-          <span>
-            {forageInfo.baseDurationTicks} tick
-            {forageInfo.baseDurationTicks !== 1 ? "s" : ""}
-          </span>
+          <span>{formatTicksAsTime(forageInfo.baseDurationTicks)}</span>
         </div>
 
         <Button
