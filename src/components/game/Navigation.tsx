@@ -61,22 +61,22 @@ export function Navigation({
 
   return (
     <>
-      <nav className="border-t bg-card fixed bottom-0 left-0 right-0">
-        <div className="container mx-auto px-2">
-          <div className="flex justify-around py-2">
+      <nav className="border-t bg-card fixed bottom-0 left-0 right-0 safe-area-inset-bottom">
+        <div className="container mx-auto px-1">
+          <div className="flex justify-between py-2 overflow-x-auto">
             {TABS.map((tab) => (
               <button
                 type="button"
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
+                className={`flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-11 rounded-lg transition-colors ${
                   activeTab === tab.id
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-accent"
                 }`}
               >
                 <span className="text-lg">{tab.icon}</span>
-                <span className="text-xs">{tab.label}</span>
+                <span className="text-[10px]">{tab.label}</span>
               </button>
             ))}
           </div>

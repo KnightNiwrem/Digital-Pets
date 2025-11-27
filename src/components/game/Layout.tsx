@@ -20,7 +20,7 @@ export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <main className="flex-1 container mx-auto p-4">{children}</main>
+      <main className="flex-1 container mx-auto p-4 pb-24">{children}</main>
       <Navigation activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   );

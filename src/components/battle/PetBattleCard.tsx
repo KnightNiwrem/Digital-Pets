@@ -44,7 +44,7 @@ export function PetBattleCard({ combatant, position }: PetBattleCardProps) {
   return (
     <Card
       className={cn(
-        "w-48",
+        "w-full max-w-48",
         position === "enemy" ? "bg-red-50 dark:bg-red-950/20" : "",
       )}
     >
