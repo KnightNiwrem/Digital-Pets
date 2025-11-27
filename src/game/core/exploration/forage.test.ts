@@ -183,7 +183,9 @@ test("processExplorationTick returns null when exploration completes", () => {
 test("calculateForageDrops returns items with 100% drop rate", () => {
   const forageTable = createTestForageTable();
   // Use skill level 1 (gives 0 bonus) to ensure 100% base rate stays 100%
-  // Skill level 0 gives negative bonus: (0-1) * 0.05 = -0.05, reducing rate to 95%
+  // For reference: Skill level 0 gives a negative bonus: (0-1) * 0.05 = -0.05.
+  // If the bonus is applied multiplicatively: 100% * (1 + (-0.05)) = 95%.
+  // If additive: 100% + (-5%) = 95%. This test assumes a multiplicative bonus.
   for (let i = 0; i < 5; i++) {
     const drops = calculateForageDrops(forageTable, 1);
     const appleDrops = drops.filter((d) => d.itemId === "food_apple");
