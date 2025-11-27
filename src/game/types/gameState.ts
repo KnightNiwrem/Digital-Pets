@@ -5,6 +5,7 @@
 import type { ExplorationResult } from "./activity";
 import type { Tick, Timestamp } from "./common";
 import type { Pet } from "./pet";
+import type { QuestProgress } from "./quest";
 import { createInitialSkills, type PlayerSkills } from "./skill";
 
 /**
@@ -59,20 +60,6 @@ export interface PlayerState {
   currentLocationId: string;
   /** Player skills */
   skills: PlayerSkills;
-}
-
-/**
- * Quest progress tracking.
- */
-export interface QuestProgress {
-  /** Quest ID */
-  questId: string;
-  /** Current objective index */
-  currentObjective: number;
-  /** Progress data for current objective */
-  objectiveProgress: Record<string, number>;
-  /** Whether the quest is completed */
-  isCompleted: boolean;
 }
 
 /**
