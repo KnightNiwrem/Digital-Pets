@@ -9,16 +9,11 @@ import {
 } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
-import { TICK_DURATION_MS, TICKS_PER_MONTH } from "@/game/types/common";
+import { TICKS_PER_MONTH } from "@/game/types/common";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { Pet, PetGrowth } from "@/game/types/pet";
 import type { StatGrowthRate } from "@/game/types/species";
 import type { BattleStats } from "@/game/types/stats";
-
-/**
- * Seconds per tick, derived from TICK_DURATION_MS.
- */
-const SECONDS_PER_TICK = TICK_DURATION_MS / 1000;
 
 /**
  * Result of processing growth for a tick.
@@ -229,31 +224,4 @@ export function getStageProgressPercent(
   const timeInStage = ageTicks - def.minAgeTicks;
 
   return Math.min(100, Math.floor((timeInStage / stageDuration) * 100));
-}
-
-/**
- * Format ticks as a human-readable duration.
- */
-export function formatTicksDuration(ticks: Tick): string {
-  const totalMinutes = Math.floor((ticks * SECONDS_PER_TICK) / 60);
-  const totalHours = Math.floor(totalMinutes / 60);
-  const totalDays = Math.floor(totalHours / 24);
-
-  if (totalDays > 0) {
-    const remainingHours = totalHours % 24;
-    if (remainingHours > 0) {
-      return `${totalDays}d ${remainingHours}h`;
-    }
-    return `${totalDays}d`;
-  }
-
-  if (totalHours > 0) {
-    const remainingMinutes = totalMinutes % 60;
-    if (remainingMinutes > 0) {
-      return `${totalHours}h ${remainingMinutes}m`;
-    }
-    return `${totalHours}h`;
-  }
-
-  return `${totalMinutes}m`;
 }

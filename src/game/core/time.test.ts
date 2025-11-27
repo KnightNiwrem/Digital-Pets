@@ -3,6 +3,7 @@
  */
 
 import { expect, test } from "bun:test";
+import { formatTicksAsTime } from "@/game/types/common";
 import {
   calculateCappedOfflineTicks,
   calculateElapsedTicks,
@@ -57,4 +58,40 @@ test("msUntilNextTick returns correct remaining time", () => {
 test("msUntilNextTick returns remaining time mid-tick", () => {
   const time = 15_000; // Halfway through a tick
   expect(msUntilNextTick(time)).toBe(15_000);
+});
+
+// formatTicksAsTime tests
+test("formatTicksAsTime formats 0 ticks", () => {
+  expect(formatTicksAsTime(0)).toBe("0m");
+});
+
+test("formatTicksAsTime formats 1 tick (less than a minute)", () => {
+  expect(formatTicksAsTime(1)).toBe("0m");
+});
+
+test("formatTicksAsTime formats minutes", () => {
+  expect(formatTicksAsTime(2)).toBe("1m"); // 2 ticks = 60 seconds = 1 minute
+});
+
+test("formatTicksAsTime formats hours", () => {
+  expect(formatTicksAsTime(120)).toBe("1h"); // 120 ticks = 1 hour
+});
+
+test("formatTicksAsTime formats hours and minutes", () => {
+  expect(formatTicksAsTime(150)).toBe("1h 15m"); // 150 ticks = 1h 15m
+});
+
+test("formatTicksAsTime formats days", () => {
+  expect(formatTicksAsTime(2880)).toBe("1d"); // 2880 ticks = 1 day
+});
+
+test("formatTicksAsTime formats days and hours", () => {
+  expect(formatTicksAsTime(3000)).toBe("1d 1h"); // 1 day + 1 hour
+});
+
+test("formatTicksAsTime formats days and minutes (no hours)", () => {
+  // 1 day + 30 minutes = 2880 + 1 tick = 2881 ticks (but that's only 30 seconds)
+  // 1 day + 30 minutes = 2880 + 1 tick won't give 30 minutes
+  // 30 minutes = 60 ticks, so 1 day + 30 min = 2880 + 60 = 2940 ticks
+  expect(formatTicksAsTime(2940)).toBe("1d 30m"); // 1 day + 30 minutes
 });

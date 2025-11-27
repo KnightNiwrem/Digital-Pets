@@ -9,7 +9,6 @@ import type { GrowthStage } from "@/game/types/constants";
 import {
   applyStatGains,
   calculateStageTransitionStatGains,
-  formatTicksDuration,
   getNextStage,
   getStageProgressPercent,
   getStatGainForRate,
@@ -304,33 +303,4 @@ test("getStageProgressPercent returns 100 at stage end", () => {
   expect(
     getStageProgressPercent("baby", GROWTH_STAGE_DEFINITIONS.child.minAgeTicks),
   ).toBe(100);
-});
-
-// formatTicksDuration tests
-test("formatTicksDuration formats 0 ticks", () => {
-  expect(formatTicksDuration(0)).toBe("0m");
-});
-
-test("formatTicksDuration formats 1 tick (less than a minute)", () => {
-  expect(formatTicksDuration(1)).toBe("0m");
-});
-
-test("formatTicksDuration formats minutes", () => {
-  expect(formatTicksDuration(2)).toBe("1m"); // 2 ticks = 60 seconds = 1 minute
-});
-
-test("formatTicksDuration formats hours", () => {
-  expect(formatTicksDuration(120)).toBe("1h"); // 120 ticks = 1 hour
-});
-
-test("formatTicksDuration formats hours and minutes", () => {
-  expect(formatTicksDuration(150)).toBe("1h 15m"); // 150 ticks = 1h 15m
-});
-
-test("formatTicksDuration formats days", () => {
-  expect(formatTicksDuration(2880)).toBe("1d"); // 2880 ticks = 1 day
-});
-
-test("formatTicksDuration formats days and hours", () => {
-  expect(formatTicksDuration(3000)).toBe("1d 1h"); // 1 day + 1 hour
 });
