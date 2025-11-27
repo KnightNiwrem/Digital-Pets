@@ -195,7 +195,7 @@ test("calculateForageDrops returns items with 100% drop rate", () => {
 
 test("calculateForageDrops skips items requiring higher skill", () => {
   const forageTable = createTestForageTable();
-  // With skill level 1, should not get food_meat (requires 1) or food_cake (requires 3)
+  // With skill level 1, can get food_meat (requires 1), but should not get food_cake (requires 3)
   // Note: minSkillLevel check is strictly less-than, so level 1 can get items requiring level 1
   const drops = calculateForageDrops(forageTable, 1);
   // food_meat requires level 1, so it may drop (50% chance)
