@@ -8,6 +8,11 @@ import type { FoodItem } from "@/game/types/item";
 /**
  * Basic food items available from the start.
  */
+/**
+ * Poop acceleration is measured in ticks.
+ * Per spec: "Each feeding item consumed reduces the next poop timer by 60 ticks (30 minutes)."
+ * Different foods have different acceleration effects.
+ */
 export const FOOD_ITEMS: readonly FoodItem[] = [
   {
     id: "food_kibble",
@@ -20,7 +25,7 @@ export const FOOD_ITEMS: readonly FoodItem[] = [
     sellValue: 5,
     icon: "🥣",
     satietyRestore: toMicro(15),
-    poopAcceleration: 0,
+    poopAcceleration: 30, // Light meal: 15 minutes
   },
   {
     id: "food_apple",
@@ -33,7 +38,7 @@ export const FOOD_ITEMS: readonly FoodItem[] = [
     sellValue: 8,
     icon: "🍎",
     satietyRestore: toMicro(20),
-    poopAcceleration: 1,
+    poopAcceleration: 60, // Standard meal: 30 minutes
   },
   {
     id: "food_meat",
@@ -46,7 +51,7 @@ export const FOOD_ITEMS: readonly FoodItem[] = [
     sellValue: 15,
     icon: "🍖",
     satietyRestore: toMicro(35),
-    poopAcceleration: 2,
+    poopAcceleration: 90, // Heavy meal: 45 minutes
   },
   {
     id: "food_fish",
@@ -59,7 +64,7 @@ export const FOOD_ITEMS: readonly FoodItem[] = [
     sellValue: 18,
     icon: "🐟",
     satietyRestore: toMicro(30),
-    poopAcceleration: 1,
+    poopAcceleration: 60, // Standard meal: 30 minutes
   },
   {
     id: "food_cake",
@@ -72,7 +77,7 @@ export const FOOD_ITEMS: readonly FoodItem[] = [
     sellValue: 25,
     icon: "🍰",
     satietyRestore: toMicro(50),
-    poopAcceleration: 3,
+    poopAcceleration: 120, // Indulgent meal: 60 minutes
   },
 ] as const;
 
