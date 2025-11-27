@@ -499,7 +499,9 @@ test("processOfflineCatchup collects exploration result when exploration complet
   // Should have collected at least one exploration result
   expect(result.report.explorationResults.length).toBeGreaterThan(0);
   // The result should have the correct location name
-  expect(result.report.explorationResults[0]?.locationName).toBe("Sunny Meadow");
+  expect(result.report.explorationResults[0]?.locationName).toBe(
+    "Sunny Meadow",
+  );
 });
 
 test("processOfflineCatchup has empty explorationResults when no exploration completes", () => {
@@ -544,7 +546,9 @@ test("processOfflineCatchup collects exploration result for in-progress explorat
 
   // Exploration should have completed and been collected
   expect(result.report.explorationResults.length).toBe(1);
-  expect(result.report.explorationResults[0]?.locationName).toBe("Sunny Meadow");
+  expect(result.report.explorationResults[0]?.locationName).toBe(
+    "Sunny Meadow",
+  );
   // Pet should no longer be exploring
   expect(result.state.pet?.activeExploration).toBeUndefined();
 });
