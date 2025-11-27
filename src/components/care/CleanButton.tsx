@@ -9,10 +9,14 @@ import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { cleanPet } from "@/game/state/actions/care";
 
+interface CleanButtonProps {
+  onSuccess?: () => void;
+}
+
 /**
  * Button to open cleaning item selection and clean the pet.
  */
-export function CleanButton() {
+export function CleanButton({ onSuccess }: CleanButtonProps) {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { state, actions } = useGameState();
@@ -24,6 +28,8 @@ export function CleanButton() {
       const result = cleanPet(currentState, itemId);
       if (!result.success) {
         setErrorMessage(result.message);
+      } else {
+        onSuccess?.();
       }
       return result.state;
     });

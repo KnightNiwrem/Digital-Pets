@@ -454,25 +454,25 @@ Expand game content.
 Final polish pass.
 
 ### 20.1 Animations
-- [ ] Pet idle animations
-- [ ] Care action feedback
-- [ ] Battle animations
+- [x] Pet idle animations
+- [x] Care action feedback
+- [x] Battle animations
 
 ### 20.2 Balance
-- [ ] Playtest and adjust decay rates
-- [ ] Playtest and adjust battle formulas
-- [ ] Adjust progression timing
+- [x] Playtest and adjust decay rates
+- [x] Playtest and adjust battle formulas
+- [x] Adjust progression timing
 
 ### 20.3 Testing
-- [ ] Unit tests for tick processor
-- [ ] Unit tests for battle damage
-- [ ] Unit tests for care decay
-- [ ] Integration tests
+- [x] Unit tests for tick processor
+- [x] Unit tests for battle damage
+- [x] Unit tests for care decay
+- [x] Integration tests
 
 ### 20.4 Settings Menu
-- [ ] Create `src/components/screens/MenuScreen.tsx`
-- [ ] Manual save/export
-- [ ] Settings options
+- [x] Create `src/components/screens/MenuScreen.tsx`
+- [x] Manual save/export
+- [x] Settings options
 
 **✓ Testable:** Polished game ready for extended play
 

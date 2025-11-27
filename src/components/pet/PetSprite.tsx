@@ -8,17 +8,40 @@ import { cn } from "@/lib/utils";
 interface PetSpriteProps {
   emoji: string;
   isSleeping?: boolean;
+  isAnimating?: boolean;
+  animationType?: "idle" | "happy" | "eat" | "drink" | "play" | "hurt";
   className?: string;
 }
 
 /**
- * Displays the pet's visual representation.
+ * Displays the pet's visual representation with idle and action animations.
  */
 export function PetSprite({
   emoji,
   isSleeping = false,
+  isAnimating = true,
+  animationType = "idle",
   className,
 }: PetSpriteProps) {
+  const getAnimationClass = () => {
+    if (isSleeping) return "animate-pulse";
+    if (!isAnimating) return "";
+
+    switch (animationType) {
+      case "happy":
+        return "animate-bounce";
+      case "eat":
+      case "drink":
+        return "animate-pet-eat";
+      case "play":
+        return "animate-pet-wiggle";
+      case "hurt":
+        return "animate-pet-shake";
+      default:
+        return "animate-pet-idle";
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -27,9 +50,11 @@ export function PetSprite({
         className,
       )}
     >
-      <span className={cn(isSleeping && "animate-pulse")}>{emoji}</span>
+      <span className={cn(getAnimationClass())}>{emoji}</span>
       {isSleeping && (
-        <span className="absolute top-0 right-0 text-3xl">💤</span>
+        <span className="absolute top-0 right-0 text-3xl animate-float">
+          💤
+        </span>
       )}
     </div>
   );

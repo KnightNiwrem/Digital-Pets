@@ -2,7 +2,9 @@
  * Care Screen component showing pet status and care actions.
  */
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActionFeedback,
   CleanButton,
   FeedButton,
   PlayButton,
@@ -28,11 +30,64 @@ import {
   selectPoop,
 } from "@/game/state/selectors";
 
+type PetAnimationType = "idle" | "happy" | "eat" | "drink" | "play" | "hurt";
+
+interface ActionFeedbackState {
+  emoji: string;
+  key: number;
+}
+
 /**
  * Main care screen showing pet status and care actions.
  */
 export function CareScreen() {
   const { state, isLoading } = useGameState();
+  const [petAnimation, setPetAnimation] = useState<PetAnimationType>("idle");
+  const [actionFeedback, setActionFeedback] =
+    useState<ActionFeedbackState | null>(null);
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  // Cleanup animation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const triggerAction = useCallback(
+    (animation: PetAnimationType, emoji: string) => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+      setPetAnimation(animation);
+      setActionFeedback({ emoji, key: Date.now() });
+      animationTimeoutRef.current = setTimeout(
+        () => setPetAnimation("idle"),
+        600,
+      );
+    },
+    [],
+  );
+
+  const handleFeedSuccess = useCallback(() => {
+    triggerAction("eat", "🍖");
+  }, [triggerAction]);
+
+  const handleWaterSuccess = useCallback(() => {
+    triggerAction("drink", "💧");
+  }, [triggerAction]);
+
+  const handlePlaySuccess = useCallback(() => {
+    triggerAction("play", "🎾");
+  }, [triggerAction]);
+
+  const handleCleanSuccess = useCallback(() => {
+    triggerAction("happy", "✨");
+  }, [triggerAction]);
 
   if (isLoading) {
     return (
@@ -79,7 +134,18 @@ export function CareScreen() {
       <Card>
         <CardContent className="pt-6 pb-4">
           <div className="relative flex justify-center">
-            <PetSprite emoji={species.emoji} isSleeping={petInfo.isSleeping} />
+            <PetSprite
+              emoji={species.emoji}
+              isSleeping={petInfo.isSleeping}
+              animationType={petAnimation}
+            />
+            {actionFeedback && (
+              <ActionFeedback
+                key={actionFeedback.key}
+                emoji={actionFeedback.emoji}
+                onComplete={() => setActionFeedback(null)}
+              />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -133,10 +199,10 @@ export function CareScreen() {
           </div>
           {!petInfo.isSleeping && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <FeedButton />
-              <WaterButton />
-              <PlayButton />
-              <CleanButton />
+              <FeedButton onSuccess={handleFeedSuccess} />
+              <WaterButton onSuccess={handleWaterSuccess} />
+              <PlayButton onSuccess={handlePlaySuccess} />
+              <CleanButton onSuccess={handleCleanSuccess} />
             </div>
           )}
           {petInfo.isSleeping && (

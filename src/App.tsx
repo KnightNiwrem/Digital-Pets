@@ -18,6 +18,7 @@ import {
   ExplorationScreen,
   InventoryScreen,
   MapScreen,
+  MenuScreen,
   NewGameScreen,
   QuestScreen,
   SkillsScreen,
@@ -147,12 +148,11 @@ function GameContent({
         return <SkillsScreen />;
       case "quests":
         return <QuestScreen />;
+      case "menu":
+        return <MenuScreen />;
       case "battle":
         // Fallback if no battle info (useEffect will redirect)
         return <ExplorationScreen onStartBattle={handleStartBattle} />;
-      case "debug":
-        // Debug tab triggers a dialog in Navigation, not a screen change
-        return <CareScreen />;
       default:
         return <CareScreen />;
     }

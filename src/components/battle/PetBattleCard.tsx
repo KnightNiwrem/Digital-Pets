@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 interface PetBattleCardProps {
   combatant: Combatant;
   position: "player" | "enemy";
+  isAttacking?: boolean;
+  isHit?: boolean;
 }
 
 /**
@@ -24,7 +26,12 @@ function clampPercent(value: number, max: number): number {
 /**
  * Displays a pet's battle status including HP bar, stamina, and effects.
  */
-export function PetBattleCard({ combatant, position }: PetBattleCardProps) {
+export function PetBattleCard({
+  combatant,
+  position,
+  isAttacking = false,
+  isHit = false,
+}: PetBattleCardProps) {
   const { derivedStats, statusEffects, name, speciesId } = combatant;
   const hpPercent = clampPercent(
     derivedStats.currentHealth,
@@ -44,14 +51,18 @@ export function PetBattleCard({ combatant, position }: PetBattleCardProps) {
   return (
     <Card
       className={cn(
-        "w-full max-w-48",
+        "w-full max-w-48 transition-all duration-200",
         position === "enemy" ? "bg-red-50 dark:bg-red-950/20" : "",
+        isAttacking && "animate-battle-attack",
+        isHit && "animate-battle-hit",
       )}
     >
       <CardContent className="pt-4 pb-3 px-4">
         {/* Name and emoji */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-2xl">{emoji}</span>
+          <span className={cn("text-2xl", isHit && "animate-pet-shake")}>
+            {emoji}
+          </span>
           <span className="font-semibold text-sm truncate">{name}</span>
         </div>
 

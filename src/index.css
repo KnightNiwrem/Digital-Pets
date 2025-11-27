@@ -18,6 +18,149 @@
   }
 }
 
+/* Pet animations */
+@keyframes pet-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pet-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes pet-eat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pet-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(5deg);
+  }
+}
+
+@keyframes action-feedback {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes battle-attack {
+  0% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(20px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes battle-hit {
+  0%,
+  100% {
+    filter: brightness(1);
+    transform: translateX(0);
+  }
+  20% {
+    filter: brightness(1.5);
+    transform: translateX(-3px);
+  }
+  40% {
+    filter: brightness(0.8);
+    transform: translateX(3px);
+  }
+  60% {
+    filter: brightness(1.2);
+    transform: translateX(-2px);
+  }
+}
+
+@layer utilities {
+  .animate-pet-idle {
+    animation: pet-idle 2s ease-in-out infinite;
+  }
+
+  .animate-pet-wiggle {
+    animation: pet-wiggle 0.5s ease-in-out infinite;
+  }
+
+  .animate-pet-eat {
+    animation: pet-eat 0.3s ease-in-out 2;
+  }
+
+  .animate-pet-shake {
+    animation: pet-shake 0.4s ease-in-out;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-action-feedback {
+    animation: action-feedback 0.6s ease-out forwards;
+  }
+
+  .animate-battle-attack {
+    animation: battle-attack 0.4s ease-out;
+  }
+
+  .animate-battle-hit {
+    animation: battle-hit 0.5s ease-out;
+  }
+}
+
 /* cool Bun background animation 😎 */
 body::before {
   content: "";
@@ -54,6 +197,6 @@ body::before {
   *,
   ::before,
   ::after {
-    animation: none;
+    animation: none !important;
   }
 }

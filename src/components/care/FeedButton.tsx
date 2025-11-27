@@ -9,10 +9,14 @@ import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { feedPet } from "@/game/state/actions/care";
 
+interface FeedButtonProps {
+  onSuccess?: () => void;
+}
+
 /**
  * Button to open food selection and feed the pet.
  */
-export function FeedButton() {
+export function FeedButton({ onSuccess }: FeedButtonProps) {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { state, actions } = useGameState();
@@ -24,6 +28,8 @@ export function FeedButton() {
       const result = feedPet(currentState, itemId);
       if (!result.success) {
         setErrorMessage(result.message);
+      } else {
+        onSuccess?.();
       }
       return result.state;
     });
