@@ -2,6 +2,7 @@
  * Re-export care components.
  */
 
+export { ActionFeedback } from "./ActionFeedback";
 export { CleanButton } from "./CleanButton";
 export { FeedButton } from "./FeedButton";
 export { PlayButton } from "./PlayButton";

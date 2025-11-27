@@ -7,6 +7,7 @@ export { CareScreen } from "./CareScreen";
 export { ExplorationScreen } from "./ExplorationScreen";
 export { InventoryScreen } from "./InventoryScreen";
 export { MapScreen } from "./MapScreen";
+export { MenuScreen } from "./MenuScreen";
 export { NewGameScreen } from "./NewGameScreen";
 export { QuestScreen } from "./QuestScreen";
 export { ShopScreen } from "./ShopScreen";
