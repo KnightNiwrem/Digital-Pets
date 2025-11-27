@@ -2,8 +2,7 @@
  * Care stat decay logic per tick.
  */
 
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
-import { getSpeciesById } from "@/game/data/species";
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import type { MicroValue } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
 
@@ -45,12 +44,9 @@ export function applyCareDecay(pet: Pet): Pet["careStats"] {
     : CARE_DECAY_AWAKE;
   const poopMultiplier = getPoopHappinessMultiplier(pet.poop.count);
 
-  const species = getSpeciesById(pet.identity.speciesId);
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
-
-  // Calculate actual max for clamping
-  const careCapMultiplier = species?.careCapMultiplier ?? 1.0;
-  const maxCareStat = Math.floor(stageDef.baseCareStatMax * careCapMultiplier);
+  // Use centralized max stat calculation
+  const maxStats = calculatePetMaxStats(pet);
+  const maxCareStat = maxStats?.careStatMax ?? 0;
 
   // Calculate new values with decay
   const newSatiety = Math.max(0, pet.careStats.satiety - decayRate);

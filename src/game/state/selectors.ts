@@ -9,6 +9,7 @@ import {
   getTicksUntilNextStage,
   getTicksUntilNextSubstage,
 } from "@/game/core/growth";
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import {
   GROWTH_STAGE_DEFINITIONS,
   type GrowthStageDefinition,
@@ -87,15 +88,14 @@ export function selectCareStats(state: GameState): CareStatDisplay | null {
   const ctx = getPetContext(state);
   if (!ctx) return null;
 
-  const { pet, species, stageDef } = ctx;
-  const careMax = Math.floor(
-    stageDef.baseCareStatMax * species.careCapMultiplier,
-  );
+  const { pet } = ctx;
+  const maxStats = calculatePetMaxStats(pet);
+  if (!maxStats) return null;
 
   const satiety = toDisplay(pet.careStats.satiety);
   const hydration = toDisplay(pet.careStats.hydration);
   const happiness = toDisplay(pet.careStats.happiness);
-  const max = toDisplay(careMax);
+  const max = toDisplay(maxStats.careStatMax);
 
   const satietyPercent = max > 0 ? Math.round((satiety / max) * 100) : 0;
   const hydrationPercent = max > 0 ? Math.round((hydration / max) * 100) : 0;
@@ -133,13 +133,12 @@ export function selectEnergy(state: GameState): EnergyDisplay | null {
   const ctx = getPetContext(state);
   if (!ctx) return null;
 
-  const { pet, species, stageDef } = ctx;
-  const energyMax = Math.floor(
-    stageDef.baseEnergyMax * species.careCapMultiplier,
-  );
+  const { pet } = ctx;
+  const maxStats = calculatePetMaxStats(pet);
+  if (!maxStats) return null;
 
   const energy = toDisplay(pet.energyStats.energy);
-  const max = toDisplay(energyMax);
+  const max = toDisplay(maxStats.energyMax);
 
   return {
     energy,

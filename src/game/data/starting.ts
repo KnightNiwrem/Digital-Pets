@@ -2,6 +2,8 @@
  * Starting data for new game and pet creation.
  */
 
+import { getInitialPoopTimer } from "@/game/core/care/poop";
+import { calculateMaxStats } from "@/game/core/petStats";
 import { createPetId, type GrowthStage, type Pet } from "@/game/types";
 import type { InventoryItem } from "@/game/types/gameState";
 import { GROWTH_STAGE_DEFINITIONS } from "./growthStages";
@@ -29,13 +31,11 @@ export function createNewPet(name: string, speciesId: string): Pet {
   const stage = DEFAULT_STARTING_STAGE;
   const stageDef = GROWTH_STAGE_DEFINITIONS[stage];
 
-  // Calculate actual care stat max based on species multiplier
-  const actualCareMax = Math.floor(
-    stageDef.baseCareStatMax * species.careCapMultiplier,
-  );
-  const actualEnergyMax = Math.floor(
-    stageDef.baseEnergyMax * species.careCapMultiplier,
-  );
+  // Use centralized max stat calculation
+  const maxStats = calculateMaxStats(speciesId, stage);
+  if (!maxStats) {
+    throw new Error(`Failed to calculate max stats for species: ${speciesId}`);
+  }
 
   // Start with full stats
   const now = Date.now();
@@ -53,12 +53,12 @@ export function createNewPet(name: string, speciesId: string): Pet {
       ageTicks: 0,
     },
     careStats: {
-      satiety: actualCareMax,
-      hydration: actualCareMax,
-      happiness: actualCareMax,
+      satiety: maxStats.careStatMax,
+      hydration: maxStats.careStatMax,
+      happiness: maxStats.careStatMax,
     },
     energyStats: {
-      energy: actualEnergyMax,
+      energy: maxStats.energyMax,
     },
     careLifeStats: {
       careLife: stageDef.careLifeMax,
@@ -67,7 +67,7 @@ export function createNewPet(name: string, speciesId: string): Pet {
     resistances: { ...species.resistances },
     poop: {
       count: 0,
-      ticksUntilNext: 480, // 4 hours until first poop
+      ticksUntilNext: getInitialPoopTimer(),
     },
     sleep: {
       isSleeping: false,
