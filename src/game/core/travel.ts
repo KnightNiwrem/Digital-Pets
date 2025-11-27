@@ -2,11 +2,13 @@
  * Travel logic for moving between locations.
  */
 
+import { updateQuestProgress } from "@/game/core/quests/quests";
 import { areLocationsConnected, getLocation } from "@/game/data/locations";
 import { toDisplay, toMicro } from "@/game/types/common";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type { LocationRequirement, TravelResult } from "@/game/types/location";
+import { ObjectiveType } from "@/game/types/quest";
 
 /**
  * Check if a growth stage meets or exceeds the required stage.
@@ -192,9 +194,16 @@ export function travel(
     },
   };
 
+  // Update quest progress for Visit objectives
+  const stateWithQuestProgress = updateQuestProgress(
+    newState,
+    ObjectiveType.Visit,
+    destinationId,
+  );
+
   return {
     success: true,
-    state: newState,
+    state: stateWithQuestProgress,
     message: `Traveled to ${destination?.name ?? destinationId}!`,
   };
 }

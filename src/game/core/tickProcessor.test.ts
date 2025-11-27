@@ -391,3 +391,76 @@ test("processGameTick handles state with no pet during daily reset", () => {
   const { getMidnightTimestamp } = require("./time");
   expect(newState.lastDailyReset).toBe(getMidnightTimestamp(now));
 });
+
+test("processGameTick updates quest progress when training completes", () => {
+  const { ActivityState } = require("@/game/types/constants");
+  const { QuestState } = require("@/game/types/quest");
+
+  const pet = createTestPet({
+    activityState: ActivityState.Training,
+    activeTraining: {
+      facilityId: "strength_gym",
+      sessionType: "basic",
+      ticksRemaining: 1, // Will complete on this tick
+      durationTicks: 10,
+      startTick: 0,
+    },
+  });
+
+  const state = createTestGameState({
+    pet,
+    quests: [
+      {
+        questId: "daily_training_session",
+        state: QuestState.Active,
+        objectiveProgress: {},
+      },
+    ],
+  });
+
+  const newState = processGameTick(state);
+
+  // Training should be complete
+  expect(newState.pet?.activeTraining).toBeUndefined();
+  // Quest progress should be updated
+  expect(newState.quests[0]?.objectiveProgress.complete_training).toBe(1);
+});
+
+test("processGameTick updates quest progress when exploration completes", () => {
+  const { ActivityState } = require("@/game/types/constants");
+  const { QuestState } = require("@/game/types/quest");
+
+  const pet = createTestPet({
+    activityState: ActivityState.Exploring,
+    activeExploration: {
+      locationId: "meadow",
+      activityType: "forage",
+      forageTableId: "meadow_forage",
+      ticksRemaining: 1, // Will complete on this tick
+      durationTicks: 10,
+      startTick: 0,
+    },
+  });
+
+  const state = createTestGameState({
+    pet,
+    player: {
+      ...createInitialGameState().player,
+      currentLocationId: "meadow",
+    },
+    quests: [
+      {
+        questId: "daily_forager",
+        state: QuestState.Active,
+        objectiveProgress: {},
+      },
+    ],
+  });
+
+  const newState = processGameTick(state);
+
+  // Exploration should be complete
+  expect(newState.pet?.activeExploration).toBeUndefined();
+  // Quest progress should be updated for foraging
+  expect(newState.quests[0]?.objectiveProgress.forage_once).toBe(1);
+});

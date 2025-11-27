@@ -7,6 +7,7 @@ import {
   processExplorationTick,
 } from "@/game/core/exploration/forage";
 import { calculatePetMaxStats } from "@/game/core/petStats";
+import { updateQuestProgress } from "@/game/core/quests/quests";
 import { resetDailySleep } from "@/game/core/sleep";
 import { processPetTick } from "@/game/core/tick";
 import { getMidnightTimestamp, shouldDailyReset } from "@/game/core/time";
@@ -21,6 +22,7 @@ import type {
   MaxStatsSnapshot,
   OfflineReport,
 } from "@/game/types/offline";
+import { ObjectiveType } from "@/game/types/quest";
 import { SkillType } from "@/game/types/skill";
 
 /**
@@ -69,8 +71,20 @@ export function processGameTick(
     };
   }
 
+  // Track if training was active before tick (to detect completion)
+  const wasTraining =
+    workingState.pet.activityState === ActivityState.Training &&
+    workingState.pet.activeTraining !== undefined;
+
   // Process pet tick (handles training, care, growth, etc.)
   const updatedPet = processPetTick(workingState.pet);
+
+  // Detect training completion (was training, now not training)
+  const trainingCompleted =
+    wasTraining &&
+    (updatedPet.activityState !== ActivityState.Training ||
+      updatedPet.activeTraining === undefined);
+
   let updatedState: GameState = {
     ...workingState,
     pet: updatedPet,
@@ -102,6 +116,26 @@ export function processGameTick(
         result,
       );
       updatedState = explorationResult.state;
+
+      // Update quest progress for Explore objectives (foraging)
+      if (result.success) {
+        updatedState = updateQuestProgress(
+          updatedState,
+          ObjectiveType.Explore,
+          "forage",
+        );
+
+        // Update quest progress for Collect objectives for each item found
+        for (const drop of result.itemsFound) {
+          updatedState = updateQuestProgress(
+            updatedState,
+            ObjectiveType.Collect,
+            drop.itemId,
+            drop.quantity,
+          );
+        }
+      }
+
       // Store the result for UI notification
       updatedState.lastExplorationResult = {
         ...result,
@@ -116,6 +150,15 @@ export function processGameTick(
         },
       };
     }
+  }
+
+  // Update quest progress for Train objectives when training completes
+  if (trainingCompleted) {
+    updatedState = updateQuestProgress(
+      updatedState,
+      ObjectiveType.Train,
+      "any",
+    );
   }
 
   return updatedState;

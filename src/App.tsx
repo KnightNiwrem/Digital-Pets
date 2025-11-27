@@ -31,7 +31,9 @@ import {
   createCombatantFromPet,
   createWildCombatant,
 } from "@/game/core/battle/battle";
+import { updateQuestProgress } from "@/game/core/quests/quests";
 import { useGameState } from "@/game/hooks/useGameState";
+import { ObjectiveType } from "@/game/types/quest";
 import "./index.css";
 
 /**
@@ -93,17 +95,33 @@ function GameContent({
   // Handle battle end
   const handleBattleEnd = (victory: boolean, rewards: BattleRewards) => {
     if (victory && state) {
-      // Award coins
-      actions.updateState((prev) => ({
-        ...prev,
-        player: {
-          ...prev.player,
-          currency: {
-            ...prev.player.currency,
-            coins: prev.player.currency.coins + rewards.coins,
+      // Award coins and update quest progress for Defeat objectives
+      actions.updateState((prev) => {
+        let newState = {
+          ...prev,
+          player: {
+            ...prev.player,
+            currency: {
+              ...prev.player.currency,
+              coins: prev.player.currency.coins + rewards.coins,
+            },
           },
-        },
-      }));
+        };
+
+        // Update quest progress for defeating any enemy
+        newState = updateQuestProgress(newState, ObjectiveType.Defeat, "any");
+
+        // Also update for the specific species if battleInfo is available
+        if (battleInfo?.enemySpeciesId) {
+          newState = updateQuestProgress(
+            newState,
+            ObjectiveType.Defeat,
+            battleInfo.enemySpeciesId,
+          );
+        }
+
+        return newState;
+      });
     }
     setBattleInfo(null);
     onTabChange("exploration");

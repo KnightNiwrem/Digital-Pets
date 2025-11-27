@@ -257,3 +257,23 @@ test("travel energy cannot go below 0", () => {
   expect(result.success).toBe(true);
   expect(result.state.pet?.energyStats.energy).toBe(0);
 });
+
+test("travel updates quest progress for Visit objectives", () => {
+  const state = createTestState({
+    pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
+    quests: [],
+  });
+  // Add an active quest with a visit objective for meadow
+  state.quests = [
+    {
+      questId: "tutorial_exploration",
+      state: "active",
+      objectiveProgress: {},
+    },
+  ];
+
+  const result = travel(state, "meadow");
+
+  expect(result.success).toBe(true);
+  expect(result.state.quests[0]?.objectiveProgress.visit_meadow).toBe(1);
+});
