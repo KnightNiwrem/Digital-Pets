@@ -3,7 +3,7 @@
  */
 
 import type { ActiveExploration, ActiveTraining } from "./activity";
-import type { MicroValue, Tick, Timestamp } from "./common";
+import type { Tick, Timestamp } from "./common";
 import type { ActivityState, GrowthStage } from "./constants";
 import type {
   BattleStats,
@@ -102,36 +102,3 @@ export type PetState = Pet;
 export function createPetId(): string {
   return `pet_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
-
-/**
- * Maximum values for care stats by growth stage (in micro-units).
- */
-export const CARE_STAT_MAX_BY_STAGE: Record<GrowthStage, MicroValue> = {
-  baby: 50_000,
-  child: 80_000,
-  teen: 120_000,
-  youngAdult: 160_000,
-  adult: 200_000,
-};
-
-/**
- * Maximum values for energy by growth stage (in micro-units).
- */
-export const ENERGY_MAX_BY_STAGE: Record<GrowthStage, MicroValue> = {
-  baby: 50_000,
-  child: 75_000,
-  teen: 100_000,
-  youngAdult: 150_000,
-  adult: 200_000,
-};
-
-/**
- * Maximum care life by growth stage (in micro-units, representing hours).
- */
-export const CARE_LIFE_MAX_BY_STAGE: Record<GrowthStage, MicroValue> = {
-  baby: 72_000,
-  child: 120_000,
-  teen: 168_000,
-  youngAdult: 240_000,
-  adult: 336_000,
-};
