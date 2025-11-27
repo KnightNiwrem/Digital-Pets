@@ -3,6 +3,7 @@
  */
 
 import { expect, test } from "bun:test";
+import { FOOD_ITEMS } from "@/game/data/items";
 import { applyExplorationResults } from "@/game/state/actions/exploration";
 import type { ExplorationResult } from "@/game/types/activity";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
@@ -37,8 +38,8 @@ test("applyExplorationResults grants bonus XP for items found", () => {
     success: true,
     message: "Found items",
     itemsFound: [
-      { itemId: "food_apple", quantity: 2 },
-      { itemId: "food_berry", quantity: 3 },
+      { itemId: FOOD_ITEMS.APPLE.id, quantity: 2 },
+      { itemId: FOOD_ITEMS.MEAT.id, quantity: 3 },
     ],
   };
 
@@ -53,7 +54,7 @@ test("applyExplorationResults updates skills in game state", () => {
   const result: ExplorationResult = {
     success: true,
     message: "Found items",
-    itemsFound: [{ itemId: "food_apple", quantity: 1 }],
+    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 1 }],
   };
 
   const { state: newState, xpGained } = applyExplorationResults(state, result);
@@ -66,13 +67,13 @@ test("applyExplorationResults adds items to inventory", () => {
   const result: ExplorationResult = {
     success: true,
     message: "Found items",
-    itemsFound: [{ itemId: "food_apple", quantity: 3 }],
+    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 3 }],
   };
 
   const { state: newState } = applyExplorationResults(state, result);
 
   const appleItem = newState.player.inventory.items.find(
-    (item) => item.itemId === "food_apple",
+    (item) => item.itemId === FOOD_ITEMS.APPLE.id,
   );
   expect(appleItem).toBeDefined();
   expect(appleItem?.quantity).toBe(3);
@@ -85,7 +86,7 @@ test("applyExplorationResults returns leveledUp true when skill levels up", () =
   const result: ExplorationResult = {
     success: true,
     message: "Found items",
-    itemsFound: [{ itemId: "food_apple", quantity: 30 }], // 15 + 30*5 = 165 XP
+    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 30 }], // 15 + 30*5 = 165 XP
   };
 
   const { leveledUp } = applyExplorationResults(state, result);

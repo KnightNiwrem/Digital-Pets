@@ -13,6 +13,7 @@ import {
   processExplorationTick,
   startForaging,
 } from "@/game/core/exploration/forage";
+import { FOOD_ITEMS } from "@/game/data/items";
 import type { ForageTable } from "@/game/data/tables/forage";
 import { createTestPet } from "@/game/testing/createTestPet";
 import type { ActiveExploration } from "@/game/types/activity";
@@ -30,21 +31,21 @@ function createTestForageTable(): ForageTable {
     baseEnergyCost: 5,
     entries: [
       {
-        itemId: "food_apple",
+        itemId: FOOD_ITEMS.APPLE.id,
         baseDropRate: 1.0, // Always drops for testing
         rarity: "common",
         minSkillLevel: 0,
         quantity: [1, 2],
       },
       {
-        itemId: "food_meat",
+        itemId: FOOD_ITEMS.MEAT.id,
         baseDropRate: 0.5,
         rarity: "uncommon",
         minSkillLevel: 1,
         quantity: [1, 1],
       },
       {
-        itemId: "food_cake",
+        itemId: FOOD_ITEMS.CAKE.id,
         baseDropRate: 0.1,
         rarity: "rare",
         minSkillLevel: 3,
@@ -190,19 +191,19 @@ test("calculateForageDrops returns items with 100% drop rate", () => {
   // If additive: 100% + (-5%) = 95%. This test assumes a multiplicative bonus.
   for (let i = 0; i < 5; i++) {
     const drops = calculateForageDrops(forageTable, 1);
-    const appleDrops = drops.filter((d) => d.itemId === "food_apple");
+    const appleDrops = drops.filter((d) => d.itemId === FOOD_ITEMS.APPLE.id);
     expect(appleDrops.length).toBe(1);
   }
 });
 
 test("calculateForageDrops skips items requiring higher skill", () => {
   const forageTable = createTestForageTable();
-  // With skill level 1, can get food_meat (requires 1), but should not get food_cake (requires 3)
+  // With skill level 1, can get FOOD_ITEMS.MEAT (requires 1), but should not get FOOD_ITEMS.CAKE (requires 3)
   // Note: minSkillLevel check is strictly less-than, so level 1 can get items requiring level 1
   const drops = calculateForageDrops(forageTable, 1);
-  // food_meat requires level 1, so it may drop (50% chance)
-  // food_cake requires level 3, so it should never drop
-  const cakeDrops = drops.filter((d) => d.itemId === "food_cake");
+  // FOOD_ITEMS.MEAT requires level 1, so it may drop (50% chance)
+  // FOOD_ITEMS.CAKE requires level 3, so it should never drop
+  const cakeDrops = drops.filter((d) => d.itemId === FOOD_ITEMS.CAKE.id);
   expect(cakeDrops.length).toBe(0);
 });
 
@@ -210,7 +211,7 @@ test("calculateForageDrops respects quantity range", () => {
   const forageTable = createTestForageTable();
   for (let i = 0; i < 10; i++) {
     const drops = calculateForageDrops(forageTable, 1);
-    const appleDrop = drops.find((d) => d.itemId === "food_apple");
+    const appleDrop = drops.find((d) => d.itemId === FOOD_ITEMS.APPLE.id);
     if (appleDrop) {
       expect(appleDrop.quantity).toBeGreaterThanOrEqual(1);
       expect(appleDrop.quantity).toBeLessThanOrEqual(2);

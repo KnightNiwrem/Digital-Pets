@@ -3,6 +3,12 @@
  */
 
 import { expect, test } from "bun:test";
+import {
+  CLEANING_ITEMS,
+  DRINK_ITEMS,
+  FOOD_ITEMS,
+  TOY_ITEMS,
+} from "@/game/data/items";
 import { dailyCareRoutine } from "@/game/data/quests/daily";
 import { tutorialFirstSteps } from "@/game/data/quests/tutorial";
 import { createNewPet } from "@/game/data/starting";
@@ -32,10 +38,22 @@ function createTestState(quests: QuestProgress[] = []): GameState {
     player: {
       inventory: {
         items: [
-          { itemId: "food_kibble", quantity: 5, currentDurability: null },
-          { itemId: "drink_water", quantity: 5, currentDurability: null },
-          { itemId: "cleaning_tissue", quantity: 3, currentDurability: null },
-          { itemId: "toy_ball", quantity: 1, currentDurability: 10 },
+          {
+            itemId: FOOD_ITEMS.KIBBLE.id,
+            quantity: 5,
+            currentDurability: null,
+          },
+          {
+            itemId: DRINK_ITEMS.WATER.id,
+            quantity: 5,
+            currentDurability: null,
+          },
+          {
+            itemId: CLEANING_ITEMS.TISSUE.id,
+            quantity: 3,
+            currentDurability: null,
+          },
+          { itemId: TOY_ITEMS.BALL.id, quantity: 1, currentDurability: 10 },
         ],
       },
       currency: { coins: 100 },
@@ -55,7 +73,7 @@ test("feedPet updates quest progress for Care/feed objective", () => {
   };
   const state = createTestState([progress]);
 
-  const result = feedPet(state, "food_kibble");
+  const result = feedPet(state, FOOD_ITEMS.KIBBLE.id);
 
   expect(result.success).toBe(true);
   expect(result.state.quests[0]?.objectiveProgress.feed_pet).toBe(1);
@@ -69,7 +87,7 @@ test("waterPet updates quest progress for Care/water objective", () => {
   };
   const state = createTestState([progress]);
 
-  const result = waterPet(state, "drink_water");
+  const result = waterPet(state, DRINK_ITEMS.WATER.id);
 
   expect(result.success).toBe(true);
   expect(result.state.quests[0]?.objectiveProgress.give_water).toBe(1);
@@ -83,7 +101,7 @@ test("cleanPet updates quest progress for Care/clean objective", () => {
   };
   const state = createTestState([progress]);
 
-  const result = cleanPet(state, "cleaning_tissue");
+  const result = cleanPet(state, CLEANING_ITEMS.TISSUE.id);
 
   expect(result.success).toBe(true);
   // The daily care routine doesn't have a clean objective, but the action should still succeed
@@ -98,7 +116,7 @@ test("playWithPet updates quest progress for Care/play objective", () => {
   };
   const state = createTestState([progress]);
 
-  const result = playWithPet(state, "toy_ball");
+  const result = playWithPet(state, TOY_ITEMS.BALL.id);
 
   expect(result.success).toBe(true);
   // The daily care routine doesn't have a play objective, but action should succeed
@@ -113,11 +131,11 @@ test("feedPet accumulates quest progress on multiple calls", () => {
   };
   const state = createTestState([progress]);
 
-  const result1 = feedPet(state, "food_kibble");
+  const result1 = feedPet(state, FOOD_ITEMS.KIBBLE.id);
   expect(result1.success).toBe(true);
   expect(result1.state.quests[0]?.objectiveProgress.feed_pet).toBe(1);
 
-  const result2 = feedPet(result1.state, "food_kibble");
+  const result2 = feedPet(result1.state, FOOD_ITEMS.KIBBLE.id);
   expect(result2.success).toBe(true);
   expect(result2.state.quests[0]?.objectiveProgress.feed_pet).toBe(2);
 });
@@ -134,7 +152,7 @@ test("care actions do not update quest progress when action fails", () => {
     state.pet.sleep.isSleeping = true;
   }
 
-  const result = feedPet(state, "food_kibble");
+  const result = feedPet(state, FOOD_ITEMS.KIBBLE.id);
 
   expect(result.success).toBe(false);
   expect(result.state.quests[0]?.objectiveProgress.feed_pet).toBeUndefined();
@@ -151,7 +169,7 @@ test("care actions do not update non-active quests", () => {
   };
   const state = createTestState([progress]);
 
-  const result = feedPet(state, "food_kibble");
+  const result = feedPet(state, FOOD_ITEMS.KIBBLE.id);
 
   expect(result.success).toBe(true);
   // Progress should not change for completed quest

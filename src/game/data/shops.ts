@@ -3,6 +3,7 @@
  */
 
 import type { Shop, ShopItem } from "@/game/types/shop";
+import { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS, TOY_ITEMS } from "./items";
 
 /**
  * Helper to create a shop item entry.
@@ -21,26 +22,26 @@ export const willowbrookShop: Shop = {
   sellMultiplier: 0.5,
   items: [
     // Food items
-    shopItem("food_kibble", 10),
-    shopItem("food_apple", 15),
-    shopItem("food_meat", 30),
-    shopItem("food_fish", 35),
+    shopItem(FOOD_ITEMS.KIBBLE.id, 10),
+    shopItem(FOOD_ITEMS.APPLE.id, 15),
+    shopItem(FOOD_ITEMS.MEAT.id, 30),
+    shopItem(FOOD_ITEMS.FISH.id, 35),
 
     // Drink items
-    shopItem("drink_water", 5),
-    shopItem("drink_juice", 15),
-    shopItem("drink_milk", 20),
-    shopItem("drink_tea", 30),
+    shopItem(DRINK_ITEMS.WATER.id, 5),
+    shopItem(DRINK_ITEMS.JUICE.id, 15),
+    shopItem(DRINK_ITEMS.MILK.id, 20),
+    shopItem(DRINK_ITEMS.TEA.id, 30),
 
     // Cleaning items
-    shopItem("cleaning_tissue", 5),
-    shopItem("cleaning_wipes", 15),
-    shopItem("cleaning_sponge", 30),
+    shopItem(CLEANING_ITEMS.TISSUE.id, 5),
+    shopItem(CLEANING_ITEMS.WIPES.id, 15),
+    shopItem(CLEANING_ITEMS.SPONGE.id, 30),
 
     // Toys
-    shopItem("toy_ball", 25),
-    shopItem("toy_rope", 35),
-    shopItem("toy_plush", 60),
+    shopItem(TOY_ITEMS.BALL.id, 25),
+    shopItem(TOY_ITEMS.ROPE.id, 35),
+    shopItem(TOY_ITEMS.PLUSH.id, 60),
   ],
 };
 
