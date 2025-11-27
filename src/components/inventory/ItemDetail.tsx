@@ -3,7 +3,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TICK_DURATION_MS, toDisplay } from "@/game/types/common";
+import { formatTicksAsTime, toDisplay } from "@/game/types/common";
 import type { ItemCategory, Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
@@ -55,19 +55,6 @@ function getRarityTextClass(rarity: Rarity): string {
     case "legendary":
       return "text-yellow-600 dark:text-yellow-400";
   }
-}
-
-/**
- * Format ticks as a human-readable time string.
- */
-function formatTicksAsTime(ticks: number): string {
-  const totalMinutes = Math.floor((ticks * TICK_DURATION_MS) / (1000 * 60));
-  if (totalMinutes < 60) {
-    return `${totalMinutes}m`;
-  }
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 }
 
 /**

@@ -86,3 +86,16 @@ export function ticksToMs(ticks: Tick): number {
 export function now(): Timestamp {
   return Date.now();
 }
+
+/**
+ * Format ticks as a human-readable time string.
+ */
+export function formatTicksAsTime(ticks: Tick): string {
+  const totalMinutes = Math.floor((ticks * TICK_DURATION_MS) / (1000 * 60));
+  if (totalMinutes < 60) {
+    return `${totalMinutes}m`;
+  }
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+}

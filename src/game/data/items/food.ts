@@ -7,11 +7,10 @@ import type { FoodItem } from "@/game/types/item";
 
 /**
  * Basic food items available from the start.
- */
-/**
+ *
  * Poop acceleration is measured in ticks.
- * Per spec: "Each feeding item consumed reduces the next poop timer by 60 ticks (30 minutes)."
- * Different foods have different acceleration effects.
+ * This implementation extends the spec: different foods have varying acceleration effects
+ * (30-120 ticks) rather than a uniform 60 ticks, allowing for more strategic food choices.
  */
 export const FOOD_ITEMS: readonly FoodItem[] = [
   {
