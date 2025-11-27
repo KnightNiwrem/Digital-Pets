@@ -11,6 +11,7 @@ import {
 } from "@/game/data/items";
 import { dailyCareRoutine } from "@/game/data/quests/daily";
 import { tutorialFirstSteps } from "@/game/data/quests/tutorial";
+import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import type { GameState } from "@/game/types/gameState";
@@ -20,7 +21,7 @@ import { createInitialSkills } from "@/game/types/skill";
 import { cleanPet, feedPet, playWithPet, waterPet } from "./care";
 
 function createTestState(quests: QuestProgress[] = []): GameState {
-  const pet = createNewPet("TestPet", "florabit");
+  const pet = createNewPet("TestPet", SPECIES.FLORABIT.id);
   // Reduce stats to test restoration
   pet.careStats.satiety = 10_000;
   pet.careStats.hydration = 10_000;

@@ -2,6 +2,7 @@
  * Shared test utilities for creating mock Pet objects.
  */
 
+import { SPECIES } from "@/game/data/species";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import { createDefaultResistances } from "@/game/types/stats";
@@ -14,7 +15,7 @@ const createDefaultTestPet = (): Pet => ({
   identity: {
     id: "test-pet-1",
     name: "Test Pet",
-    speciesId: "florabit",
+    speciesId: SPECIES.FLORABIT.id,
   },
   growth: {
     stage: GrowthStage.Baby,
