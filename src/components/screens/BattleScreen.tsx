@@ -2,7 +2,7 @@
  * Battle screen for combat encounters.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BattleArena,
   BattleLog,
@@ -29,6 +29,8 @@ import type { Move } from "@/game/types/move";
 const ENEMY_TURN_DELAY_MS = 800;
 /** Delay for turn resolution processing (ms) */
 const TURN_RESOLUTION_DELAY_MS = 500;
+/** Duration for attack animations (ms) */
+const ATTACK_ANIMATION_DURATION_MS = 400;
 
 interface BattleScreenProps {
   playerCombatant: Combatant;
@@ -36,6 +38,20 @@ interface BattleScreenProps {
   onBattleEnd: (victory: boolean, rewards: BattleRewards) => void;
   onFlee?: () => void;
 }
+
+interface AnimationState {
+  playerAttacking: boolean;
+  enemyAttacking: boolean;
+  playerHit: boolean;
+  enemyHit: boolean;
+}
+
+const initialAnimationState: AnimationState = {
+  playerAttacking: false,
+  enemyAttacking: false,
+  playerHit: false,
+  enemyHit: false,
+};
 
 /**
  * Main battle screen component managing the battle flow.
@@ -50,6 +66,28 @@ export function BattleScreen({
     initializeBattle(playerCombatant, enemyCombatant),
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  const [animationState, setAnimationState] = useState<AnimationState>(
+    initialAnimationState,
+  );
+
+  // Trigger attack animation
+  const triggerAttackAnimation = useCallback(
+    (isPlayerAttack: boolean, onComplete: () => void) => {
+      setAnimationState((prev) => ({
+        ...prev,
+        playerAttacking: isPlayerAttack,
+        enemyAttacking: !isPlayerAttack,
+        playerHit: !isPlayerAttack,
+        enemyHit: isPlayerAttack,
+      }));
+
+      setTimeout(() => {
+        setAnimationState(initialAnimationState);
+        onComplete();
+      }, ATTACK_ANIMATION_DURATION_MS);
+    },
+    [],
+  );
 
   // Process enemy turn automatically after player acts
   useEffect(() => {
@@ -57,12 +95,14 @@ export function BattleScreen({
       setIsProcessing(true);
       // Small delay for dramatic effect
       const timeout = setTimeout(() => {
-        setBattleState((prev) => executeEnemyTurn(prev));
-        setIsProcessing(false);
+        triggerAttackAnimation(false, () => {
+          setBattleState((prev) => executeEnemyTurn(prev));
+          setIsProcessing(false);
+        });
       }, ENEMY_TURN_DELAY_MS);
       return () => clearTimeout(timeout);
     }
-  }, [battleState.phase, isProcessing]);
+  }, [battleState.phase, isProcessing, triggerAttackAnimation]);
 
   // Process turn resolution automatically
   useEffect(() => {
@@ -80,7 +120,11 @@ export function BattleScreen({
     if (battleState.phase !== BattlePhase.PlayerTurn || isProcessing) {
       return;
     }
-    setBattleState((prev) => executePlayerTurn(prev, move));
+    setIsProcessing(true);
+    triggerAttackAnimation(true, () => {
+      setBattleState((prev) => executePlayerTurn(prev, move));
+      setIsProcessing(false);
+    });
   };
 
   // Memoize battle completion info to avoid recalculating
@@ -125,7 +169,14 @@ export function BattleScreen({
       </Card>
 
       {/* Battle arena */}
-      <BattleArena player={battleState.player} enemy={battleState.enemy} />
+      <BattleArena
+        player={battleState.player}
+        enemy={battleState.enemy}
+        playerAttacking={animationState.playerAttacking}
+        enemyAttacking={animationState.enemyAttacking}
+        playerHit={animationState.playerHit}
+        enemyHit={animationState.enemyHit}
+      />
 
       {/* Battle log */}
       <BattleLog entries={battleState.log} />

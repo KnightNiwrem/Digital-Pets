@@ -57,7 +57,15 @@ export function MenuScreen() {
   };
 
   const handleImportClick = () => {
+    setImportError(null);
     fileInputRef.current?.click();
+  };
+
+  const handleImportDialogChange = (open: boolean) => {
+    setShowImportDialog(open);
+    if (!open) {
+      setImportError(null);
+    }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +83,8 @@ export function MenuScreen() {
       } else {
         setImportError(result.error);
       }
-    } catch {
+    } catch (error) {
+      console.error("File import error:", error);
       setImportError("Failed to read file");
     }
 
@@ -225,7 +234,7 @@ export function MenuScreen() {
       </Dialog>
 
       {/* Import Dialog */}
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+      <Dialog open={showImportDialog} onOpenChange={handleImportDialogChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Import Save Data</DialogTitle>
@@ -242,7 +251,7 @@ export function MenuScreen() {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setShowImportDialog(false)}
+              onClick={() => handleImportDialogChange(false)}
             >
               Cancel
             </Button>

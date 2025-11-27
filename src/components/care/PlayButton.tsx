@@ -9,10 +9,14 @@ import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { playWithPet } from "@/game/state/actions/care";
 
+interface PlayButtonProps {
+  onSuccess?: () => void;
+}
+
 /**
  * Button to open toy selection and play with the pet.
  */
-export function PlayButton() {
+export function PlayButton({ onSuccess }: PlayButtonProps) {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { state, actions } = useGameState();
@@ -24,6 +28,8 @@ export function PlayButton() {
       const result = playWithPet(currentState, itemId);
       if (!result.success) {
         setErrorMessage(result.message);
+      } else {
+        onSuccess?.();
       }
       return result.state;
     });
