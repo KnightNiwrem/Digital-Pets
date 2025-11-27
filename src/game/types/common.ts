@@ -88,14 +88,34 @@ export function now(): Timestamp {
 }
 
 /**
+ * Duration of one game tick in seconds.
+ */
+export const TICK_DURATION_SECONDS = TICK_DURATION_MS / 1000;
+
+/**
  * Format ticks as a human-readable time string.
+ * Handles minutes, hours, and days.
  */
 export function formatTicksAsTime(ticks: Tick): string {
-  const totalMinutes = Math.floor((ticks * TICK_DURATION_MS) / (1000 * 60));
-  if (totalMinutes < 60) {
-    return `${totalMinutes}m`;
+  const totalMinutes = Math.floor((ticks * TICK_DURATION_SECONDS) / 60);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const totalDays = Math.floor(totalHours / 24);
+
+  if (totalDays > 0) {
+    const remainingHours = totalHours % 24;
+    if (remainingHours > 0) {
+      return `${totalDays}d ${remainingHours}h`;
+    }
+    return `${totalDays}d`;
   }
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+
+  if (totalHours > 0) {
+    const remainingMinutes = totalMinutes % 60;
+    if (remainingMinutes > 0) {
+      return `${totalHours}h ${remainingMinutes}m`;
+    }
+    return `${totalHours}h`;
+  }
+
+  return `${totalMinutes}m`;
 }
