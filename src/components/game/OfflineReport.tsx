@@ -213,13 +213,10 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
 
   // Determine button labels
   const isLastPage =
-    currentPage === "exploration" &&
-    explorationIndex === totalExplorationPages - 1;
-  const nextButtonLabel = isLastPage
-    ? "Continue"
-    : currentPage === "stats" && hasExplorationResults
-      ? "Next"
-      : "Continue";
+    (currentPage === "stats" && !hasExplorationResults) ||
+    (currentPage === "exploration" &&
+      explorationIndex === totalExplorationPages - 1);
+  const nextButtonLabel = isLastPage ? "Continue" : "Next";
 
   // Calculate page indicator
   const getCurrentPageNumber = () => {

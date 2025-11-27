@@ -166,16 +166,25 @@ export function processGameTick(
 }
 
 /**
+ * Callback invoked after each tick during batch processing.
+ * @param state The game state after the tick was processed
+ * @param tickIndex The zero-based index of the tick that was just processed
+ */
+export type TickCallback = (state: GameState, tickIndex: number) => void;
+
+/**
  * Process multiple ticks at once (for offline catch-up).
  * Processes ticks sequentially to maintain correct state transitions.
  * @param state The initial game state
  * @param tickCount Number of ticks to process
  * @param startTime Optional start timestamp for simulation (defaults to now - tickCount * TICK_DURATION_MS)
+ * @param onTick Optional callback invoked after each tick is processed
  */
 export function processMultipleTicks(
   state: GameState,
   tickCount: Tick,
   startTime?: number,
+  onTick?: TickCallback,
 ): GameState {
   let currentState = state;
   const simulatedStartTime = startTime ?? now() - tickCount * TICK_DURATION_MS;
@@ -183,6 +192,7 @@ export function processMultipleTicks(
   for (let i = 0; i < tickCount; i++) {
     const simulatedTime = simulatedStartTime + (i + 1) * TICK_DURATION_MS;
     currentState = processGameTick(currentState, simulatedTime);
+    onTick?.(currentState, i);
   }
 
   return currentState;
@@ -249,24 +259,23 @@ export function processOfflineCatchup(
   const poopBefore = state.pet?.poop.count ?? 0;
   const petName = state.pet?.identity.name ?? null;
 
-  // Process ticks and collect exploration results
-  const simulatedStartTime = state.lastSaveTime;
-  let currentState = state;
+  // Process ticks and collect exploration results using the shared tick processor
   const explorationResults: OfflineExplorationResult[] = [];
-
-  for (let i = 0; i < cappedTicks; i++) {
-    const simulatedTime = simulatedStartTime + (i + 1) * TICK_DURATION_MS;
-    currentState = processGameTick(currentState, simulatedTime);
-
-    // Collect exploration result if one was generated
-    if (currentState.lastExplorationResult) {
-      explorationResults.push({
-        locationName: currentState.lastExplorationResult.locationName,
-        itemsFound: currentState.lastExplorationResult.itemsFound,
-        message: currentState.lastExplorationResult.message,
-      });
-    }
-  }
+  const currentState = processMultipleTicks(
+    state,
+    cappedTicks,
+    state.lastSaveTime,
+    (tickState) => {
+      // Collect exploration result if one was generated this tick
+      if (tickState.lastExplorationResult) {
+        explorationResults.push({
+          locationName: tickState.lastExplorationResult.locationName,
+          itemsFound: tickState.lastExplorationResult.itemsFound,
+          message: tickState.lastExplorationResult.message,
+        });
+      }
+    },
+  );
 
   const afterStats = createCareStatsSnapshot(currentState);
   const poopAfter = currentState.pet?.poop.count ?? 0;
