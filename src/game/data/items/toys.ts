@@ -7,9 +7,11 @@ import type { ToyItem } from "@/game/types/item";
 
 /**
  * Toy items available in the game.
+ *
+ * Use TOY_ITEMS.BALL.id to get the item ID "toy_ball".
  */
-export const TOY_ITEMS: readonly ToyItem[] = [
-  {
+export const TOY_ITEMS = {
+  BALL: {
     id: "toy_ball",
     name: "Rubber Ball",
     description: "A bouncy rubber ball. Simple but fun!",
@@ -22,7 +24,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(15),
     maxDurability: 10,
   },
-  {
+  ROPE: {
     id: "toy_rope",
     name: "Tug Rope",
     description: "A sturdy rope for tugging and playing.",
@@ -35,7 +37,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(18),
     maxDurability: 12,
   },
-  {
+  PLUSH: {
     id: "toy_plush",
     name: "Plush Toy",
     description: "A soft, cuddly plush companion.",
@@ -48,7 +50,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(22),
     maxDurability: 8,
   },
-  {
+  SQUEAKY: {
     id: "toy_squeaky",
     name: "Squeaky Toy",
     description: "A squeaky toy that makes amusing sounds!",
@@ -61,7 +63,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(25),
     maxDurability: 15,
   },
-  {
+  PUZZLE: {
     id: "toy_puzzle",
     name: "Puzzle Toy",
     description: "A challenging puzzle toy for smart pets.",
@@ -74,7 +76,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(35),
     maxDurability: 20,
   },
-  {
+  FRISBEE: {
     id: "toy_frisbee",
     name: "Flying Frisbee",
     description: "A colorful frisbee for outdoor fun.",
@@ -87,7 +89,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(16),
     maxDurability: 15,
   },
-  {
+  BELL: {
     id: "toy_bell",
     name: "Jingle Bell",
     description: "A shiny bell that makes a pleasant sound.",
@@ -100,7 +102,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(20),
     maxDurability: 25,
   },
-  {
+  MAGIC_WAND: {
     id: "toy_magic_wand",
     name: "Magic Wand",
     description: "A sparkling wand that creates mesmerizing light patterns.",
@@ -113,7 +115,7 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(40),
     maxDurability: 12,
   },
-  {
+  TREASURE_BOX: {
     id: "toy_treasure_box",
     name: "Treasure Box",
     description:
@@ -127,11 +129,14 @@ export const TOY_ITEMS: readonly ToyItem[] = [
     happinessRestore: toMicro(50),
     maxDurability: 30,
   },
-] as const;
+} as const satisfies Record<string, ToyItem>;
+
+/** Array of all toy items for iteration. */
+export const TOY_ITEMS_LIST: readonly ToyItem[] = Object.values(TOY_ITEMS);
 
 /**
  * Get a toy item by ID.
  */
 export function getToyItemById(id: string): ToyItem | undefined {
-  return TOY_ITEMS.find((item) => item.id === id);
+  return TOY_ITEMS_LIST.find((item) => item.id === id);
 }

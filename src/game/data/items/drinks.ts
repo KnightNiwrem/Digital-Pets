@@ -7,9 +7,11 @@ import type { DrinkItem } from "@/game/types/item";
 
 /**
  * Basic drink items available from the start.
+ *
+ * Use DRINK_ITEMS.WATER.id to get the item ID "drink_water".
  */
-export const DRINK_ITEMS: readonly DrinkItem[] = [
-  {
+export const DRINK_ITEMS = {
+  WATER: {
     id: "drink_water",
     name: "Water",
     description: "Pure, refreshing water. Essential for life.",
@@ -21,7 +23,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     icon: "💧",
     hydrationRestore: toMicro(20),
   },
-  {
+  JUICE: {
     id: "drink_juice",
     name: "Fruit Juice",
     description: "Sweet and refreshing fruit juice.",
@@ -33,7 +35,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     icon: "🧃",
     hydrationRestore: toMicro(25),
   },
-  {
+  MILK: {
     id: "drink_milk",
     name: "Milk",
     description: "Creamy, nutritious milk. Good for growing pets!",
@@ -45,7 +47,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     icon: "🥛",
     hydrationRestore: toMicro(30),
   },
-  {
+  TEA: {
     id: "drink_tea",
     name: "Herbal Tea",
     description: "A warm, soothing herbal tea. Calms the soul.",
@@ -57,7 +59,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     icon: "🍵",
     hydrationRestore: toMicro(35),
   },
-  {
+  ENERGY: {
     id: "drink_energy",
     name: "Energy Drink",
     description: "A powerful energy drink. Hydrates and energizes!",
@@ -70,7 +72,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     hydrationRestore: toMicro(25),
     energyRestore: toMicro(20),
   },
-  {
+  COCONUT: {
     id: "drink_coconut",
     name: "Coconut Water",
     description: "Refreshing natural coconut water. Full of electrolytes.",
@@ -82,7 +84,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     icon: "🥥",
     hydrationRestore: toMicro(28),
   },
-  {
+  SMOOTHIE: {
     id: "drink_smoothie",
     name: "Berry Smoothie",
     description: "A thick, creamy smoothie packed with berries.",
@@ -94,7 +96,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     icon: "🍹",
     hydrationRestore: toMicro(40),
   },
-  {
+  MINERAL_WATER: {
     id: "drink_mineral_water",
     name: "Mineral Water",
     description: "Pure spring water rich in minerals. Extra refreshing!",
@@ -106,7 +108,7 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     icon: "💦",
     hydrationRestore: toMicro(45),
   },
-  {
+  NECTAR: {
     id: "drink_nectar",
     name: "Flower Nectar",
     description:
@@ -120,11 +122,15 @@ export const DRINK_ITEMS: readonly DrinkItem[] = [
     hydrationRestore: toMicro(50),
     energyRestore: toMicro(30),
   },
-] as const;
+} as const satisfies Record<string, DrinkItem>;
+
+/** Array of all drink items for iteration. */
+export const DRINK_ITEMS_LIST: readonly DrinkItem[] =
+  Object.values(DRINK_ITEMS);
 
 /**
  * Get a drink item by ID.
  */
 export function getDrinkItemById(id: string): DrinkItem | undefined {
-  return DRINK_ITEMS.find((item) => item.id === id);
+  return DRINK_ITEMS_LIST.find((item) => item.id === id);
 }

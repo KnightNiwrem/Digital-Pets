@@ -6,9 +6,11 @@ import type { MedicineItem } from "@/game/types/item";
 
 /**
  * Medicine items for healing and curing status effects.
+ *
+ * Use MEDICINE_ITEMS.BANDAGE.id to get the item ID "medicine_bandage".
  */
-export const MEDICINE_ITEMS: readonly MedicineItem[] = [
-  {
+export const MEDICINE_ITEMS = {
+  BANDAGE: {
     id: "medicine_bandage",
     name: "Bandage",
     description:
@@ -21,7 +23,7 @@ export const MEDICINE_ITEMS: readonly MedicineItem[] = [
     icon: "🩹",
     healAmount: 20,
   },
-  {
+  POTION: {
     id: "medicine_potion",
     name: "Health Potion",
     description: "A basic healing potion. Restores moderate HP.",
@@ -33,7 +35,7 @@ export const MEDICINE_ITEMS: readonly MedicineItem[] = [
     icon: "🧪",
     healAmount: 50,
   },
-  {
+  ANTIDOTE: {
     id: "medicine_antidote",
     name: "Antidote",
     description: "Cures poison status effect.",
@@ -45,7 +47,7 @@ export const MEDICINE_ITEMS: readonly MedicineItem[] = [
     icon: "💊",
     cureStatus: ["poison"],
   },
-  {
+  SMELLING_SALTS: {
     id: "medicine_smelling_salts",
     name: "Smelling Salts",
     description: "Cures sleep and stun status effects.",
@@ -57,7 +59,7 @@ export const MEDICINE_ITEMS: readonly MedicineItem[] = [
     icon: "🧂",
     cureStatus: ["sleep", "stun"],
   },
-  {
+  SUPER_POTION: {
     id: "medicine_super_potion",
     name: "Super Potion",
     description: "A powerful healing potion. Restores significant HP.",
@@ -69,7 +71,7 @@ export const MEDICINE_ITEMS: readonly MedicineItem[] = [
     icon: "⚗️",
     healAmount: 100,
   },
-  {
+  FULL_RESTORE: {
     id: "medicine_full_restore",
     name: "Full Restore",
     description:
@@ -83,11 +85,15 @@ export const MEDICINE_ITEMS: readonly MedicineItem[] = [
     isFullRestore: true,
     cureStatus: ["poison", "burn", "freeze", "sleep", "stun", "confusion"],
   },
-] as const;
+} as const satisfies Record<string, MedicineItem>;
+
+/** Array of all medicine items for iteration. */
+export const MEDICINE_ITEMS_LIST: readonly MedicineItem[] =
+  Object.values(MEDICINE_ITEMS);
 
 /**
  * Get a medicine item by ID.
  */
 export function getMedicineItemById(id: string): MedicineItem | undefined {
-  return MEDICINE_ITEMS.find((item) => item.id === id);
+  return MEDICINE_ITEMS_LIST.find((item) => item.id === id);
 }

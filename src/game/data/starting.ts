@@ -7,6 +7,7 @@ import { calculateMaxStats } from "@/game/core/petStats";
 import { createPetId, type GrowthStage, type Pet } from "@/game/types";
 import type { InventoryItem } from "@/game/types/gameState";
 import { GROWTH_STAGE_DEFINITIONS } from "./growthStages";
+import { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS, TOY_ITEMS } from "./items";
 import { getSpeciesById } from "./species";
 
 /**
@@ -91,16 +92,16 @@ export function createDefaultStarterPet(): Pet {
  */
 export const STARTING_INVENTORY: readonly InventoryItem[] = [
   // Food items
-  { itemId: "food_kibble", quantity: 5, currentDurability: null },
-  { itemId: "food_apple", quantity: 3, currentDurability: null },
+  { itemId: FOOD_ITEMS.KIBBLE.id, quantity: 5, currentDurability: null },
+  { itemId: FOOD_ITEMS.APPLE.id, quantity: 3, currentDurability: null },
   // Drink items
-  { itemId: "drink_water", quantity: 5, currentDurability: null },
-  { itemId: "drink_juice", quantity: 3, currentDurability: null },
+  { itemId: DRINK_ITEMS.WATER.id, quantity: 5, currentDurability: null },
+  { itemId: DRINK_ITEMS.JUICE.id, quantity: 3, currentDurability: null },
   // Cleaning items
-  { itemId: "cleaning_tissue", quantity: 5, currentDurability: null },
-  { itemId: "cleaning_wipes", quantity: 2, currentDurability: null },
+  { itemId: CLEANING_ITEMS.TISSUE.id, quantity: 5, currentDurability: null },
+  { itemId: CLEANING_ITEMS.WIPES.id, quantity: 2, currentDurability: null },
   // Toy (with durability)
-  { itemId: "toy_ball", quantity: 1, currentDurability: 10 },
+  { itemId: TOY_ITEMS.BALL.id, quantity: 1, currentDurability: 10 },
 ] as const;
 
 /**

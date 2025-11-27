@@ -10,6 +10,7 @@ import {
   getShopItem,
   sellItem,
 } from "@/game/core/shop";
+import { FOOD_ITEMS } from "@/game/data/items";
 import { getShop } from "@/game/data/shops";
 import { createInitialGameState } from "@/game/types/gameState";
 
@@ -46,7 +47,7 @@ describe("getShopItem", () => {
     expect(shop).toBeDefined();
     if (!shop) return;
 
-    const item = getShopItem(shop, "food_kibble");
+    const item = getShopItem(shop, FOOD_ITEMS.KIBBLE.id);
     expect(item).toBeDefined();
     expect(item?.buyPrice).toBe(10);
   });
@@ -64,12 +65,12 @@ describe("getShopItem", () => {
 describe("calculateSellPrice", () => {
   test("calculates correct sell price based on multiplier", () => {
     // food_kibble has sellValue of 5, shop has 0.5 multiplier
-    const price = calculateSellPrice("willowbrook_shop", "food_kibble");
+    const price = calculateSellPrice("willowbrook_shop", FOOD_ITEMS.KIBBLE.id);
     expect(price).toBe(2); // floor(5 * 0.5) = 2
   });
 
   test("returns 0 for unknown shop", () => {
-    const price = calculateSellPrice("nonexistent_shop", "food_kibble");
+    const price = calculateSellPrice("nonexistent_shop", FOOD_ITEMS.KIBBLE.id);
     expect(price).toBe(0);
   });
 
@@ -93,14 +94,16 @@ describe("buyItem", () => {
     const { result, state: newState } = buyItem(
       state,
       "willowbrook_shop",
-      "food_kibble",
+      FOOD_ITEMS.KIBBLE.id,
       2,
     );
 
     expect(result.success).toBe(true);
     expect(newState.player.currency.coins).toBe(80); // 100 - (10 * 2)
     expect(newState.player.inventory.items).toHaveLength(1);
-    expect(newState.player.inventory.items[0]?.itemId).toBe("food_kibble");
+    expect(newState.player.inventory.items[0]?.itemId).toBe(
+      FOOD_ITEMS.KIBBLE.id,
+    );
     expect(newState.player.inventory.items[0]?.quantity).toBe(2);
   });
 
@@ -117,7 +120,7 @@ describe("buyItem", () => {
     const { result, state: newState } = buyItem(
       state,
       "willowbrook_shop",
-      "food_kibble",
+      FOOD_ITEMS.KIBBLE.id,
       1,
     );
 
@@ -139,7 +142,7 @@ describe("buyItem", () => {
     const { result, state: newState } = buyItem(
       state,
       "nonexistent_shop",
-      "food_kibble",
+      FOOD_ITEMS.KIBBLE.id,
       1,
     );
 
@@ -179,12 +182,17 @@ describe("buyItem", () => {
     };
 
     // Zero quantity
-    const result1 = buyItem(state, "willowbrook_shop", "food_kibble", 0);
+    const result1 = buyItem(state, "willowbrook_shop", FOOD_ITEMS.KIBBLE.id, 0);
     expect(result1.result.success).toBe(false);
     expect(result1.result.message).toBe("Quantity must be at least 1.");
 
     // Negative quantity
-    const result2 = buyItem(state, "willowbrook_shop", "food_kibble", -5);
+    const result2 = buyItem(
+      state,
+      "willowbrook_shop",
+      FOOD_ITEMS.KIBBLE.id,
+      -5,
+    );
     expect(result2.result.success).toBe(false);
     expect(result2.result.message).toBe("Quantity must be at least 1.");
   });
@@ -199,7 +207,11 @@ describe("sellItem", () => {
         currency: { coins: 50 },
         inventory: {
           items: [
-            { itemId: "food_kibble", quantity: 5, currentDurability: null },
+            {
+              itemId: FOOD_ITEMS.KIBBLE.id,
+              quantity: 5,
+              currentDurability: null,
+            },
           ],
         },
       },
@@ -208,7 +220,7 @@ describe("sellItem", () => {
     const { result, state: newState } = sellItem(
       state,
       "willowbrook_shop",
-      "food_kibble",
+      FOOD_ITEMS.KIBBLE.id,
       2,
     );
 
@@ -226,7 +238,11 @@ describe("sellItem", () => {
         currency: { coins: 50 },
         inventory: {
           items: [
-            { itemId: "food_kibble", quantity: 1, currentDurability: null },
+            {
+              itemId: FOOD_ITEMS.KIBBLE.id,
+              quantity: 1,
+              currentDurability: null,
+            },
           ],
         },
       },
@@ -235,7 +251,7 @@ describe("sellItem", () => {
     const { result, state: newState } = sellItem(
       state,
       "willowbrook_shop",
-      "food_kibble",
+      FOOD_ITEMS.KIBBLE.id,
       5,
     );
 
@@ -251,13 +267,22 @@ describe("sellItem", () => {
         ...createInitialGameState().player,
         inventory: {
           items: [
-            { itemId: "food_kibble", quantity: 5, currentDurability: null },
+            {
+              itemId: FOOD_ITEMS.KIBBLE.id,
+              quantity: 5,
+              currentDurability: null,
+            },
           ],
         },
       },
     };
 
-    const { result } = sellItem(state, "nonexistent_shop", "food_kibble", 1);
+    const { result } = sellItem(
+      state,
+      "nonexistent_shop",
+      FOOD_ITEMS.KIBBLE.id,
+      1,
+    );
 
     expect(result.success).toBe(false);
     expect(result.message).toBe("Shop not found.");
@@ -271,7 +296,11 @@ describe("sellItem", () => {
         currency: { coins: 0 },
         inventory: {
           items: [
-            { itemId: "food_kibble", quantity: 3, currentDurability: null },
+            {
+              itemId: FOOD_ITEMS.KIBBLE.id,
+              quantity: 3,
+              currentDurability: null,
+            },
           ],
         },
       },
@@ -280,7 +309,7 @@ describe("sellItem", () => {
     const { result, state: newState } = sellItem(
       state,
       "willowbrook_shop",
-      "food_kibble",
+      FOOD_ITEMS.KIBBLE.id,
       3,
     );
 
@@ -295,19 +324,33 @@ describe("sellItem", () => {
         ...createInitialGameState().player,
         inventory: {
           items: [
-            { itemId: "food_kibble", quantity: 5, currentDurability: null },
+            {
+              itemId: FOOD_ITEMS.KIBBLE.id,
+              quantity: 5,
+              currentDurability: null,
+            },
           ],
         },
       },
     };
 
     // Zero quantity
-    const result1 = sellItem(state, "willowbrook_shop", "food_kibble", 0);
+    const result1 = sellItem(
+      state,
+      "willowbrook_shop",
+      FOOD_ITEMS.KIBBLE.id,
+      0,
+    );
     expect(result1.result.success).toBe(false);
     expect(result1.result.message).toBe("Quantity must be at least 1.");
 
     // Negative quantity
-    const result2 = sellItem(state, "willowbrook_shop", "food_kibble", -5);
+    const result2 = sellItem(
+      state,
+      "willowbrook_shop",
+      FOOD_ITEMS.KIBBLE.id,
+      -5,
+    );
     expect(result2.result.success).toBe(false);
     expect(result2.result.message).toBe("Quantity must be at least 1.");
   });

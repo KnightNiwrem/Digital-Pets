@@ -13,27 +13,43 @@ import type {
   MedicineItem,
   ToyItem,
 } from "@/game/types/item";
-import { BATTLE_ITEMS, getBattleItemById } from "./battle";
-import { CLEANING_ITEMS, getCleaningItemById } from "./cleaning";
-import { DRINK_ITEMS, getDrinkItemById } from "./drinks";
-import { EQUIPMENT_ITEMS, getEquipmentItemById } from "./equipment";
-import { FOOD_ITEMS, getFoodItemById } from "./food";
-import { getMaterialItemById, MATERIAL_ITEMS } from "./materials";
-import { getMedicineItemById, MEDICINE_ITEMS } from "./medicine";
-import { getToyItemById, TOY_ITEMS } from "./toys";
+import { BATTLE_ITEMS, BATTLE_ITEMS_LIST, getBattleItemById } from "./battle";
+import {
+  CLEANING_ITEMS,
+  CLEANING_ITEMS_LIST,
+  getCleaningItemById,
+} from "./cleaning";
+import { DRINK_ITEMS, DRINK_ITEMS_LIST, getDrinkItemById } from "./drinks";
+import {
+  EQUIPMENT_ITEMS,
+  EQUIPMENT_ITEMS_LIST,
+  getEquipmentItemById,
+} from "./equipment";
+import { FOOD_ITEMS, FOOD_ITEMS_LIST, getFoodItemById } from "./food";
+import {
+  getMaterialItemById,
+  MATERIAL_ITEMS,
+  MATERIAL_ITEMS_LIST,
+} from "./materials";
+import {
+  getMedicineItemById,
+  MEDICINE_ITEMS,
+  MEDICINE_ITEMS_LIST,
+} from "./medicine";
+import { getToyItemById, TOY_ITEMS, TOY_ITEMS_LIST } from "./toys";
 
 /**
  * All items in the game.
  */
 export const ALL_ITEMS: readonly Item[] = [
-  ...FOOD_ITEMS,
-  ...DRINK_ITEMS,
-  ...CLEANING_ITEMS,
-  ...TOY_ITEMS,
-  ...MEDICINE_ITEMS,
-  ...BATTLE_ITEMS,
-  ...EQUIPMENT_ITEMS,
-  ...MATERIAL_ITEMS,
+  ...FOOD_ITEMS_LIST,
+  ...DRINK_ITEMS_LIST,
+  ...CLEANING_ITEMS_LIST,
+  ...TOY_ITEMS_LIST,
+  ...MEDICINE_ITEMS_LIST,
+  ...BATTLE_ITEMS_LIST,
+  ...EQUIPMENT_ITEMS_LIST,
+  ...MATERIAL_ITEMS_LIST,
 ] as const;
 
 /**
@@ -56,56 +72,56 @@ export function getItemsByCategory<T extends Item>(
  * Get all food items.
  */
 export function getAllFoodItems(): FoodItem[] {
-  return [...FOOD_ITEMS];
+  return [...FOOD_ITEMS_LIST];
 }
 
 /**
  * Get all drink items.
  */
 export function getAllDrinkItems(): DrinkItem[] {
-  return [...DRINK_ITEMS];
+  return [...DRINK_ITEMS_LIST];
 }
 
 /**
  * Get all cleaning items.
  */
 export function getAllCleaningItems(): CleaningItem[] {
-  return [...CLEANING_ITEMS];
+  return [...CLEANING_ITEMS_LIST];
 }
 
 /**
  * Get all toy items.
  */
 export function getAllToyItems(): ToyItem[] {
-  return [...TOY_ITEMS];
+  return [...TOY_ITEMS_LIST];
 }
 
 /**
  * Get all medicine items.
  */
 export function getAllMedicineItems(): MedicineItem[] {
-  return [...MEDICINE_ITEMS];
+  return [...MEDICINE_ITEMS_LIST];
 }
 
 /**
  * Get all battle items.
  */
 export function getAllBattleItems(): BattleItem[] {
-  return [...BATTLE_ITEMS];
+  return [...BATTLE_ITEMS_LIST];
 }
 
 /**
  * Get all equipment items.
  */
 export function getAllEquipmentItems(): EquipmentItem[] {
-  return [...EQUIPMENT_ITEMS];
+  return [...EQUIPMENT_ITEMS_LIST];
 }
 
 /**
  * Get all material items.
  */
 export function getAllMaterialItems(): MaterialItem[] {
-  return [...MATERIAL_ITEMS];
+  return [...MATERIAL_ITEMS_LIST];
 }
 
 // Re-export individual lookup functions
@@ -120,7 +136,7 @@ export {
   getToyItemById,
 };
 
-// Re-export item arrays
+// Re-export item objects (enum-like access via FOOD_ITEMS.KIBBLE.id)
 export {
   BATTLE_ITEMS,
   CLEANING_ITEMS,
@@ -130,4 +146,16 @@ export {
   MATERIAL_ITEMS,
   MEDICINE_ITEMS,
   TOY_ITEMS,
+};
+
+// Re-export item arrays for iteration
+export {
+  BATTLE_ITEMS_LIST,
+  CLEANING_ITEMS_LIST,
+  DRINK_ITEMS_LIST,
+  EQUIPMENT_ITEMS_LIST,
+  FOOD_ITEMS_LIST,
+  MATERIAL_ITEMS_LIST,
+  MEDICINE_ITEMS_LIST,
+  TOY_ITEMS_LIST,
 };
