@@ -2,6 +2,7 @@
  * Types for offline progression reporting.
  */
 
+import type { ExplorationDrop } from "./activity";
 import type { MicroValue, Tick } from "./common";
 
 /**
@@ -12,6 +13,18 @@ export interface CareStatsSnapshot {
   hydration: MicroValue;
   happiness: MicroValue;
   energy: MicroValue;
+}
+
+/**
+ * Result of an exploration that completed during offline time.
+ */
+export interface OfflineExplorationResult {
+  /** Location name where exploration occurred */
+  locationName: string;
+  /** Items found during exploration */
+  itemsFound: ExplorationDrop[];
+  /** Message describing the result */
+  message: string;
 }
 
 /**
@@ -44,6 +57,8 @@ export interface OfflineReport {
   poopBefore: number;
   /** Poop count after offline processing */
   poopAfter: number;
+  /** Exploration results that completed during offline time */
+  explorationResults: OfflineExplorationResult[];
 }
 
 /**

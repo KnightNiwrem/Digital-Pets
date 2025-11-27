@@ -20,6 +20,7 @@ import type { GameState } from "@/game/types/gameState";
 import type {
   CareStatsSnapshot,
   MaxStatsSnapshot,
+  OfflineExplorationResult,
   OfflineReport,
 } from "@/game/types/offline";
 import { ObjectiveType } from "@/game/types/quest";
@@ -229,6 +230,7 @@ function createMaxStatsSnapshot(state: GameState): MaxStatsSnapshot | null {
 
 /**
  * Process offline catch-up ticks.
+ * Collects exploration results that complete during offline time.
  */
 export function processOfflineCatchup(
   state: GameState,
@@ -247,11 +249,27 @@ export function processOfflineCatchup(
   const poopBefore = state.pet?.poop.count ?? 0;
   const petName = state.pet?.identity.name ?? null;
 
-  // Use lastSaveTime as the start time for simulating offline progression
-  const newState = processMultipleTicks(state, cappedTicks, state.lastSaveTime);
+  // Process ticks and collect exploration results
+  const simulatedStartTime = state.lastSaveTime;
+  let currentState = state;
+  const explorationResults: OfflineExplorationResult[] = [];
 
-  const afterStats = createCareStatsSnapshot(newState);
-  const poopAfter = newState.pet?.poop.count ?? 0;
+  for (let i = 0; i < cappedTicks; i++) {
+    const simulatedTime = simulatedStartTime + (i + 1) * TICK_DURATION_MS;
+    currentState = processGameTick(currentState, simulatedTime);
+
+    // Collect exploration result if one was generated
+    if (currentState.lastExplorationResult) {
+      explorationResults.push({
+        locationName: currentState.lastExplorationResult.locationName,
+        itemsFound: currentState.lastExplorationResult.itemsFound,
+        message: currentState.lastExplorationResult.message,
+      });
+    }
+  }
+
+  const afterStats = createCareStatsSnapshot(currentState);
+  const poopAfter = currentState.pet?.poop.count ?? 0;
 
   const report: OfflineReport = {
     elapsedMs: reportElapsedMs,
@@ -263,10 +281,11 @@ export function processOfflineCatchup(
     maxStats,
     poopBefore,
     poopAfter,
+    explorationResults,
   };
 
   return {
-    state: newState,
+    state: currentState,
     ticksProcessed: cappedTicks,
     wasCapped,
     report,
