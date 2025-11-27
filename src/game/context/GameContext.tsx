@@ -156,8 +156,14 @@ export function GameProvider({ children }: GameProviderProps) {
       return;
     }
 
-    // Training completed: was training before, not training now
-    if (previousTraining && !currentTraining) {
+    // Training completed: was training before, not training now, and was on last tick
+    // If ticksRemaining > 1, training was cancelled, not completed
+    const wasNaturalCompletion =
+      previousTraining &&
+      !currentTraining &&
+      previousTraining.ticksRemaining <= 1;
+
+    if (wasNaturalCompletion) {
       const facility = getFacility(previousTraining.facilityId);
       const session = getSession(
         previousTraining.facilityId,
