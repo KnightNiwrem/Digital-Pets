@@ -159,6 +159,26 @@ test("completeQuest grants currency reward", () => {
   expect(result.state.player.currency.coins).toBe(initialCoins + 50);
 });
 
+test("completeQuest grants item reward", () => {
+  const progress: QuestProgress = {
+    questId: tutorialFirstSteps.id,
+    state: QuestState.Active,
+    objectiveProgress: {
+      feed_pet: 1,
+      give_water: 1,
+    },
+  };
+  const state = createTestState({}, [progress]);
+  const result = completeQuest(state, tutorialFirstSteps.id);
+  expect(result.success).toBe(true);
+  // Tutorial quest rewards 3 apples (food_apple)
+  const appleItem = result.state.player.inventory.items.find(
+    (item) => item.itemId === "food_apple",
+  );
+  expect(appleItem).toBeDefined();
+  expect(appleItem?.quantity).toBe(3);
+});
+
 test("updateQuestProgress advances matching objectives", () => {
   const progress: QuestProgress = {
     questId: tutorialFirstSteps.id,

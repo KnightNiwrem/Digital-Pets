@@ -45,7 +45,7 @@ export const tutorialFirstSteps: Quest = {
     },
     {
       type: RewardType.Item,
-      target: "apple",
+      target: "food_apple",
       quantity: 3,
     },
   ],
@@ -88,7 +88,7 @@ export const tutorialExploration: Quest = {
     },
     {
       type: RewardType.Item,
-      target: "rubber_ball",
+      target: "toy_ball",
       quantity: 1,
     },
   ],
