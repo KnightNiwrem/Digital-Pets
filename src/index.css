@@ -193,6 +193,8 @@ body::before {
   }
 }
 
+/* Accessibility: Respect user's reduced motion preference.
+   Using !important is intentional to override all animation styles. */
 @media (prefers-reduced-motion) {
   *,
   ::before,

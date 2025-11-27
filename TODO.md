@@ -402,20 +402,20 @@ Buy items from merchants.
 Quest tracking and completion.
 
 ### 18.1 Types & Data
-- [ ] Create `src/game/types/quest.ts` - Quest, Objective, Reward interfaces
-- [ ] Create `src/game/data/quests/tutorial.ts` - Tutorial quest chain
+- [x] Create `src/game/types/quest.ts` - Quest, Objective, Reward interfaces
+- [x] Create `src/game/data/quests/tutorial.ts` - Tutorial quest chain
 
 ### 18.2 Quest Logic
-- [ ] Create `src/game/core/quests/requirements.ts` - Requirement checks
-- [ ] Create `src/game/core/quests/objectives.ts` - Objective tracking
-- [ ] Create `src/game/core/quests/rewards.ts` - Grant rewards
-- [ ] Create `src/game/core/quests/quests.ts` - Quest state machine
+- [x] Create `src/game/core/quests/requirements.ts` - Requirement checks
+- [x] Create `src/game/core/quests/objectives.ts` - Objective tracking
+- [x] Create `src/game/core/quests/rewards.ts` - Grant rewards
+- [x] Create `src/game/core/quests/quests.ts` - Quest state machine
 
 ### 18.3 Quest UI
-- [ ] Create `src/components/screens/QuestScreen.tsx` - Quest journal
-- [ ] Create `src/components/quests/QuestList.tsx` - Active/available quests
-- [ ] Create `src/components/quests/QuestDetail.tsx` - Quest info
-- [ ] Create `src/components/quests/ObjectiveList.tsx` - Progress display
+- [x] Create `src/components/screens/QuestScreen.tsx` - Quest journal
+- [x] Create `src/components/quests/QuestList.tsx` - Active/available quests
+- [x] Create `src/components/quests/QuestDetail.tsx` - Quest info
+- [x] Create `src/components/quests/ObjectiveList.tsx` - Progress display
 
 **✓ Testable:** Start tutorial quest → Complete objectives → See rewards
 
