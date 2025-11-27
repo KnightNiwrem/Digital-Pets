@@ -94,28 +94,34 @@ export const TICK_DURATION_SECONDS = TICK_DURATION_MS / 1000;
 
 /**
  * Format ticks as a human-readable time string.
- * Handles minutes, hours, and days.
+ * Displays up to two of the most significant units (days, hours, minutes).
  */
 export function formatTicksAsTime(ticks: Tick): string {
   const totalMinutes = Math.floor((ticks * TICK_DURATION_SECONDS) / 60);
+  if (totalMinutes < 1) {
+    return "0m";
+  }
+
   const totalHours = Math.floor(totalMinutes / 60);
   const totalDays = Math.floor(totalHours / 24);
 
+  const parts: string[] = [];
   if (totalDays > 0) {
-    const remainingHours = totalHours % 24;
-    if (remainingHours > 0) {
-      return `${totalDays}d ${remainingHours}h`;
-    }
-    return `${totalDays}d`;
+    parts.push(`${totalDays}d`);
   }
 
-  if (totalHours > 0) {
+  const remainingHours = totalHours % 24;
+  if (remainingHours > 0) {
+    parts.push(`${remainingHours}h`);
+  }
+
+  if (parts.length < 2) {
     const remainingMinutes = totalMinutes % 60;
     if (remainingMinutes > 0) {
-      return `${totalHours}h ${remainingMinutes}m`;
+      parts.push(`${remainingMinutes}m`);
     }
-    return `${totalHours}h`;
   }
 
-  return `${totalMinutes}m`;
+  // If totalMinutes > 0, parts will always have at least one element.
+  return parts.join(" ");
 }

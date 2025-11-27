@@ -88,3 +88,10 @@ test("formatTicksAsTime formats days", () => {
 test("formatTicksAsTime formats days and hours", () => {
   expect(formatTicksAsTime(3000)).toBe("1d 1h"); // 1 day + 1 hour
 });
+
+test("formatTicksAsTime formats days and minutes (no hours)", () => {
+  // 1 day + 30 minutes = 2880 + 1 tick = 2881 ticks (but that's only 30 seconds)
+  // 1 day + 30 minutes = 2880 + 1 tick won't give 30 minutes
+  // 30 minutes = 60 ticks, so 1 day + 30 min = 2880 + 60 = 2940 ticks
+  expect(formatTicksAsTime(2940)).toBe("1d 30m"); // 1 day + 30 minutes
+});
