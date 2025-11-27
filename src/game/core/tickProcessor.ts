@@ -20,6 +20,7 @@ import type { GameState } from "@/game/types/gameState";
 import type {
   CareStatsSnapshot,
   MaxStatsSnapshot,
+  OfflineExplorationResult,
   OfflineReport,
 } from "@/game/types/offline";
 import { ObjectiveType } from "@/game/types/quest";
@@ -165,16 +166,25 @@ export function processGameTick(
 }
 
 /**
+ * Callback invoked after each tick during batch processing.
+ * @param state The game state after the tick was processed
+ * @param tickIndex The zero-based index of the tick that was just processed
+ */
+export type TickCallback = (state: GameState, tickIndex: number) => void;
+
+/**
  * Process multiple ticks at once (for offline catch-up).
  * Processes ticks sequentially to maintain correct state transitions.
  * @param state The initial game state
  * @param tickCount Number of ticks to process
  * @param startTime Optional start timestamp for simulation (defaults to now - tickCount * TICK_DURATION_MS)
+ * @param onTick Optional callback invoked after each tick is processed
  */
 export function processMultipleTicks(
   state: GameState,
   tickCount: Tick,
   startTime?: number,
+  onTick?: TickCallback,
 ): GameState {
   let currentState = state;
   const simulatedStartTime = startTime ?? now() - tickCount * TICK_DURATION_MS;
@@ -182,6 +192,7 @@ export function processMultipleTicks(
   for (let i = 0; i < tickCount; i++) {
     const simulatedTime = simulatedStartTime + (i + 1) * TICK_DURATION_MS;
     currentState = processGameTick(currentState, simulatedTime);
+    onTick?.(currentState, i);
   }
 
   return currentState;
@@ -229,6 +240,7 @@ function createMaxStatsSnapshot(state: GameState): MaxStatsSnapshot | null {
 
 /**
  * Process offline catch-up ticks.
+ * Collects exploration results that complete during offline time.
  */
 export function processOfflineCatchup(
   state: GameState,
@@ -247,11 +259,26 @@ export function processOfflineCatchup(
   const poopBefore = state.pet?.poop.count ?? 0;
   const petName = state.pet?.identity.name ?? null;
 
-  // Use lastSaveTime as the start time for simulating offline progression
-  const newState = processMultipleTicks(state, cappedTicks, state.lastSaveTime);
+  // Process ticks and collect exploration results using the shared tick processor
+  const explorationResults: OfflineExplorationResult[] = [];
+  const currentState = processMultipleTicks(
+    state,
+    cappedTicks,
+    state.lastSaveTime,
+    (tickState) => {
+      // Collect exploration result if one was generated this tick
+      if (tickState.lastExplorationResult) {
+        explorationResults.push({
+          locationName: tickState.lastExplorationResult.locationName,
+          itemsFound: tickState.lastExplorationResult.itemsFound,
+          message: tickState.lastExplorationResult.message,
+        });
+      }
+    },
+  );
 
-  const afterStats = createCareStatsSnapshot(newState);
-  const poopAfter = newState.pet?.poop.count ?? 0;
+  const afterStats = createCareStatsSnapshot(currentState);
+  const poopAfter = currentState.pet?.poop.count ?? 0;
 
   const report: OfflineReport = {
     elapsedMs: reportElapsedMs,
@@ -263,10 +290,11 @@ export function processOfflineCatchup(
     maxStats,
     poopBefore,
     poopAfter,
+    explorationResults,
   };
 
   return {
-    state: newState,
+    state: currentState,
     ticksProcessed: cappedTicks,
     wasCapped,
     report,

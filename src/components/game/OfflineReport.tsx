@@ -2,6 +2,7 @@
  * Offline report dialog showing what happened while the player was away.
  */
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,8 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getItemById } from "@/game/data/items";
 import { toDisplay } from "@/game/types/common";
-import type { OfflineReport as OfflineReportType } from "@/game/types/offline";
+import type {
+  OfflineExplorationResult,
+  OfflineReport as OfflineReportType,
+} from "@/game/types/offline";
 
 interface OfflineReportProps {
   report: OfflineReportType;
@@ -83,6 +88,69 @@ function StatChange({
 }
 
 /**
+ * Display a single exploration result.
+ */
+function ExplorationResultCard({
+  result,
+}: {
+  result: OfflineExplorationResult;
+}) {
+  const hasItems = result.itemsFound.length > 0;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="text-2xl">{hasItems ? "🌿" : "😔"}</span>
+        <div>
+          <p className="font-medium">Exploration Complete</p>
+          <p className="text-sm text-muted-foreground">{result.locationName}</p>
+        </div>
+      </div>
+
+      {hasItems ? (
+        <div className="bg-secondary/50 rounded-lg p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2">
+            Items Found
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {result.itemsFound.map((drop, index) => {
+              const item = getItemById(drop.itemId);
+              return (
+                <div
+                  key={`${drop.itemId}-${index}`}
+                  className="flex items-center gap-2 p-2 bg-background rounded-md"
+                >
+                  <span className="text-lg">{item?.icon ?? "❓"}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {item?.name ?? drop.itemId}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      x{drop.quantity}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-secondary/50 rounded-lg p-3 text-center">
+          <p className="text-sm text-muted-foreground">
+            Didn't find anything this time.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Page types for the offline report.
+ */
+type OfflineReportPage = "stats" | "exploration";
+
+/**
  * Display the offline report as a dialog.
  */
 export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
@@ -95,13 +163,67 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
     maxStats,
     poopBefore,
     poopAfter,
+    explorationResults,
   } = report;
+
+  const hasExplorationResults = explorationResults.length > 0;
+
+  // Start on stats page, move to exploration if there are results
+  const [currentPage, setCurrentPage] = useState<OfflineReportPage>("stats");
+  const [explorationIndex, setExplorationIndex] = useState(0);
 
   const poopChange = poopAfter - poopBefore;
 
   // Use max values from report, with fallback for safety
   const maxCareStat = maxStats?.careStatMax ?? 200_000;
   const maxEnergy = maxStats?.energyMax ?? 200_000;
+
+  // Calculate total pages (1 for stats + number of exploration results)
+  const totalExplorationPages = explorationResults.length;
+  const hasPetInfo = petName && beforeStats && afterStats;
+
+  // Handle next button
+  const handleNext = () => {
+    if (currentPage === "stats") {
+      if (hasExplorationResults) {
+        setCurrentPage("exploration");
+        setExplorationIndex(0);
+      } else {
+        onDismiss();
+      }
+    } else {
+      if (explorationIndex < totalExplorationPages - 1) {
+        setExplorationIndex(explorationIndex + 1);
+      } else {
+        onDismiss();
+      }
+    }
+  };
+
+  // Handle back button
+  const handleBack = () => {
+    if (currentPage === "exploration") {
+      if (explorationIndex > 0) {
+        setExplorationIndex(explorationIndex - 1);
+      } else {
+        setCurrentPage("stats");
+      }
+    }
+  };
+
+  // Determine button labels
+  const isLastPage =
+    (currentPage === "stats" && !hasExplorationResults) ||
+    (currentPage === "exploration" &&
+      explorationIndex === totalExplorationPages - 1);
+  const nextButtonLabel = isLastPage ? "Continue" : "Next";
+
+  // Calculate page indicator
+  const getCurrentPageNumber = () => {
+    if (currentPage === "stats") return 1;
+    return 2 + explorationIndex;
+  };
+  const getTotalPages = () => 1 + totalExplorationPages;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onDismiss()}>
@@ -114,68 +236,96 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {petName && beforeStats && afterStats && (
-          <div className="space-y-4">
-            <p className="text-sm">
-              While you were away, <strong>{petName}</strong> experienced the
-              following changes:
-            </p>
+        {currentPage === "stats" && (
+          <>
+            {hasPetInfo && (
+              <div className="space-y-4">
+                <p className="text-sm">
+                  While you were away, <strong>{petName}</strong> experienced
+                  the following changes:
+                </p>
 
-            <div className="space-y-1 text-sm">
-              <StatChange
-                label="Satiety"
-                before={beforeStats.satiety}
-                after={afterStats.satiety}
-                max={maxCareStat}
-              />
-              <StatChange
-                label="Hydration"
-                before={beforeStats.hydration}
-                after={afterStats.hydration}
-                max={maxCareStat}
-              />
-              <StatChange
-                label="Happiness"
-                before={beforeStats.happiness}
-                after={afterStats.happiness}
-                max={maxCareStat}
-              />
-              <StatChange
-                label="Energy"
-                before={beforeStats.energy}
-                after={afterStats.energy}
-                max={maxEnergy}
-              />
+                <div className="space-y-1 text-sm">
+                  <StatChange
+                    label="Satiety"
+                    before={beforeStats.satiety}
+                    after={afterStats.satiety}
+                    max={maxCareStat}
+                  />
+                  <StatChange
+                    label="Hydration"
+                    before={beforeStats.hydration}
+                    after={afterStats.hydration}
+                    max={maxCareStat}
+                  />
+                  <StatChange
+                    label="Happiness"
+                    before={beforeStats.happiness}
+                    after={afterStats.happiness}
+                    max={maxCareStat}
+                  />
+                  <StatChange
+                    label="Energy"
+                    before={beforeStats.energy}
+                    after={afterStats.energy}
+                    max={maxEnergy}
+                  />
 
-              {poopChange > 0 && (
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-muted-foreground">Poop</span>
-                  <span className="text-amber-500">
-                    +{poopChange} poop{poopChange > 1 ? "s" : ""} accumulated
-                  </span>
+                  {poopChange > 0 && (
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-muted-foreground">Poop</span>
+                      <span className="text-amber-500">
+                        +{poopChange} poop{poopChange > 1 ? "s" : ""}{" "}
+                        accumulated
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {(afterStats.satiety === 0 ||
-              afterStats.hydration === 0 ||
-              afterStats.happiness === 0 ||
-              afterStats.energy === 0) && (
-              <p className="text-destructive text-sm">
-                ⚠️ Some needs are critical! Take care of your pet immediately.
+                {(afterStats.satiety === 0 ||
+                  afterStats.hydration === 0 ||
+                  afterStats.happiness === 0 ||
+                  afterStats.energy === 0) && (
+                  <p className="text-destructive text-sm">
+                    ⚠️ Some needs are critical! Take care of your pet
+                    immediately.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {!petName && (
+              <p className="text-sm text-muted-foreground">
+                Time has passed but you don&apos;t have a pet yet.
               </p>
             )}
+          </>
+        )}
+
+        {currentPage === "exploration" &&
+          explorationResults[explorationIndex] && (
+            <ExplorationResultCard
+              result={explorationResults[explorationIndex]}
+            />
+          )}
+
+        {/* Page indicator and navigation */}
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-2">
+            {(hasExplorationResults || currentPage === "exploration") && (
+              <span className="text-xs text-muted-foreground">
+                Page {getCurrentPageNumber()} of {getTotalPages()}
+              </span>
+            )}
           </div>
-        )}
-
-        {!petName && (
-          <p className="text-sm text-muted-foreground">
-            Time has passed but you don&apos;t have a pet yet.
-          </p>
-        )}
-
-        <div className="flex justify-end mt-4">
-          <Button onClick={onDismiss}>Continue</Button>
+          <div className="flex gap-2">
+            {currentPage === "exploration" && (
+              <Button variant="outline" onClick={handleBack}>
+                Back
+              </Button>
+            )}
+            <Button onClick={handleNext}>{nextButtonLabel}</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

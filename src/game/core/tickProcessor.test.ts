@@ -466,3 +466,89 @@ test("processGameTick updates quest progress when exploration completes", () => 
   // Quest progress should be updated for foraging
   expect(newState.quests[0]?.objectiveProgress.forage_once).toBe(1);
 });
+
+// Tests for exploration result collection in offline catchup
+
+test("processOfflineCatchup collects exploration result when exploration completes", () => {
+  const { ActivityState } = require("@/game/types/constants");
+
+  const pet = createTestPet({
+    activityState: ActivityState.Exploring,
+    activeExploration: {
+      locationId: "meadow",
+      activityType: "forage",
+      forageTableId: "meadow_forage",
+      ticksRemaining: 3, // Will complete on tick 3
+      durationTicks: 10,
+      startTick: 0,
+      energyCost: 0,
+    },
+  });
+
+  const state = createTestGameState({
+    pet,
+    player: {
+      ...createInitialGameState().player,
+      currentLocationId: "meadow",
+    },
+    totalTicks: 0,
+  });
+
+  const result = processOfflineCatchup(state, 10, 100);
+
+  // Should have collected at least one exploration result
+  expect(result.report.explorationResults.length).toBeGreaterThan(0);
+  // The result should have the correct location name
+  expect(result.report.explorationResults[0]?.locationName).toBe(
+    "Sunny Meadow",
+  );
+});
+
+test("processOfflineCatchup has empty explorationResults when no exploration completes", () => {
+  const pet = createTestPet({
+    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 0 },
+  });
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100);
+
+  // No exploration was active, so no results
+  expect(result.report.explorationResults).toEqual([]);
+});
+
+test("processOfflineCatchup collects exploration result for in-progress exploration", () => {
+  const { ActivityState } = require("@/game/types/constants");
+
+  // Exploration that was already in progress before going offline
+  // with only 2 ticks remaining
+  const pet = createTestPet({
+    activityState: ActivityState.Exploring,
+    activeExploration: {
+      locationId: "meadow",
+      activityType: "forage",
+      forageTableId: "meadow_forage",
+      ticksRemaining: 2,
+      durationTicks: 100, // Long duration, but only 2 ticks left
+      startTick: 0,
+      energyCost: 0,
+    },
+  });
+
+  const state = createTestGameState({
+    pet,
+    player: {
+      ...createInitialGameState().player,
+      currentLocationId: "meadow",
+    },
+    totalTicks: 0,
+  });
+
+  const result = processOfflineCatchup(state, 5, 100);
+
+  // Exploration should have completed and been collected
+  expect(result.report.explorationResults.length).toBe(1);
+  expect(result.report.explorationResults[0]?.locationName).toBe(
+    "Sunny Meadow",
+  );
+  // Pet should no longer be exploring
+  expect(result.state.pet?.activeExploration).toBeUndefined();
+});
