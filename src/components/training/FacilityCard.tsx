@@ -4,13 +4,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatTicksDuration } from "@/game/core/growth";
 import { isSessionAvailable } from "@/game/core/training";
 import type {
   TrainingFacility,
   TrainingSession,
   TrainingSessionType,
 } from "@/game/types/activity";
+import { formatTicksAsTime } from "@/game/types/common";
 import type { GrowthStage } from "@/game/types/constants";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +60,7 @@ function SessionButton({
     >
       <span className="font-medium text-xs">{session.name}</span>
       <span className="text-[10px] text-muted-foreground">
-        {formatTicksDuration(session.durationTicks)} · ⚡{session.energyCost}
+        {formatTicksAsTime(session.durationTicks)} · ⚡{session.energyCost}
       </span>
       <span className="text-[10px]">
         +{session.primaryStatGain}

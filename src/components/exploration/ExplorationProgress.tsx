@@ -5,9 +5,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getExplorationProgress } from "@/game/core/exploration/forage";
-import { formatTicksDuration } from "@/game/core/growth";
 import { getLocation } from "@/game/data/locations";
 import type { ActiveExploration } from "@/game/types/activity";
+import { formatTicksAsTime } from "@/game/types/common";
 
 interface ExplorationProgressProps {
   exploration: ActiveExploration;
@@ -23,7 +23,7 @@ export function ExplorationProgress({
 }: ExplorationProgressProps) {
   const location = getLocation(exploration.locationId);
   const progress = getExplorationProgress(exploration);
-  const timeRemaining = formatTicksDuration(exploration.ticksRemaining);
+  const timeRemaining = formatTicksAsTime(exploration.ticksRemaining);
 
   const activityName =
     exploration.activityType === "forage" ? "Foraging" : "Exploring";

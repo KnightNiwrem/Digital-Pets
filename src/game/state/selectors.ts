@@ -3,7 +3,6 @@
  */
 
 import {
-  formatTicksDuration,
   getNextStage,
   getStageProgressPercent,
   getTicksUntilNextStage,
@@ -17,7 +16,11 @@ import {
 import { getSpeciesById } from "@/game/data/species";
 import type { GameState, Pet } from "@/game/types";
 import type { Tick } from "@/game/types/common";
-import { TICKS_PER_DAY, toDisplay } from "@/game/types/common";
+import {
+  formatTicksAsTime,
+  TICKS_PER_DAY,
+  toDisplay,
+} from "@/game/types/common";
 import {
   type CareThreshold,
   type GrowthStage,
@@ -272,12 +275,12 @@ export function selectGrowthProgress(
     ticksUntilNextStage,
     timeUntilNextStage:
       ticksUntilNextStage !== null
-        ? formatTicksDuration(ticksUntilNextStage)
+        ? formatTicksAsTime(ticksUntilNextStage)
         : null,
     ticksUntilNextSubstage,
     timeUntilNextSubstage:
       ticksUntilNextSubstage !== null
-        ? formatTicksDuration(ticksUntilNextSubstage)
+        ? formatTicksAsTime(ticksUntilNextSubstage)
         : null,
     ageDays,
     ageTicks,

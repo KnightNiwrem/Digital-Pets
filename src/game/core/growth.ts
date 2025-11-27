@@ -225,10 +225,3 @@ export function getStageProgressPercent(
 
   return Math.min(100, Math.floor((timeInStage / stageDuration) * 100));
 }
-
-/**
- * Format ticks as a human-readable duration.
- * Re-exported from common.ts for backwards compatibility.
- * @deprecated Use formatTicksAsTime from @/game/types/common instead.
- */
-export { formatTicksAsTime as formatTicksDuration } from "@/game/types/common";
