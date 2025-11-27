@@ -5,6 +5,7 @@
 import { useMemo, useState } from "react";
 import { LocationDetail, LocationNode } from "@/components/map";
 import { DialogueScreen } from "@/components/npc";
+import { ShopScreen } from "@/components/screens/ShopScreen";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { getConnectedLocations, getLocation } from "@/game/data/locations";
@@ -22,6 +23,7 @@ export function MapScreen() {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [talkingToNpcId, setTalkingToNpcId] = useState<string | null>(null);
+  const [shoppingAtNpcId, setShoppingAtNpcId] = useState<string | null>(null);
 
   // Get current location
   const currentLocationId = state?.player.currentLocationId ?? "home";
@@ -81,11 +83,15 @@ export function MapScreen() {
     setTalkingToNpcId(null);
   };
 
-  // Handle shop open (placeholder for Milestone 17)
-  const handleOpenShop = (_npcId: string) => {
-    // Shop functionality will be implemented in Milestone 17
-    setErrorMessage("Shop is coming soon!");
+  // Handle shop open
+  const handleOpenShop = (npcId: string) => {
     setTalkingToNpcId(null);
+    setShoppingAtNpcId(npcId);
+  };
+
+  // Handle shop close
+  const handleCloseShop = () => {
+    setShoppingAtNpcId(null);
   };
 
   if (isLoading) {
@@ -102,6 +108,11 @@ export function MapScreen() {
         <p className="text-muted-foreground">Error loading map data.</p>
       </div>
     );
+  }
+
+  // If shopping at an NPC, show shop screen
+  if (shoppingAtNpcId) {
+    return <ShopScreen npcId={shoppingAtNpcId} onClose={handleCloseShop} />;
   }
 
   // If talking to an NPC, show dialogue screen
