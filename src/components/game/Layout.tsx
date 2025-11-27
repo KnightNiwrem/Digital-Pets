@@ -18,9 +18,11 @@ interface LayoutProps {
  */
 export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-full bg-background flex flex-col overflow-hidden">
       <Header />
-      <main className="flex-1 container mx-auto p-4">{children}</main>
+      <main className="flex-1 overflow-y-auto container mx-auto p-4 pb-24">
+        {children}
+      </main>
       <Navigation activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   );
