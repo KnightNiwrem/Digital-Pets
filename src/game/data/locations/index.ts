@@ -5,7 +5,7 @@
 import type { Location, WorldMap } from "@/game/types/location";
 import { homeLocation } from "./home";
 import { townLocations } from "./towns";
-import { wildLocations } from "./wild";
+import { explorableLocations } from "./wild";
 
 /**
  * All locations in the game world.
@@ -13,7 +13,7 @@ import { wildLocations } from "./wild";
 export const allLocations: Location[] = [
   homeLocation,
   ...townLocations,
-  ...wildLocations,
+  ...explorableLocations,
 ];
 
 /**
