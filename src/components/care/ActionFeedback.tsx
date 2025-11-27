@@ -2,7 +2,7 @@
  * Action feedback component that shows animated emoji feedback.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface ActionFeedbackProps {
@@ -20,15 +20,21 @@ export function ActionFeedback({
   className,
 }: ActionFeedbackProps) {
   const [isVisible, setIsVisible] = useState(true);
+  const onCompleteRef = useRef(onComplete);
+
+  // Keep ref updated with latest callback
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      onComplete?.();
+      onCompleteRef.current?.();
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, []);
 
   if (!isVisible) return null;
 

@@ -2,7 +2,7 @@
  * Battle screen for combat encounters.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BattleArena,
   BattleLog,
@@ -69,10 +69,25 @@ export function BattleScreen({
   const [animationState, setAnimationState] = useState<AnimationState>(
     initialAnimationState,
   );
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  // Cleanup animation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Trigger attack animation
   const triggerAttackAnimation = useCallback(
     (isPlayerAttack: boolean, onComplete: () => void) => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
       setAnimationState((prev) => ({
         ...prev,
         playerAttacking: isPlayerAttack,
@@ -81,7 +96,7 @@ export function BattleScreen({
         enemyHit: isPlayerAttack,
       }));
 
-      setTimeout(() => {
+      animationTimeoutRef.current = setTimeout(() => {
         setAnimationState(initialAnimationState);
         onComplete();
       }, ATTACK_ANIMATION_DURATION_MS);

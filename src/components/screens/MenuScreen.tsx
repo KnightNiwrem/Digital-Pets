@@ -2,7 +2,7 @@
  * Menu screen with settings and save management.
  */
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,19 +26,37 @@ export function MenuScreen() {
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveStatusTimeoutRef.current) {
+        clearTimeout(saveStatusTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const showSaveStatus = useCallback((message: string) => {
+    if (saveStatusTimeoutRef.current) {
+      clearTimeout(saveStatusTimeoutRef.current);
+    }
+    setSaveStatus(message);
+    saveStatusTimeoutRef.current = setTimeout(() => setSaveStatus(null), 2000);
+  }, []);
 
   const handleManualSave = () => {
     if (!state) return;
     const success = saveGame(state);
-    setSaveStatus(success ? "Game saved!" : "Failed to save game");
-    setTimeout(() => setSaveStatus(null), 2000);
+    showSaveStatus(success ? "Game saved!" : "Failed to save game");
   };
 
   const handleExport = () => {
     const data = exportSave();
     if (!data) {
-      setSaveStatus("Failed to export save");
-      setTimeout(() => setSaveStatus(null), 2000);
+      showSaveStatus("Failed to export save");
       return;
     }
 
@@ -52,8 +70,7 @@ export function MenuScreen() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    setSaveStatus("Save exported!");
-    setTimeout(() => setSaveStatus(null), 2000);
+    showSaveStatus("Save exported!");
   };
 
   const handleImportClick = () => {
@@ -78,8 +95,7 @@ export function MenuScreen() {
       if (result.success) {
         actions.updateState(() => result.state);
         setShowImportDialog(false);
-        setSaveStatus("Save imported successfully!");
-        setTimeout(() => setSaveStatus(null), 2000);
+        showSaveStatus("Save imported successfully!");
       } else {
         setImportError(result.error);
       }

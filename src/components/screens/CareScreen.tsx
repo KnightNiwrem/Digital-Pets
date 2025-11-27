@@ -2,7 +2,7 @@
  * Care Screen component showing pet status and care actions.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActionFeedback,
   CleanButton,
@@ -45,12 +45,30 @@ export function CareScreen() {
   const [petAnimation, setPetAnimation] = useState<PetAnimationType>("idle");
   const [actionFeedback, setActionFeedback] =
     useState<ActionFeedbackState | null>(null);
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  // Cleanup animation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const triggerAction = useCallback(
     (animation: PetAnimationType, emoji: string) => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
       setPetAnimation(animation);
       setActionFeedback({ emoji, key: Date.now() });
-      setTimeout(() => setPetAnimation("idle"), 600);
+      animationTimeoutRef.current = setTimeout(
+        () => setPetAnimation("idle"),
+        600,
+      );
     },
     [],
   );
