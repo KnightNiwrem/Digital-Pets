@@ -3,7 +3,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toDisplay } from "@/game/types/common";
+import { formatTicksAsTime, toDisplay } from "@/game/types/common";
 import type { ItemCategory, Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
@@ -72,7 +72,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
       if (itemDef.poopAcceleration) {
         stats.push({
           label: "Poop Speed",
-          value: `+${itemDef.poopAcceleration} ticks`,
+          value: `+${formatTicksAsTime(itemDef.poopAcceleration)}`,
         });
       }
       break;

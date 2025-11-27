@@ -33,7 +33,7 @@ Food items restore Satiety (in micro-units).
 | Property | Description |
 |----------|-------------|
 | satietyRestore | microSatiety restored on use |
-| poopAcceleration | Ticks reduced from next poop timer |
+| poopAcceleration | Ticks reduced from next poop timer (varies by food: 30-120 ticks) |
 
 ### Drink
 

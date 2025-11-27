@@ -149,8 +149,8 @@ test("useFoodItem applies poopAcceleration when food has it", () => {
   const state = createTestState();
   if (state.pet) {
     // Set poop timer to a known value
-    state.pet.poop.ticksUntilNext = 10;
-    // Add food_meat which has poopAcceleration of 2
+    state.pet.poop.ticksUntilNext = 200;
+    // Add food_meat which has poopAcceleration of 90 ticks (45 minutes)
     state.player.inventory.items.push({
       itemId: "food_meat",
       quantity: 1,
@@ -160,16 +160,16 @@ test("useFoodItem applies poopAcceleration when food has it", () => {
 
   const result = useFoodItem(state, "food_meat");
   expect(result.success).toBe(true);
-  // poop timer should be reduced by 2 (from 10 to 8)
-  expect(result.state.pet?.poop.ticksUntilNext).toBe(8);
+  // poop timer should be reduced by 90 (from 200 to 110)
+  expect(result.state.pet?.poop.ticksUntilNext).toBe(110);
 });
 
 test("useFoodItem does not go below 0 for poop timer", () => {
   const state = createTestState();
   if (state.pet) {
     // Set poop timer to a low value
-    state.pet.poop.ticksUntilNext = 1;
-    // Add food_cake which has poopAcceleration of 3
+    state.pet.poop.ticksUntilNext = 50;
+    // Add food_cake which has poopAcceleration of 120 ticks (60 minutes)
     state.player.inventory.items.push({
       itemId: "food_cake",
       quantity: 1,
@@ -183,18 +183,18 @@ test("useFoodItem does not go below 0 for poop timer", () => {
   expect(result.state.pet?.poop.ticksUntilNext).toBe(0);
 });
 
-test("useFoodItem does not change poop timer when poopAcceleration is 0", () => {
+test("useFoodItem applies poopAcceleration for light meals", () => {
   const state = createTestState();
   if (state.pet) {
     // Set poop timer to a known value
-    state.pet.poop.ticksUntilNext = 10;
+    state.pet.poop.ticksUntilNext = 100;
   }
 
-  // food_kibble has poopAcceleration of 0
+  // food_kibble has poopAcceleration of 30 ticks (15 minutes)
   const result = useFoodItem(state, "food_kibble");
   expect(result.success).toBe(true);
-  // poop timer should remain unchanged
-  expect(result.state.pet?.poop.ticksUntilNext).toBe(10);
+  // poop timer should be reduced by 30 (from 100 to 70)
+  expect(result.state.pet?.poop.ticksUntilNext).toBe(70);
 });
 
 test("useCleaningItem removes poop and consumes item", () => {
