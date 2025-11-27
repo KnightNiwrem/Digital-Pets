@@ -29,9 +29,14 @@ export function BattleArena({
   className,
 }: BattleArenaProps) {
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      {/* Enemy (top) */}
-      <div className="flex justify-end">
+    <div
+      className={cn(
+        "flex flex-col md:flex-row md:items-center md:justify-around gap-8 md:gap-4 p-4",
+        className,
+      )}
+    >
+      {/* Enemy (top on mobile, right on desktop) */}
+      <div className="flex justify-end md:order-3">
         <PetBattleCard
           combatant={enemy}
           position="enemy"
@@ -41,12 +46,12 @@ export function BattleArena({
       </div>
 
       {/* VS indicator */}
-      <div className="flex justify-center">
+      <div className="flex justify-center md:order-2">
         <span className="text-2xl font-bold text-muted-foreground">⚔️</span>
       </div>
 
-      {/* Player (bottom) */}
-      <div className="flex justify-start">
+      {/* Player (bottom on mobile, left on desktop) */}
+      <div className="flex justify-start md:order-1">
         <PetBattleCard
           combatant={player}
           position="player"

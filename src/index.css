@@ -159,6 +159,14 @@
   .animate-battle-hit {
     animation: battle-hit 0.5s ease-out;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* cool Bun background animation 😎 */

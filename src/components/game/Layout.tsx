@@ -20,7 +20,7 @@ export function Layout({ children, activeTab, onTabChange }: LayoutProps) {
   return (
     <div className="h-full bg-background flex flex-col overflow-hidden">
       <Header />
-      <main className="flex-1 overflow-y-auto container mx-auto p-4 pb-24">
+      <main className="flex-1 overflow-y-auto container mx-auto p-2 sm:p-4 pb-24 max-w-4xl">
         {children}
       </main>
       <Navigation activeTab={activeTab} onTabChange={onTabChange} />

@@ -98,6 +98,13 @@ export const CARE_LIFE_RECOVERY_ABOVE_50: MicroValue = 8;
 export const CARE_LIFE_RECOVERY_ABOVE_75: MicroValue = 16;
 export const CARE_LIFE_RECOVERY_AT_100: MicroValue = 25;
 
+/**
+ * Care stat thresholds for care life recovery (percentages).
+ */
+export const CARE_LIFE_RECOVERY_THRESHOLD_100 = 100;
+export const CARE_LIFE_RECOVERY_THRESHOLD_75 = 75;
+export const CARE_LIFE_RECOVERY_THRESHOLD_50 = 50;
+
 // =============================================================================
 // Energy Regeneration
 // =============================================================================

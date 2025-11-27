@@ -40,7 +40,7 @@ export function MoveSelect({
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Select Move</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-2">
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {combatant.moveSlots.map((slot) => (
           <MoveButton
             key={slot.move.id}

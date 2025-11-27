@@ -14,6 +14,9 @@ import {
   CARE_LIFE_RECOVERY_ABOVE_50,
   CARE_LIFE_RECOVERY_ABOVE_75,
   CARE_LIFE_RECOVERY_AT_100,
+  CARE_LIFE_RECOVERY_THRESHOLD_50,
+  CARE_LIFE_RECOVERY_THRESHOLD_75,
+  CARE_LIFE_RECOVERY_THRESHOLD_100,
   POOP_CARE_LIFE_DRAIN_THRESHOLD,
 } from "./constants";
 
@@ -26,6 +29,9 @@ export {
   CARE_LIFE_RECOVERY_ABOVE_50,
   CARE_LIFE_RECOVERY_ABOVE_75,
   CARE_LIFE_RECOVERY_AT_100,
+  CARE_LIFE_RECOVERY_THRESHOLD_100,
+  CARE_LIFE_RECOVERY_THRESHOLD_75,
+  CARE_LIFE_RECOVERY_THRESHOLD_50,
 };
 
 /**
@@ -90,13 +96,13 @@ export function calculateCareLifeChange(
   const percentages = getCareStatPercentages(pet, maxCareStat);
   const minPercent = Math.min(...percentages);
 
-  if (minPercent >= 100) {
+  if (minPercent >= CARE_LIFE_RECOVERY_THRESHOLD_100) {
     return CARE_LIFE_RECOVERY_AT_100;
   }
-  if (minPercent >= 75) {
+  if (minPercent >= CARE_LIFE_RECOVERY_THRESHOLD_75) {
     return CARE_LIFE_RECOVERY_ABOVE_75;
   }
-  if (minPercent >= 50) {
+  if (minPercent >= CARE_LIFE_RECOVERY_THRESHOLD_50) {
     return CARE_LIFE_RECOVERY_ABOVE_50;
   }
 
