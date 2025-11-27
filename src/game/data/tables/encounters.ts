@@ -2,6 +2,7 @@
  * Encounter table definitions for wild areas.
  */
 
+import { SPECIES } from "@/game/data/species";
 import { GrowthStage } from "@/game/types/constants";
 
 /**
@@ -51,7 +52,7 @@ export const meadowEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 1.0,
-      speciesIds: ["florabit", "sparkfin"],
+      speciesIds: [SPECIES.FLORABIT.id, SPECIES.SPARKFIN.id],
       levelOffset: [-1, 2],
     },
   ],
@@ -67,13 +68,13 @@ export const woodsEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.7,
-      speciesIds: ["florabit", "rockpup"],
+      speciesIds: [SPECIES.FLORABIT.id, SPECIES.ROCKPUP.id],
       levelOffset: [0, 3],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.3,
-      speciesIds: ["sparkfin"],
+      speciesIds: [SPECIES.SPARKFIN.id],
       levelOffset: [2, 5],
     },
   ],
@@ -89,13 +90,13 @@ export const coastEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.8,
-      speciesIds: ["sparkfin", "coralite"],
+      speciesIds: [SPECIES.SPARKFIN.id, SPECIES.CORALITE.id],
       levelOffset: [-1, 3],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.2,
-      speciesIds: ["florabit"],
+      speciesIds: [SPECIES.FLORABIT.id],
       levelOffset: [0, 2],
     },
   ],
@@ -111,13 +112,13 @@ export const highlandsEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.6,
-      speciesIds: ["rockpup", "emberfox"],
+      speciesIds: [SPECIES.ROCKPUP.id, SPECIES.EMBERFOX.id],
       levelOffset: [0, 4],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.4,
-      speciesIds: ["emberfox"],
+      speciesIds: [SPECIES.EMBERFOX.id],
       levelOffset: [2, 6],
       minStage: GrowthStage.Teen,
     },
@@ -134,19 +135,19 @@ export const cavesEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.5,
-      speciesIds: ["rockpup", "coralite"],
+      speciesIds: [SPECIES.ROCKPUP.id, SPECIES.CORALITE.id],
       levelOffset: [0, 5],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.35,
-      speciesIds: ["sparkfin"],
+      speciesIds: [SPECIES.SPARKFIN.id],
       levelOffset: [2, 6],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.15,
-      speciesIds: ["shadowmoth"],
+      speciesIds: [SPECIES.SHADOWMOTH.id],
       levelOffset: [4, 8],
       minStage: GrowthStage.Child,
     },
@@ -163,19 +164,19 @@ export const depthsEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.4,
-      speciesIds: ["shadowmoth", "rockpup"],
+      speciesIds: [SPECIES.SHADOWMOTH.id, SPECIES.ROCKPUP.id],
       levelOffset: [0, 6],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.4,
-      speciesIds: ["shadowmoth", "emberfox"],
+      speciesIds: [SPECIES.SHADOWMOTH.id, SPECIES.EMBERFOX.id],
       levelOffset: [3, 8],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.2,
-      speciesIds: ["shadowmoth"],
+      speciesIds: [SPECIES.SHADOWMOTH.id],
       levelOffset: [5, 10],
       minStage: GrowthStage.YoungAdult,
     },

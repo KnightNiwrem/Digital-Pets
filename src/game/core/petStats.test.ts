@@ -4,7 +4,7 @@
 
 import { expect, test } from "bun:test";
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
-import { getSpeciesById } from "@/game/data/species";
+import { getSpeciesById, SPECIES } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
 import { calculateMaxStats, calculatePetMaxStats } from "./petStats";
 
@@ -16,7 +16,7 @@ test("calculatePetMaxStats returns correct values for baby florabit", () => {
 
   expect(maxStats).not.toBeNull();
 
-  const species = getSpeciesById("florabit");
+  const species = getSpeciesById(SPECIES.FLORABIT.id);
   expect(species).toBeDefined();
   const stageDef = GROWTH_STAGE_DEFINITIONS.baby;
 
@@ -44,7 +44,7 @@ test("calculatePetMaxStats returns correct values for adult stage", () => {
 
   expect(maxStats).not.toBeNull();
 
-  const species = getSpeciesById("florabit");
+  const species = getSpeciesById(SPECIES.FLORABIT.id);
   expect(species).toBeDefined();
   const stageDef = GROWTH_STAGE_DEFINITIONS.adult;
 
@@ -94,10 +94,10 @@ test("calculatePetMaxStats values differ between growth stages", () => {
 });
 
 test("calculateMaxStats returns correct values when called directly", () => {
-  const species = getSpeciesById("florabit");
+  const species = getSpeciesById(SPECIES.FLORABIT.id);
   expect(species).toBeDefined();
 
-  const maxStats = calculateMaxStats("florabit", "baby");
+  const maxStats = calculateMaxStats(SPECIES.FLORABIT.id, "baby");
   expect(maxStats).not.toBeNull();
 
   const stageDef = GROWTH_STAGE_DEFINITIONS.baby;

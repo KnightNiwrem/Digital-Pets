@@ -2,6 +2,7 @@
  * Main story quest chain.
  */
 
+import { SPECIES } from "@/game/data/species";
 import { GrowthStage } from "@/game/types/constants";
 import {
   ObjectiveType,
@@ -109,7 +110,7 @@ export const mainCrystalDiscovery: Quest = {
     },
     {
       type: RewardType.Unlock,
-      target: "coralite",
+      target: SPECIES.CORALITE.id,
       quantity: 1,
     },
   ],
@@ -150,7 +151,7 @@ export const mainRisingFlames: Quest = {
       id: "defeat_emberfox",
       type: ObjectiveType.Defeat,
       description: "Defeat wild Emberfox",
-      target: "emberfox",
+      target: SPECIES.EMBERFOX.id,
       quantity: 3,
     },
     {
@@ -174,7 +175,7 @@ export const mainRisingFlames: Quest = {
     },
     {
       type: RewardType.Unlock,
-      target: "emberfox",
+      target: SPECIES.EMBERFOX.id,
       quantity: 1,
     },
   ],
@@ -215,7 +216,7 @@ export const mainShadowDepths: Quest = {
       id: "defeat_shadowmoth",
       type: ObjectiveType.Defeat,
       description: "Defeat powerful Shadowmoth",
-      target: "shadowmoth",
+      target: SPECIES.SHADOWMOTH.id,
       quantity: 5,
     },
     {
@@ -239,7 +240,7 @@ export const mainShadowDepths: Quest = {
     },
     {
       type: RewardType.Unlock,
-      target: "shadowmoth",
+      target: SPECIES.SHADOWMOTH.id,
       quantity: 1,
     },
   ],

@@ -9,6 +9,7 @@ import {
   FOOD_ITEMS,
   TOY_ITEMS,
 } from "@/game/data/items";
+import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import type { GameState } from "@/game/types/gameState";
@@ -21,7 +22,7 @@ import {
 } from "./items";
 
 function createTestState(): GameState {
-  const pet = createNewPet("TestPet", "florabit");
+  const pet = createNewPet("TestPet", SPECIES.FLORABIT.id);
   // Reduce stats to test restoration
   pet.careStats.satiety = 10_000;
   pet.careStats.hydration = 10_000;

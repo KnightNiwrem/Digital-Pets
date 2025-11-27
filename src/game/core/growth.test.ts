@@ -4,6 +4,7 @@
 
 import { expect, test } from "bun:test";
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import { SPECIES } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
 import type { GrowthStage } from "@/game/types/constants";
 import {
@@ -42,7 +43,7 @@ test("getStatGainForRate returns 5 for high growth rate", () => {
 
 // calculateStageTransitionStatGains tests
 test("calculateStageTransitionStatGains returns correct gains for florabit", () => {
-  const gains = calculateStageTransitionStatGains("florabit");
+  const gains = calculateStageTransitionStatGains(SPECIES.FLORABIT.id);
   expect(gains).not.toBeNull();
   // Florabit has all medium growth rates
   expect(gains?.strength).toBe(3);
@@ -54,7 +55,7 @@ test("calculateStageTransitionStatGains returns correct gains for florabit", () 
 });
 
 test("calculateStageTransitionStatGains returns correct gains for sparkfin", () => {
-  const gains = calculateStageTransitionStatGains("sparkfin");
+  const gains = calculateStageTransitionStatGains(SPECIES.SPARKFIN.id);
   expect(gains).not.toBeNull();
   // Sparkfin has high agility/precision, low endurance/fortitude
   expect(gains?.agility).toBe(5);

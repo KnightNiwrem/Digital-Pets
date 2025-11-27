@@ -8,12 +8,12 @@ import { createPetId, type GrowthStage, type Pet } from "@/game/types";
 import type { InventoryItem } from "@/game/types/gameState";
 import { GROWTH_STAGE_DEFINITIONS } from "./growthStages";
 import { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS, TOY_ITEMS } from "./items";
-import { getSpeciesById } from "./species";
+import { getSpeciesById, SPECIES } from "./species";
 
 /**
  * Default starting species ID.
  */
-export const DEFAULT_STARTING_SPECIES = "florabit";
+export const DEFAULT_STARTING_SPECIES = SPECIES.FLORABIT.id;
 
 /**
  * Default starting growth stage.

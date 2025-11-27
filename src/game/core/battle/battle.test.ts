@@ -3,6 +3,7 @@
  */
 
 import { expect, test } from "bun:test";
+import { SPECIES } from "@/game/data/species";
 import {
   createDefaultBattleStats,
   createDefaultResistances,
@@ -28,7 +29,7 @@ function createTestCombatant(overrides: Partial<Combatant> = {}): Combatant {
 
   return {
     name: "Test Pet",
-    speciesId: "florabit",
+    speciesId: SPECIES.FLORABIT.id,
     battleStats,
     derivedStats: calculateDerivedStats(battleStats),
     resistances: createDefaultResistances(),
@@ -141,8 +142,8 @@ test("calculateBattleRewards returns 0 coins for defeat", () => {
 });
 
 test("createWildCombatant creates combatant with scaled stats", () => {
-  const level1 = createWildCombatant("florabit", 1);
-  const level10 = createWildCombatant("florabit", 10);
+  const level1 = createWildCombatant(SPECIES.FLORABIT.id, 1);
+  const level10 = createWildCombatant(SPECIES.FLORABIT.id, 10);
 
   // Level 10 should have higher stats than level 1
   expect(level10.battleStats.strength).toBeGreaterThan(
@@ -151,7 +152,7 @@ test("createWildCombatant creates combatant with scaled stats", () => {
 });
 
 test("createWildCombatant sets correct name format", () => {
-  const combatant = createWildCombatant("florabit", 5);
+  const combatant = createWildCombatant(SPECIES.FLORABIT.id, 5);
 
   expect(combatant.name).toBe("Wild Florabit");
   expect(combatant.isPlayer).toBe(false);
