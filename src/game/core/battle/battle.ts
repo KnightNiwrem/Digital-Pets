@@ -26,6 +26,26 @@ export type { Combatant } from "./turn";
 const LEVEL_SCALING_FACTOR = 0.1;
 
 /**
+ * Determine the next battle phase based on turn order.
+ */
+function determineNextPhase(
+  turnOrder: BattleState["turnOrder"],
+  turnOrderIndex: number,
+): { nextPhase: BattlePhase; nextIndex: number } {
+  const nextIndex = turnOrderIndex + 1;
+  let nextPhase: BattlePhase;
+
+  if (nextIndex >= turnOrder.length) {
+    nextPhase = BattlePhase.TurnResolution;
+  } else {
+    const nextActor = turnOrder[nextIndex];
+    nextPhase =
+      nextActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn;
+  }
+  return { nextPhase, nextIndex };
+}
+
+/**
  * Battle phase states.
  */
 export const BattlePhase = {
@@ -66,7 +86,7 @@ export interface BattleState {
   /** Battle log entries */
   log: BattleLogEntry[];
   /** Turn order for current turn */
-  turnOrder: ["player" | "enemy", "player" | "enemy"];
+  turnOrder: ("player" | "enemy")[];
   /** Index in turn order */
   turnOrderIndex: number;
   /** Whether player has acted this turn */
@@ -302,16 +322,10 @@ export function executePlayerTurn(state: BattleState, move: Move): BattleState {
   }
 
   // Determine next phase
-  const nextIndex = state.turnOrderIndex + 1;
-  let nextPhase: BattlePhase;
-
-  if (nextIndex >= state.turnOrder.length) {
-    nextPhase = BattlePhase.TurnResolution;
-  } else {
-    const nextActor = state.turnOrder[nextIndex];
-    nextPhase =
-      nextActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn;
-  }
+  const { nextPhase, nextIndex } = determineNextPhase(
+    state.turnOrder,
+    state.turnOrderIndex,
+  );
 
   return {
     ...state,
@@ -373,16 +387,10 @@ export function executeEnemyTurn(state: BattleState): BattleState {
   }
 
   // Determine next phase
-  const nextIndex = state.turnOrderIndex + 1;
-  let nextPhase: BattlePhase;
-
-  if (nextIndex >= state.turnOrder.length) {
-    nextPhase = BattlePhase.TurnResolution;
-  } else {
-    const nextActor = state.turnOrder[nextIndex];
-    nextPhase =
-      nextActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn;
-  }
+  const { nextPhase, nextIndex } = determineNextPhase(
+    state.turnOrder,
+    state.turnOrderIndex,
+  );
 
   return {
     ...state,
