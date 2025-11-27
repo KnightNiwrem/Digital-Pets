@@ -35,9 +35,10 @@ export function BuySellPanel({
 }: BuySellPanelProps) {
   const [quantity, setQuantity] = useState(1);
 
-  const maxBuyQuantity = shopItem
-    ? Math.floor(playerCoins / shopItem.buyPrice)
-    : 0;
+  const maxBuyQuantity =
+    shopItem && shopItem.buyPrice > 0
+      ? Math.floor(playerCoins / shopItem.buyPrice)
+      : 0;
   const maxSellQuantity = inventoryItem?.quantity ?? 0;
 
   const totalBuyCost = shopItem ? shopItem.buyPrice * quantity : 0;

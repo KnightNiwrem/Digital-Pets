@@ -2,7 +2,7 @@
  * Shop screen for buying and selling items with merchants.
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BuySellPanel, ShopInventory } from "@/components/shop";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { getShopForNpc } from "@/game/data/shops";
 import { useGameState } from "@/game/hooks/useGameState";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
+import { cn } from "@/lib/utils";
 
 interface ShopScreenProps {
   npcId: string;
@@ -29,10 +30,32 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [message, setMessage] = useState<string | null>(null);
+  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const npc = getNpc(npcId);
   const shop = npc?.shopId ? getShopForNpc(npc.shopId) : undefined;
   const playerCoins = state?.player.currency.coins ?? 0;
+
+  // Clear message timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (messageTimeoutRef.current !== null) {
+        clearTimeout(messageTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Helper to show temporary message
+  const showMessage = useCallback((msg: string) => {
+    if (messageTimeoutRef.current !== null) {
+      clearTimeout(messageTimeoutRef.current);
+    }
+    setMessage(msg);
+    messageTimeoutRef.current = setTimeout(() => {
+      setMessage(null);
+      messageTimeoutRef.current = null;
+    }, 2000);
+  }, []);
 
   // Get shop items with their definitions
   const shopItems = useMemo(() => {
@@ -51,24 +74,24 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
   // Get player's sellable items (stackable items with quantity > 0)
   const sellableItems = useMemo(() => {
     if (!state || !shop) return [];
-    return state.player.inventory.items
-      .filter((invItem) => {
-        const itemDef = getItemById(invItem.itemId);
-        // Only allow selling stackable items (not durability-based like toys)
-        return itemDef?.stackable && invItem.quantity > 0;
-      })
-      .map((invItem) => ({
-        inventoryItem: invItem,
-        itemDef: getItemById(invItem.itemId),
-      }))
-      .filter(
-        (
-          item,
-        ): item is {
-          inventoryItem: InventoryItem;
-          itemDef: Item;
-        } => item.itemDef !== undefined,
-      );
+    return state.player.inventory.items.reduce<
+      Array<{
+        inventoryItem: InventoryItem;
+        itemDef: Item;
+        sellPrice: number;
+      }>
+    >((acc, invItem) => {
+      const itemDef = getItemById(invItem.itemId);
+      // Only allow selling stackable items (not durability-based like toys)
+      if (itemDef?.stackable && invItem.quantity > 0) {
+        acc.push({
+          inventoryItem: invItem,
+          itemDef,
+          sellPrice: calculateSellPrice(shop.id, invItem.itemId),
+        });
+      }
+      return acc;
+    }, []);
   }, [state, shop]);
 
   // Get selected item details
@@ -98,14 +121,10 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
 
       if (result.success) {
         actions.updateState(() => newState);
-        setMessage(result.message);
-        setTimeout(() => setMessage(null), 2000);
-      } else {
-        setMessage(result.message);
-        setTimeout(() => setMessage(null), 2000);
       }
+      showMessage(result.message);
     },
-    [state, shop, selectedItemId, actions],
+    [state, shop, selectedItemId, actions, showMessage],
   );
 
   // Handle selling
@@ -122,7 +141,6 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
 
       if (result.success) {
         actions.updateState(() => newState);
-        setMessage(result.message);
         // Clear selection if all items sold
         const remaining = findInventoryItem(
           newState.player.inventory,
@@ -131,13 +149,10 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
         if (!remaining || remaining.quantity === 0) {
           setSelectedItemId(null);
         }
-        setTimeout(() => setMessage(null), 2000);
-      } else {
-        setMessage(result.message);
-        setTimeout(() => setMessage(null), 2000);
       }
+      showMessage(result.message);
     },
-    [state, shop, selectedItemId, actions],
+    [state, shop, selectedItemId, actions, showMessage],
   );
 
   // Handle tab change
@@ -247,36 +262,38 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
                 </p>
               ) : (
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                  {sellableItems.map(({ inventoryItem, itemDef }) => {
-                    const isSelected = selectedItemId === inventoryItem.itemId;
-                    const sellPrice = calculateSellPrice(
-                      shop.id,
-                      inventoryItem.itemId,
-                    );
+                  {sellableItems.map(
+                    ({ inventoryItem, itemDef, sellPrice }) => {
+                      const isSelected =
+                        selectedItemId === inventoryItem.itemId;
 
-                    return (
-                      <button
-                        key={inventoryItem.itemId}
-                        type="button"
-                        onClick={() => setSelectedItemId(inventoryItem.itemId)}
-                        aria-label={`Select ${itemDef.name}`}
-                        className={`relative flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all hover:bg-accent ${
-                          isSelected ? "ring-2 ring-primary bg-primary/10" : ""
-                        }`}
-                      >
-                        <span className="text-2xl">{itemDef.icon}</span>
-                        <span className="text-xs font-medium truncate max-w-full">
-                          {itemDef.name}
-                        </span>
-                        <span className="text-xs text-yellow-600 dark:text-yellow-400">
-                          🪙 {sellPrice}
-                        </span>
-                        <span className="absolute top-1 right-1 text-xs bg-background/80 px-1 rounded">
-                          ×{inventoryItem.quantity}
-                        </span>
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={inventoryItem.itemId}
+                          type="button"
+                          onClick={() =>
+                            setSelectedItemId(inventoryItem.itemId)
+                          }
+                          aria-label={`Select ${itemDef.name}`}
+                          className={cn(
+                            "relative flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all hover:bg-accent",
+                            isSelected && "ring-2 ring-primary bg-primary/10",
+                          )}
+                        >
+                          <span className="text-2xl">{itemDef.icon}</span>
+                          <span className="text-xs font-medium truncate max-w-full">
+                            {itemDef.name}
+                          </span>
+                          <span className="text-xs text-yellow-600 dark:text-yellow-400">
+                            🪙 {sellPrice}
+                          </span>
+                          <span className="absolute top-1 right-1 text-xs bg-background/80 px-1 rounded">
+                            ×{inventoryItem.quantity}
+                          </span>
+                        </button>
+                      );
+                    },
+                  )}
                 </div>
               )}
             </CardContent>
@@ -288,10 +305,7 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
               itemDef={selectedSellItem.itemDef}
               inventoryItem={selectedSellItem.inventoryItem}
               playerCoins={playerCoins}
-              sellPrice={calculateSellPrice(
-                shop.id,
-                selectedSellItem.inventoryItem.itemId,
-              )}
+              sellPrice={selectedSellItem.sellPrice}
               onBuy={() => {}}
               onSell={handleSell}
             />

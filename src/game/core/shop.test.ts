@@ -168,6 +168,26 @@ describe("buyItem", () => {
     expect(result.message).toBe("Item not available in this shop.");
     expect(newState).toBe(state); // unchanged
   });
+
+  test("fails for invalid quantity", () => {
+    const state = {
+      ...createInitialGameState(),
+      player: {
+        ...createInitialGameState().player,
+        currency: { coins: 100 },
+      },
+    };
+
+    // Zero quantity
+    const result1 = buyItem(state, "willowbrook_shop", "food_kibble", 0);
+    expect(result1.result.success).toBe(false);
+    expect(result1.result.message).toBe("Quantity must be at least 1.");
+
+    // Negative quantity
+    const result2 = buyItem(state, "willowbrook_shop", "food_kibble", -5);
+    expect(result2.result.success).toBe(false);
+    expect(result2.result.message).toBe("Quantity must be at least 1.");
+  });
 });
 
 describe("sellItem", () => {
@@ -266,5 +286,29 @@ describe("sellItem", () => {
 
     expect(result.success).toBe(true);
     expect(newState.player.inventory.items).toHaveLength(0);
+  });
+
+  test("fails for invalid quantity", () => {
+    const state = {
+      ...createInitialGameState(),
+      player: {
+        ...createInitialGameState().player,
+        inventory: {
+          items: [
+            { itemId: "food_kibble", quantity: 5, currentDurability: null },
+          ],
+        },
+      },
+    };
+
+    // Zero quantity
+    const result1 = sellItem(state, "willowbrook_shop", "food_kibble", 0);
+    expect(result1.result.success).toBe(false);
+    expect(result1.result.message).toBe("Quantity must be at least 1.");
+
+    // Negative quantity
+    const result2 = sellItem(state, "willowbrook_shop", "food_kibble", -5);
+    expect(result2.result.success).toBe(false);
+    expect(result2.result.message).toBe("Quantity must be at least 1.");
   });
 });

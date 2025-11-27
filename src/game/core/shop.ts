@@ -35,6 +35,18 @@ export function calculateSellPrice(shopId: string, itemId: string): number {
 }
 
 /**
+ * Validate and normalize quantity for transactions.
+ * Returns null if quantity is invalid, otherwise returns the normalized quantity.
+ */
+function normalizeQuantity(quantity: number): number | null {
+  const normalized = Math.floor(quantity);
+  if (!Number.isFinite(normalized) || normalized <= 0) {
+    return null;
+  }
+  return normalized;
+}
+
+/**
  * Buy an item from a shop.
  * Returns a result with the updated state or an error message.
  */
@@ -44,6 +56,14 @@ export function buyItem(
   itemId: string,
   quantity = 1,
 ): { result: BuyResult; state: GameState } {
+  const normalizedQuantity = normalizeQuantity(quantity);
+  if (normalizedQuantity === null) {
+    return {
+      result: { success: false, message: "Quantity must be at least 1." },
+      state,
+    };
+  }
+
   const shop = getShop(shopId);
   if (!shop) {
     return {
@@ -68,7 +88,7 @@ export function buyItem(
     };
   }
 
-  const totalCost = shopItem.buyPrice * quantity;
+  const totalCost = shopItem.buyPrice * normalizedQuantity;
 
   if (!canAfford(state, totalCost)) {
     return {
@@ -81,7 +101,11 @@ export function buyItem(
   }
 
   // Deduct coins and add item
-  const newInventory = addItem(state.player.inventory, itemId, quantity);
+  const newInventory = addItem(
+    state.player.inventory,
+    itemId,
+    normalizedQuantity,
+  );
   const newState: GameState = {
     ...state,
     player: {
@@ -97,7 +121,7 @@ export function buyItem(
   return {
     result: {
       success: true,
-      message: `Purchased ${quantity}x ${itemDef.name} for ${totalCost} coins.`,
+      message: `Purchased ${normalizedQuantity}x ${itemDef.name} for ${totalCost} coins.`,
     },
     state: newState,
   };
@@ -113,6 +137,14 @@ export function sellItem(
   itemId: string,
   quantity = 1,
 ): { result: SellResult; state: GameState } {
+  const normalizedQuantity = normalizeQuantity(quantity);
+  if (normalizedQuantity === null) {
+    return {
+      result: { success: false, message: "Quantity must be at least 1." },
+      state,
+    };
+  }
+
   const shop = getShop(shopId);
   if (!shop) {
     return {
@@ -129,7 +161,7 @@ export function sellItem(
     };
   }
 
-  if (!hasItem(state.player.inventory, itemId, quantity)) {
+  if (!hasItem(state.player.inventory, itemId, normalizedQuantity)) {
     return {
       result: { success: false, message: "Not enough items to sell." },
       state,
@@ -137,7 +169,7 @@ export function sellItem(
   }
 
   const sellPrice = calculateSellPrice(shopId, itemId);
-  const totalEarned = sellPrice * quantity;
+  const totalEarned = sellPrice * normalizedQuantity;
 
   if (totalEarned === 0) {
     return {
@@ -147,7 +179,11 @@ export function sellItem(
   }
 
   // Remove item and add coins
-  const newInventory = removeItem(state.player.inventory, itemId, quantity);
+  const newInventory = removeItem(
+    state.player.inventory,
+    itemId,
+    normalizedQuantity,
+  );
   const newState: GameState = {
     ...state,
     player: {
@@ -163,7 +199,7 @@ export function sellItem(
   return {
     result: {
       success: true,
-      message: `Sold ${quantity}x ${itemDef.name} for ${totalEarned} coins.`,
+      message: `Sold ${normalizedQuantity}x ${itemDef.name} for ${totalEarned} coins.`,
       coinsReceived: totalEarned,
     },
     state: newState,
