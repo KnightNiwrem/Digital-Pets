@@ -67,7 +67,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
     case "food":
       stats.push({
         label: "Satiety",
-        value: `+${toDisplay(itemDef.satietyRestore)}%`,
+        value: `+${toDisplay(itemDef.satietyRestore)}`,
       });
       if (itemDef.poopAcceleration) {
         stats.push({
@@ -79,7 +79,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
     case "drink":
       stats.push({
         label: "Hydration",
-        value: `+${toDisplay(itemDef.hydrationRestore)}%`,
+        value: `+${toDisplay(itemDef.hydrationRestore)}`,
       });
       if (itemDef.energyRestore) {
         stats.push({
@@ -91,7 +91,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
     case "toy":
       stats.push({
         label: "Happiness",
-        value: `+${toDisplay(itemDef.happinessRestore)}%`,
+        value: `+${toDisplay(itemDef.happinessRestore)}`,
       });
       stats.push({
         label: "Durability",

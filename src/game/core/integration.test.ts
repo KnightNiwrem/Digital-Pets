@@ -32,10 +32,11 @@ function createTestGameState(overrides: Partial<GameState> = {}): GameState {
 
 describe("Care system integration", () => {
   test("care stats and care life work together correctly", () => {
-    // Start with a pet that has low care stats
+    // Start with a pet that has exactly 0 satiety (critical)
+    // With ceiling rounding, a stat is only 0 when microValue is exactly 0
     const pet = createTestPet({
       careStats: {
-        satiety: 500, // Very low - below 1000 threshold for 0 display
+        satiety: 0, // Exactly 0 - critical stat
         hydration: 40_000,
         happiness: 40_000,
       },
@@ -44,7 +45,7 @@ describe("Care system integration", () => {
       },
     });
 
-    // Process care life - should drain since satiety is effectively 0
+    // Process care life - should drain since satiety is 0
     const maxStats = calculatePetMaxStats(pet);
     const updatedCareLife = applyCareLifeChange(
       pet,

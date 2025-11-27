@@ -4,7 +4,7 @@
 
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
 import type { MicroValue } from "@/game/types/common";
-import { toDisplay } from "@/game/types/common";
+import { toDisplayCare } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
 import {
   CARE_LIFE_DRAIN_1_STAT,
@@ -39,9 +39,9 @@ export {
  */
 function countCriticalStats(pet: Pet): number {
   let count = 0;
-  if (toDisplay(pet.careStats.satiety) <= 0) count++;
-  if (toDisplay(pet.careStats.hydration) <= 0) count++;
-  if (toDisplay(pet.careStats.happiness) <= 0) count++;
+  if (toDisplayCare(pet.careStats.satiety) <= 0) count++;
+  if (toDisplayCare(pet.careStats.hydration) <= 0) count++;
+  if (toDisplayCare(pet.careStats.happiness) <= 0) count++;
   return count;
 }
 

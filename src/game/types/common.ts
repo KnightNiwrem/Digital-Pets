@@ -5,7 +5,8 @@
 
 /**
  * Micro-unit values for precise integer arithmetic.
- * Display value = floor(microValue / 1000)
+ * Care stats display value = ceil(microValue / 1000)
+ * Energy display value = floor(microValue / 1000)
  *
  * Used for: Satiety, Hydration, Happiness, Energy, Care Life
  */
@@ -17,10 +18,22 @@ export type MicroValue = number;
 export const MICRO_RATIO = 1000;
 
 /**
- * Convert a micro-value to its display value.
+ * Convert a micro-value to its display value using floor.
+ * Use this for energy and other non-care stats.
  */
 export function toDisplay(microValue: MicroValue): number {
   return Math.floor(microValue / MICRO_RATIO);
+}
+
+/**
+ * Convert a care stat micro-value to its display value using ceil.
+ * Use this for satiety, hydration, and happiness.
+ *
+ * This ensures that any remaining micro-units round up to the next display value.
+ * For example, microSatiety of 50001 produces a display value of 51.
+ */
+export function toDisplayCare(microValue: MicroValue): number {
+  return Math.ceil(microValue / MICRO_RATIO);
 }
 
 /**
