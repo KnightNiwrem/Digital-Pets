@@ -29,7 +29,12 @@ export function BattleArena({
   className,
 }: BattleArenaProps) {
   return (
-    <div className={cn("flex flex-col md:flex-row md:items-center md:justify-around gap-8 md:gap-4 p-4", className)}>
+    <div
+      className={cn(
+        "flex flex-col md:flex-row md:items-center md:justify-around gap-8 md:gap-4 p-4",
+        className,
+      )}
+    >
       {/* Enemy (top on mobile, right on desktop) */}
       <div className="flex justify-end md:order-3">
         <PetBattleCard

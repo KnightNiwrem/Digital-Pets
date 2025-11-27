@@ -10,8 +10,7 @@
   }
 
   body {
-    @apply h-full overflow-hidden min-w-[320px] relative m-0 bg-background
-      text-foreground;
+    @apply h-full overflow-hidden min-w-[320px] relative m-0 bg-background text-foreground;
   }
 
   #root {
