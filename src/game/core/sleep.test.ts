@@ -9,8 +9,12 @@ import {
 } from "@/game/testing/createTestPet";
 import {
   canPerformCareActions,
+  getMinSleepTicks,
+  getRemainingMinSleep,
+  hasMetSleepRequirement,
   processSleepTick,
   putToSleep,
+  resetDailySleep,
   wakeUp,
 } from "./sleep";
 
@@ -81,4 +85,63 @@ test("canPerformCareActions returns false when sleeping", () => {
 test("canPerformCareActions returns true when awake", () => {
   const pet = createTestPet();
   expect(canPerformCareActions(pet)).toBe(true);
+});
+
+// New tests for sleep requirements
+
+test("getMinSleepTicks returns correct values per growth stage", () => {
+  expect(getMinSleepTicks("baby")).toBe(1920); // 16 hours
+  expect(getMinSleepTicks("child")).toBe(1680); // 14 hours
+  expect(getMinSleepTicks("teen")).toBe(1440); // 12 hours
+  expect(getMinSleepTicks("youngAdult")).toBe(1200); // 10 hours
+  expect(getMinSleepTicks("adult")).toBe(960); // 8 hours
+});
+
+test("getRemainingMinSleep returns correct remaining sleep needed", () => {
+  const pet = createTestPet({
+    sleep: { isSleeping: false, sleepStartTime: null, sleepTicksToday: 500 },
+  });
+  // Baby requires 1920 ticks, slept 500, so needs 1420 more
+  expect(getRemainingMinSleep(pet)).toBe(1420);
+});
+
+test("getRemainingMinSleep returns 0 when requirement met", () => {
+  const pet = createTestPet({
+    sleep: { isSleeping: false, sleepStartTime: null, sleepTicksToday: 2000 },
+  });
+  expect(getRemainingMinSleep(pet)).toBe(0);
+});
+
+test("hasMetSleepRequirement returns false when under requirement", () => {
+  const pet = createTestPet({
+    sleep: { isSleeping: false, sleepStartTime: null, sleepTicksToday: 500 },
+  });
+  expect(hasMetSleepRequirement(pet)).toBe(false);
+});
+
+test("hasMetSleepRequirement returns true when requirement met", () => {
+  const pet = createTestPet({
+    sleep: { isSleeping: false, sleepStartTime: null, sleepTicksToday: 1920 },
+  });
+  expect(hasMetSleepRequirement(pet)).toBe(true);
+});
+
+test("hasMetSleepRequirement returns true when exceeded requirement", () => {
+  const pet = createTestPet({
+    sleep: { isSleeping: false, sleepStartTime: null, sleepTicksToday: 2500 },
+  });
+  expect(hasMetSleepRequirement(pet)).toBe(true);
+});
+
+test("resetDailySleep resets sleepTicksToday to 0", () => {
+  const sleep = {
+    isSleeping: true,
+    sleepStartTime: Date.now(),
+    sleepTicksToday: 1500,
+  };
+  const result = resetDailySleep(sleep);
+
+  expect(result.sleepTicksToday).toBe(0);
+  expect(result.isSleeping).toBe(true); // Should preserve sleeping state
+  expect(result.sleepStartTime).toBe(sleep.sleepStartTime);
 });

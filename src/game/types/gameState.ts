@@ -100,6 +100,12 @@ export interface GameState {
    * Reserved for future use: currently, battle state is managed locally in BattleScreen.
    */
   activeBattle?: ActiveBattle;
+  /**
+   * Timestamp of the last daily reset.
+   * Used to track when to reset daily counters like sleepTicksToday.
+   * Per spec (time-mechanics.md): Daily reset occurs at midnight local time.
+   */
+  lastDailyReset: Timestamp;
 }
 
 /**
@@ -111,9 +117,10 @@ export const CURRENT_SAVE_VERSION = 1;
  * Create an empty initial game state.
  */
 export function createInitialGameState(): GameState {
+  const currentTime = Date.now();
   return {
     version: CURRENT_SAVE_VERSION,
-    lastSaveTime: Date.now(),
+    lastSaveTime: currentTime,
     totalTicks: 0,
     pet: null,
     player: {
@@ -124,5 +131,6 @@ export function createInitialGameState(): GameState {
     },
     quests: [],
     isInitialized: false,
+    lastDailyReset: currentTime,
   };
 }

@@ -4,17 +4,14 @@
 
 import type { Tick } from "@/game/types/common";
 import type { Pet, PetPoop } from "@/game/types/pet";
+import {
+  MAX_POOP_COUNT,
+  POOP_INTERVAL_AWAKE,
+  POOP_INTERVAL_SLEEPING,
+} from "./constants";
 
-/**
- * Ticks between poop generation.
- */
-export const POOP_INTERVAL_AWAKE: Tick = 480; // 4 hours
-export const POOP_INTERVAL_SLEEPING: Tick = 960; // 8 hours
-
-/**
- * Maximum poop count (cap from time mechanics).
- */
-export const MAX_POOP_COUNT = 50;
+// Re-export constants for backwards compatibility with tests
+export { MAX_POOP_COUNT, POOP_INTERVAL_AWAKE, POOP_INTERVAL_SLEEPING };
 
 /**
  * Process poop generation for a single tick.

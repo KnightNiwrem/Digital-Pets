@@ -95,3 +95,50 @@ test("formatTicksAsTime formats days and minutes (no hours)", () => {
   // 30 minutes = 60 ticks, so 1 day + 30 min = 2880 + 60 = 2940 ticks
   expect(formatTicksAsTime(2940)).toBe("1d 30m"); // 1 day + 30 minutes
 });
+
+// Daily reset tests
+test("getMidnightTimestamp returns start of day", () => {
+  const { getMidnightTimestamp } = require("./time");
+  // Create a specific date: 2024-01-15 14:30:00 UTC
+  const testDate = new Date("2024-01-15T14:30:00.000Z");
+  const midnight = getMidnightTimestamp(testDate.getTime());
+  const midnightDate = new Date(midnight);
+  expect(midnightDate.getHours()).toBe(0);
+  expect(midnightDate.getMinutes()).toBe(0);
+  expect(midnightDate.getSeconds()).toBe(0);
+  expect(midnightDate.getMilliseconds()).toBe(0);
+});
+
+test("shouldDailyReset returns true when last reset was before today midnight", () => {
+  const { shouldDailyReset } = require("./time");
+  // Last reset was yesterday
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(12, 0, 0, 0);
+
+  expect(shouldDailyReset(yesterday.getTime(), now.getTime())).toBe(true);
+});
+
+test("shouldDailyReset returns false when last reset was today", () => {
+  const { shouldDailyReset, getMidnightTimestamp } = require("./time");
+  const now = new Date();
+  now.setHours(14, 0, 0, 0); // 2 PM today
+  const todayMidnight = getMidnightTimestamp(now.getTime());
+
+  expect(shouldDailyReset(todayMidnight, now.getTime())).toBe(false);
+});
+
+test("shouldDailyReset returns true across midnight boundary", () => {
+  const { shouldDailyReset } = require("./time");
+  // Last reset was 11:59 PM yesterday
+  const now = new Date();
+  const lastReset = new Date(now);
+  lastReset.setDate(lastReset.getDate() - 1);
+  lastReset.setHours(23, 59, 0, 0);
+
+  // Current time is 12:01 AM today
+  now.setHours(0, 1, 0, 0);
+
+  expect(shouldDailyReset(lastReset.getTime(), now.getTime())).toBe(true);
+});

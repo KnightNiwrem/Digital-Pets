@@ -6,25 +6,27 @@ import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
 import type { MicroValue } from "@/game/types/common";
 import { toDisplay } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
+import {
+  CARE_LIFE_DRAIN_1_STAT,
+  CARE_LIFE_DRAIN_2_STATS,
+  CARE_LIFE_DRAIN_3_STATS,
+  CARE_LIFE_DRAIN_POOP,
+  CARE_LIFE_RECOVERY_ABOVE_50,
+  CARE_LIFE_RECOVERY_ABOVE_75,
+  CARE_LIFE_RECOVERY_AT_100,
+  POOP_CARE_LIFE_DRAIN_THRESHOLD,
+} from "./constants";
 
-/**
- * Care life drain rates per tick when care stats are at 0.
- */
-export const CARE_LIFE_DRAIN_1_STAT: MicroValue = 8;
-export const CARE_LIFE_DRAIN_2_STATS: MicroValue = 25;
-export const CARE_LIFE_DRAIN_3_STATS: MicroValue = 50;
-
-/**
- * Additional drain when poop count is 7+.
- */
-export const CARE_LIFE_DRAIN_POOP: MicroValue = 8;
-
-/**
- * Care life recovery rates when care stats are healthy.
- */
-export const CARE_LIFE_RECOVERY_ABOVE_50: MicroValue = 8;
-export const CARE_LIFE_RECOVERY_ABOVE_75: MicroValue = 16;
-export const CARE_LIFE_RECOVERY_AT_100: MicroValue = 25;
+// Re-export constants for backwards compatibility with tests
+export {
+  CARE_LIFE_DRAIN_1_STAT,
+  CARE_LIFE_DRAIN_2_STATS,
+  CARE_LIFE_DRAIN_3_STATS,
+  CARE_LIFE_DRAIN_POOP,
+  CARE_LIFE_RECOVERY_ABOVE_50,
+  CARE_LIFE_RECOVERY_ABOVE_75,
+  CARE_LIFE_RECOVERY_AT_100,
+};
 
 /**
  * Count how many care stats have a display value of 0.
@@ -75,7 +77,7 @@ export function calculateCareLifeChange(
   }
 
   // Add drain from high poop count
-  if (pet.poop.count >= 7) {
+  if (pet.poop.count >= POOP_CARE_LIFE_DRAIN_THRESHOLD) {
     totalDrain += CARE_LIFE_DRAIN_POOP;
   }
 

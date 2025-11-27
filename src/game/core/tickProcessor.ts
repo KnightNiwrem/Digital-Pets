@@ -7,7 +7,9 @@ import {
   processExplorationTick,
 } from "@/game/core/exploration/forage";
 import { calculatePetMaxStats } from "@/game/core/petStats";
+import { resetDailySleep } from "@/game/core/sleep";
 import { processPetTick } from "@/game/core/tick";
+import { getMidnightTimestamp, shouldDailyReset } from "@/game/core/time";
 import { getLocation } from "@/game/data/locations";
 import { applyExplorationResults } from "@/game/state/actions/exploration";
 import type { Tick } from "@/game/types/common";
@@ -22,25 +24,63 @@ import type {
 import { SkillType } from "@/game/types/skill";
 
 /**
+ * Apply daily reset if needed.
+ * Resets daily counters like sleepTicksToday at midnight local time.
+ */
+function applyDailyResetIfNeeded(
+  state: GameState,
+  currentTime: number = now(),
+): GameState {
+  if (!shouldDailyReset(state.lastDailyReset, currentTime)) {
+    return state;
+  }
+
+  // Apply daily reset
+  const todayMidnight = getMidnightTimestamp(currentTime);
+  let updatedState: GameState = {
+    ...state,
+    lastDailyReset: todayMidnight,
+  };
+
+  // Reset pet's daily sleep counter if there's a pet
+  if (updatedState.pet) {
+    updatedState = {
+      ...updatedState,
+      pet: {
+        ...updatedState.pet,
+        sleep: resetDailySleep(updatedState.pet.sleep),
+      },
+    };
+  }
+
+  return updatedState;
+}
+
+/**
  * Process a single game tick, updating the entire game state.
  */
 export function processGameTick(state: GameState): GameState {
+  const currentTime = now();
+
+  // Check for daily reset first
+  const workingState = applyDailyResetIfNeeded(state, currentTime);
+
   // If no pet, just update time
-  if (!state.pet) {
+  if (!workingState.pet) {
     return {
-      ...state,
-      totalTicks: state.totalTicks + 1,
-      lastSaveTime: now(),
+      ...workingState,
+      totalTicks: workingState.totalTicks + 1,
+      lastSaveTime: currentTime,
     };
   }
 
   // Process pet tick (handles training, care, growth, etc.)
-  const updatedPet = processPetTick(state.pet);
+  const updatedPet = processPetTick(workingState.pet);
   let updatedState: GameState = {
-    ...state,
+    ...workingState,
     pet: updatedPet,
-    totalTicks: state.totalTicks + 1,
-    lastSaveTime: now(),
+    totalTicks: workingState.totalTicks + 1,
+    lastSaveTime: currentTime,
     // Clear any previous exploration result
     lastExplorationResult: undefined,
   };
@@ -57,7 +97,7 @@ export function processGameTick(state: GameState): GameState {
       const locationId = updatedPet.activeExploration.locationId;
       const location = getLocation(locationId);
       const foragingLevel =
-        state.player.skills?.[SkillType.Foraging]?.level ?? 1;
+        workingState.player.skills?.[SkillType.Foraging]?.level ?? 1;
       const { pet: completedPet, result } = applyExplorationCompletion(
         updatedPet,
         foragingLevel,
