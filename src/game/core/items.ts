@@ -4,9 +4,8 @@
 
 import { removePoop } from "@/game/core/care/poop";
 import { hasItem, removeItem } from "@/game/core/inventory";
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getItemById } from "@/game/data/items";
-import { getSpeciesById } from "@/game/data/species";
 import type { GameState, InventoryItem } from "@/game/types/gameState";
 import {
   isCleaningItem,
@@ -29,12 +28,8 @@ export interface UseItemResult {
  */
 function getMaxCareStat(state: GameState): number {
   if (!state.pet) return 0;
-
-  const species = getSpeciesById(state.pet.identity.speciesId);
-  const stageDef = GROWTH_STAGE_DEFINITIONS[state.pet.growth.stage];
-  const careCapMultiplier = species?.careCapMultiplier ?? 1.0;
-
-  return Math.floor(stageDef.baseCareStatMax * careCapMultiplier);
+  const maxStats = calculatePetMaxStats(state.pet);
+  return maxStats?.careStatMax ?? 0;
 }
 
 /**
@@ -42,13 +37,8 @@ function getMaxCareStat(state: GameState): number {
  */
 function getMaxEnergy(state: GameState): number {
   if (!state.pet) return 0;
-
-  const species = getSpeciesById(state.pet.identity.speciesId);
-  const stageDef = GROWTH_STAGE_DEFINITIONS[state.pet.growth.stage];
-  // Use careCapMultiplier for energy as well (species don't have separate energyCapMultiplier)
-  const careCapMultiplier = species?.careCapMultiplier ?? 1.0;
-
-  return Math.floor(stageDef.baseEnergyMax * careCapMultiplier);
+  const maxStats = calculatePetMaxStats(state.pet);
+  return maxStats?.energyMax ?? 0;
 }
 
 /**

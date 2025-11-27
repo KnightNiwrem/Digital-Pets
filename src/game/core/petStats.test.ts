@@ -6,7 +6,7 @@ import { expect, test } from "bun:test";
 import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
-import { calculatePetMaxStats } from "./petStats";
+import { calculateMaxStats, calculatePetMaxStats } from "./petStats";
 
 test("calculatePetMaxStats returns correct values for baby florabit", () => {
   const pet = createTestPet({
@@ -91,4 +91,43 @@ test("calculatePetMaxStats values differ between growth stages", () => {
     babyStats?.careStatMax ?? 0,
   );
   expect(adultStats?.energyMax ?? 0).toBeGreaterThan(babyStats?.energyMax ?? 0);
+});
+
+test("calculateMaxStats returns correct values when called directly", () => {
+  const species = getSpeciesById("florabit");
+  expect(species).toBeDefined();
+
+  const maxStats = calculateMaxStats("florabit", "baby");
+  expect(maxStats).not.toBeNull();
+
+  const stageDef = GROWTH_STAGE_DEFINITIONS.baby;
+  const expectedCareMax = Math.floor(
+    stageDef.baseCareStatMax * (species?.careCapMultiplier ?? 1),
+  );
+
+  expect(maxStats?.careStatMax).toBe(expectedCareMax);
+});
+
+test("calculateMaxStats returns null for invalid species", () => {
+  const maxStats = calculateMaxStats("invalid_species", "baby");
+  expect(maxStats).toBeNull();
+});
+
+test("calculateMaxStats is equivalent to calculatePetMaxStats", () => {
+  const pet = createTestPet({
+    growth: {
+      stage: "teen",
+      substage: 2,
+      birthTime: Date.now(),
+      ageTicks: 500_000,
+    },
+  });
+
+  const petStats = calculatePetMaxStats(pet);
+  const directStats = calculateMaxStats(
+    pet.identity.speciesId,
+    pet.growth.stage,
+  );
+
+  expect(petStats).toEqual(directStats);
 });

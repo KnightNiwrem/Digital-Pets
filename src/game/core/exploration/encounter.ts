@@ -8,7 +8,7 @@ import {
   EncounterType,
   getEncounterTable,
 } from "@/game/data/tables/encounters";
-import type { GrowthStage } from "@/game/types/constants";
+import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import { type Combatant, createWildCombatant } from "../battle/battle";
 
@@ -86,9 +86,8 @@ function isEncounterAvailable(
     return true;
   }
 
-  const stageOrder = ["baby", "child", "teen", "youngAdult", "adult"];
-  const petStageIndex = stageOrder.indexOf(petStage);
-  const requiredIndex = stageOrder.indexOf(entry.minStage);
+  const petStageIndex = GROWTH_STAGE_ORDER.indexOf(petStage);
+  const requiredIndex = GROWTH_STAGE_ORDER.indexOf(entry.minStage);
 
   return petStageIndex >= requiredIndex;
 }
