@@ -86,11 +86,11 @@ export function countDailyResets(
   fromTime: Timestamp,
   toTime: Timestamp = now(),
 ): number {
-  const startMidnight = getMidnightTimestamp(fromTime);
-  const endMidnight = getMidnightTimestamp(toTime);
-  // Calculate the number of days between the two midnights
-  const msDiff = endMidnight - startMidnight;
-  const daysDiff = Math.floor(msDiff / (24 * 60 * 60 * 1000));
-  // If from is before its midnight and to is after its midnight, we have at least one reset
-  return fromTime < startMidnight + 24 * 60 * 60 * 1000 ? daysDiff : daysDiff;
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const firstReset = getMidnightTimestamp(fromTime) + MS_PER_DAY;
+  if (toTime < firstReset) {
+    return 0;
+  }
+  const lastReset = getMidnightTimestamp(toTime);
+  return Math.floor((lastReset - firstReset) / MS_PER_DAY) + 1;
 }

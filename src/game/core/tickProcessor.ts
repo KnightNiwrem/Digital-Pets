@@ -35,33 +35,28 @@ function applyDailyResetIfNeeded(
     return state;
   }
 
-  // Apply daily reset
   const todayMidnight = getMidnightTimestamp(currentTime);
-  let updatedState: GameState = {
+  return {
     ...state,
     lastDailyReset: todayMidnight,
+    pet: state.pet
+      ? {
+          ...state.pet,
+          sleep: resetDailySleep(state.pet.sleep),
+        }
+      : null,
   };
-
-  // Reset pet's daily sleep counter if there's a pet
-  if (updatedState.pet) {
-    updatedState = {
-      ...updatedState,
-      pet: {
-        ...updatedState.pet,
-        sleep: resetDailySleep(updatedState.pet.sleep),
-      },
-    };
-  }
-
-  return updatedState;
 }
 
 /**
  * Process a single game tick, updating the entire game state.
+ * @param state The current game state
+ * @param currentTime Optional timestamp for the tick (defaults to now(), pass explicit time for offline catch-up)
  */
-export function processGameTick(state: GameState): GameState {
-  const currentTime = now();
-
+export function processGameTick(
+  state: GameState,
+  currentTime: number = now(),
+): GameState {
   // Check for daily reset first
   const workingState = applyDailyResetIfNeeded(state, currentTime);
 
@@ -129,15 +124,21 @@ export function processGameTick(state: GameState): GameState {
 /**
  * Process multiple ticks at once (for offline catch-up).
  * Processes ticks sequentially to maintain correct state transitions.
+ * @param state The initial game state
+ * @param tickCount Number of ticks to process
+ * @param startTime Optional start timestamp for simulation (defaults to now - tickCount * TICK_DURATION_MS)
  */
 export function processMultipleTicks(
   state: GameState,
   tickCount: Tick,
+  startTime?: number,
 ): GameState {
   let currentState = state;
+  const simulatedStartTime = startTime ?? now() - tickCount * TICK_DURATION_MS;
 
   for (let i = 0; i < tickCount; i++) {
-    currentState = processGameTick(currentState);
+    const simulatedTime = simulatedStartTime + (i + 1) * TICK_DURATION_MS;
+    currentState = processGameTick(currentState, simulatedTime);
   }
 
   return currentState;
@@ -203,7 +204,8 @@ export function processOfflineCatchup(
   const poopBefore = state.pet?.poop.count ?? 0;
   const petName = state.pet?.identity.name ?? null;
 
-  const newState = processMultipleTicks(state, cappedTicks);
+  // Use lastSaveTime as the start time for simulating offline progression
+  const newState = processMultipleTicks(state, cappedTicks, state.lastSaveTime);
 
   const afterStats = createCareStatsSnapshot(newState);
   const poopAfter = newState.pet?.poop.count ?? 0;

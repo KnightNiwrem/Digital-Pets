@@ -257,3 +257,137 @@ test("processOfflineCatchup uses provided elapsedMs", () => {
 
   expect(result.report.elapsedMs).toBe(500_000);
 });
+
+// Tests for daily reset functionality
+
+test("processGameTick triggers daily reset when crossing midnight", () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(12, 0, 0, 0);
+
+  const pet = createTestPet({
+    sleep: {
+      isSleeping: false,
+      sleepTicksToday: 100,
+      sleepStartTime: null,
+    },
+  });
+  const state = createTestGameState({
+    pet,
+    lastDailyReset: yesterday.getTime(),
+  });
+
+  const now = Date.now();
+  const newState = processGameTick(state, now);
+
+  // Daily sleep counter should be reset
+  expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
+});
+
+test("processGameTick does not reset when already reset today", () => {
+  const { getMidnightTimestamp } = require("./time");
+  const now = Date.now();
+  const todayMidnight = getMidnightTimestamp(now);
+
+  const pet = createTestPet({
+    sleep: {
+      isSleeping: false,
+      sleepTicksToday: 100,
+      sleepStartTime: null,
+    },
+  });
+  const state = createTestGameState({
+    pet,
+    lastDailyReset: todayMidnight,
+  });
+
+  const newState = processGameTick(state, now);
+
+  // Daily sleep counter should NOT be reset
+  expect(newState.pet?.sleep.sleepTicksToday).toBe(100);
+});
+
+test("processGameTick preserves other pet properties during daily reset", () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(12, 0, 0, 0);
+
+  const pet = createTestPet({
+    careStats: {
+      satiety: 50_000,
+      hydration: 40_000,
+      happiness: 30_000,
+    },
+    sleep: {
+      isSleeping: false,
+      sleepTicksToday: 100,
+      sleepStartTime: null,
+    },
+  });
+  const state = createTestGameState({
+    pet,
+    lastDailyReset: yesterday.getTime(),
+  });
+
+  const now = Date.now();
+  const newState = processGameTick(state, now);
+
+  // Care stats should still be processed (decayed)
+  expect(newState.pet?.careStats.satiety).toBeLessThan(50_000);
+  // But sleep counter should be reset
+  expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
+});
+
+test("processMultipleTicks triggers daily resets during offline progression", () => {
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const TICK_DURATION_MS = 30_000;
+
+  // Set up state from 3 days ago
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+  threeDaysAgo.setHours(12, 0, 0, 0);
+
+  const pet = createTestPet({
+    sleep: {
+      isSleeping: false,
+      sleepTicksToday: 100,
+      sleepStartTime: null,
+    },
+  });
+  const state = createTestGameState({
+    pet,
+    lastSaveTime: threeDaysAgo.getTime(),
+    lastDailyReset: threeDaysAgo.getTime() - MS_PER_DAY, // Reset was day before that
+  });
+
+  // Process ticks spanning 3 days
+  const ticksFor3Days = Math.floor((3 * MS_PER_DAY) / TICK_DURATION_MS);
+  const newState = processMultipleTicks(
+    state,
+    ticksFor3Days,
+    threeDaysAgo.getTime(),
+  );
+
+  // Sleep counter should be reset (we crossed multiple midnights)
+  expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
+});
+
+test("processGameTick handles state with no pet during daily reset", () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(12, 0, 0, 0);
+
+  const state = createTestGameState({
+    pet: null,
+    lastDailyReset: yesterday.getTime(),
+  });
+
+  const now = Date.now();
+  const newState = processGameTick(state, now);
+
+  // Should update lastDailyReset without error
+  expect(newState.pet).toBeNull();
+  // lastDailyReset should be updated to today's midnight
+  const { getMidnightTimestamp } = require("./time");
+  expect(newState.lastDailyReset).toBe(getMidnightTimestamp(now));
+});

@@ -142,3 +142,61 @@ test("shouldDailyReset returns true across midnight boundary", () => {
 
   expect(shouldDailyReset(lastReset.getTime(), now.getTime())).toBe(true);
 });
+
+// countDailyResets tests
+test("countDailyResets returns 0 for same day", () => {
+  const { countDailyResets } = require("./time");
+  const date = new Date();
+  date.setHours(10, 0, 0, 0); // 10 AM
+  const fromTime = date.getTime();
+  date.setHours(14, 0, 0, 0); // 2 PM same day
+  const toTime = date.getTime();
+
+  expect(countDailyResets(fromTime, toTime)).toBe(0);
+});
+
+test("countDailyResets returns 1 for consecutive days", () => {
+  const { countDailyResets } = require("./time");
+  const from = new Date();
+  from.setHours(23, 0, 0, 0); // 11 PM Day 1
+  const to = new Date(from);
+  to.setDate(to.getDate() + 1);
+  to.setHours(1, 0, 0, 0); // 1 AM Day 2
+
+  expect(countDailyResets(from.getTime(), to.getTime())).toBe(1);
+});
+
+test("countDailyResets returns 2 for 3 days apart", () => {
+  const { countDailyResets } = require("./time");
+  const from = new Date();
+  from.setHours(11, 0, 0, 0); // 11 AM Day 1
+  const to = new Date(from);
+  to.setDate(to.getDate() + 2);
+  to.setHours(13, 0, 0, 0); // 1 PM Day 3
+
+  // Resets at Day 2 midnight and Day 3 midnight
+  expect(countDailyResets(from.getTime(), to.getTime())).toBe(2);
+});
+
+test("countDailyResets handles different times of day", () => {
+  const { countDailyResets } = require("./time");
+  // Late night to early morning next day
+  const from = new Date();
+  from.setHours(23, 59, 0, 0); // 11:59 PM
+  const to = new Date(from);
+  to.setDate(to.getDate() + 1);
+  to.setHours(0, 1, 0, 0); // 12:01 AM next day
+
+  expect(countDailyResets(from.getTime(), to.getTime())).toBe(1);
+});
+
+test("countDailyResets returns correct count for 7 days offline", () => {
+  const { countDailyResets } = require("./time");
+  const from = new Date();
+  from.setHours(12, 0, 0, 0); // Noon Day 1
+  const to = new Date(from);
+  to.setDate(to.getDate() + 7);
+  to.setHours(12, 0, 0, 0); // Noon Day 8
+
+  expect(countDailyResets(from.getTime(), to.getTime())).toBe(7);
+});
