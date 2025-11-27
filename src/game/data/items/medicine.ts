@@ -90,10 +90,3 @@ export const MEDICINE_ITEMS = {
 /** Array of all medicine items for iteration. */
 export const MEDICINE_ITEMS_LIST: readonly MedicineItem[] =
   Object.values(MEDICINE_ITEMS);
-
-/**
- * Get a medicine item by ID.
- */
-export function getMedicineItemById(id: string): MedicineItem | undefined {
-  return MEDICINE_ITEMS_LIST.find((item) => item.id === id);
-}

@@ -114,10 +114,3 @@ export const EQUIPMENT_ITEMS = {
 /** Array of all equipment items for iteration. */
 export const EQUIPMENT_ITEMS_LIST: readonly EquipmentItem[] =
   Object.values(EQUIPMENT_ITEMS);
-
-/**
- * Get an equipment item by ID.
- */
-export function getEquipmentItemById(id: string): EquipmentItem | undefined {
-  return EQUIPMENT_ITEMS_LIST.find((item) => item.id === id);
-}

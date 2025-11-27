@@ -150,10 +150,3 @@ export const FOOD_ITEMS = {
 
 /** Array of all food items for iteration. */
 export const FOOD_ITEMS_LIST: readonly FoodItem[] = Object.values(FOOD_ITEMS);
-
-/**
- * Get a food item by ID.
- */
-export function getFoodItemById(id: string): FoodItem | undefined {
-  return FOOD_ITEMS_LIST.find((item) => item.id === id);
-}

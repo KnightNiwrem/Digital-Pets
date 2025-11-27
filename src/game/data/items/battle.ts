@@ -99,10 +99,3 @@ export const BATTLE_ITEMS = {
 /** Array of all battle items for iteration. */
 export const BATTLE_ITEMS_LIST: readonly BattleItem[] =
   Object.values(BATTLE_ITEMS);
-
-/**
- * Get a battle item by ID.
- */
-export function getBattleItemById(id: string): BattleItem | undefined {
-  return BATTLE_ITEMS_LIST.find((item) => item.id === id);
-}
