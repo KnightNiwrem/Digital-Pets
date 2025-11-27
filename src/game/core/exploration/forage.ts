@@ -2,6 +2,7 @@
  * Foraging exploration logic.
  */
 
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getLocation } from "@/game/data/locations";
 import { type ForageTable, getForageTable } from "@/game/data/tables/forage";
 import type {
@@ -292,6 +293,8 @@ export function cancelExploration(pet: Pet): {
   }
 
   const energyRefunded = pet.activeExploration.energyCost;
+  const maxStats = calculatePetMaxStats(pet);
+  const maxEnergy = maxStats?.energyMax ?? 0;
 
   return {
     success: true,
@@ -300,7 +303,7 @@ export function cancelExploration(pet: Pet): {
       activityState: ActivityState.Idle,
       activeExploration: undefined,
       energyStats: {
-        energy: pet.energyStats.energy + energyRefunded,
+        energy: Math.min(pet.energyStats.energy + energyRefunded, maxEnergy),
       },
     },
     message: "Exploration cancelled. Energy has been refunded.",

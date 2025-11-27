@@ -2,6 +2,7 @@
  * Training system core logic.
  */
 
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getFacility, getSession } from "@/game/data/facilities";
 import type {
   ActiveTraining,
@@ -238,6 +239,8 @@ export function cancelTraining(pet: Pet): {
   }
 
   const energyRefunded = pet.activeTraining.energyCost;
+  const maxStats = calculatePetMaxStats(pet);
+  const maxEnergy = maxStats?.energyMax ?? 0;
 
   return {
     success: true,
@@ -246,7 +249,7 @@ export function cancelTraining(pet: Pet): {
       activityState: ActivityState.Idle,
       activeTraining: undefined,
       energyStats: {
-        energy: pet.energyStats.energy + energyRefunded,
+        energy: Math.min(pet.energyStats.energy + energyRefunded, maxEnergy),
       },
     },
     message: "Training cancelled. Energy has been refunded.",
