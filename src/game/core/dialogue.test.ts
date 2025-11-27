@@ -38,7 +38,7 @@ test("startDialogue returns correct starting node", () => {
 // getCurrentNode tests
 test("getCurrentNode returns correct node", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "greeting",
   };
@@ -49,7 +49,7 @@ test("getCurrentNode returns correct node", () => {
 
 test("getCurrentNode returns undefined for invalid dialogue", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "invalid_dialogue",
     currentNodeId: "greeting",
   };
@@ -60,7 +60,7 @@ test("getCurrentNode returns undefined for invalid dialogue", () => {
 // advanceDialogue tests
 test("advanceDialogue advances message node", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "about_town",
   };
@@ -72,7 +72,7 @@ test("advanceDialogue advances message node", () => {
 
 test("advanceDialogue fails for choice node without selection", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "greeting",
   };
@@ -84,7 +84,7 @@ test("advanceDialogue fails for choice node without selection", () => {
 
 test("advanceDialogue ends at end node", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "farewell",
   };
@@ -95,7 +95,7 @@ test("advanceDialogue ends at end node", () => {
 
 test("advanceDialogue ends at shop node", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "shop",
   };
@@ -108,7 +108,7 @@ test("advanceDialogue ends at shop node", () => {
 // selectChoice tests
 test("selectChoice advances to selected node", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "greeting",
   };
@@ -120,7 +120,7 @@ test("selectChoice advances to selected node", () => {
 
 test("selectChoice fails with invalid index", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "greeting",
   };
@@ -131,7 +131,7 @@ test("selectChoice fails with invalid index", () => {
 
 test("selectChoice fails on non-choice node", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "about_town",
   };
@@ -142,7 +142,7 @@ test("selectChoice fails on non-choice node", () => {
 
 test("selectChoice ends when selecting farewell", () => {
   const state: DialogueState = {
-    npcId: "mira",
+    npcId: "shopkeeper_mira",
     dialogueId: "mira_dialogue",
     currentNodeId: "greeting",
   };
