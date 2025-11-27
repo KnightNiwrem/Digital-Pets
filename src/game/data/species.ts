@@ -1,6 +1,8 @@
 /**
  * Species definitions for Digital Pets.
  * Initial starter species available from game start.
+ *
+ * Use SPECIES.FLORABIT.id to get the species ID "florabit".
  */
 
 import type { Species } from "@/game/types/species";
@@ -8,9 +10,9 @@ import type { Species } from "@/game/types/species";
 /**
  * Starter species available at game start.
  */
-export const SPECIES: Record<string, Species> = {
+export const SPECIES = {
   // Balanced starter - good all-around
-  florabit: {
+  FLORABIT: {
     id: "florabit",
     name: "Florabit",
     description: "A gentle plant-like creature with balanced abilities.",
@@ -45,7 +47,7 @@ export const SPECIES: Record<string, Species> = {
   },
 
   // Agile glass cannon
-  sparkfin: {
+  SPARKFIN: {
     id: "sparkfin",
     name: "Sparkfin",
     description: "A swift aquatic creature that strikes with precision.",
@@ -80,7 +82,7 @@ export const SPECIES: Record<string, Species> = {
   },
 
   // Tanky defender
-  rockpup: {
+  ROCKPUP: {
     id: "rockpup",
     name: "Rockpup",
     description: "A sturdy rock-like creature with high endurance.",
@@ -115,7 +117,7 @@ export const SPECIES: Record<string, Species> = {
   },
 
   // Evasive status specialist - quest unlock
-  coralite: {
+  CORALITE: {
     id: "coralite",
     name: "Coralite",
     description:
@@ -151,7 +153,7 @@ export const SPECIES: Record<string, Species> = {
   },
 
   // Fiery power tank - discovery unlock
-  emberfox: {
+  EMBERFOX: {
     id: "emberfox",
     name: "Emberfox",
     description:
@@ -187,7 +189,7 @@ export const SPECIES: Record<string, Species> = {
   },
 
   // Evasion specialist - discovery unlock
-  shadowmoth: {
+  SHADOWMOTH: {
     id: "shadowmoth",
     name: "Shadowmoth",
     description:
@@ -221,25 +223,33 @@ export const SPECIES: Record<string, Species> = {
     },
     unlockMethod: "discovery",
   },
-};
+} as const satisfies Record<string, Species>;
+
+/** Array of all species for iteration. */
+export const SPECIES_LIST: readonly Species[] = Object.values(SPECIES);
+
+/** Map of species ID to species for lookup by ID string. */
+const SPECIES_BY_ID: ReadonlyMap<string, Species> = new Map(
+  SPECIES_LIST.map((s) => [s.id, s]),
+);
 
 /**
  * Get all species as an array.
  */
-export function getAllSpecies(): Species[] {
-  return Object.values(SPECIES);
+export function getAllSpecies(): readonly Species[] {
+  return SPECIES_LIST;
 }
 
 /**
  * Get a species by ID.
  */
 export function getSpeciesById(id: string): Species | undefined {
-  return SPECIES[id];
+  return SPECIES_BY_ID.get(id);
 }
 
 /**
  * Get all starter species.
  */
 export function getStarterSpecies(): Species[] {
-  return getAllSpecies().filter((s) => s.unlockMethod === "starting");
+  return SPECIES_LIST.filter((s) => s.unlockMethod === "starting");
 }
