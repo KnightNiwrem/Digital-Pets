@@ -26,6 +26,26 @@ export type { Combatant } from "./turn";
 const LEVEL_SCALING_FACTOR = 0.1;
 
 /**
+ * Determine the next battle phase based on turn order.
+ */
+function determineNextPhase(
+  turnOrder: BattleState["turnOrder"],
+  turnOrderIndex: number,
+): { nextPhase: BattlePhase; nextIndex: number } {
+  const nextIndex = turnOrderIndex + 1;
+  let nextPhase: BattlePhase;
+
+  if (nextIndex >= turnOrder.length) {
+    nextPhase = BattlePhase.TurnResolution;
+  } else {
+    const nextActor = turnOrder[nextIndex];
+    nextPhase =
+      nextActor === "player" ? BattlePhase.PlayerTurn : BattlePhase.EnemyTurn;
+  }
+  return { nextPhase, nextIndex };
+}
+
+/**
  * Battle phase states.
  */
 export const BattlePhase = {
@@ -301,13 +321,19 @@ export function executePlayerTurn(state: BattleState, move: Move): BattleState {
     };
   }
 
-  // Move to enemy turn
+  // Determine next phase
+  const { nextPhase, nextIndex } = determineNextPhase(
+    state.turnOrder,
+    state.turnOrderIndex,
+  );
+
   return {
     ...state,
     player: actor,
     enemy: target,
     log: newLog,
-    phase: BattlePhase.EnemyTurn,
+    phase: nextPhase,
+    turnOrderIndex: nextIndex,
     playerActed: true,
   };
 }
@@ -360,13 +386,19 @@ export function executeEnemyTurn(state: BattleState): BattleState {
     };
   }
 
-  // Move to turn resolution
+  // Determine next phase
+  const { nextPhase, nextIndex } = determineNextPhase(
+    state.turnOrder,
+    state.turnOrderIndex,
+  );
+
   return {
     ...state,
     player: target,
     enemy: actor,
     log: newLog,
-    phase: BattlePhase.TurnResolution,
+    phase: nextPhase,
+    turnOrderIndex: nextIndex,
     enemyActed: true,
   };
 }
