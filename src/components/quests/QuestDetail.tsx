@@ -28,8 +28,11 @@ function formatReward(reward: QuestReward): string {
       return `${reward.quantity} ${reward.target} XP`;
     case "unlock":
       return `Unlock: ${reward.target}`;
-    default:
-      return `${reward.quantity}x ${reward.target}`;
+    default: {
+      // Exhaustive check - ensures all reward types are handled
+      const _exhaustiveCheck: never = reward.type;
+      return _exhaustiveCheck;
+    }
   }
 }
 

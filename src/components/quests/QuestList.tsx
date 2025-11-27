@@ -4,7 +4,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Quest, QuestProgress } from "@/game/types/quest";
+import { type Quest, type QuestProgress, QuestState } from "@/game/types/quest";
 import { cn } from "@/lib/utils";
 
 interface QuestListProps {
@@ -65,7 +65,7 @@ export function QuestList({
       {quests.map((quest) => {
         const progress = progressMap.get(quest.id);
         const isSelected = selectedQuestId === quest.id;
-        const isActive = progress?.state === "active";
+        const isActive = progress?.state === QuestState.Active;
 
         return (
           <Button

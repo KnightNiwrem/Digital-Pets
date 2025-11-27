@@ -2,6 +2,7 @@
  * Quest requirement checking logic.
  */
 
+import { GROWTH_STAGE_ORDER } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import {
   type QuestRequirement,
@@ -29,9 +30,14 @@ export function checkRequirement(
     case RequirementType.Stage: {
       // Check if pet has reached the required growth stage
       if (!state.pet) return false;
-      const stageOrder = ["egg", "baby", "child", "teen", "adult", "elder"];
-      const currentStageIndex = stageOrder.indexOf(state.pet.growth.stage);
-      const requiredStageIndex = stageOrder.indexOf(requirement.target);
+      const currentStageIndex = GROWTH_STAGE_ORDER.indexOf(
+        state.pet.growth.stage,
+      );
+      const requiredStageIndex = GROWTH_STAGE_ORDER.indexOf(
+        requirement.target as (typeof GROWTH_STAGE_ORDER)[number],
+      );
+      // Guard against invalid stages
+      if (currentStageIndex === -1 || requiredStageIndex === -1) return false;
       return currentStageIndex >= requiredStageIndex;
     }
 
@@ -52,8 +58,8 @@ export function checkRequirement(
     }
 
     case RequirementType.Location: {
-      // Check if player has visited the location
-      // For now, just check if current location matches (discovery tracking would be more robust)
+      // Check if player is currently at the location
+      // Note: Discovery tracking would be more robust for "has visited" semantics
       return state.player.currentLocationId === requirement.target;
     }
 

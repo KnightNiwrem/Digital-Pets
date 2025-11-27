@@ -209,10 +209,11 @@ export function updateQuestProgress(
   target: string,
   amount = 1,
 ): GameState {
-  let currentState = state;
+  const newQuests = [...state.quests];
+  let hasChanges = false;
 
-  for (let i = 0; i < currentState.quests.length; i++) {
-    const progress = currentState.quests[i];
+  for (let i = 0; i < newQuests.length; i++) {
+    let progress = newQuests[i];
     if (!progress || progress.state !== QuestState.Active) continue;
 
     const quest = getQuest(progress.questId);
@@ -224,6 +225,9 @@ export function updateQuestProgress(
       target,
     );
 
+    if (matchingObjectives.length === 0) continue;
+
+    let questProgressChanged = false;
     for (const objective of matchingObjectives) {
       const result = updateObjectiveProgress(
         progress,
@@ -233,17 +237,18 @@ export function updateQuestProgress(
       );
 
       if (result.progress !== progress) {
-        const newQuests = [...currentState.quests];
-        newQuests[i] = result.progress;
-        currentState = {
-          ...currentState,
-          quests: newQuests,
-        };
+        progress = result.progress;
+        questProgressChanged = true;
       }
+    }
+
+    if (questProgressChanged) {
+      newQuests[i] = progress;
+      hasChanges = true;
     }
   }
 
-  return currentState;
+  return hasChanges ? { ...state, quests: newQuests } : state;
 }
 
 /**

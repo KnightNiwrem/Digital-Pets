@@ -76,6 +76,11 @@ export function QuestScreen() {
         return availableQuests;
       case "completed":
         return completedQuests;
+      default: {
+        // Exhaustive check - ensures all tab types are handled
+        const _exhaustiveCheck: never = activeTab;
+        return _exhaustiveCheck;
+      }
     }
   }, [activeTab, activeQuests, availableQuests, completedQuests]);
 

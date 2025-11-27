@@ -87,7 +87,7 @@ function grantReward(
 
     case RewardType.Unlock: {
       // Unlock rewards would modify unlocked features/locations
-      // For now, just log - would need unlock tracking in GameState
+      // For now, just return a summary - would need unlock tracking in GameState
       return {
         state,
         summary: `Unlocked: ${reward.target}`,

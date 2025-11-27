@@ -68,8 +68,8 @@ export const tutorialExploration: Quest = {
     {
       id: "visit_meadow",
       type: ObjectiveType.Visit,
-      description: "Visit the Sunlit Meadow",
-      target: "sunlit_meadow",
+      description: "Visit the Sunny Meadow",
+      target: "meadow",
       quantity: 1,
     },
     {
