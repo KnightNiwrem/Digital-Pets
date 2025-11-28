@@ -117,13 +117,3 @@ export const CARE_LIFE_RECOVERY_THRESHOLD_50 = 50;
  */
 export const ENERGY_REGEN_AWAKE: MicroValue = 40;
 export const ENERGY_REGEN_SLEEPING: MicroValue = 120;
-
-// =============================================================================
-// Time Caps
-// =============================================================================
-
-/**
- * Maximum offline ticks to process for care mechanics.
- * Per spec (time-mechanics.md): 20,160 ticks (7 days).
- */
-export const MAX_OFFLINE_CARE_TICKS: Tick = 20_160;

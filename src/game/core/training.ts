@@ -2,6 +2,7 @@
  * Training system core logic.
  */
 
+import { checkActivityRequirements } from "@/game/core/activityGating";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getFacility, getSession } from "@/game/data/facilities";
 import type {
@@ -10,12 +11,11 @@ import type {
   TrainingSession,
   TrainingSessionType,
 } from "@/game/types/activity";
-import { type Tick, toDisplay, toMicro } from "@/game/types/common";
+import { type Tick, toMicro } from "@/game/types/common";
 import {
   ActivityState,
   GROWTH_STAGE_ORDER,
   type GrowthStage,
-  getActivityConflictMessage,
 } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
@@ -42,19 +42,7 @@ export function canStartTraining(
   facilityId: string,
   sessionType: TrainingSessionType,
 ): { canTrain: boolean; message: string } {
-  // Check if pet is already doing an activity
-  if (pet.activityState !== ActivityState.Idle) {
-    return {
-      canTrain: false,
-      message: getActivityConflictMessage(
-        "train",
-        pet.activityState,
-        ActivityState.Training,
-      ),
-    };
-  }
-
-  // Get facility and session
+  // Get facility and session first (needed for energy cost check)
   const facility = getFacility(facilityId);
   if (!facility) {
     return { canTrain: false, message: "Training facility not found." };
@@ -65,20 +53,22 @@ export function canStartTraining(
     return { canTrain: false, message: "Training session not available." };
   }
 
+  // Check activity state and energy requirements
+  const gatingCheck = checkActivityRequirements(
+    pet,
+    "train",
+    session.energyCost,
+    ActivityState.Training,
+  );
+  if (!gatingCheck.allowed) {
+    return { canTrain: false, message: gatingCheck.message };
+  }
+
   // Check growth stage requirement
   if (!isSessionAvailable(session, pet.growth.stage)) {
     return {
       canTrain: false,
       message: `Requires ${session.minStage} stage or higher.`,
-    };
-  }
-
-  // Check energy
-  const currentEnergy = toDisplay(pet.energyStats.energy);
-  if (currentEnergy < session.energyCost) {
-    return {
-      canTrain: false,
-      message: `Not enough energy. Need ${session.energyCost}, have ${currentEnergy}.`,
     };
   }
 
