@@ -467,3 +467,82 @@ test("useFoodItem fails when pet is exploring", () => {
   expect(result.success).toBe(false);
   expect(result.message).toContain("exploring");
 });
+
+test("useFoodItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+  }
+
+  const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
+test("useDrinkItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+  }
+
+  const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
+});
+
+test("useDrinkItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+  }
+
+  const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
+test("useCleaningItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+    state.pet.poop.count = 3;
+  }
+
+  const result = useCleaningItem(state, CLEANING_ITEMS.TISSUE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
+});
+
+test("useCleaningItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+    state.pet.poop.count = 3;
+  }
+
+  const result = useCleaningItem(state, CLEANING_ITEMS.TISSUE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
+test("useToyItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+  }
+
+  const result = useToyItem(state, TOY_ITEMS.BALL.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
+});
+
+test("useToyItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+  }
+
+  const result = useToyItem(state, TOY_ITEMS.BALL.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
