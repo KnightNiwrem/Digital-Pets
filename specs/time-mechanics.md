@@ -77,16 +77,15 @@ else:
 
 ## Time Caps
 
-To prevent extreme scenarios:
+To prevent extreme scenarios while still allowing for meaningful consequences:
 
 | Mechanic | Maximum Offline Ticks |
 |----------|----------------------|
-| Care processing | 20,160 ticks (7 days) |
+| All systems | 86,400 ticks (30 days) |
 | Poop generation | 50 poop max |
-| Growth | No cap |
 | Energy regen | Up to maximum only |
 
-If offline longer than 7 days, excess ticks are ignored for care processing.
+The 30-day cap applies universally to all offline processing (care, growth, training, exploration). This ensures that neglected adult pets can still die, while preventing extreme data processing loads.
 
 ## Timestamps
 

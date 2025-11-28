@@ -92,12 +92,23 @@ Poop accumulates over time and must be cleaned by the player using cleaning item
 
 ### Poop Generation
 
-| State | Ticks Between Poop |
-|-------|-------------------|
+Poop generation uses a decay-rate system to handle mid-cycle state changes:
+
+| State | Effective Time to Poop |
+|-------|------------------------|
 | Awake | 480 ticks (4 hours) |
 | Sleeping | 960 ticks (8 hours) |
 
-Each feeding item consumed reduces the next poop timer by 60 ticks (30 minutes).
+**Implementation:**
+- Timer uses a micro-threshold of 960 units
+- Awake state: decays 2 units per tick (960/2 = 480 ticks)
+- Sleeping state: decays 1 unit per tick (960/1 = 960 ticks)
+
+This ensures that going to sleep mid-cycle properly extends the remaining time. For example, if the timer is half-depleted (480 units remaining):
+- Staying awake: 480/2 = 240 more ticks until poop
+- Going to sleep: 480/1 = 480 more ticks until poop
+
+Each feeding item consumed reduces the poop timer by a specified amount (typically 60-120 micro-units).
 
 ### Poop Effects
 

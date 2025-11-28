@@ -265,7 +265,7 @@ describe("Tick processor integration", () => {
         birthTime: Date.now(),
         ageTicks: 0,
       },
-      poop: { count: 0, ticksUntilNext: 480 },
+      poop: { count: 0, ticksUntilNext: 960 }, // POOP_MICRO_THRESHOLD
     });
 
     const state = createTestGameState({ pet, totalTicks: 0 });
@@ -275,7 +275,7 @@ describe("Tick processor integration", () => {
     expect(newState.totalTicks).toBe(1);
     expect(newState.pet?.growth.ageTicks).toBe(1);
     expect(newState.pet?.careStats.satiety).toBeLessThan(40_000);
-    expect(newState.pet?.poop.ticksUntilNext).toBe(479);
+    expect(newState.pet?.poop.ticksUntilNext).toBe(958); // 960 - 2 (awake decay rate)
   });
 
   test("offline catchup processes many ticks correctly", () => {

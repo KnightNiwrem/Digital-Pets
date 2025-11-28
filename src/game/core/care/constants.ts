@@ -25,10 +25,25 @@ export const CARE_DECAY_SLEEPING: MicroValue = 25;
 // =============================================================================
 
 /**
- * Ticks between poop generation.
+ * Poop generation uses a micro-threshold system with different decay rates.
+ * This allows mid-cycle state changes (awake<->sleeping) to properly adjust timing.
+ *
  * Per spec (care-system.md):
- * - Awake: 480 ticks (4 hours)
- * - Sleeping: 960 ticks (8 hours)
+ * - Awake: poop every 480 ticks (4 hours)
+ * - Sleeping: poop every 960 ticks (8 hours)
+ *
+ * Implementation:
+ * - POOP_MICRO_THRESHOLD = 960 (chosen as LCM-friendly value)
+ * - POOP_DECAY_AWAKE = 2 (960 / 480 = 2, so 480 ticks to generate)
+ * - POOP_DECAY_SLEEPING = 1 (960 / 960 = 1, so 960 ticks to generate)
+ */
+export const POOP_MICRO_THRESHOLD: Tick = 960;
+export const POOP_DECAY_AWAKE: Tick = 2;
+export const POOP_DECAY_SLEEPING: Tick = 1;
+
+/**
+ * Legacy constants for reference (intervals in ticks).
+ * These represent the effective time to generate poop in each state.
  */
 export const POOP_INTERVAL_AWAKE: Tick = 480;
 export const POOP_INTERVAL_SLEEPING: Tick = 960;
@@ -37,6 +52,9 @@ export const POOP_INTERVAL_SLEEPING: Tick = 960;
  * Ticks reduced from poop timer when feeding.
  * Per spec (care-system.md): 60 ticks (30 minutes) standard.
  * Note: Items can have varying acceleration (30-120 ticks) for gameplay depth.
+ *
+ * When using the decay system, this is applied as micro-units:
+ * poopAccelerationMicro = POOP_ACCELERATION_BASE * POOP_DECAY_AWAKE
  */
 export const POOP_ACCELERATION_BASE: Tick = 60;
 
