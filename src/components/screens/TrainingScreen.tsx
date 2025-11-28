@@ -2,6 +2,7 @@
  * Training screen for training the pet's battle stats.
  */
 
+import { ActivityStatusCard } from "@/components/game";
 import {
   FacilityCard,
   StatsDisplay,
@@ -14,6 +15,18 @@ import { cancelTraining, startTraining } from "@/game/state/actions/training";
 import type { TrainingSessionType } from "@/game/types/activity";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
+
+/**
+ * Messages for each activity state blocking training.
+ */
+const TRAINING_BLOCKED_MESSAGES: Record<ActivityState, string> = {
+  [ActivityState.Idle]: "",
+  [ActivityState.Sleeping]: "Wake up your pet to start training.",
+  [ActivityState.Training]: "",
+  [ActivityState.Exploring]:
+    "Cancel exploration or wait for it to complete before training.",
+  [ActivityState.Battling]: "Complete the battle before training.",
+};
 
 /**
  * Main training screen component.
@@ -99,47 +112,10 @@ export function TrainingScreen() {
       )}
 
       {/* Activity Blocking Status */}
-      {activityState === ActivityState.Sleeping && (
-        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
-              <span className="text-2xl">💤</span>
-              <span className="font-medium">Your pet is sleeping...</span>
-            </div>
-            <p className="text-center text-sm text-blue-600 dark:text-blue-400 mt-2">
-              Wake up your pet to start training.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {activityState === ActivityState.Exploring && (
-        <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center justify-center gap-2 text-green-700 dark:text-green-300">
-              <span className="text-2xl">🌿</span>
-              <span className="font-medium">Your pet is exploring...</span>
-            </div>
-            <p className="text-center text-sm text-green-600 dark:text-green-400 mt-2">
-              Cancel exploration or wait for it to complete before training.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {activityState === ActivityState.Battling && (
-        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center justify-center gap-2 text-red-700 dark:text-red-300">
-              <span className="text-2xl">⚔️</span>
-              <span className="font-medium">Your pet is battling...</span>
-            </div>
-            <p className="text-center text-sm text-red-600 dark:text-red-400 mt-2">
-              Complete the battle before training.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      <ActivityStatusCard
+        activityState={activityState}
+        message={TRAINING_BLOCKED_MESSAGES[activityState]}
+      />
 
       {/* Battle Stats Overview */}
       <StatsDisplay battleStats={pet.battleStats} />

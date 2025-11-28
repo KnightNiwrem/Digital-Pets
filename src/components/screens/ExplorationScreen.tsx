@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { ActivitySelect, ExplorationProgress } from "@/components/exploration";
+import { ActivityStatusCard } from "@/components/game";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/error-dialog";
@@ -21,6 +22,18 @@ import {
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
 import { FacilityType, LocationType } from "@/game/types/location";
+
+/**
+ * Messages for each activity state blocking exploration.
+ */
+const EXPLORATION_BLOCKED_MESSAGES: Record<ActivityState, string> = {
+  [ActivityState.Idle]: "",
+  [ActivityState.Sleeping]: "Wake up your pet to start exploring.",
+  [ActivityState.Training]:
+    "Cancel training or wait for it to complete before exploring.",
+  [ActivityState.Exploring]: "",
+  [ActivityState.Battling]: "Complete the battle before exploring.",
+};
 
 /**
  * Main exploration screen component.
@@ -145,47 +158,10 @@ export function ExplorationScreen({
         )}
 
         {/* Activity Blocking Status */}
-        {activityState === ActivityState.Sleeping && (
-          <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
-                <span className="text-2xl">💤</span>
-                <span className="font-medium">Your pet is sleeping...</span>
-              </div>
-              <p className="text-center text-sm text-blue-600 dark:text-blue-400 mt-2">
-                Wake up your pet to start exploring.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {activityState === ActivityState.Training && (
-          <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300">
-                <span className="text-2xl">💪</span>
-                <span className="font-medium">Your pet is training...</span>
-              </div>
-              <p className="text-center text-sm text-amber-600 dark:text-amber-400 mt-2">
-                Cancel training or wait for it to complete before exploring.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {activityState === ActivityState.Battling && (
-          <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center justify-center gap-2 text-red-700 dark:text-red-300">
-                <span className="text-2xl">⚔️</span>
-                <span className="font-medium">Your pet is battling...</span>
-              </div>
-              <p className="text-center text-sm text-red-600 dark:text-red-400 mt-2">
-                Complete the battle before exploring.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        <ActivityStatusCard
+          activityState={activityState}
+          message={EXPLORATION_BLOCKED_MESSAGES[activityState]}
+        />
 
         {/* Exploration Activities */}
         {isIdle && isWildArea && (
