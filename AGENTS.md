@@ -17,18 +17,43 @@ This project is **not live yet**. Breaking changes to reach the ideal code state
 
 ```
 ├── src/
-│   ├── index.ts          # Bun server entry point with API routes
-│   ├── index.html        # HTML entry point
-│   ├── index.css         # Global styles and Tailwind imports
-│   ├── frontend.tsx      # React app entry point
-│   ├── App.tsx           # Main React component
-│   ├── components/ui/    # shadcn/ui components (button, card, input, etc.)
-│   ├── lib/utils.ts      # Utility functions (cn helper for classnames)
-│   └── utils/            # Additional utilities with tests
-├── styles/globals.css    # Additional global styles
-├── build.ts              # Custom build script
-├── biome.json            # Biome linting/formatting config
-└── tsconfig.json         # TypeScript configuration
+│   ├── index.ts              # Bun server entry point with API routes
+│   ├── index.html            # HTML entry point
+│   ├── index.css             # Global styles and Tailwind imports
+│   ├── frontend.tsx          # React app entry point
+│   ├── App.tsx               # Main React component
+│   ├── APITester.tsx         # API testing component
+│   ├── components/
+│   │   ├── ui/               # shadcn/ui components (button, card, dialog, etc.)
+│   │   ├── battle/           # Battle system components
+│   │   ├── care/             # Pet care components (feed, clean, play, etc.)
+│   │   ├── exploration/      # Exploration activity components
+│   │   ├── game/             # Core game UI (header, navigation, notifications)
+│   │   ├── inventory/        # Item management components
+│   │   ├── map/              # Location and map components
+│   │   ├── npc/              # NPC dialogue components
+│   │   ├── pet/              # Pet display and status components
+│   │   ├── quests/           # Quest system components
+│   │   ├── screens/          # Main screen components (Care, Battle, Shop, etc.)
+│   │   ├── shop/             # Shop and trading components
+│   │   ├── skills/           # Skill display components
+│   │   └── training/         # Training facility components
+│   ├── game/
+│   │   ├── GameManager.ts    # Central game state manager
+│   │   ├── GameManager.test.ts
+│   │   ├── context/          # React context providers
+│   │   ├── core/             # Core game logic
+│   │   ├── data/             # Game data definitions
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── state/            # State management
+│   │   ├── testing/          # Test utilities
+│   │   └── types/            # TypeScript type definitions
+│   └── lib/utils.ts          # Utility functions (cn helper for classnames)
+├── specs/                    # Game design specification documents
+├── styles/globals.css        # Additional global styles
+├── build.ts                  # Custom build script
+├── biome.json                # Biome linting/formatting config
+└── tsconfig.json             # TypeScript configuration
 ```
 
 ## Dev Environment Setup
