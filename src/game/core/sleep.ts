@@ -71,7 +71,10 @@ export function hasMetSleepRequirement(pet: Pet): boolean {
 export function putToSleep(pet: Pet): SleepTransitionResult {
   // Check if pet is busy with another activity (training, exploring, battling)
   // Allow sleeping when already idle or already sleeping
-  if (pet.activityState !== ActivityState.Idle && pet.activityState !== ActivityState.Sleeping) {
+  if (
+    pet.activityState !== ActivityState.Idle &&
+    pet.activityState !== ActivityState.Sleeping
+  ) {
     const gatingCheck = checkActivityIdle(pet, "put to sleep");
     return {
       success: false,
