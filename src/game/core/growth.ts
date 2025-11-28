@@ -7,6 +7,7 @@ import { getSpeciesStageStats, toGrowthStage } from "@/game/data/growthStages";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { Pet, PetGrowth } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
+import { calculateTotalBattleStats } from "./petStats";
 
 /**
  * Result of processing growth for a tick.
@@ -24,27 +25,6 @@ export interface GrowthTickResult {
   previousStage: GrowthStage | null;
   /** Previous substage if transitioned */
   previousSubstage: number | null;
-}
-
-/**
- * Calculate total battle stats by combining base (from growth stage), trained, and bonus stats.
- */
-function calculateTotalBattleStats(
-  baseStats: BattleStats,
-  trainedStats: BattleStats,
-  bonusStats: BattleStats,
-): BattleStats {
-  return {
-    strength: baseStats.strength + trainedStats.strength + bonusStats.strength,
-    endurance:
-      baseStats.endurance + trainedStats.endurance + bonusStats.endurance,
-    agility: baseStats.agility + trainedStats.agility + bonusStats.agility,
-    precision:
-      baseStats.precision + trainedStats.precision + bonusStats.precision,
-    fortitude:
-      baseStats.fortitude + trainedStats.fortitude + bonusStats.fortitude,
-    cunning: baseStats.cunning + trainedStats.cunning + bonusStats.cunning,
-  };
 }
 
 /**

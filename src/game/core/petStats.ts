@@ -90,3 +90,25 @@ export function calculatePetMaxStats(pet: Pet): PetMaxStats | null {
     pet.bonusMaxStats,
   );
 }
+
+/**
+ * Calculate total battle stats by combining base (from growth stage), trained, and bonus stats.
+ * Use this whenever you need to compute effective battle stats from their components.
+ */
+export function calculateTotalBattleStats(
+  baseStats: BattleStats,
+  trainedStats: BattleStats,
+  bonusStats: BattleStats,
+): BattleStats {
+  return {
+    strength: baseStats.strength + trainedStats.strength + bonusStats.strength,
+    endurance:
+      baseStats.endurance + trainedStats.endurance + bonusStats.endurance,
+    agility: baseStats.agility + trainedStats.agility + bonusStats.agility,
+    precision:
+      baseStats.precision + trainedStats.precision + bonusStats.precision,
+    fortitude:
+      baseStats.fortitude + trainedStats.fortitude + bonusStats.fortitude,
+    cunning: baseStats.cunning + trainedStats.cunning + bonusStats.cunning,
+  };
+}
