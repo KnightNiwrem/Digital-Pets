@@ -3,7 +3,7 @@
  */
 
 import { getDefaultMoves } from "@/game/data/moves";
-import { getSpeciesById } from "@/game/data/species";
+import { getInitialGrowthStage, getSpeciesById } from "@/game/data/species";
 import type { Move, MoveSlot } from "@/game/types/move";
 import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
@@ -148,15 +148,22 @@ export function createWildCombatant(
     throw new Error(`Unknown species: ${speciesId}`);
   }
 
+  // Get the initial growth stage for base stats
+  const initialStage = getInitialGrowthStage(speciesId);
+  if (!initialStage) {
+    throw new Error(`No initial growth stage for species: ${speciesId}`);
+  }
+
   // Scale stats by level
   const levelMultiplier = 1 + (level - 1) * LEVEL_SCALING_FACTOR;
+  const baseStats = initialStage.baseStats.battle;
   const battleStats: BattleStats = {
-    strength: Math.floor(species.baseStats.strength * levelMultiplier),
-    endurance: Math.floor(species.baseStats.endurance * levelMultiplier),
-    agility: Math.floor(species.baseStats.agility * levelMultiplier),
-    precision: Math.floor(species.baseStats.precision * levelMultiplier),
-    fortitude: Math.floor(species.baseStats.fortitude * levelMultiplier),
-    cunning: Math.floor(species.baseStats.cunning * levelMultiplier),
+    strength: Math.floor(baseStats.strength * levelMultiplier),
+    endurance: Math.floor(baseStats.endurance * levelMultiplier),
+    agility: Math.floor(baseStats.agility * levelMultiplier),
+    precision: Math.floor(baseStats.precision * levelMultiplier),
+    fortitude: Math.floor(baseStats.fortitude * levelMultiplier),
+    cunning: Math.floor(baseStats.cunning * levelMultiplier),
   };
 
   const derivedStats = calculateDerivedStats(battleStats);

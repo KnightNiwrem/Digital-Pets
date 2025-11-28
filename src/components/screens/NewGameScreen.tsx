@@ -29,6 +29,16 @@ interface SpeciesCardProps {
 }
 
 /**
+ * Get a growth speed label based on total growth stages.
+ * Species with more substages grow more gradually (slower).
+ */
+function getGrowthSpeedLabel(totalStages: number): string {
+  if (totalStages >= 18) return "Slow Grower";
+  if (totalStages >= 16) return "Steady Grower";
+  return "Fast Grower";
+}
+
+/**
  * Species selection card component.
  */
 function SpeciesCard({ species, isSelected, onSelect }: SpeciesCardProps) {
@@ -61,14 +71,8 @@ function SpeciesCard({ species, isSelected, onSelect }: SpeciesCardProps) {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="text-muted-foreground">Type:</div>
           <div className="capitalize">{species.archetype}</div>
-          <div className="text-muted-foreground">Care:</div>
-          <div>
-            {species.careCapMultiplier < 1
-              ? "Low Maintenance"
-              : species.careCapMultiplier > 1
-                ? "High Maintenance"
-                : "Normal"}
-          </div>
+          <div className="text-muted-foreground">Growth:</div>
+          <div>{getGrowthSpeedLabel(species.growthStages.length)}</div>
         </div>
       </CardContent>
     </Card>

@@ -47,10 +47,15 @@ describe("Care system integration", () => {
 
     // Process care life - should drain since satiety is 0
     const maxStats = calculatePetMaxStats(pet);
-    const updatedCareLife = applyCareLifeChange(
-      pet,
-      maxStats?.careStatMax ?? 0,
-    );
+    // Use proper per-stat max care values
+    const maxCareStats = maxStats
+      ? {
+          satiety: maxStats.care.satiety,
+          hydration: maxStats.care.hydration,
+          happiness: maxStats.care.happiness,
+        }
+      : { satiety: 0, hydration: 0, happiness: 0 };
+    const updatedCareLife = applyCareLifeChange(pet, maxCareStats);
 
     // Care life should have decreased
     expect(updatedCareLife).toBeLessThan(72_000);

@@ -37,7 +37,9 @@ export function applyCareDecay(pet: Pet): Pet["careStats"] {
 
   // Use centralized max stat calculation
   const maxStats = calculatePetMaxStats(pet);
-  const maxCareStat = maxStats?.careStatMax ?? 0;
+  const maxSatiety = maxStats?.care.satiety ?? 0;
+  const maxHydration = maxStats?.care.hydration ?? 0;
+  const maxHappiness = maxStats?.care.happiness ?? 0;
 
   // Calculate new values with decay
   const newSatiety = Math.max(0, pet.careStats.satiety - decayRate);
@@ -46,8 +48,8 @@ export function applyCareDecay(pet: Pet): Pet["careStats"] {
   const newHappiness = Math.max(0, pet.careStats.happiness - happinessDecay);
 
   return {
-    satiety: Math.min(newSatiety, maxCareStat),
-    hydration: Math.min(newHydration, maxCareStat),
-    happiness: Math.min(newHappiness, maxCareStat),
+    satiety: Math.min(newSatiety, maxSatiety),
+    hydration: Math.min(newHydration, maxHydration),
+    happiness: Math.min(newHappiness, maxHappiness),
   };
 }

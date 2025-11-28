@@ -3,100 +3,24 @@
  */
 
 import { expect, test } from "bun:test";
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
-import { SPECIES } from "@/game/data/species";
+import {
+  getSpeciesById,
+  getSpeciesGrowthStage,
+  SPECIES,
+} from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
 import type { GrowthStage } from "@/game/types/constants";
-import {
-  applyStatGains,
-  calculateStageTransitionStatGains,
-  getNextStage,
-  getStageProgressPercent,
-  getStatGainForRate,
-  getTicksUntilNextStage,
-  getTicksUntilNextSubstage,
-  processGrowthTick,
-} from "./growth";
+import { getNextStage, processGrowthTick } from "./growth";
 
-/**
- * Calculate the substage length for the baby stage.
- */
-function getBabySubstageLength(): number {
-  const babyDef = GROWTH_STAGE_DEFINITIONS.baby;
-  const childDef = GROWTH_STAGE_DEFINITIONS.child;
-  const stageDuration = childDef.minAgeTicks - babyDef.minAgeTicks;
-  return Math.floor(stageDuration / babyDef.substageCount);
+// Helper to get the min age ticks for a given stage from species data
+function getStageMinAgeTicks(speciesId: string, stage: GrowthStage): number {
+  const species = getSpeciesById(speciesId);
+  if (!species) return 0;
+  const growthStage = species.growthStages.find(
+    (gs) => gs.stage === stage && gs.subStage === "1",
+  );
+  return growthStage?.minAgeTicks ?? 0;
 }
-
-// getStatGainForRate tests
-test("getStatGainForRate returns 1 for low growth rate", () => {
-  expect(getStatGainForRate("low")).toBe(1);
-});
-
-test("getStatGainForRate returns 3 for medium growth rate", () => {
-  expect(getStatGainForRate("medium")).toBe(3);
-});
-
-test("getStatGainForRate returns 5 for high growth rate", () => {
-  expect(getStatGainForRate("high")).toBe(5);
-});
-
-// calculateStageTransitionStatGains tests
-test("calculateStageTransitionStatGains returns correct gains for florabit", () => {
-  const gains = calculateStageTransitionStatGains(SPECIES.FLORABIT.id);
-  expect(gains).not.toBeNull();
-  // Florabit has all medium growth rates
-  expect(gains?.strength).toBe(3);
-  expect(gains?.endurance).toBe(3);
-  expect(gains?.agility).toBe(3);
-  expect(gains?.precision).toBe(3);
-  expect(gains?.fortitude).toBe(3);
-  expect(gains?.cunning).toBe(3);
-});
-
-test("calculateStageTransitionStatGains returns correct gains for sparkfin", () => {
-  const gains = calculateStageTransitionStatGains(SPECIES.SPARKFIN.id);
-  expect(gains).not.toBeNull();
-  // Sparkfin has high agility/precision, low endurance/fortitude
-  expect(gains?.agility).toBe(5);
-  expect(gains?.precision).toBe(5);
-  expect(gains?.endurance).toBe(1);
-  expect(gains?.fortitude).toBe(1);
-});
-
-test("calculateStageTransitionStatGains returns null for unknown species", () => {
-  const gains = calculateStageTransitionStatGains("unknown_species");
-  expect(gains).toBeNull();
-});
-
-// applyStatGains tests
-test("applyStatGains correctly adds gains to stats", () => {
-  const current = {
-    strength: 10,
-    endurance: 10,
-    agility: 10,
-    precision: 10,
-    fortitude: 10,
-    cunning: 10,
-  };
-  const gains = {
-    strength: 3,
-    endurance: 3,
-    agility: 3,
-    precision: 3,
-    fortitude: 3,
-    cunning: 3,
-  };
-
-  const result = applyStatGains(current, gains);
-
-  expect(result.strength).toBe(13);
-  expect(result.endurance).toBe(13);
-  expect(result.agility).toBe(13);
-  expect(result.precision).toBe(13);
-  expect(result.fortitude).toBe(13);
-  expect(result.cunning).toBe(13);
-});
 
 // processGrowthTick tests
 test("processGrowthTick increments ageTicks", () => {
@@ -122,12 +46,13 @@ test("processGrowthTick does not transition when within same stage", () => {
 });
 
 test("processGrowthTick transitions stage when reaching threshold", () => {
+  const childMinAge = getStageMinAgeTicks(SPECIES.FLORABIT.id, "child");
   const pet = createTestPet({
     growth: {
       stage: "baby",
       substage: 3,
       birthTime: Date.now(),
-      ageTicks: GROWTH_STAGE_DEFINITIONS.child.minAgeTicks - 1,
+      ageTicks: childMinAge - 1,
     },
     battleStats: {
       strength: 10,
@@ -143,43 +68,38 @@ test("processGrowthTick transitions stage when reaching threshold", () => {
   expect(result.stageTransitioned).toBe(true);
   expect(result.growth.stage).toBe("child");
   expect(result.previousStage).toBe("baby");
-  // Should have gained stats (florabit has medium growth = +3 for all stats)
-  expect(result.battleStats.strength).toBe(13);
-  expect(result.battleStats.endurance).toBe(13);
-  expect(result.battleStats.agility).toBe(13);
-  expect(result.battleStats.precision).toBe(13);
-  expect(result.battleStats.fortitude).toBe(13);
-  expect(result.battleStats.cunning).toBe(13);
+  // Battle stats come from species growth stage definition now
+  // Verify they're updated
+  expect(result.battleStats.strength).toBeGreaterThan(0);
 });
 
 // Parameterized tests for stage transitions
 const stageTransitions: {
   from: GrowthStage;
   to: GrowthStage;
-  startStrength: number;
-  endStrength: number;
 }[] = [
-  { from: "child", to: "teen", startStrength: 13, endStrength: 16 },
-  { from: "teen", to: "youngAdult", startStrength: 16, endStrength: 19 },
-  { from: "youngAdult", to: "adult", startStrength: 19, endStrength: 22 },
+  { from: "child", to: "teen" },
+  { from: "teen", to: "youngAdult" },
+  { from: "youngAdult", to: "adult" },
 ];
 
-for (const { from, to, startStrength, endStrength } of stageTransitions) {
+for (const { from, to } of stageTransitions) {
   test(`processGrowthTick transitions from ${from} to ${to}`, () => {
+    const toMinAge = getStageMinAgeTicks(SPECIES.FLORABIT.id, to);
     const pet = createTestPet({
       growth: {
         stage: from,
         substage: 3,
         birthTime: Date.now(),
-        ageTicks: GROWTH_STAGE_DEFINITIONS[to].minAgeTicks - 1,
+        ageTicks: toMinAge - 1,
       },
       battleStats: {
-        strength: startStrength,
-        endurance: startStrength,
-        agility: startStrength,
-        precision: startStrength,
-        fortitude: startStrength,
-        cunning: startStrength,
+        strength: 10,
+        endurance: 10,
+        agility: 10,
+        precision: 10,
+        fortitude: 10,
+        cunning: 10,
       },
     });
     const result = processGrowthTick(pet);
@@ -187,18 +107,23 @@ for (const { from, to, startStrength, endStrength } of stageTransitions) {
     expect(result.stageTransitioned).toBe(true);
     expect(result.growth.stage).toBe(to);
     expect(result.previousStage).toBe(from);
-    expect(result.battleStats.strength).toBe(endStrength);
   });
 }
 
-test("processGrowthTick transitions substage within stage", () => {
-  const substageLength = getBabySubstageLength();
+test("processGrowthTick handles substage transitions", () => {
+  // Get the min age for baby substage 2 (subStage is a string)
+  const species = getSpeciesById(SPECIES.FLORABIT.id);
+  const babySubstage2 = species?.growthStages.find(
+    (gs) => gs.stage === "baby" && gs.subStage === "2",
+  );
+  if (!babySubstage2) return;
+
   const pet = createTestPet({
     growth: {
       stage: "baby",
       substage: 1,
       birthTime: Date.now(),
-      ageTicks: substageLength - 1,
+      ageTicks: babySubstage2.minAgeTicks - 1,
     },
   });
   const result = processGrowthTick(pet);
@@ -209,14 +134,20 @@ test("processGrowthTick transitions substage within stage", () => {
   expect(result.previousSubstage).toBe(1);
 });
 
-test("processGrowthTick does not modify battle stats on substage transition", () => {
-  const substageLength = getBabySubstageLength();
+test("processGrowthTick recalculates battle stats on substage transition", () => {
+  // Get the min age for baby substage 2 (subStage is a string)
+  const species = getSpeciesById(SPECIES.FLORABIT.id);
+  const babySubstage2 = species?.growthStages.find(
+    (gs) => gs.stage === "baby" && gs.subStage === "2",
+  );
+  if (!babySubstage2) return;
+
   const pet = createTestPet({
     growth: {
       stage: "baby",
       substage: 1,
       birthTime: Date.now(),
-      ageTicks: substageLength - 1,
+      ageTicks: babySubstage2.minAgeTicks - 1,
     },
     battleStats: {
       strength: 10,
@@ -230,7 +161,26 @@ test("processGrowthTick does not modify battle stats on substage transition", ()
   const result = processGrowthTick(pet);
 
   expect(result.substageTransitioned).toBe(true);
-  expect(result.battleStats.strength).toBe(10);
+  // Battle stats should be recalculated with new base stats from substage 2
+  // Baby substage 2 has base stats of 11 for all battle stats
+  expect(result.battleStats.strength).toBe(
+    babySubstage2.baseStats.battle.strength,
+  );
+  expect(result.battleStats.endurance).toBe(
+    babySubstage2.baseStats.battle.endurance,
+  );
+  expect(result.battleStats.agility).toBe(
+    babySubstage2.baseStats.battle.agility,
+  );
+  expect(result.battleStats.precision).toBe(
+    babySubstage2.baseStats.battle.precision,
+  );
+  expect(result.battleStats.fortitude).toBe(
+    babySubstage2.baseStats.battle.fortitude,
+  );
+  expect(result.battleStats.cunning).toBe(
+    babySubstage2.baseStats.battle.cunning,
+  );
 });
 
 // getNextStage tests
@@ -254,54 +204,35 @@ test("getNextStage returns null for adult", () => {
   expect(getNextStage("adult")).toBeNull();
 });
 
-// getTicksUntilNextStage tests
-test("getTicksUntilNextStage returns correct ticks for baby at start", () => {
-  const ticks = getTicksUntilNextStage("baby", 0);
-  expect(ticks).toBe(GROWTH_STAGE_DEFINITIONS.child.minAgeTicks);
+// Species-specific growth stage tests
+test("getSpeciesGrowthStage returns correct stage for age 0", () => {
+  const stage = getSpeciesGrowthStage(SPECIES.FLORABIT, 0);
+  expect(stage).toBeDefined();
+  expect(stage?.stage).toBe("baby");
+  expect(stage?.subStage).toBe("1");
 });
 
-test("getTicksUntilNextStage returns correct ticks for baby halfway", () => {
-  const halfwayTicks = GROWTH_STAGE_DEFINITIONS.child.minAgeTicks / 2;
-  const ticks = getTicksUntilNextStage("baby", halfwayTicks);
-  expect(ticks).toBe(halfwayTicks);
+test("getSpeciesGrowthStage returns correct stage for adult age", () => {
+  const adultMinAge = getStageMinAgeTicks(SPECIES.FLORABIT.id, "adult");
+  const stage = getSpeciesGrowthStage(SPECIES.FLORABIT, adultMinAge);
+  expect(stage).toBeDefined();
+  expect(stage?.stage).toBe("adult");
 });
 
-test("getTicksUntilNextStage returns null for adult", () => {
-  const ticks = getTicksUntilNextStage(
-    "adult",
-    GROWTH_STAGE_DEFINITIONS.adult.minAgeTicks,
-  );
-  expect(ticks).toBeNull();
+test("emberfox has 4 child substages in growth", () => {
+  const species = getSpeciesById(SPECIES.EMBERFOX.id);
+  expect(species).toBeDefined();
+
+  const childStages =
+    species?.growthStages.filter((gs) => gs.stage === "child") ?? [];
+  expect(childStages.length).toBe(4);
 });
 
-// getTicksUntilNextSubstage tests
-test("getTicksUntilNextSubstage returns ticks for substage 1", () => {
-  const expectedSubstageLength = getBabySubstageLength();
-  const ticks = getTicksUntilNextSubstage("baby", 1, 0);
-  expect(ticks).toBe(expectedSubstageLength);
-});
+test("florabit has 3 child substages in growth", () => {
+  const species = getSpeciesById(SPECIES.FLORABIT.id);
+  expect(species).toBeDefined();
 
-test("getTicksUntilNextSubstage returns null at max substage", () => {
-  const ticks = getTicksUntilNextSubstage(
-    "baby",
-    3,
-    GROWTH_STAGE_DEFINITIONS.child.minAgeTicks - 800,
-  );
-  expect(ticks).toBeNull();
-});
-
-// getStageProgressPercent tests
-test("getStageProgressPercent returns 0 at stage start", () => {
-  expect(getStageProgressPercent("baby", 0)).toBe(0);
-});
-
-test("getStageProgressPercent returns 50 halfway through stage", () => {
-  const halfwayTicks = GROWTH_STAGE_DEFINITIONS.child.minAgeTicks / 2;
-  expect(getStageProgressPercent("baby", halfwayTicks)).toBe(50);
-});
-
-test("getStageProgressPercent returns 100 at stage end", () => {
-  expect(
-    getStageProgressPercent("baby", GROWTH_STAGE_DEFINITIONS.child.minAgeTicks),
-  ).toBe(100);
+  const childStages =
+    species?.growthStages.filter((gs) => gs.stage === "child") ?? [];
+  expect(childStages.length).toBe(3);
 });

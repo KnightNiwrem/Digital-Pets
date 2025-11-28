@@ -2,7 +2,7 @@
  * Sleep state transitions and logic.
  */
 
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import { getSpeciesGrowthStage } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
 import { now } from "@/game/types/common";
 import type { GrowthStage } from "@/game/types/constants";
@@ -18,25 +18,50 @@ export interface SleepTransitionResult {
 }
 
 /**
- * Get the minimum sleep ticks required for a growth stage.
+ * Default minimum sleep ticks by growth stage (fallback if species data unavailable).
+ * Based on 120 ticks per hour:
+ * - baby: 16 hours = 1920 ticks
+ * - child: 14 hours = 1680 ticks
+ * - teen: 12 hours = 1440 ticks
+ * - youngAdult: 10 hours = 1200 ticks
+ * - adult: 8 hours = 960 ticks
  */
-export function getMinSleepTicks(stage: GrowthStage): Tick {
-  return GROWTH_STAGE_DEFINITIONS[stage].minSleepTicks;
+const DEFAULT_MIN_SLEEP_TICKS: Record<GrowthStage, Tick> = {
+  baby: 1920,
+  child: 1680,
+  teen: 1440,
+  youngAdult: 1200,
+  adult: 960,
+};
+
+/**
+ * Get the minimum sleep ticks required for a pet based on species and age.
+ */
+export function getMinSleepTicksForPet(pet: Pet): Tick {
+  const growthStage = getSpeciesGrowthStage(
+    pet.identity.speciesId,
+    pet.growth.ageTicks,
+  );
+  return (
+    growthStage?.minSleepTicks ?? DEFAULT_MIN_SLEEP_TICKS[pet.growth.stage]
+  );
 }
 
 /**
  * Calculate remaining sleep needed for today.
+ * Uses species-specific sleep requirements.
  */
 export function getRemainingMinSleep(pet: Pet): Tick {
-  const minRequired = getMinSleepTicks(pet.growth.stage);
+  const minRequired = getMinSleepTicksForPet(pet);
   return Math.max(0, minRequired - pet.sleep.sleepTicksToday);
 }
 
 /**
  * Check if pet has met their minimum sleep requirement for today.
+ * Uses species-specific sleep requirements.
  */
 export function hasMetSleepRequirement(pet: Pet): boolean {
-  return pet.sleep.sleepTicksToday >= getMinSleepTicks(pet.growth.stage);
+  return pet.sleep.sleepTicksToday >= getMinSleepTicksForPet(pet);
 }
 
 /**

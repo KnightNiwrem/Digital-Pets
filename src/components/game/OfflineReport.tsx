@@ -178,8 +178,10 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
   const poopChange = poopAfter - poopBefore;
 
   // Use max values from report, with fallback for safety
-  const maxCareStat = maxStats?.careStatMax ?? 200_000;
-  const maxEnergy = maxStats?.energyMax ?? 200_000;
+  const maxSatiety = maxStats?.care?.satiety ?? 200_000;
+  const maxHydration = maxStats?.care?.hydration ?? 200_000;
+  const maxHappiness = maxStats?.care?.happiness ?? 200_000;
+  const maxEnergy = maxStats?.energy ?? 200_000;
 
   // Calculate total pages (1 for stats + number of exploration results)
   const totalExplorationPages = explorationResults.length;
@@ -253,21 +255,21 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
                     label="Satiety"
                     before={beforeStats.satiety}
                     after={afterStats.satiety}
-                    max={maxCareStat}
+                    max={maxSatiety}
                     displayFn={toDisplayCare}
                   />
                   <StatChange
                     label="Hydration"
                     before={beforeStats.hydration}
                     after={afterStats.hydration}
-                    max={maxCareStat}
+                    max={maxHydration}
                     displayFn={toDisplayCare}
                   />
                   <StatChange
                     label="Happiness"
                     before={beforeStats.happiness}
                     after={afterStats.happiness}
-                    max={maxCareStat}
+                    max={maxHappiness}
                     displayFn={toDisplayCare}
                   />
                   <StatChange

@@ -2,16 +2,13 @@
  * Selectors for deriving values from game state.
  */
 
-import {
-  getNextStage,
-  getStageProgressPercent,
-  getTicksUntilNextStage,
-  getTicksUntilNextSubstage,
-} from "@/game/core/growth";
+import { getNextStage } from "@/game/core/growth";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import {
-  GROWTH_STAGE_DEFINITIONS,
-  type GrowthStageDefinition,
+  getNextSpeciesStage,
+  getSpeciesStageStats,
+  getStageProgress,
+  getTicksUntilNextStageTransition,
 } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
 import type { GameState, Pet } from "@/game/types";
@@ -27,7 +24,7 @@ import {
   type GrowthStage,
   getCareThreshold,
 } from "@/game/types/constants";
-import type { Species } from "@/game/types/species";
+import type { Species, SpeciesGrowthStageStats } from "@/game/types/species";
 
 /**
  * Get the active pet from game state.
@@ -51,7 +48,7 @@ export function selectPetSpecies(state: GameState): Species | null {
 interface PetContext {
   pet: Pet;
   species: Species;
-  stageDef: GrowthStageDefinition;
+  stageStats: SpeciesGrowthStageStats;
 }
 
 function getPetContext(state: GameState): PetContext | null {
@@ -61,10 +58,13 @@ function getPetContext(state: GameState): PetContext | null {
   const species = getSpeciesById(pet.identity.speciesId);
   if (!species) return null;
 
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
-  if (!stageDef) return null;
+  const stageStats = getSpeciesStageStats(
+    pet.identity.speciesId,
+    pet.growth.ageTicks,
+  );
+  if (!stageStats) return null;
 
-  return { pet, species, stageDef };
+  return { pet, species, stageStats };
 }
 
 /**
@@ -99,19 +99,24 @@ export function selectCareStats(state: GameState): CareStatDisplay | null {
   const satiety = toDisplayCare(pet.careStats.satiety);
   const hydration = toDisplayCare(pet.careStats.hydration);
   const happiness = toDisplayCare(pet.careStats.happiness);
-  const max = toDisplayCare(maxStats.careStatMax);
+  const satietyMax = toDisplayCare(maxStats.care.satiety);
+  const hydrationMax = toDisplayCare(maxStats.care.hydration);
+  const happinessMax = toDisplayCare(maxStats.care.happiness);
 
-  const satietyPercent = max > 0 ? Math.round((satiety / max) * 100) : 0;
-  const hydrationPercent = max > 0 ? Math.round((hydration / max) * 100) : 0;
-  const happinessPercent = max > 0 ? Math.round((happiness / max) * 100) : 0;
+  const satietyPercent =
+    satietyMax > 0 ? Math.round((satiety / satietyMax) * 100) : 0;
+  const hydrationPercent =
+    hydrationMax > 0 ? Math.round((hydration / hydrationMax) * 100) : 0;
+  const happinessPercent =
+    happinessMax > 0 ? Math.round((happiness / happinessMax) * 100) : 0;
 
   return {
     satiety,
     hydration,
     happiness,
-    satietyMax: max,
-    hydrationMax: max,
-    happinessMax: max,
+    satietyMax,
+    hydrationMax,
+    happinessMax,
     satietyPercent,
     hydrationPercent,
     happinessPercent,
@@ -142,7 +147,7 @@ export function selectEnergy(state: GameState): EnergyDisplay | null {
   if (!maxStats) return null;
 
   const energy = toDisplay(pet.energyStats.energy);
-  const max = toDisplay(maxStats.energyMax);
+  const max = toDisplay(maxStats.energy);
 
   return {
     energy,
@@ -222,7 +227,12 @@ export function selectPetInfo(state: GameState): PetInfoDisplay | null {
   const ctx = getPetContext(state);
   if (!ctx) return null;
 
-  const { pet, species, stageDef } = ctx;
+  const { pet, species, stageStats } = ctx;
+
+  // Count substages with the same stage name to determine substage count
+  const substageCount = species.growthStages.filter(
+    (gs) => gs.stage === stageStats.stage,
+  ).length;
 
   // Convert age in ticks to days
   const ageDays = Math.floor(pet.growth.ageTicks / TICKS_PER_DAY);
@@ -231,10 +241,10 @@ export function selectPetInfo(state: GameState): PetInfoDisplay | null {
     name: pet.identity.name,
     speciesName: species.name,
     speciesEmoji: species.emoji,
-    stage: stageDef.name,
+    stage: stageStats.name,
     stageId: pet.growth.stage,
     substage: pet.growth.substage,
-    substageCount: stageDef.substageCount,
+    substageCount,
     ageDays,
     isSleeping: pet.sleep.isSleeping,
   };
@@ -249,30 +259,52 @@ export function selectGrowthProgress(
   const ctx = getPetContext(state);
   if (!ctx) return null;
 
-  const { pet, stageDef } = ctx;
+  const { pet, species, stageStats } = ctx;
   const { stage, substage, ageTicks } = pet.growth;
 
-  const nextStageId = getNextStage(stage);
-  const nextStageDef = nextStageId
-    ? GROWTH_STAGE_DEFINITIONS[nextStageId]
-    : null;
+  // Count substages with the same stage name
+  const substageCount = species.growthStages.filter(
+    (gs) => gs.stage === stageStats.stage,
+  ).length;
 
-  const ticksUntilNextStage = getTicksUntilNextStage(stage, ageTicks);
-  const ticksUntilNextSubstage = getTicksUntilNextSubstage(
-    stage,
-    substage,
+  const nextStageId = getNextStage(stage);
+
+  const ticksUntilNextStage = getTicksUntilNextStageTransition(
+    pet.identity.speciesId,
     ageTicks,
   );
 
+  // Calculate ticks until next substage (only if next transition is a substage, not a main stage)
+  let ticksUntilNextSubstage: Tick | null = null;
+  const nextSpeciesStage = getNextSpeciesStage(
+    pet.identity.speciesId,
+    ageTicks,
+  );
+  if (nextSpeciesStage && nextSpeciesStage.stage === stageStats.stage) {
+    // Next transition is a substage within the same main stage
+    ticksUntilNextSubstage = nextSpeciesStage.minAgeTicks - ageTicks;
+  }
+
   const ageDays = Math.floor(ageTicks / TICKS_PER_DAY);
 
+  // Find the next stage name - use the display name directly from the stage stats
+  let nextStageName: string | null = null;
+  if (nextStageId) {
+    const nextStageStats = species.growthStages.find(
+      (gs) => gs.stage === nextStageId,
+    );
+    if (nextStageStats) {
+      nextStageName = nextStageStats.name;
+    }
+  }
+
   return {
-    currentStage: stageDef.name,
+    currentStage: stageStats.name,
     currentStageId: stage,
-    nextStage: nextStageDef?.name ?? null,
+    nextStage: nextStageName,
     substage,
-    substageCount: stageDef.substageCount,
-    stageProgressPercent: getStageProgressPercent(stage, ageTicks),
+    substageCount,
+    stageProgressPercent: getStageProgress(pet.identity.speciesId, ageTicks),
     ticksUntilNextStage,
     timeUntilNextStage:
       ticksUntilNextStage !== null

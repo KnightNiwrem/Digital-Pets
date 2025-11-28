@@ -2,7 +2,7 @@
  * Care life drain/recovery logic.
  */
 
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import type { MicroValue } from "@/game/types/common";
 import { toDisplayCare } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
@@ -35,6 +35,15 @@ export {
 };
 
 /**
+ * Maximum care stats for percentage calculations.
+ */
+export interface MaxCareStats {
+  satiety: MicroValue;
+  hydration: MicroValue;
+  happiness: MicroValue;
+}
+
+/**
  * Count how many care stats have a display value of 0.
  */
 function countCriticalStats(pet: Pet): number {
@@ -47,12 +56,24 @@ function countCriticalStats(pet: Pet): number {
 
 /**
  * Get care stat percentages for recovery calculation.
+ * Uses the correct max value for each individual stat.
  */
-function getCareStatPercentages(pet: Pet, maxCareStat: MicroValue): number[] {
-  if (maxCareStat === 0) return [0, 0, 0];
-  const satietyPercent = (pet.careStats.satiety / maxCareStat) * 100;
-  const hydrationPercent = (pet.careStats.hydration / maxCareStat) * 100;
-  const happinessPercent = (pet.careStats.happiness / maxCareStat) * 100;
+function getCareStatPercentages(
+  pet: Pet,
+  maxCareStats: MaxCareStats,
+): number[] {
+  const satietyPercent =
+    maxCareStats.satiety === 0
+      ? 0
+      : (pet.careStats.satiety / maxCareStats.satiety) * 100;
+  const hydrationPercent =
+    maxCareStats.hydration === 0
+      ? 0
+      : (pet.careStats.hydration / maxCareStats.hydration) * 100;
+  const happinessPercent =
+    maxCareStats.happiness === 0
+      ? 0
+      : (pet.careStats.happiness / maxCareStats.happiness) * 100;
   return [satietyPercent, hydrationPercent, happinessPercent];
 }
 
@@ -62,7 +83,7 @@ function getCareStatPercentages(pet: Pet, maxCareStat: MicroValue): number[] {
  */
 export function calculateCareLifeChange(
   pet: Pet,
-  maxCareStat: MicroValue,
+  maxCareStats: MaxCareStats,
 ): MicroValue {
   const criticalCount = countCriticalStats(pet);
   let totalDrain = 0;
@@ -93,7 +114,7 @@ export function calculateCareLifeChange(
   }
 
   // If no drain, check for recovery conditions
-  const percentages = getCareStatPercentages(pet, maxCareStat);
+  const percentages = getCareStatPercentages(pet, maxCareStats);
   const minPercent = Math.min(...percentages);
 
   if (minPercent >= CARE_LIFE_RECOVERY_THRESHOLD_100) {
@@ -116,12 +137,12 @@ export function calculateCareLifeChange(
  */
 export function applyCareLifeChange(
   pet: Pet,
-  maxCareStat: MicroValue,
+  maxCareStats: MaxCareStats,
 ): MicroValue {
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
-  const maxCareLife = stageDef.careLifeMax;
+  const maxStats = calculatePetMaxStats(pet);
+  const maxCareLife = maxStats?.careLife ?? 0;
 
-  const delta = calculateCareLifeChange(pet, maxCareStat);
+  const delta = calculateCareLifeChange(pet, maxCareStats);
   const newCareLife = pet.careLifeStats.careLife + delta;
 
   return Math.max(0, Math.min(newCareLife, maxCareLife));

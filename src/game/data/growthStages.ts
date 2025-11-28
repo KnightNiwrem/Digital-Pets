@@ -1,155 +1,175 @@
 /**
- * Growth stage definitions with thresholds and properties.
+ * Growth stage utilities and constants.
+ * Growth stage definitions are now embedded in species data.
  */
 
-import type { MicroValue, Tick } from "@/game/types/common";
-import { TICKS_PER_MONTH } from "@/game/types/common";
+import type { Tick } from "@/game/types/common";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
+import type { SpeciesGrowthStageStats } from "@/game/types/species";
+import { getSpeciesById } from "./species";
 
 /**
- * Definition for a growth stage.
+ * Default species ID used for deriving generic stage thresholds.
+ * Florabit is the balanced starter, making it a good default reference.
  */
-export interface GrowthStageDefinition {
-  /** Growth stage identifier */
-  stage: GrowthStage;
-  /** Display name */
-  name: string;
-  /** Number of substages within this stage */
-  substageCount: number;
-  /** Minimum age in ticks to reach this stage */
-  minAgeTicks: Tick;
-  /** Base maximum for care stats (micro-units) */
-  baseCareStatMax: MicroValue;
-  /** Base maximum for energy (micro-units) */
-  baseEnergyMax: MicroValue;
-  /** Maximum care life (micro-units) */
-  careLifeMax: MicroValue;
-  /**
-   * Minimum sleep ticks required per day.
-   * Per spec (training.md):
-   * - Baby: 1920 ticks (16 hours)
-   * - Child: 1680 ticks (14 hours)
-   * - Teen: 1440 ticks (12 hours)
-   * - Young Adult: 1200 ticks (10 hours)
-   * - Adult: 960 ticks (8 hours)
-   */
-  minSleepTicks: Tick;
+const DEFAULT_REFERENCE_SPECIES = "florabit";
+
+/**
+ * Convert a stage string to a GrowthStage constant.
+ * Returns null if invalid.
+ */
+export function toGrowthStage(stage: string): GrowthStage | null {
+  if (GROWTH_STAGE_ORDER.includes(stage as GrowthStage)) {
+    return stage as GrowthStage;
+  }
+  return null;
 }
 
 /**
- * Growth stage definitions.
- * Target: ~12 months real time to reach Adult.
- *
- * Tick reference:
- * - 1 day = 2880 ticks
- * - 1 week = 20,160 ticks
- * - 1 month ≈ 86,400 ticks (30 days)
+ * Get the minimum age ticks for each growth stage, derived from a default species.
+ * This is used by legacy functions that don't have access to a specific species.
+ * Returns the minAgeTicks of the first substage of each main stage.
  */
-export const GROWTH_STAGE_DEFINITIONS: Record<
-  GrowthStage,
-  GrowthStageDefinition
-> = {
-  baby: {
-    stage: "baby",
-    name: "Baby",
-    substageCount: 3,
-    minAgeTicks: 0,
-    baseCareStatMax: 50_000,
-    baseEnergyMax: 50_000,
-    careLifeMax: 72_000,
-    minSleepTicks: 1920, // 16 hours
-  },
-  child: {
-    stage: "child",
-    name: "Child",
-    substageCount: 3,
-    minAgeTicks: 172_800, // ~2 months
-    baseCareStatMax: 80_000,
-    baseEnergyMax: 75_000,
-    careLifeMax: 120_000,
-    minSleepTicks: 1680, // 14 hours
-  },
-  teen: {
-    stage: "teen",
-    name: "Teen",
-    substageCount: 3,
-    minAgeTicks: 432_000, // ~5 months
-    baseCareStatMax: 120_000,
-    baseEnergyMax: 100_000,
-    careLifeMax: 168_000,
-    minSleepTicks: 1440, // 12 hours
-  },
-  youngAdult: {
-    stage: "youngAdult",
-    name: "Young Adult",
-    substageCount: 3,
-    minAgeTicks: 691_200, // ~8 months
-    baseCareStatMax: 160_000,
-    baseEnergyMax: 150_000,
-    careLifeMax: 240_000,
-    minSleepTicks: 1200, // 10 hours
-  },
-  adult: {
-    stage: "adult",
-    name: "Adult",
-    substageCount: 3,
-    minAgeTicks: 1_036_800, // ~12 months
-    baseCareStatMax: 200_000,
-    baseEnergyMax: 200_000,
-    careLifeMax: 336_000,
-    minSleepTicks: 960, // 8 hours
-  },
-};
-
-/**
- * Get growth stage definition by stage.
- */
-export function getGrowthStageDefinition(
-  stage: GrowthStage,
-): GrowthStageDefinition {
-  return GROWTH_STAGE_DEFINITIONS[stage];
-}
-
-/**
- * Determine growth stage from age in ticks.
- */
-export function getStageFromAge(ageTicks: Tick): GrowthStage {
-  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.adult.minAgeTicks) return "adult";
-  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.youngAdult.minAgeTicks)
-    return "youngAdult";
-  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.teen.minAgeTicks) return "teen";
-  if (ageTicks >= GROWTH_STAGE_DEFINITIONS.child.minAgeTicks) return "child";
-  return "baby";
-}
-
-/**
- * Calculate substage within the current growth stage.
- */
-export function getSubstage(stage: GrowthStage, ageTicks: Tick): number {
-  const def = GROWTH_STAGE_DEFINITIONS[stage];
-  const stageIndex = GROWTH_STAGE_ORDER.indexOf(stage);
-  const nextStageIndex = stageIndex + 1;
-
-  // If adult, calculate substage based on time in adult stage
-  if (nextStageIndex >= GROWTH_STAGE_ORDER.length) {
-    const timeInStage = ageTicks - def.minAgeTicks;
-    return Math.min(
-      def.substageCount,
-      Math.floor(timeInStage / TICKS_PER_MONTH) + 1,
-    );
+export function getDefaultStageMinAges(): Record<GrowthStage, Tick> {
+  const species = getSpeciesById(DEFAULT_REFERENCE_SPECIES);
+  if (!species) {
+    // Hardcoded fallback if species not found (should never happen)
+    return {
+      baby: 0,
+      child: 172_800,
+      teen: 432_000,
+      youngAdult: 691_200,
+      adult: 1_036_800,
+    };
   }
 
-  // TypeScript doesn't know nextStageIndex is valid after the length check above
-  const nextStage = GROWTH_STAGE_ORDER[nextStageIndex];
-  if (!nextStage) return 1; // Safety fallback, should never happen
+  const stageMinAges: Record<GrowthStage, Tick> = {
+    baby: 0,
+    child: 0,
+    teen: 0,
+    youngAdult: 0,
+    adult: 0,
+  };
 
-  const nextStageDef = GROWTH_STAGE_DEFINITIONS[nextStage];
-  const stageDuration = nextStageDef.minAgeTicks - def.minAgeTicks;
-  const timeInStage = ageTicks - def.minAgeTicks;
-  const substageLength = stageDuration / def.substageCount;
+  // Find the first substage of each main stage
+  for (const stage of GROWTH_STAGE_ORDER) {
+    const firstSubstage = species.growthStages.find((gs) => gs.stage === stage);
+    if (firstSubstage) {
+      stageMinAges[stage] = firstSubstage.minAgeTicks;
+    }
+  }
 
-  return Math.min(
-    def.substageCount,
-    Math.floor(timeInStage / substageLength) + 1,
-  );
+  return stageMinAges;
+}
+
+/**
+ * Get the current growth stage stats for a species based on age.
+ *
+ * Note: For more flexibility (accepting either a Species object or ID),
+ * you can also use getSpeciesGrowthStage from species.ts.
+ */
+export function getSpeciesStageStats(
+  speciesId: string,
+  ageTicks: Tick,
+): SpeciesGrowthStageStats | null {
+  const species = getSpeciesById(speciesId);
+  if (!species) return null;
+
+  // Find the highest growth stage that the pet qualifies for based on age
+  let currentStage: SpeciesGrowthStageStats | undefined;
+  for (const stage of species.growthStages) {
+    if (ageTicks >= stage.minAgeTicks) {
+      currentStage = stage;
+    } else {
+      break;
+    }
+  }
+  return currentStage ?? null;
+}
+
+/**
+ * Get the next growth stage for a species based on current age.
+ * Returns null if at the final stage.
+ */
+export function getNextSpeciesStage(
+  speciesId: string,
+  ageTicks: Tick,
+): SpeciesGrowthStageStats | null {
+  const species = getSpeciesById(speciesId);
+  if (!species) return null;
+
+  // Find the next stage after the current one
+  for (let i = 0; i < species.growthStages.length; i++) {
+    const stage = species.growthStages[i];
+    if (stage && ageTicks < stage.minAgeTicks) {
+      return stage;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get the GrowthStage enum value from a species growth stage.
+ */
+export function getGrowthStageFromSpeciesStage(
+  stageStats: SpeciesGrowthStageStats,
+): GrowthStage {
+  const stage = toGrowthStage(stageStats.stage);
+  return stage ?? "baby";
+}
+
+/**
+ * Calculate ticks until next stage transition.
+ * Returns null if at final stage.
+ */
+export function getTicksUntilNextStageTransition(
+  speciesId: string,
+  ageTicks: Tick,
+): Tick | null {
+  const nextStage = getNextSpeciesStage(speciesId, ageTicks);
+  if (!nextStage) return null;
+  return nextStage.minAgeTicks - ageTicks;
+}
+
+/**
+ * Get the index of the current growth stage in the species' growth stages array.
+ */
+export function getCurrentStageIndex(
+  speciesId: string,
+  ageTicks: Tick,
+): number {
+  const species = getSpeciesById(speciesId);
+  if (!species) return 0;
+
+  let currentIndex = 0;
+  for (let i = 0; i < species.growthStages.length; i++) {
+    const stage = species.growthStages[i];
+    if (stage && ageTicks >= stage.minAgeTicks) {
+      currentIndex = i;
+    } else {
+      break;
+    }
+  }
+  return currentIndex;
+}
+
+/**
+ * Get progress percentage toward next stage.
+ * Returns 100 if at final stage.
+ */
+export function getStageProgress(speciesId: string, ageTicks: Tick): number {
+  const species = getSpeciesById(speciesId);
+  if (!species) return 0;
+
+  const currentIndex = getCurrentStageIndex(speciesId, ageTicks);
+  const currentStage = species.growthStages[currentIndex];
+  const nextStage = species.growthStages[currentIndex + 1];
+
+  if (!currentStage) return 0;
+  if (!nextStage) return 100;
+
+  const stageDuration = nextStage.minAgeTicks - currentStage.minAgeTicks;
+  const timeInStage = ageTicks - currentStage.minAgeTicks;
+
+  return Math.min(100, Math.floor((timeInStage / stageDuration) * 100));
 }

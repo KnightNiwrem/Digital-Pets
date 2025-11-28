@@ -2,8 +2,12 @@
  * Care system exports.
  */
 
-// Care life functions
-export { applyCareLifeChange, calculateCareLifeChange } from "./careLife";
+// Care life functions and types
+export {
+  applyCareLifeChange,
+  calculateCareLifeChange,
+  type MaxCareStats,
+} from "./careLife";
 
 // Care stats functions
 export { applyCareDecay, getPoopHappinessMultiplier } from "./careStats";

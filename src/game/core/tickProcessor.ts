@@ -233,8 +233,13 @@ function createMaxStatsSnapshot(state: GameState): MaxStatsSnapshot | null {
   const maxStats = calculatePetMaxStats(state.pet);
   if (!maxStats) return null;
   return {
-    careStatMax: maxStats.careStatMax,
-    energyMax: maxStats.energyMax,
+    care: {
+      satiety: maxStats.care.satiety,
+      hydration: maxStats.care.hydration,
+      happiness: maxStats.care.happiness,
+    },
+    energy: maxStats.energy,
+    careLife: maxStats.careLife,
   };
 }
 
