@@ -2,15 +2,11 @@
  * Travel logic for moving between locations.
  */
 
+import { checkActivityIdle, checkEnergy } from "@/game/core/activityGating";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { areLocationsConnected, getLocation } from "@/game/data/locations";
-import { toDisplay, toMicro } from "@/game/types/common";
-import {
-  ActivityState,
-  GROWTH_STAGE_ORDER,
-  type GrowthStage,
-  getActivityConflictMessage,
-} from "@/game/types/constants";
+import { toMicro } from "@/game/types/common";
+import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type { LocationRequirement, TravelResult } from "@/game/types/location";
 import { ObjectiveType } from "@/game/types/quest";
@@ -109,12 +105,10 @@ export function canTravel(
     return { success: false, message: "You need a pet to travel." };
   }
 
-  // Cannot travel while doing another activity
-  if (state.pet.activityState !== ActivityState.Idle) {
-    return {
-      success: false,
-      message: getActivityConflictMessage("travel", state.pet.activityState),
-    };
+  // Check activity state
+  const activityCheck = checkActivityIdle(state.pet, "travel");
+  if (!activityCheck.allowed) {
+    return { success: false, message: activityCheck.message };
   }
 
   const currentLocationId = state.player.currentLocationId;
@@ -151,11 +145,11 @@ export function canTravel(
     return { success: false, message: "Cannot calculate travel cost." };
   }
 
-  const currentEnergy = toDisplay(state.pet.energyStats.energy);
-  if (currentEnergy < energyCost) {
+  const energyCheck = checkEnergy(state.pet.energyStats.energy, energyCost);
+  if (!energyCheck.allowed) {
     return {
       success: false,
-      message: `Not enough energy. Need ${energyCost}, have ${currentEnergy}.`,
+      message: energyCheck.message,
       energyCost,
     };
   }

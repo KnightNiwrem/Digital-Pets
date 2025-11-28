@@ -2,6 +2,7 @@
  * Foraging exploration logic.
  */
 
+import { checkActivityRequirements } from "@/game/core/activityGating";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getLocation } from "@/game/data/locations";
 import { type ForageTable, getForageTable } from "@/game/data/tables/forage";
@@ -11,11 +12,8 @@ import type {
   ExplorationResult,
 } from "@/game/types/activity";
 import { ExplorationActivityType } from "@/game/types/activity";
-import { type Tick, toDisplay, toMicro } from "@/game/types/common";
-import {
-  ActivityState,
-  getActivityConflictMessage,
-} from "@/game/types/constants";
+import { type Tick, toMicro } from "@/game/types/common";
+import { ActivityState } from "@/game/types/constants";
 import { FacilityType, LocationType } from "@/game/types/location";
 import type { Pet } from "@/game/types/pet";
 
@@ -31,19 +29,7 @@ export function canStartForaging(
   pet: Pet,
   currentLocationId: string,
 ): { canForage: boolean; message: string } {
-  // Check if pet is already doing an activity
-  if (pet.activityState !== ActivityState.Idle) {
-    return {
-      canForage: false,
-      message: getActivityConflictMessage(
-        "forage",
-        pet.activityState,
-        ActivityState.Exploring,
-      ),
-    };
-  }
-
-  // Get location
+  // Get location first (needed for energy cost check)
   const location = getLocation(currentLocationId);
   if (!location) {
     return { canForage: false, message: "Location not found." };
@@ -82,13 +68,15 @@ export function canStartForaging(
     };
   }
 
-  // Check energy
-  const currentEnergy = toDisplay(pet.energyStats.energy);
-  if (currentEnergy < forageTable.baseEnergyCost) {
-    return {
-      canForage: false,
-      message: `Not enough energy. Need ${forageTable.baseEnergyCost}, have ${currentEnergy}.`,
-    };
+  // Check activity state and energy requirements
+  const gatingCheck = checkActivityRequirements(
+    pet,
+    "forage",
+    forageTable.baseEnergyCost,
+    ActivityState.Exploring,
+  );
+  if (!gatingCheck.allowed) {
+    return { canForage: false, message: gatingCheck.message };
   }
 
   return { canForage: true, message: "Ready to forage!" };

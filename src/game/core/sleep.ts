@@ -2,14 +2,11 @@
  * Sleep state transitions and logic.
  */
 
+import { checkActivityIdle } from "@/game/core/activityGating";
 import { getSpeciesGrowthStage } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
 import { now } from "@/game/types/common";
-import {
-  ActivityState,
-  type GrowthStage,
-  getActivityConflictMessage,
-} from "@/game/types/constants";
+import { ActivityState, type GrowthStage } from "@/game/types/constants";
 import type { Pet, PetSleep } from "@/game/types/pet";
 
 /**
@@ -73,14 +70,16 @@ export function hasMetSleepRequirement(pet: Pet): boolean {
  */
 export function putToSleep(pet: Pet): SleepTransitionResult {
   // Check if pet is busy with another activity (training, exploring, battling)
+  // Allow sleeping when already idle or already sleeping
   if (
     pet.activityState !== ActivityState.Idle &&
     pet.activityState !== ActivityState.Sleeping
   ) {
+    const gatingCheck = checkActivityIdle(pet, "put to sleep");
     return {
       success: false,
       sleep: pet.sleep,
-      message: getActivityConflictMessage("put to sleep", pet.activityState),
+      message: gatingCheck.message,
     };
   }
 

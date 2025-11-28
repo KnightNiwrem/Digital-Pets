@@ -2,14 +2,11 @@
  * Item usage logic for consuming food, drinks, cleaning items, and toys.
  */
 
+import { checkActivityIdle } from "@/game/core/activityGating";
 import { removePoop } from "@/game/core/care/poop";
 import { hasItem, removeItem } from "@/game/core/inventory";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getItemById } from "@/game/data/items";
-import {
-  ActivityState,
-  getActivityConflictMessage,
-} from "@/game/types/constants";
 import type { GameState, InventoryItem } from "@/game/types/gameState";
 import {
   isCleaningItem,
@@ -59,12 +56,9 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
-  if (state.pet.activityState !== ActivityState.Idle) {
-    return {
-      success: false,
-      state,
-      message: getActivityConflictMessage("feed", state.pet.activityState),
-    };
+  const gatingCheck = checkActivityIdle(state.pet, "feed");
+  if (!gatingCheck.allowed) {
+    return { success: false, state, message: gatingCheck.message };
   }
 
   // Check if item exists and is food
@@ -137,15 +131,9 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
-  if (state.pet.activityState !== ActivityState.Idle) {
-    return {
-      success: false,
-      state,
-      message: getActivityConflictMessage(
-        "give water",
-        state.pet.activityState,
-      ),
-    };
+  const gatingCheck = checkActivityIdle(state.pet, "give water");
+  if (!gatingCheck.allowed) {
+    return { success: false, state, message: gatingCheck.message };
   }
 
   // Check if item exists and is drink
@@ -219,12 +207,9 @@ export function useCleaningItem(
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
-  if (state.pet.activityState !== ActivityState.Idle) {
-    return {
-      success: false,
-      state,
-      message: getActivityConflictMessage("clean", state.pet.activityState),
-    };
+  const gatingCheck = checkActivityIdle(state.pet, "clean");
+  if (!gatingCheck.allowed) {
+    return { success: false, state, message: gatingCheck.message };
   }
 
   // Check if item exists and is cleaning
@@ -306,12 +291,9 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
-  if (state.pet.activityState !== ActivityState.Idle) {
-    return {
-      success: false,
-      state,
-      message: getActivityConflictMessage("play", state.pet.activityState),
-    };
+  const gatingCheck = checkActivityIdle(state.pet, "play");
+  if (!gatingCheck.allowed) {
+    return { success: false, state, message: gatingCheck.message };
   }
 
   // Check if item exists and is a toy

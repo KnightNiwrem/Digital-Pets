@@ -33,6 +33,7 @@ import type { Pet } from "@/game/types/pet";
  * 7. Activity timers (training, etc.)
  */
 export function processPetTick(pet: Pet): Pet {
+  // Calculate max stats once per tick to avoid redundant recalculations
   const maxStats = calculatePetMaxStats(pet);
 
   // Get max care stats for proper percentage calculations
@@ -44,9 +45,10 @@ export function processPetTick(pet: Pet): Pet {
       }
     : { satiety: 0, hydration: 0, happiness: 0 };
   const maxEnergy = maxStats?.energy ?? 0;
+  const maxCareLife = maxStats?.careLife ?? 0;
 
   // 1. Care Life drain/recovery (evaluated on current care stat state)
-  const newCareLife = applyCareLifeChange(pet, maxCareStats);
+  const newCareLife = applyCareLifeChange(pet, maxCareStats, maxCareLife);
 
   // 2. Energy regeneration
   const newEnergy = applyEnergyRegen(

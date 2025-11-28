@@ -55,7 +55,8 @@ describe("Care system integration", () => {
           happiness: maxStats.care.happiness,
         }
       : { satiety: 0, hydration: 0, happiness: 0 };
-    const updatedCareLife = applyCareLifeChange(pet, maxCareStats);
+    const maxCareLife = maxStats?.careLife ?? 0;
+    const updatedCareLife = applyCareLifeChange(pet, maxCareStats, maxCareLife);
 
     // Care life should have decreased
     expect(updatedCareLife).toBeLessThan(72_000);

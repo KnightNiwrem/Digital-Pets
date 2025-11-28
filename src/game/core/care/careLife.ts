@@ -2,7 +2,6 @@
  * Care life drain/recovery logic.
  */
 
-import { calculatePetMaxStats } from "@/game/core/petStats";
 import type { MicroValue } from "@/game/types/common";
 import { toDisplayCare } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
@@ -134,14 +133,16 @@ export function calculateCareLifeChange(
 /**
  * Apply care life change for a single tick.
  * Returns the new care life value.
+ *
+ * @param pet - The pet to process
+ * @param maxCareStats - Max care stats for percentage calculations
+ * @param maxCareLife - Max care life value (pass from pre-computed max stats to avoid recalculation)
  */
 export function applyCareLifeChange(
   pet: Pet,
   maxCareStats: MaxCareStats,
+  maxCareLife: MicroValue,
 ): MicroValue {
-  const maxStats = calculatePetMaxStats(pet);
-  const maxCareLife = maxStats?.careLife ?? 0;
-
   const delta = calculateCareLifeChange(pet, maxCareStats);
   const newCareLife = pet.careLifeStats.careLife + delta;
 
