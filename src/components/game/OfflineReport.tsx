@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { StatsGainedDisplay } from "@/components/ui/StatsGainedDisplay";
 import { getItemById } from "@/game/data/items";
 import { toDisplay, toDisplayCare } from "@/game/types/common";
 import type {
@@ -18,7 +19,6 @@ import type {
   OfflineReport as OfflineReportType,
   OfflineTrainingResult,
 } from "@/game/types/offline";
-import type { BattleStats } from "@/game/types/stats";
 
 interface OfflineReportProps {
   report: OfflineReportType;
@@ -151,39 +151,10 @@ function ExplorationResultCard({
 }
 
 /**
- * Stat display names for training.
- */
-const STAT_DISPLAY_NAMES: Record<keyof BattleStats, string> = {
-  strength: "Strength",
-  endurance: "Endurance",
-  agility: "Agility",
-  precision: "Precision",
-  fortitude: "Fortitude",
-  cunning: "Cunning",
-};
-
-/**
- * Stat icons for training.
- */
-const STAT_ICONS: Record<keyof BattleStats, string> = {
-  strength: "💪",
-  endurance: "❤️",
-  agility: "⚡",
-  precision: "🎯",
-  fortitude: "🛡️",
-  cunning: "🧠",
-};
-
-/**
  * Display a single training result.
  */
 function TrainingResultCard({ result }: { result: OfflineTrainingResult }) {
   const { facilityName, result: trainingResult } = result;
-  const statsGained = trainingResult.statsGained ?? {};
-
-  const gainedEntries = Object.entries(statsGained).filter(
-    ([_, value]) => value && value > 0,
-  ) as [keyof BattleStats, number][];
 
   return (
     <div className="space-y-3">
@@ -195,23 +166,9 @@ function TrainingResultCard({ result }: { result: OfflineTrainingResult }) {
         </div>
       </div>
 
-      {gainedEntries.length > 0 ? (
-        <div className="bg-secondary/50 rounded-lg p-3">
-          <p className="text-xs font-medium text-muted-foreground mb-2">
-            Stats Gained
-          </p>
-          <div className="flex flex-col items-center gap-2">
-            {gainedEntries.map(([stat, value]) => (
-              <div key={stat} className="flex items-center gap-2">
-                <span>{STAT_ICONS[stat]}</span>
-                <span className="text-sm">{STAT_DISPLAY_NAMES[stat]}</span>
-                <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                  +{value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {trainingResult.statsGained &&
+      Object.values(trainingResult.statsGained).some((v) => v && v > 0) ? (
+        <StatsGainedDisplay statsGained={trainingResult.statsGained} />
       ) : (
         <div className="bg-secondary/50 rounded-lg p-3 text-center">
           <p className="text-sm text-muted-foreground">

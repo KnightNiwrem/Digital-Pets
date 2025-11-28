@@ -15,6 +15,7 @@ import { completeTraining } from "@/game/core/training";
 import { getFacility } from "@/game/data/facilities";
 import { getLocation } from "@/game/data/locations";
 import { applyExplorationResults } from "@/game/state/actions/exploration";
+import type { TrainingResult } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
@@ -82,14 +83,12 @@ export function processGameTick(
 
   // Capture training result BEFORE processing tick (since processPetTick clears the training state)
   // Training completes when ticksRemaining === 1 (will be decremented to 0)
-  const trainingWillComplete =
-    wasTraining && workingState.pet.activeTraining?.ticksRemaining === 1;
-  const trainingResultBeforeCompletion = trainingWillComplete
-    ? completeTraining(workingState.pet)
-    : null;
-  const facilityId = trainingWillComplete
-    ? workingState.pet.activeTraining?.facilityId
-    : null;
+  let trainingResultBeforeCompletion: TrainingResult | null = null;
+  let facilityId: string | null = null;
+  if (wasTraining && workingState.pet.activeTraining?.ticksRemaining === 1) {
+    trainingResultBeforeCompletion = completeTraining(workingState.pet);
+    facilityId = workingState.pet.activeTraining.facilityId;
+  }
 
   // Process pet tick (handles training, care, growth, etc.)
   const updatedPet = processPetTick(workingState.pet);
@@ -307,13 +306,10 @@ export function processOfflineCatchup(
       }
       // Collect training result if one was generated this tick
       if (tickState.lastTrainingResult) {
+        const { facilityName, ...result } = tickState.lastTrainingResult;
         trainingResults.push({
-          facilityName: tickState.lastTrainingResult.facilityName,
-          result: {
-            success: tickState.lastTrainingResult.success,
-            message: tickState.lastTrainingResult.message,
-            statsGained: tickState.lastTrainingResult.statsGained,
-          },
+          facilityName,
+          result,
         });
       }
     },

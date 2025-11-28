@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { StatsGainedDisplay } from "@/components/ui/StatsGainedDisplay";
 import type { BattleStats } from "@/game/types/stats";
 import { cn } from "@/lib/utils";
 
@@ -20,30 +21,6 @@ interface TrainingCompleteNotificationProps {
   petName: string;
   onDismiss: () => void;
 }
-
-/**
- * Stat display names.
- */
-const STAT_DISPLAY_NAMES: Record<keyof BattleStats, string> = {
-  strength: "Strength",
-  endurance: "Endurance",
-  agility: "Agility",
-  precision: "Precision",
-  fortitude: "Fortitude",
-  cunning: "Cunning",
-};
-
-/**
- * Stat icons.
- */
-const STAT_ICONS: Record<keyof BattleStats, string> = {
-  strength: "💪",
-  endurance: "❤️",
-  agility: "⚡",
-  precision: "🎯",
-  fortitude: "🛡️",
-  cunning: "🧠",
-};
 
 /**
  * Display a notification when training completes.
@@ -61,10 +38,6 @@ export function TrainingCompleteNotification({
     const timer = setTimeout(() => setIsAnimating(false), 500);
     return () => clearTimeout(timer);
   }, []);
-
-  const gainedEntries = Object.entries(statsGained).filter(
-    ([_, value]) => value && value > 0,
-  ) as [keyof BattleStats, number][];
 
   return (
     <Dialog open onOpenChange={(open) => !open && onDismiss()}>
@@ -86,22 +59,7 @@ export function TrainingCompleteNotification({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="bg-secondary/50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-center mb-2">
-              Stats Gained
-            </h4>
-            <div className="flex flex-col items-center gap-2">
-              {gainedEntries.map(([stat, value]) => (
-                <div key={stat} className="flex items-center gap-2">
-                  <span>{STAT_ICONS[stat]}</span>
-                  <span className="text-sm">{STAT_DISPLAY_NAMES[stat]}</span>
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                    +{value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <StatsGainedDisplay statsGained={statsGained} />
           <Button onClick={onDismiss} className="w-full">
             Continue
           </Button>
