@@ -51,10 +51,7 @@ export const POOP_INTERVAL_SLEEPING: Tick = 960;
 /**
  * Ticks reduced from poop timer when feeding.
  * Per spec (care-system.md): 60 ticks (30 minutes) standard.
- * Note: Items can have varying acceleration (30-120 ticks) for gameplay depth.
- *
- * When using the decay system, this is applied as micro-units:
- * poopAccelerationMicro = POOP_ACCELERATION_BASE * POOP_DECAY_AWAKE
+ * Note: Item poop acceleration values are already in micro-units and are applied directly to the timer.
  */
 export const POOP_ACCELERATION_BASE: Tick = 60;
 
