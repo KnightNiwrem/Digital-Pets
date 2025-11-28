@@ -51,7 +51,9 @@ export function ExplorationScreen({
 
   const pet = state.pet;
   const currentEnergy = toDisplay(pet.energyStats.energy);
-  const isExploring = pet.activityState === ActivityState.Exploring;
+  const activityState = pet.activityState;
+  const isExploring = activityState === ActivityState.Exploring;
+  const isIdle = activityState === ActivityState.Idle;
   const currentLocation = getLocation(state.player.currentLocationId);
   const forageInfo = getLocationForageInfo(state.player.currentLocationId);
 
@@ -63,17 +65,18 @@ export function ExplorationScreen({
     FacilityType.BattleArea,
   );
 
-  // Get foraging availability
-  const forageCheck = canStartForaging(pet, state.player.currentLocationId);
+  // Get foraging availability (only when idle, otherwise show activity status)
+  const forageCheck = isIdle
+    ? canStartForaging(pet, state.player.currentLocationId)
+    : { canForage: false, message: "" };
 
   // Handle starting foraging
   const handleStartForage = () => {
     const result = startForaging(state);
     if (result.success) {
       actions.updateState(() => result.state);
-    } else {
-      setErrorMessage(result.message);
     }
+    // Error case should not happen since we hide the activities when not idle
   };
 
   // Handle canceling exploration
@@ -81,8 +84,6 @@ export function ExplorationScreen({
     const result = cancelExploration(state);
     if (result.success) {
       actions.updateState(() => result.state);
-    } else {
-      setErrorMessage(result.message);
     }
   };
 
@@ -119,7 +120,7 @@ export function ExplorationScreen({
               </div>
             </div>
           </CardHeader>
-          {!isExploring && (
+          {isIdle && (
             <CardContent>
               {isWildArea ? (
                 <p className="text-sm text-muted-foreground">
@@ -143,8 +144,51 @@ export function ExplorationScreen({
           />
         )}
 
+        {/* Activity Blocking Status */}
+        {activityState === ActivityState.Sleeping && (
+          <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
+                <span className="text-2xl">💤</span>
+                <span className="font-medium">Your pet is sleeping...</span>
+              </div>
+              <p className="text-center text-sm text-blue-600 dark:text-blue-400 mt-2">
+                Wake up your pet to start exploring.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {activityState === ActivityState.Training && (
+          <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300">
+                <span className="text-2xl">💪</span>
+                <span className="font-medium">Your pet is training...</span>
+              </div>
+              <p className="text-center text-sm text-amber-600 dark:text-amber-400 mt-2">
+                Cancel training or wait for it to complete before exploring.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {activityState === ActivityState.Battling && (
+          <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center justify-center gap-2 text-red-700 dark:text-red-300">
+                <span className="text-2xl">⚔️</span>
+                <span className="font-medium">Your pet is battling...</span>
+              </div>
+              <p className="text-center text-sm text-red-600 dark:text-red-400 mt-2">
+                Complete the battle before exploring.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Exploration Activities */}
-        {!isExploring && isWildArea && (
+        {isIdle && isWildArea && (
           <>
             <h2 className="text-lg font-semibold px-1">Activities</h2>
             <ActivitySelect
@@ -168,11 +212,7 @@ export function ExplorationScreen({
                   <p className="text-sm text-muted-foreground mb-3">
                     Search for wild pets to battle in this area.
                   </p>
-                  <Button
-                    onClick={handleSeekBattle}
-                    className="w-full"
-                    disabled={pet.activityState !== ActivityState.Idle}
-                  >
+                  <Button onClick={handleSeekBattle} className="w-full">
                     🔍 Find Wild Pet
                   </Button>
                 </CardContent>
@@ -182,7 +222,7 @@ export function ExplorationScreen({
         )}
 
         {/* Not in a wild area message */}
-        {!isWildArea && !isExploring && (
+        {!isWildArea && isIdle && (
           <Card>
             <CardContent className="pt-6 text-center">
               <span className="text-4xl">🏠</span>

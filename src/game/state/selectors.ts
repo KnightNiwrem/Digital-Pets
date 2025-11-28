@@ -20,6 +20,7 @@ import {
   toDisplayCare,
 } from "@/game/types/common";
 import {
+  type ActivityState,
   type CareThreshold,
   type GrowthStage,
   getCareThreshold,
@@ -169,6 +170,7 @@ export interface PetInfoDisplay {
   substageCount: number;
   ageDays: number;
   isSleeping: boolean;
+  activityState: ActivityState;
 }
 
 /**
@@ -247,6 +249,7 @@ export function selectPetInfo(state: GameState): PetInfoDisplay | null {
     substageCount,
     ageDays,
     isSleeping: pet.sleep.isSleeping,
+    activityState: pet.activityState,
   };
 }
 

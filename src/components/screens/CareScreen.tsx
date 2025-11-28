@@ -29,6 +29,7 @@ import {
   selectPetSpecies,
   selectPoop,
 } from "@/game/state/selectors";
+import { ActivityState } from "@/game/types/constants";
 
 type PetAnimationType = "idle" | "happy" | "eat" | "drink" | "play" | "hurt";
 
@@ -188,6 +189,51 @@ export function CareScreen() {
         </Card>
       )}
 
+      {/* Training Status */}
+      {petInfo.activityState === ActivityState.Training && (
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300">
+              <span className="text-2xl">💪</span>
+              <span className="font-medium">Your pet is training...</span>
+            </div>
+            <p className="text-center text-sm text-amber-600 dark:text-amber-400 mt-2">
+              Go to the Training screen to view progress or cancel.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Exploring Status */}
+      {petInfo.activityState === ActivityState.Exploring && (
+        <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-center gap-2 text-green-700 dark:text-green-300">
+              <span className="text-2xl">🌿</span>
+              <span className="font-medium">Your pet is exploring...</span>
+            </div>
+            <p className="text-center text-sm text-green-600 dark:text-green-400 mt-2">
+              Go to the Explore screen to view progress or cancel.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Battling Status */}
+      {petInfo.activityState === ActivityState.Battling && (
+        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-center gap-2 text-red-700 dark:text-red-300">
+              <span className="text-2xl">⚔️</span>
+              <span className="font-medium">Your pet is battling...</span>
+            </div>
+            <p className="text-center text-sm text-red-600 dark:text-red-400 mt-2">
+              Complete the battle before performing care actions.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Care Actions */}
       <Card>
         <CardHeader className="pb-2">
@@ -198,7 +244,7 @@ export function CareScreen() {
             <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
               <SleepToggle />
             </div>
-            {!petInfo.isSleeping && (
+            {petInfo.activityState === ActivityState.Idle && (
               <>
                 <FeedButton onSuccess={handleFeedSuccess} />
                 <WaterButton onSuccess={handleWaterSuccess} />
@@ -207,9 +253,15 @@ export function CareScreen() {
               </>
             )}
           </div>
-          {petInfo.isSleeping && (
+          {petInfo.activityState !== ActivityState.Idle && (
             <p className="text-sm text-muted-foreground text-center">
-              Wake up your pet to feed, water, play, or clean.
+              {petInfo.isSleeping
+                ? "Wake up your pet to feed, water, play, or clean."
+                : petInfo.activityState === ActivityState.Training
+                  ? "Cancel training to feed, water, play, or clean."
+                  : petInfo.activityState === ActivityState.Exploring
+                    ? "Cancel exploration to feed, water, play, or clean."
+                    : "Complete the battle to feed, water, play, or clean."}
             </p>
           )}
         </CardContent>
