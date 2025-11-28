@@ -2,7 +2,7 @@
  * Types for offline progression reporting.
  */
 
-import type { ExplorationDrop } from "./activity";
+import type { ExplorationDrop, TrainingResult } from "./activity";
 import type { MicroValue, Tick } from "./common";
 
 /**
@@ -25,6 +25,16 @@ export interface OfflineExplorationResult {
   itemsFound: ExplorationDrop[];
   /** Message describing the result */
   message: string;
+}
+
+/**
+ * Result of a training session that completed during offline time.
+ */
+export interface OfflineTrainingResult {
+  /** Facility name where training occurred */
+  facilityName: string;
+  /** Training result details */
+  result: TrainingResult;
 }
 
 /**
@@ -64,6 +74,8 @@ export interface OfflineReport {
   poopAfter: number;
   /** Exploration results that completed during offline time */
   explorationResults: OfflineExplorationResult[];
+  /** Training results that completed during offline time */
+  trainingResults: OfflineTrainingResult[];
 }
 
 /**

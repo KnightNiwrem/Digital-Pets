@@ -16,7 +16,9 @@ import { toDisplay, toDisplayCare } from "@/game/types/common";
 import type {
   OfflineExplorationResult,
   OfflineReport as OfflineReportType,
+  OfflineTrainingResult,
 } from "@/game/types/offline";
+import type { BattleStats } from "@/game/types/stats";
 
 interface OfflineReportProps {
   report: OfflineReportType;
@@ -149,9 +151,82 @@ function ExplorationResultCard({
 }
 
 /**
+ * Stat display names for training.
+ */
+const STAT_DISPLAY_NAMES: Record<keyof BattleStats, string> = {
+  strength: "Strength",
+  endurance: "Endurance",
+  agility: "Agility",
+  precision: "Precision",
+  fortitude: "Fortitude",
+  cunning: "Cunning",
+};
+
+/**
+ * Stat icons for training.
+ */
+const STAT_ICONS: Record<keyof BattleStats, string> = {
+  strength: "💪",
+  endurance: "❤️",
+  agility: "⚡",
+  precision: "🎯",
+  fortitude: "🛡️",
+  cunning: "🧠",
+};
+
+/**
+ * Display a single training result.
+ */
+function TrainingResultCard({ result }: { result: OfflineTrainingResult }) {
+  const { facilityName, result: trainingResult } = result;
+  const statsGained = trainingResult.statsGained ?? {};
+
+  const gainedEntries = Object.entries(statsGained).filter(
+    ([_, value]) => value && value > 0,
+  ) as [keyof BattleStats, number][];
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="text-2xl">🎉</span>
+        <div>
+          <p className="font-medium">Training Complete!</p>
+          <p className="text-sm text-muted-foreground">{facilityName}</p>
+        </div>
+      </div>
+
+      {gainedEntries.length > 0 ? (
+        <div className="bg-secondary/50 rounded-lg p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2">
+            Stats Gained
+          </p>
+          <div className="flex flex-col items-center gap-2">
+            {gainedEntries.map(([stat, value]) => (
+              <div key={stat} className="flex items-center gap-2">
+                <span>{STAT_ICONS[stat]}</span>
+                <span className="text-sm">{STAT_DISPLAY_NAMES[stat]}</span>
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                  +{value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-secondary/50 rounded-lg p-3 text-center">
+          <p className="text-sm text-muted-foreground">
+            Training session completed.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * Page types for the offline report.
  */
-type OfflineReportPage = "stats" | "exploration";
+type OfflineReportPage = "stats" | "training" | "exploration";
 
 /**
  * Display the offline report as a dialog.
@@ -167,12 +242,15 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
     poopBefore,
     poopAfter,
     explorationResults,
+    trainingResults,
   } = report;
 
   const hasExplorationResults = explorationResults.length > 0;
+  const hasTrainingResults = trainingResults.length > 0;
 
-  // Start on stats page, move to exploration if there are results
+  // Start on stats page, move to training/exploration if there are results
   const [currentPage, setCurrentPage] = useState<OfflineReportPage>("stats");
+  const [trainingIndex, setTrainingIndex] = useState(0);
   const [explorationIndex, setExplorationIndex] = useState(0);
 
   const poopChange = poopAfter - poopBefore;
@@ -183,14 +261,28 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
   const maxHappiness = maxStats?.care?.happiness ?? 200_000;
   const maxEnergy = maxStats?.energy ?? 200_000;
 
-  // Calculate total pages (1 for stats + number of exploration results)
+  // Calculate total pages (1 for stats + training results + exploration results)
+  const totalTrainingPages = trainingResults.length;
   const totalExplorationPages = explorationResults.length;
   const hasPetInfo = petName && beforeStats && afterStats;
 
   // Handle next button
+  // Navigation order: stats -> training (if any) -> exploration (if any) -> dismiss
   const handleNext = () => {
     if (currentPage === "stats") {
-      if (hasExplorationResults) {
+      if (hasTrainingResults) {
+        setCurrentPage("training");
+        setTrainingIndex(0);
+      } else if (hasExplorationResults) {
+        setCurrentPage("exploration");
+        setExplorationIndex(0);
+      } else {
+        onDismiss();
+      }
+    } else if (currentPage === "training") {
+      if (trainingIndex < totalTrainingPages - 1) {
+        setTrainingIndex(trainingIndex + 1);
+      } else if (hasExplorationResults) {
         setCurrentPage("exploration");
         setExplorationIndex(0);
       } else {
@@ -207,9 +299,18 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
 
   // Handle back button
   const handleBack = () => {
-    if (currentPage === "exploration") {
+    if (currentPage === "training") {
+      if (trainingIndex > 0) {
+        setTrainingIndex(trainingIndex - 1);
+      } else {
+        setCurrentPage("stats");
+      }
+    } else if (currentPage === "exploration") {
       if (explorationIndex > 0) {
         setExplorationIndex(explorationIndex - 1);
+      } else if (hasTrainingResults) {
+        setCurrentPage("training");
+        setTrainingIndex(totalTrainingPages - 1);
       } else {
         setCurrentPage("stats");
       }
@@ -218,17 +319,24 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
 
   // Determine button labels
   const isLastPage =
-    (currentPage === "stats" && !hasExplorationResults) ||
+    (currentPage === "stats" &&
+      !hasTrainingResults &&
+      !hasExplorationResults) ||
+    (currentPage === "training" &&
+      trainingIndex === totalTrainingPages - 1 &&
+      !hasExplorationResults) ||
     (currentPage === "exploration" &&
       explorationIndex === totalExplorationPages - 1);
   const nextButtonLabel = isLastPage ? "Continue" : "Next";
 
   // Calculate page indicator
+  const hasMultiplePages = hasTrainingResults || hasExplorationResults;
   const getCurrentPageNumber = () => {
     if (currentPage === "stats") return 1;
-    return 2 + explorationIndex;
+    if (currentPage === "training") return 2 + trainingIndex;
+    return 2 + totalTrainingPages + explorationIndex;
   };
-  const getTotalPages = () => 1 + totalExplorationPages;
+  const getTotalPages = () => 1 + totalTrainingPages + totalExplorationPages;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onDismiss()}>
@@ -310,6 +418,10 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
           </>
         )}
 
+        {currentPage === "training" && trainingResults[trainingIndex] && (
+          <TrainingResultCard result={trainingResults[trainingIndex]} />
+        )}
+
         {currentPage === "exploration" &&
           explorationResults[explorationIndex] && (
             <ExplorationResultCard
@@ -320,14 +432,14 @@ export function OfflineReport({ report, onDismiss }: OfflineReportProps) {
         {/* Page indicator and navigation */}
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-2">
-            {(hasExplorationResults || currentPage === "exploration") && (
+            {hasMultiplePages && (
               <span className="text-xs text-muted-foreground">
                 Page {getCurrentPageNumber()} of {getTotalPages()}
               </span>
             )}
           </div>
           <div className="flex gap-2">
-            {currentPage === "exploration" && (
+            {(currentPage === "training" || currentPage === "exploration") && (
               <Button variant="outline" onClick={handleBack}>
                 Back
               </Button>
