@@ -199,7 +199,7 @@ export const groveEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.3,
-      speciesIds: [SPECIES.FLORABIT.id, SPECIES.SPARKFIN.id],
+      speciesIds: [SPECIES.FLORABIT.id, SPECIES.ROCKPUP.id],
       levelOffset: [1, 4],
     },
   ],
@@ -228,7 +228,7 @@ export const hollowEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.15,
-      speciesIds: [SPECIES.CORALITE.id],
+      speciesIds: [SPECIES.ROCKPUP.id],
       levelOffset: [3, 6],
     },
   ],
@@ -273,7 +273,7 @@ export const peaksEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.5,
-      speciesIds: [SPECIES.ROCKPUP.id, SPECIES.CORALITE.id],
+      speciesIds: [SPECIES.ROCKPUP.id, SPECIES.FLORABIT.id],
       levelOffset: [0, 5],
     },
     {
@@ -360,7 +360,7 @@ export const glacialEncounters: EncounterTable = {
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.4,
-      speciesIds: [SPECIES.ROCKPUP.id, SPECIES.CORALITE.id],
+      speciesIds: [SPECIES.ROCKPUP.id, SPECIES.FLORABIT.id],
       levelOffset: [0, 6],
     },
     {
@@ -397,7 +397,7 @@ export const spireEncounters: EncounterTable = {
       probability: 0.35,
       speciesIds: [
         SPECIES.SHADOWMOTH.id,
-        SPECIES.CORALITE.id,
+        SPECIES.EMBERFOX.id,
         SPECIES.ROCKPUP.id,
       ],
       levelOffset: [5, 12],
