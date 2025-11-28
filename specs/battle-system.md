@@ -2,6 +2,10 @@
 
 Turn-based 1v1 combat between pets. Pets cannot die in battle - defeat results in exhaustion, not death.
 
+## Battle Pacing
+
+The battle formulas are tuned so that battles between pets with similar stats complete within approximately **8-10 turns** (4-5 turns per combatant). This provides engaging tactical decisions without dragging on too long.
+
 ## Battle Stats
 
 Six attributes determine combat effectiveness:
