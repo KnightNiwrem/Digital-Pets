@@ -8,9 +8,10 @@ import type { FoodItem } from "@/game/types/item";
 /**
  * Basic food items available from the start.
  *
- * Poop acceleration is measured in ticks.
+ * Poop acceleration is measured in micro-units (applied directly to the poop timer).
+ * With POOP_MICRO_THRESHOLD = 960, divide by 2 to get equivalent ticks when awake.
  * This implementation extends the spec: different foods have varying acceleration effects
- * (30-120 ticks) rather than a uniform 60 ticks, allowing for more strategic food choices.
+ * allowing for more strategic food choices.
  *
  * Use FOOD_ITEMS.KIBBLE.id to get the item ID "food_kibble".
  */
@@ -26,7 +27,7 @@ export const FOOD_ITEMS = {
     sellValue: 5,
     icon: "🥣",
     satietyRestore: toMicro(15),
-    poopAcceleration: 30, // Light meal: 15 minutes
+    poopAcceleration: 60, // Light meal: 15 minutes (micro-units)
   },
   APPLE: {
     id: "food_apple",
@@ -39,7 +40,7 @@ export const FOOD_ITEMS = {
     sellValue: 8,
     icon: "🍎",
     satietyRestore: toMicro(20),
-    poopAcceleration: 60, // Standard meal: 30 minutes
+    poopAcceleration: 120, // Standard meal: 30 minutes (micro-units)
   },
   MEAT: {
     id: "food_meat",
@@ -52,7 +53,7 @@ export const FOOD_ITEMS = {
     sellValue: 15,
     icon: "🍖",
     satietyRestore: toMicro(35),
-    poopAcceleration: 90, // Heavy meal: 45 minutes
+    poopAcceleration: 180, // Heavy meal: 45 minutes (micro-units)
   },
   FISH: {
     id: "food_fish",
@@ -65,7 +66,7 @@ export const FOOD_ITEMS = {
     sellValue: 18,
     icon: "🐟",
     satietyRestore: toMicro(30),
-    poopAcceleration: 60, // Standard meal: 30 minutes
+    poopAcceleration: 120, // Standard meal: 30 minutes (micro-units)
   },
   CAKE: {
     id: "food_cake",
@@ -78,7 +79,7 @@ export const FOOD_ITEMS = {
     sellValue: 25,
     icon: "🍰",
     satietyRestore: toMicro(50),
-    poopAcceleration: 120, // Indulgent meal: 60 minutes
+    poopAcceleration: 240, // Indulgent meal: 60 minutes (micro-units)
   },
   BERRIES: {
     id: "food_berries",
@@ -91,7 +92,7 @@ export const FOOD_ITEMS = {
     sellValue: 6,
     icon: "🫐",
     satietyRestore: toMicro(12),
-    poopAcceleration: 20, // Very light: 10 minutes
+    poopAcceleration: 40, // Very light: 10 minutes (micro-units)
   },
   MUSHROOM: {
     id: "food_mushroom",
@@ -104,7 +105,7 @@ export const FOOD_ITEMS = {
     sellValue: 12,
     icon: "🍄",
     satietyRestore: toMicro(25),
-    poopAcceleration: 45, // Light meal: 22.5 minutes
+    poopAcceleration: 90, // Light meal: 22.5 minutes (micro-units)
   },
   STEAK: {
     id: "food_steak",
@@ -117,7 +118,7 @@ export const FOOD_ITEMS = {
     sellValue: 40,
     icon: "🥩",
     satietyRestore: toMicro(60),
-    poopAcceleration: 100, // Heavy meal: 50 minutes
+    poopAcceleration: 200, // Heavy meal: 50 minutes (micro-units)
   },
   HONEY: {
     id: "food_honey",
@@ -130,7 +131,7 @@ export const FOOD_ITEMS = {
     sellValue: 20,
     icon: "🍯",
     satietyRestore: toMicro(18),
-    poopAcceleration: 30, // Light: 15 minutes
+    poopAcceleration: 60, // Light: 15 minutes (micro-units)
   },
   FEAST: {
     id: "food_feast",
@@ -144,7 +145,7 @@ export const FOOD_ITEMS = {
     sellValue: 100,
     icon: "🍱",
     satietyRestore: toMicro(100),
-    poopAcceleration: 180, // Massive meal: 90 minutes
+    poopAcceleration: 360, // Massive meal: 90 minutes (micro-units)
   },
 } as const satisfies Record<string, FoodItem>;
 

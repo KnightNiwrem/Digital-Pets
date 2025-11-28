@@ -11,9 +11,11 @@ import {
 } from "@/game/types/common";
 
 /**
- * Maximum ticks to process for offline catch-up (7 days).
+ * Maximum ticks to process for offline catch-up (30 days).
+ * This cap applies universally to all offline processing (care, growth, training, etc.)
+ * to prevent extreme scenarios while still allowing for pet death by neglect.
  */
-export const MAX_OFFLINE_TICKS: Tick = TICKS_PER_DAY * 7;
+export const MAX_OFFLINE_TICKS: Tick = TICKS_PER_DAY * 30;
 
 /**
  * Calculate elapsed ticks between two timestamps.
@@ -28,7 +30,7 @@ export function calculateElapsedTicks(
 }
 
 /**
- * Calculate offline ticks with the 7-day cap.
+ * Calculate offline ticks with the 30-day cap.
  */
 export function calculateCappedOfflineTicks(
   lastSaveTime: Timestamp,

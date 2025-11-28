@@ -36,10 +36,10 @@ test("calculateElapsedTicks returns 0 for negative elapsed time", () => {
   expect(calculateElapsedTicks(time, time - 30_000)).toBe(0);
 });
 
-test("calculateCappedOfflineTicks caps at 7 days", () => {
+test("calculateCappedOfflineTicks caps at 30 days", () => {
   const time = Date.now();
-  const tenDays = 10 * 24 * 60 * 60 * 1000;
-  expect(calculateCappedOfflineTicks(time, time + tenDays)).toBe(
+  const fortyDays = 40 * 24 * 60 * 60 * 1000;
+  expect(calculateCappedOfflineTicks(time, time + fortyDays)).toBe(
     MAX_OFFLINE_TICKS,
   );
 });

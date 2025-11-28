@@ -180,7 +180,7 @@ test("useFoodItem applies poopAcceleration when food has it", () => {
   if (state.pet) {
     // Set poop timer to a known value
     state.pet.poop.ticksUntilNext = 200;
-    // Add food_meat which has poopAcceleration of 90 ticks (45 minutes)
+    // Add food_meat which has poopAcceleration of 180 micro-units (45 minutes)
     state.player.inventory.items.push({
       itemId: FOOD_ITEMS.MEAT.id,
       quantity: 1,
@@ -190,8 +190,8 @@ test("useFoodItem applies poopAcceleration when food has it", () => {
 
   const result = useFoodItem(state, FOOD_ITEMS.MEAT.id);
   expect(result.success).toBe(true);
-  // poop timer should be reduced by 90 (from 200 to 110)
-  expect(result.state.pet?.poop.ticksUntilNext).toBe(110);
+  // poop timer should be reduced by 180 (from 200 to 20)
+  expect(result.state.pet?.poop.ticksUntilNext).toBe(20);
 });
 
 test("useFoodItem does not go below 0 for poop timer", () => {
@@ -199,7 +199,7 @@ test("useFoodItem does not go below 0 for poop timer", () => {
   if (state.pet) {
     // Set poop timer to a low value
     state.pet.poop.ticksUntilNext = 50;
-    // Add food_cake which has poopAcceleration of 120 ticks (60 minutes)
+    // Add food_cake which has poopAcceleration of 240 micro-units (60 minutes)
     state.player.inventory.items.push({
       itemId: FOOD_ITEMS.CAKE.id,
       quantity: 1,
@@ -220,11 +220,11 @@ test("useFoodItem applies poopAcceleration for light meals", () => {
     state.pet.poop.ticksUntilNext = 100;
   }
 
-  // food_kibble has poopAcceleration of 30 ticks (15 minutes)
+  // food_kibble has poopAcceleration of 60 micro-units (15 minutes)
   const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
   expect(result.success).toBe(true);
-  // poop timer should be reduced by 30 (from 100 to 70)
-  expect(result.state.pet?.poop.ticksUntilNext).toBe(70);
+  // poop timer should be reduced by 60 (from 100 to 40)
+  expect(result.state.pet?.poop.ticksUntilNext).toBe(40);
 });
 
 test("useCleaningItem removes poop and consumes item", () => {
