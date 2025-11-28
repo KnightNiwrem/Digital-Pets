@@ -11,6 +11,7 @@ import {
 } from "@/game/data/items";
 import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
+import { createSleepingTestPet } from "@/game/testing/createTestPet";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
@@ -98,10 +99,9 @@ test("useFoodItem consumes item from inventory", () => {
 
 test("useFoodItem fails when pet is sleeping", () => {
   const state = createTestState();
-  if (state.pet) {
-    state.pet.sleep.isSleeping = true;
-    state.pet.activityState = ActivityState.Sleeping;
-  }
+  state.pet = createSleepingTestPet({
+    careStats: { satiety: 10_000, hydration: 10_000, happiness: 10_000 },
+  });
 
   const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
   expect(result.success).toBe(false);
@@ -153,10 +153,9 @@ test("useDrinkItem with energy drink also restores energy", () => {
 
 test("useDrinkItem fails when pet is sleeping", () => {
   const state = createTestState();
-  if (state.pet) {
-    state.pet.sleep.isSleeping = true;
-    state.pet.activityState = ActivityState.Sleeping;
-  }
+  state.pet = createSleepingTestPet({
+    careStats: { satiety: 10_000, hydration: 10_000, happiness: 10_000 },
+  });
 
   const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
   expect(result.success).toBe(false);
@@ -364,10 +363,9 @@ test("useToyItem destroys toy when durability reaches 0", () => {
 
 test("useToyItem fails when pet is sleeping", () => {
   const state = createTestState();
-  if (state.pet) {
-    state.pet.sleep.isSleeping = true;
-    state.pet.activityState = ActivityState.Sleeping;
-  }
+  state.pet = createSleepingTestPet({
+    careStats: { satiety: 10_000, hydration: 10_000, happiness: 10_000 },
+  });
 
   const result = useToyItem(state, TOY_ITEMS.BALL.id);
   expect(result.success).toBe(false);
