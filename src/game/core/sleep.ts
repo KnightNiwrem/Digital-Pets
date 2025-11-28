@@ -48,14 +48,6 @@ export function getMinSleepTicksForPet(pet: Pet): Tick {
 }
 
 /**
- * Get the minimum sleep ticks required for a growth stage.
- * @deprecated Use getMinSleepTicksForPet instead for species-specific values.
- */
-export function getMinSleepTicks(stage: GrowthStage): Tick {
-  return DEFAULT_MIN_SLEEP_TICKS[stage];
-}
-
-/**
  * Calculate remaining sleep needed for today.
  * Uses species-specific sleep requirements.
  */

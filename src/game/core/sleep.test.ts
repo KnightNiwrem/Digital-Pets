@@ -9,7 +9,6 @@ import {
 } from "@/game/testing/createTestPet";
 import {
   canPerformCareActions,
-  getMinSleepTicks,
   getRemainingMinSleep,
   hasMetSleepRequirement,
   processSleepTick,
@@ -88,14 +87,6 @@ test("canPerformCareActions returns true when awake", () => {
 });
 
 // New tests for sleep requirements
-
-test("getMinSleepTicks returns correct values per growth stage", () => {
-  expect(getMinSleepTicks("baby")).toBe(1920); // 16 hours
-  expect(getMinSleepTicks("child")).toBe(1680); // 14 hours
-  expect(getMinSleepTicks("teen")).toBe(1440); // 12 hours
-  expect(getMinSleepTicks("youngAdult")).toBe(1200); // 10 hours
-  expect(getMinSleepTicks("adult")).toBe(960); // 8 hours
-});
 
 test("getRemainingMinSleep returns correct remaining sleep needed", () => {
   const pet = createTestPet({

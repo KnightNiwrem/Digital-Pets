@@ -10,12 +10,7 @@ import {
 } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
 import type { GrowthStage } from "@/game/types/constants";
-import {
-  getNextStage,
-  getStageProgressPercent,
-  getTicksUntilNextSubstage,
-  processGrowthTick,
-} from "./growth";
+import { getNextStage, processGrowthTick } from "./growth";
 
 // Helper to get the min age ticks for a given stage from species data
 function getStageMinAgeTicks(speciesId: string, stage: GrowthStage): number {
@@ -189,27 +184,6 @@ test("getNextStage returns adult for youngAdult", () => {
 
 test("getNextStage returns null for adult", () => {
   expect(getNextStage("adult")).toBeNull();
-});
-
-// getTicksUntilNextSubstage tests
-test("getTicksUntilNextSubstage returns null (deprecated function)", () => {
-  // This function now returns null because it requires speciesId for proper calculation
-  const ticks = getTicksUntilNextSubstage("baby", 1, 0);
-  expect(ticks).toBeNull();
-});
-
-// getStageProgressPercent tests
-test("getStageProgressPercent returns 0 at stage start", () => {
-  expect(getStageProgressPercent("baby", 0)).toBe(0);
-});
-
-test("getStageProgressPercent returns value for age", () => {
-  const childMinAge = getStageMinAgeTicks(SPECIES.FLORABIT.id, "child");
-  const halfwayTicks = childMinAge / 2;
-  // The progress should be some percentage based on the age
-  const progress = getStageProgressPercent("baby", halfwayTicks);
-  expect(progress).toBeGreaterThanOrEqual(0);
-  expect(progress).toBeLessThanOrEqual(100);
 });
 
 // Species-specific growth stage tests

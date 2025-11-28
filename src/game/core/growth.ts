@@ -2,13 +2,8 @@
  * Growth logic for pet age accumulation, stage transitions, and stat updates.
  */
 
-import {
-  getDefaultStageMinAges,
-  getSpeciesStageStats,
-  toGrowthStage,
-} from "@/game/data/growthStages";
-import type { Tick } from "@/game/types/common";
-import { TICKS_PER_MONTH } from "@/game/types/common";
+import { getSpeciesStageStats, toGrowthStage } from "@/game/data/growthStages";
+
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { Pet, PetGrowth } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
@@ -131,70 +126,4 @@ export function getNextStage(stage: GrowthStage): GrowthStage | null {
     return null;
   }
   return GROWTH_STAGE_ORDER[currentIndex + 1] ?? null;
-}
-
-/**
- * Calculate ticks until next substage.
- * Now uses species-specific growth stage data.
- * @deprecated Use getTicksUntilNextStageTransition with speciesId instead.
- */
-export function getTicksUntilNextSubstage(
-  _stage: GrowthStage,
-  _substage: number,
-  _ageTicks: Tick,
-): Tick | null {
-  // This is a simplified version - for proper substage calculation,
-  // we'd need the speciesId. For now, return the ticks until next transition.
-  // In practice, callers should use getTicksUntilNextStageTransition directly.
-  return null;
-}
-
-/**
- * Calculate ticks until next main stage.
- * Now uses species-specific data via getTicksUntilNextStageTransition.
- * Note: This is kept for backwards compatibility but callers should prefer
- * using getTicksUntilNextStageTransition with speciesId.
- * @deprecated Use getTicksUntilNextStageTransition from growthStages.ts instead.
- */
-export function getTicksUntilNextStage(
-  stage: GrowthStage,
-  ageTicks: Tick,
-): Tick | null {
-  // Without speciesId, we can't calculate species-specific thresholds.
-  // This function is kept for backwards compatibility.
-  // Callers should use getTicksUntilNextStageTransition from growthStages.ts.
-  const nextStage = getNextStage(stage);
-  if (!nextStage) return null;
-
-  // Derive thresholds from default species data
-  const stageMinAges = getDefaultStageMinAges();
-
-  return Math.max(0, stageMinAges[nextStage] - ageTicks);
-}
-
-/**
- * Calculate progress percentage toward next stage (0-100).
- * For species-specific progress, use getStageProgress from growthStages.ts.
- * @deprecated Use getStageProgress from growthStages.ts instead.
- */
-export function getStageProgressPercent(
-  stage: GrowthStage,
-  ageTicks: Tick,
-): number {
-  const nextStage = getNextStage(stage);
-
-  // Derive thresholds from default species data
-  const stageMinAges = getDefaultStageMinAges();
-
-  if (!nextStage) {
-    // Adult stage: calculate based on fixed substages
-    const timeInStage = ageTicks - stageMinAges[stage];
-    const totalDuration = 3 * TICKS_PER_MONTH;
-    return Math.min(100, Math.floor((timeInStage / totalDuration) * 100));
-  }
-
-  const stageDuration = stageMinAges[nextStage] - stageMinAges[stage];
-  const timeInStage = ageTicks - stageMinAges[stage];
-
-  return Math.min(100, Math.floor((timeInStage / stageDuration) * 100));
 }

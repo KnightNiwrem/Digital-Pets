@@ -2,14 +2,12 @@
  * Selectors for deriving values from game state.
  */
 
-import {
-  getNextStage,
-  getStageProgressPercent,
-  getTicksUntilNextSubstage,
-} from "@/game/core/growth";
+import { getNextStage } from "@/game/core/growth";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import {
+  getNextSpeciesStage,
   getSpeciesStageStats,
+  getStageProgress,
   getTicksUntilNextStageTransition,
 } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
@@ -275,11 +273,17 @@ export function selectGrowthProgress(
     pet.identity.speciesId,
     ageTicks,
   );
-  const ticksUntilNextSubstage = getTicksUntilNextSubstage(
-    stage,
-    substage,
+
+  // Calculate ticks until next substage (only if next transition is a substage, not a main stage)
+  let ticksUntilNextSubstage: Tick | null = null;
+  const nextSpeciesStage = getNextSpeciesStage(
+    pet.identity.speciesId,
     ageTicks,
   );
+  if (nextSpeciesStage && nextSpeciesStage.stage === stageStats.stage) {
+    // Next transition is a substage within the same main stage
+    ticksUntilNextSubstage = nextSpeciesStage.minAgeTicks - ageTicks;
+  }
 
   const ageDays = Math.floor(ageTicks / TICKS_PER_DAY);
 
@@ -300,7 +304,7 @@ export function selectGrowthProgress(
     nextStage: nextStageName,
     substage,
     substageCount,
-    stageProgressPercent: getStageProgressPercent(stage, ageTicks),
+    stageProgressPercent: getStageProgress(pet.identity.speciesId, ageTicks),
     ticksUntilNextStage,
     timeUntilNextStage:
       ticksUntilNextStage !== null

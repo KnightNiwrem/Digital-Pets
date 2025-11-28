@@ -2,12 +2,8 @@
  * Utilities for calculating pet stats based on growth stage and species.
  */
 
-import {
-  getDefaultStageMinAges,
-  getSpeciesStageStats,
-} from "@/game/data/growthStages";
+import { getSpeciesStageStats } from "@/game/data/growthStages";
 import type { MicroValue } from "@/game/types/common";
-import type { GrowthStage } from "@/game/types/constants";
 import type { BonusMaxStats, Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
 
@@ -93,34 +89,4 @@ export function calculatePetMaxStats(pet: Pet): PetMaxStats | null {
     pet.growth.ageTicks,
     pet.bonusMaxStats,
   );
-}
-
-/**
- * Legacy compatibility: Calculate max stats returning a simple object.
- * Used for backwards compatibility with code expecting the old interface.
- * @deprecated Use calculatePetMaxStats instead for full max stats.
- */
-export function calculateMaxStats(
-  speciesId: string,
-  stage: GrowthStage,
-): { careStatMax: MicroValue; energyMax: MicroValue } | null {
-  // For legacy compatibility, we need to find a stage that matches
-  // We'll use the minimum age of that stage, derived from species data
-  const stageMinAges = getDefaultStageMinAges();
-
-  const ageTicks = stageMinAges[stage];
-  const maxStats = calculateMaxStatsForAge(speciesId, ageTicks);
-  if (!maxStats) return null;
-
-  // Return the minimum of care stats for backwards compatibility
-  const minCareMax = Math.min(
-    maxStats.care.satiety,
-    maxStats.care.hydration,
-    maxStats.care.happiness,
-  );
-
-  return {
-    careStatMax: minCareMax,
-    energyMax: maxStats.energy,
-  };
 }
