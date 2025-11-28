@@ -11,7 +11,9 @@ import {
 } from "@/game/data/items";
 import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
+import { createSleepingTestPet } from "@/game/testing/createTestPet";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
+import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import { createInitialSkills } from "@/game/types/skill";
 import {
@@ -97,9 +99,9 @@ test("useFoodItem consumes item from inventory", () => {
 
 test("useFoodItem fails when pet is sleeping", () => {
   const state = createTestState();
-  if (state.pet) {
-    state.pet.sleep.isSleeping = true;
-  }
+  state.pet = createSleepingTestPet({
+    careStats: { satiety: 10_000, hydration: 10_000, happiness: 10_000 },
+  });
 
   const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
   expect(result.success).toBe(false);
@@ -151,9 +153,9 @@ test("useDrinkItem with energy drink also restores energy", () => {
 
 test("useDrinkItem fails when pet is sleeping", () => {
   const state = createTestState();
-  if (state.pet) {
-    state.pet.sleep.isSleeping = true;
-  }
+  state.pet = createSleepingTestPet({
+    careStats: { satiety: 10_000, hydration: 10_000, happiness: 10_000 },
+  });
 
   const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
   expect(result.success).toBe(false);
@@ -361,9 +363,9 @@ test("useToyItem destroys toy when durability reaches 0", () => {
 
 test("useToyItem fails when pet is sleeping", () => {
   const state = createTestState();
-  if (state.pet) {
-    state.pet.sleep.isSleeping = true;
-  }
+  state.pet = createSleepingTestPet({
+    careStats: { satiety: 10_000, hydration: 10_000, happiness: 10_000 },
+  });
 
   const result = useToyItem(state, TOY_ITEMS.BALL.id);
   expect(result.success).toBe(false);
@@ -406,4 +408,141 @@ test("useToyItem clamps happiness to max", () => {
   expect(result.success).toBe(true);
   // Baby stage max with florabit multiplier is 50_000
   expect(result.state.pet?.careStats.happiness).toBe(50_000);
+});
+
+// Tests for blocking care actions during training
+
+test("useFoodItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+  }
+
+  const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useDrinkItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+  }
+
+  const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useCleaningItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+    state.pet.poop.count = 3;
+  }
+
+  const result = useCleaningItem(state, CLEANING_ITEMS.TISSUE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useToyItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+  }
+
+  const result = useToyItem(state, TOY_ITEMS.BALL.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useFoodItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+  }
+
+  const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
+});
+
+test("useFoodItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+  }
+
+  const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
+test("useDrinkItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+  }
+
+  const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
+});
+
+test("useDrinkItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+  }
+
+  const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
+test("useCleaningItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+    state.pet.poop.count = 3;
+  }
+
+  const result = useCleaningItem(state, CLEANING_ITEMS.TISSUE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
+});
+
+test("useCleaningItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+    state.pet.poop.count = 3;
+  }
+
+  const result = useCleaningItem(state, CLEANING_ITEMS.TISSUE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
+test("useToyItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+  }
+
+  const result = useToyItem(state, TOY_ITEMS.BALL.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
+});
+
+test("useToyItem fails when pet is battling", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Battling;
+  }
+
+  const result = useToyItem(state, TOY_ITEMS.BALL.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
 });

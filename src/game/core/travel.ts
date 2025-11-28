@@ -5,7 +5,12 @@
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { areLocationsConnected, getLocation } from "@/game/data/locations";
 import { toDisplay, toMicro } from "@/game/types/common";
-import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
+import {
+  ActivityState,
+  GROWTH_STAGE_ORDER,
+  type GrowthStage,
+  getActivityConflictMessage,
+} from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type { LocationRequirement, TravelResult } from "@/game/types/location";
 import { ObjectiveType } from "@/game/types/quest";
@@ -104,11 +109,11 @@ export function canTravel(
     return { success: false, message: "You need a pet to travel." };
   }
 
-  // Cannot travel while sleeping
-  if (state.pet.sleep.isSleeping) {
+  // Cannot travel while doing another activity
+  if (state.pet.activityState !== ActivityState.Idle) {
     return {
       success: false,
-      message: "Your pet is sleeping. Wake them up first.",
+      message: getActivityConflictMessage("travel", state.pet.activityState),
     };
   }
 
