@@ -52,6 +52,14 @@ test("putToSleep fails when pet is exploring", () => {
   expect(result.message).toContain("exploring");
 });
 
+test("putToSleep fails when pet is battling", () => {
+  const pet = createTestPet({ activityState: ActivityState.Battling });
+  const result = putToSleep(pet);
+
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
 test("wakeUp succeeds when pet is sleeping", () => {
   const pet = createSleepingTestPet();
   const result = wakeUp(pet);

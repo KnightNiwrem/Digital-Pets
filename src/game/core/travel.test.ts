@@ -160,6 +160,15 @@ test("canTravel fails when pet is exploring", () => {
   expect(result.message).toContain("exploring");
 });
 
+test("canTravel fails when pet is battling", () => {
+  const state = createTestState({
+    pet: createTestPet({ activityState: ActivityState.Battling }),
+  });
+  const result = canTravel(state, "meadow");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("battling");
+});
+
 test("canTravel fails for unknown destination", () => {
   const state = createTestState({});
   const result = canTravel(state, "unknown-location");
