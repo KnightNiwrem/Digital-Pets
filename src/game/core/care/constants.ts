@@ -49,11 +49,11 @@ export const POOP_INTERVAL_AWAKE: Tick = 480;
 export const POOP_INTERVAL_SLEEPING: Tick = 960;
 
 /**
- * Ticks reduced from poop timer when feeding.
- * Per spec (care-system.md): 60 ticks (30 minutes) standard.
- * Note: Item poop acceleration values are already in micro-units and are applied directly to the timer.
+ * Base poop acceleration value in micro-units.
+ * Per spec (care-system.md): 60 ticks (30 minutes) standard = 120 micro-units.
+ * Item poop acceleration values are in micro-units and applied directly to the timer.
  */
-export const POOP_ACCELERATION_BASE: Tick = 60;
+export const POOP_ACCELERATION_BASE: Tick = 120;
 
 /**
  * Maximum poop count (cap from time mechanics).
