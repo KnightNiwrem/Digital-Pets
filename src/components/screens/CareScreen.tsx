@@ -12,7 +12,7 @@ import {
   SleepToggle,
   WaterButton,
 } from "@/components/care";
-import { ActivityStatusCard, getCareBlockedMessage } from "@/components/game";
+import { ActivityStatusCard } from "@/components/game";
 import {
   EnergyBar,
   GrowthProgress,
@@ -31,6 +31,22 @@ import {
   selectPoop,
 } from "@/game/state/selectors";
 import { ActivityState } from "@/game/types/constants";
+
+/**
+ * Get the message for ActivityStatusCard based on the current activity state.
+ */
+function getActivityMessage(activityState: ActivityState): string {
+  switch (activityState) {
+    case ActivityState.Training:
+      return "Go to the Training screen to view progress or cancel.";
+    case ActivityState.Exploring:
+      return "Go to the Explore screen to view progress or cancel.";
+    case ActivityState.Battling:
+      return "Complete the battle before performing care actions.";
+    default:
+      return "";
+  }
+}
 
 type PetAnimationType = "idle" | "happy" | "eat" | "drink" | "play" | "hurt";
 
@@ -174,8 +190,8 @@ export function CareScreen() {
         </CardContent>
       </Card>
 
-      {/* Sleep Status */}
-      {petInfo.isSleeping && (
+      {/* Sleep Status - only show when actually sleeping */}
+      {petInfo.activityState === ActivityState.Sleeping && (
         <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
@@ -193,15 +209,7 @@ export function CareScreen() {
       {/* Activity Blocking Status */}
       <ActivityStatusCard
         activityState={petInfo.activityState}
-        message={
-          petInfo.activityState === ActivityState.Training
-            ? "Go to the Training screen to view progress or cancel."
-            : petInfo.activityState === ActivityState.Exploring
-              ? "Go to the Explore screen to view progress or cancel."
-              : petInfo.activityState === ActivityState.Battling
-                ? "Complete the battle before performing care actions."
-                : ""
-        }
+        message={getActivityMessage(petInfo.activityState)}
       />
 
       {/* Care Actions */}
@@ -211,9 +219,13 @@ export function CareScreen() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
-              <SleepToggle />
-            </div>
+            {/* Only show SleepToggle when pet is idle or sleeping */}
+            {(petInfo.activityState === ActivityState.Idle ||
+              petInfo.activityState === ActivityState.Sleeping) && (
+              <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
+                <SleepToggle />
+              </div>
+            )}
             {petInfo.activityState === ActivityState.Idle && (
               <>
                 <FeedButton onSuccess={handleFeedSuccess} />
@@ -223,11 +235,6 @@ export function CareScreen() {
               </>
             )}
           </div>
-          {petInfo.activityState !== ActivityState.Idle && (
-            <p className="text-sm text-muted-foreground text-center">
-              {getCareBlockedMessage(petInfo.activityState)}
-            </p>
-          )}
         </CardContent>
       </Card>
     </div>
