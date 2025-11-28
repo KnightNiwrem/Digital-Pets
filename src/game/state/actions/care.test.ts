@@ -14,6 +14,7 @@ import { tutorialFirstSteps } from "@/game/data/quests/tutorial";
 import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
+import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type { QuestProgress } from "@/game/types/quest";
 import { QuestState } from "@/game/types/quest";
@@ -151,6 +152,7 @@ test("care actions do not update quest progress when action fails", () => {
   // Make pet sleep so feeding fails
   if (state.pet) {
     state.pet.sleep.isSleeping = true;
+    state.pet.activityState = ActivityState.Sleeping;
   }
 
   const result = feedPet(state, FOOD_ITEMS.KIBBLE.id);

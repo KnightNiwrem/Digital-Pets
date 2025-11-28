@@ -12,6 +12,7 @@ import {
 import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
+import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import { createInitialSkills } from "@/game/types/skill";
 import {
@@ -99,6 +100,7 @@ test("useFoodItem fails when pet is sleeping", () => {
   const state = createTestState();
   if (state.pet) {
     state.pet.sleep.isSleeping = true;
+    state.pet.activityState = ActivityState.Sleeping;
   }
 
   const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
@@ -153,6 +155,7 @@ test("useDrinkItem fails when pet is sleeping", () => {
   const state = createTestState();
   if (state.pet) {
     state.pet.sleep.isSleeping = true;
+    state.pet.activityState = ActivityState.Sleeping;
   }
 
   const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
@@ -363,6 +366,7 @@ test("useToyItem fails when pet is sleeping", () => {
   const state = createTestState();
   if (state.pet) {
     state.pet.sleep.isSleeping = true;
+    state.pet.activityState = ActivityState.Sleeping;
   }
 
   const result = useToyItem(state, TOY_ITEMS.BALL.id);
@@ -406,4 +410,62 @@ test("useToyItem clamps happiness to max", () => {
   expect(result.success).toBe(true);
   // Baby stage max with florabit multiplier is 50_000
   expect(result.state.pet?.careStats.happiness).toBe(50_000);
+});
+
+// Tests for blocking care actions during training
+
+test("useFoodItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+  }
+
+  const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useDrinkItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+  }
+
+  const result = useDrinkItem(state, DRINK_ITEMS.WATER.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useCleaningItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+    state.pet.poop.count = 3;
+  }
+
+  const result = useCleaningItem(state, CLEANING_ITEMS.TISSUE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useToyItem fails when pet is training", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Training;
+  }
+
+  const result = useToyItem(state, TOY_ITEMS.BALL.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("useFoodItem fails when pet is exploring", () => {
+  const state = createTestState();
+  if (state.pet) {
+    state.pet.activityState = ActivityState.Exploring;
+  }
+
+  const result = useFoodItem(state, FOOD_ITEMS.KIBBLE.id);
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
 });

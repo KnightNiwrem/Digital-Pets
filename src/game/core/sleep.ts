@@ -5,7 +5,11 @@
 import { getSpeciesGrowthStage } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
 import { now } from "@/game/types/common";
-import type { GrowthStage } from "@/game/types/constants";
+import {
+  ActivityState,
+  type GrowthStage,
+  getActivityConflictMessage,
+} from "@/game/types/constants";
 import type { Pet, PetSleep } from "@/game/types/pet";
 
 /**
@@ -68,6 +72,18 @@ export function hasMetSleepRequirement(pet: Pet): boolean {
  * Put the pet to sleep.
  */
 export function putToSleep(pet: Pet): SleepTransitionResult {
+  // Check if pet is busy with another activity (training, exploring, battling)
+  if (
+    pet.activityState !== ActivityState.Idle &&
+    pet.activityState !== ActivityState.Sleeping
+  ) {
+    return {
+      success: false,
+      sleep: pet.sleep,
+      message: getActivityConflictMessage("put to sleep", pet.activityState),
+    };
+  }
+
   if (pet.sleep.isSleeping) {
     return {
       success: false,

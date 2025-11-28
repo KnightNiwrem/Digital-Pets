@@ -7,6 +7,7 @@ import {
   createSleepingTestPet,
   createTestPet,
 } from "@/game/testing/createTestPet";
+import { ActivityState } from "@/game/types/constants";
 import {
   canPerformCareActions,
   getRemainingMinSleep,
@@ -33,6 +34,22 @@ test("putToSleep fails when pet is already sleeping", () => {
 
   expect(result.success).toBe(false);
   expect(result.message).toBe("Pet is already sleeping.");
+});
+
+test("putToSleep fails when pet is training", () => {
+  const pet = createTestPet({ activityState: ActivityState.Training });
+  const result = putToSleep(pet);
+
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("putToSleep fails when pet is exploring", () => {
+  const pet = createTestPet({ activityState: ActivityState.Exploring });
+  const result = putToSleep(pet);
+
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
 });
 
 test("wakeUp succeeds when pet is sleeping", () => {

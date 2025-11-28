@@ -8,7 +8,7 @@ import {
   createTestPet,
 } from "@/game/testing/createTestPet";
 import { toMicro } from "@/game/types/common";
-import { GrowthStage } from "@/game/types/constants";
+import { ActivityState, GrowthStage } from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import type { Pet } from "@/game/types/pet";
 import {
@@ -140,6 +140,24 @@ test("canTravel fails when pet is sleeping", () => {
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
   expect(result.message).toContain("sleeping");
+});
+
+test("canTravel fails when pet is training", () => {
+  const state = createTestState({
+    pet: createTestPet({ activityState: ActivityState.Training }),
+  });
+  const result = canTravel(state, "meadow");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("training");
+});
+
+test("canTravel fails when pet is exploring", () => {
+  const state = createTestState({
+    pet: createTestPet({ activityState: ActivityState.Exploring }),
+  });
+  const result = canTravel(state, "meadow");
+  expect(result.success).toBe(false);
+  expect(result.message).toContain("exploring");
 });
 
 test("canTravel fails for unknown destination", () => {

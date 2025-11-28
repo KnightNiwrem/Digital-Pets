@@ -6,6 +6,10 @@ import { removePoop } from "@/game/core/care/poop";
 import { hasItem, removeItem } from "@/game/core/inventory";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getItemById } from "@/game/data/items";
+import {
+  ActivityState,
+  getActivityConflictMessage,
+} from "@/game/types/constants";
 import type { GameState, InventoryItem } from "@/game/types/gameState";
 import {
   isCleaningItem,
@@ -54,9 +58,13 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
     return { success: false, state, message: "No pet to feed!" };
   }
 
-  // Check if pet is sleeping
-  if (state.pet.sleep.isSleeping) {
-    return { success: false, state, message: "Can't feed a sleeping pet!" };
+  // Check if pet is idle (not sleeping, training, exploring, or battling)
+  if (state.pet.activityState !== ActivityState.Idle) {
+    return {
+      success: false,
+      state,
+      message: getActivityConflictMessage("feed", state.pet.activityState),
+    };
   }
 
   // Check if item exists and is food
@@ -128,12 +136,15 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
     return { success: false, state, message: "No pet to give water!" };
   }
 
-  // Check if pet is sleeping
-  if (state.pet.sleep.isSleeping) {
+  // Check if pet is idle (not sleeping, training, exploring, or battling)
+  if (state.pet.activityState !== ActivityState.Idle) {
     return {
       success: false,
       state,
-      message: "Can't give water to a sleeping pet!",
+      message: getActivityConflictMessage(
+        "give water",
+        state.pet.activityState,
+      ),
     };
   }
 
@@ -205,6 +216,15 @@ export function useCleaningItem(
   // Check if pet exists
   if (!state.pet) {
     return { success: false, state, message: "No pet to clean!" };
+  }
+
+  // Check if pet is idle (not sleeping, training, exploring, or battling)
+  if (state.pet.activityState !== ActivityState.Idle) {
+    return {
+      success: false,
+      state,
+      message: getActivityConflictMessage("clean", state.pet.activityState),
+    };
   }
 
   // Check if item exists and is cleaning
@@ -285,12 +305,12 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
     return { success: false, state, message: "No pet to play with!" };
   }
 
-  // Check if pet is sleeping
-  if (state.pet.sleep.isSleeping) {
+  // Check if pet is idle (not sleeping, training, exploring, or battling)
+  if (state.pet.activityState !== ActivityState.Idle) {
     return {
       success: false,
       state,
-      message: "Can't play with a sleeping pet!",
+      message: getActivityConflictMessage("play", state.pet.activityState),
     };
   }
 
