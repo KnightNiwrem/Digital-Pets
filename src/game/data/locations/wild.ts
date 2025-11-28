@@ -145,6 +145,7 @@ export const crystalCaves: Location = {
     { targetId: "scorched_highlands", energyCost: 20, terrainModifier: 1.3 },
     { targetId: "shadow_depths", energyCost: 30, terrainModifier: 1.8 },
     { targetId: "ironhaven", energyCost: 12 },
+    { targetId: "mushroom_hollow", energyCost: 18 },
   ],
   levelMin: 10,
   levelMax: 20,
