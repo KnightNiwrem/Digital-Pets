@@ -2,7 +2,7 @@
  * Game state types for overall game and player state.
  */
 
-import type { ExplorationResult } from "./activity";
+import type { ExplorationResult, TrainingResult } from "./activity";
 import type { Tick, Timestamp } from "./common";
 import type { Pet } from "./pet";
 import type { QuestProgress } from "./quest";
@@ -82,6 +82,8 @@ export interface GameState {
   isInitialized: boolean;
   /** Last exploration result (for UI notification, cleared after display) */
   lastExplorationResult?: ExplorationResult & { locationName: string };
+  /** Last training result (for UI notification, cleared after display) */
+  lastTrainingResult?: TrainingResult & { facilityName: string };
   /**
    * Active battle (if in combat).
    * Reserved for future use: currently, battle state is managed locally in BattleScreen.

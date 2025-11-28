@@ -11,8 +11,11 @@ import { updateQuestProgress } from "@/game/core/quests/quests";
 import { resetDailySleep } from "@/game/core/sleep";
 import { processPetTick } from "@/game/core/tick";
 import { getMidnightTimestamp, shouldDailyReset } from "@/game/core/time";
+import { completeTraining } from "@/game/core/training";
+import { getFacility } from "@/game/data/facilities";
 import { getLocation } from "@/game/data/locations";
 import { applyExplorationResults } from "@/game/state/actions/exploration";
+import type { TrainingResult } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
@@ -22,6 +25,7 @@ import type {
   MaxStatsSnapshot,
   OfflineExplorationResult,
   OfflineReport,
+  OfflineTrainingResult,
 } from "@/game/types/offline";
 import { ObjectiveType } from "@/game/types/quest";
 import { SkillType } from "@/game/types/skill";
@@ -77,6 +81,15 @@ export function processGameTick(
     workingState.pet.activityState === ActivityState.Training &&
     workingState.pet.activeTraining !== undefined;
 
+  // Capture training result BEFORE processing tick (since processPetTick clears the training state)
+  // Training completes when ticksRemaining === 1 (will be decremented to 0)
+  let trainingResultBeforeCompletion: TrainingResult | null = null;
+  let facilityId: string | null = null;
+  if (wasTraining && workingState.pet.activeTraining?.ticksRemaining === 1) {
+    trainingResultBeforeCompletion = completeTraining(workingState.pet);
+    facilityId = workingState.pet.activeTraining.facilityId;
+  }
+
   // Process pet tick (handles training, care, growth, etc.)
   const updatedPet = processPetTick(workingState.pet);
 
@@ -93,6 +106,8 @@ export function processGameTick(
     lastSaveTime: currentTime,
     // Clear any previous exploration result
     lastExplorationResult: undefined,
+    // Clear any previous training result
+    lastTrainingResult: undefined,
   };
 
   // Process exploration at game state level (needs access to inventory)
@@ -160,6 +175,15 @@ export function processGameTick(
       ObjectiveType.Train,
       "any",
     );
+
+    // Store the training result for UI notification
+    if (trainingResultBeforeCompletion && facilityId) {
+      const facility = getFacility(facilityId);
+      updatedState.lastTrainingResult = {
+        ...trainingResultBeforeCompletion,
+        facilityName: facility?.name ?? "Unknown Facility",
+      };
+    }
   }
 
   return updatedState;
@@ -245,7 +269,7 @@ function createMaxStatsSnapshot(state: GameState): MaxStatsSnapshot | null {
 
 /**
  * Process offline catch-up ticks.
- * Collects exploration results that complete during offline time.
+ * Collects exploration and training results that complete during offline time.
  */
 export function processOfflineCatchup(
   state: GameState,
@@ -264,8 +288,9 @@ export function processOfflineCatchup(
   const poopBefore = state.pet?.poop.count ?? 0;
   const petName = state.pet?.identity.name ?? null;
 
-  // Process ticks and collect exploration results using the shared tick processor
+  // Process ticks and collect exploration/training results using the shared tick processor
   const explorationResults: OfflineExplorationResult[] = [];
+  const trainingResults: OfflineTrainingResult[] = [];
   const currentState = processMultipleTicks(
     state,
     cappedTicks,
@@ -277,6 +302,14 @@ export function processOfflineCatchup(
           locationName: tickState.lastExplorationResult.locationName,
           itemsFound: tickState.lastExplorationResult.itemsFound,
           message: tickState.lastExplorationResult.message,
+        });
+      }
+      // Collect training result if one was generated this tick
+      if (tickState.lastTrainingResult) {
+        const { facilityName, ...result } = tickState.lastTrainingResult;
+        trainingResults.push({
+          facilityName,
+          result,
         });
       }
     },
@@ -296,6 +329,7 @@ export function processOfflineCatchup(
     poopBefore,
     poopAfter,
     explorationResults,
+    trainingResults,
   };
 
   return {
