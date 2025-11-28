@@ -134,7 +134,7 @@ test("processGrowthTick handles substage transitions", () => {
   expect(result.previousSubstage).toBe(1);
 });
 
-test("processGrowthTick does not modify battle stats on substage transition", () => {
+test("processGrowthTick recalculates battle stats on substage transition", () => {
   // Get the min age for baby substage 2 (subStage is a string)
   const species = getSpeciesById(SPECIES.FLORABIT.id);
   const babySubstage2 = species?.growthStages.find(
@@ -161,8 +161,26 @@ test("processGrowthTick does not modify battle stats on substage transition", ()
   const result = processGrowthTick(pet);
 
   expect(result.substageTransitioned).toBe(true);
-  // Battle stats should be updated to match the new substage
-  expect(result.battleStats).toBeDefined();
+  // Battle stats should be recalculated with new base stats from substage 2
+  // Baby substage 2 has base stats of 11 for all battle stats
+  expect(result.battleStats.strength).toBe(
+    babySubstage2.baseStats.battle.strength,
+  );
+  expect(result.battleStats.endurance).toBe(
+    babySubstage2.baseStats.battle.endurance,
+  );
+  expect(result.battleStats.agility).toBe(
+    babySubstage2.baseStats.battle.agility,
+  );
+  expect(result.battleStats.precision).toBe(
+    babySubstage2.baseStats.battle.precision,
+  );
+  expect(result.battleStats.fortitude).toBe(
+    babySubstage2.baseStats.battle.fortitude,
+  );
+  expect(result.battleStats.cunning).toBe(
+    babySubstage2.baseStats.battle.cunning,
+  );
 });
 
 // getNextStage tests

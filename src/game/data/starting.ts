@@ -5,6 +5,7 @@
 import { getInitialPoopTimer } from "@/game/core/care/poop";
 import {
   calculateMaxStatsForAge,
+  calculateTotalBattleStats,
   createDefaultBonusMaxStats,
 } from "@/game/core/petStats";
 import { createPetId, type GrowthStage, type Pet } from "@/game/types";
@@ -52,6 +53,16 @@ export function createNewPet(name: string, speciesId: string): Pet {
   // Start with full stats
   const now = Date.now();
 
+  // Initialize trained battle stats to zero
+  const trainedBattleStats = {
+    strength: 0,
+    endurance: 0,
+    agility: 0,
+    precision: 0,
+    fortitude: 0,
+    cunning: 0,
+  };
+
   return {
     identity: {
       id: createPetId(),
@@ -75,15 +86,12 @@ export function createNewPet(name: string, speciesId: string): Pet {
     careLifeStats: {
       careLife: maxStats.careLife,
     },
-    battleStats: { ...stageStats.baseStats.battle },
-    trainedBattleStats: {
-      strength: 0,
-      endurance: 0,
-      agility: 0,
-      precision: 0,
-      fortitude: 0,
-      cunning: 0,
-    },
+    battleStats: calculateTotalBattleStats(
+      stageStats.baseStats.battle,
+      trainedBattleStats,
+      bonusMaxStats.battle,
+    ),
+    trainedBattleStats,
     resistances: { ...species.resistances },
     poop: {
       count: 0,
