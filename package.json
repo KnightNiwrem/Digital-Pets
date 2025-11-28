@@ -1,5 +1,6 @@
 {
-  "name": "bun-react-template",
+  "name": "digital-pets",
+  "description": "A virtual pet game with care mechanics, exploration, battles, and progression",
   "version": "0.1.0",
   "private": true,
   "type": "module",
