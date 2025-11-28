@@ -19,13 +19,19 @@ export interface SleepTransitionResult {
 
 /**
  * Default minimum sleep ticks by growth stage (fallback if species data unavailable).
+ * Based on 120 ticks per hour:
+ * - baby: 16 hours = 1920 ticks
+ * - child: 14 hours = 1680 ticks
+ * - teen: 12 hours = 1440 ticks
+ * - youngAdult: 10 hours = 1200 ticks
+ * - adult: 8 hours = 960 ticks
  */
 const DEFAULT_MIN_SLEEP_TICKS: Record<GrowthStage, Tick> = {
-  baby: 480,
-  child: 400,
-  teen: 320,
-  youngAdult: 240,
-  adult: 200,
+  baby: 1920,
+  child: 1680,
+  teen: 1440,
+  youngAdult: 1200,
+  adult: 960,
 };
 
 /**
