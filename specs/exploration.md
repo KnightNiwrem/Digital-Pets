@@ -6,13 +6,35 @@ Exploration allows pets to forage for items and encounter wild pets or events.
 
 ### Foraging
 
-Searching an area for gatherable resources.
+Searching an area for gatherable plants, herbs, and general resources.
 
 | Property | Description |
 |----------|-------------|
 | Duration | Measured in ticks |
 | Energy Cost | Consumes energy |
 | Skill Used | Foraging skill level affects results |
+
+### Mining
+
+Extracting ores, stones, and minerals from rocky areas.
+
+| Property | Description |
+|----------|-------------|
+| Duration | Measured in ticks |
+| Energy Cost | Consumes energy |
+| Skill Used | Mining skill level affects results |
+| Requirement | Location must have minable deposits |
+
+### Fishing
+
+Catching fish and aquatic resources from water sources.
+
+| Property | Description |
+|----------|-------------|
+| Duration | Measured in ticks |
+| Energy Cost | Consumes energy |
+| Skill Used | Fishing skill level affects results |
+| Requirement | Location must have water source |
 
 ### Scouting
 
@@ -32,7 +54,7 @@ Thorough exploration for rare finds.
 |----------|-------------|
 | Duration | Measured in ticks (longest) |
 | Energy Cost | Highest |
-| Skills Used | Both Foraging and Scouting |
+| Skills Used | Foraging, Mining, Fishing, and Scouting |
 | Requirement | Minimum skill levels per location |
 
 ## Forage Tables
@@ -120,6 +142,8 @@ Locations can require minimum skill levels:
 | Property | Description |
 |----------|-------------|
 | minForaging | Foraging level to forage here |
+| minMining | Mining level to mine here |
+| minFishing | Fishing level to fish here |
 | minScouting | Scouting level to scout here |
 | minDeepExplore | Combined requirement for deep exploration |
 

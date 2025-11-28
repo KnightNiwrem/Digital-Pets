@@ -7,10 +7,12 @@
  */
 export const SkillType = {
   Foraging: "foraging",
+  Mining: "mining",
+  Fishing: "fishing",
   Scouting: "scouting",
   Crafting: "crafting",
   Trading: "trading",
-  Taming: "taming",
+  Social: "social",
 } as const;
 
 export type SkillType = (typeof SkillType)[keyof typeof SkillType];
@@ -61,10 +63,12 @@ export interface Skill {
  */
 export interface PlayerSkills {
   [SkillType.Foraging]: Skill;
+  [SkillType.Mining]: Skill;
+  [SkillType.Fishing]: Skill;
   [SkillType.Scouting]: Skill;
   [SkillType.Crafting]: Skill;
   [SkillType.Trading]: Skill;
-  [SkillType.Taming]: Skill;
+  [SkillType.Social]: Skill;
 }
 
 /**
@@ -73,10 +77,12 @@ export interface PlayerSkills {
 export function createInitialSkills(): PlayerSkills {
   return {
     [SkillType.Foraging]: { type: SkillType.Foraging, level: 1, currentXp: 0 },
+    [SkillType.Mining]: { type: SkillType.Mining, level: 1, currentXp: 0 },
+    [SkillType.Fishing]: { type: SkillType.Fishing, level: 1, currentXp: 0 },
     [SkillType.Scouting]: { type: SkillType.Scouting, level: 1, currentXp: 0 },
     [SkillType.Crafting]: { type: SkillType.Crafting, level: 1, currentXp: 0 },
     [SkillType.Trading]: { type: SkillType.Trading, level: 1, currentXp: 0 },
-    [SkillType.Taming]: { type: SkillType.Taming, level: 1, currentXp: 0 },
+    [SkillType.Social]: { type: SkillType.Social, level: 1, currentXp: 0 },
   };
 }
 
@@ -86,10 +92,12 @@ export function createInitialSkills(): PlayerSkills {
 export function getSkillDisplayName(skillType: SkillType): string {
   const names: Record<SkillType, string> = {
     [SkillType.Foraging]: "Foraging",
+    [SkillType.Mining]: "Mining",
+    [SkillType.Fishing]: "Fishing",
     [SkillType.Scouting]: "Scouting",
     [SkillType.Crafting]: "Crafting",
     [SkillType.Trading]: "Trading",
-    [SkillType.Taming]: "Taming",
+    [SkillType.Social]: "Social",
   };
   return names[skillType];
 }
@@ -100,10 +108,12 @@ export function getSkillDisplayName(skillType: SkillType): string {
 export function getSkillEmoji(skillType: SkillType): string {
   const emojis: Record<SkillType, string> = {
     [SkillType.Foraging]: "🌿",
+    [SkillType.Mining]: "⛏️",
+    [SkillType.Fishing]: "🎣",
     [SkillType.Scouting]: "🔍",
     [SkillType.Crafting]: "🔧",
     [SkillType.Trading]: "💰",
-    [SkillType.Taming]: "🤝",
+    [SkillType.Social]: "🤝",
   };
   return emojis[skillType];
 }
