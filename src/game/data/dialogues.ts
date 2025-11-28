@@ -200,7 +200,7 @@ export const gromDialogue: DialogueTree = {
     ),
     about_town_2: messageNode(
       "about_town_2",
-      "The Crystal Caves to the south are popular with adventurers, and beyond the peaks lies the Frozen Peaks. Not many return from there.",
+      "The Crystal Caves to the south are popular with adventurers, and to the north lie the Frozen Peaks. Not many return from there.",
       "greeting",
     ),
     about_ore: messageNode(
