@@ -36,7 +36,9 @@ export function getMinSleepTicksForPet(pet: Pet): Tick {
     pet.identity.speciesId,
     pet.growth.ageTicks,
   );
-  return growthStage?.minSleepTicks ?? DEFAULT_MIN_SLEEP_TICKS[pet.growth.stage];
+  return (
+    growthStage?.minSleepTicks ?? DEFAULT_MIN_SLEEP_TICKS[pet.growth.stage]
+  );
 }
 
 /**

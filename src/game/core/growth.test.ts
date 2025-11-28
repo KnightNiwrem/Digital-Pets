@@ -3,7 +3,11 @@
  */
 
 import { expect, test } from "bun:test";
-import { getSpeciesById, getSpeciesGrowthStage, SPECIES } from "@/game/data/species";
+import {
+  getSpeciesById,
+  getSpeciesGrowthStage,
+  SPECIES,
+} from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
 import type { GrowthStage } from "@/game/types/constants";
 import {

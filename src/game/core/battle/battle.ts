@@ -3,7 +3,7 @@
  */
 
 import { getDefaultMoves } from "@/game/data/moves";
-import { getSpeciesById, getInitialGrowthStage } from "@/game/data/species";
+import { getInitialGrowthStage, getSpeciesById } from "@/game/data/species";
 import type { Move, MoveSlot } from "@/game/types/move";
 import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";

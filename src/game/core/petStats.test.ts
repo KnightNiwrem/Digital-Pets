@@ -165,7 +165,12 @@ test("emberfox has 4 child substages", () => {
   expect(childStages.length).toBe(4);
 
   // Verify substages are numbered correctly (as strings)
-  expect(childStages.map((s) => s.subStage).sort()).toEqual(["1", "2", "3", "4"]);
+  expect(childStages.map((s) => s.subStage).sort()).toEqual([
+    "1",
+    "2",
+    "3",
+    "4",
+  ]);
 });
 
 test("florabit has 3 child substages", () => {
