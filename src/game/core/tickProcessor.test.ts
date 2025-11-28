@@ -555,3 +555,132 @@ test("processOfflineCatchup collects exploration result for in-progress explorat
   // Pet should no longer be exploring
   expect(result.state.pet?.activeExploration).toBeUndefined();
 });
+
+// Tests for lastTrainingResult in processGameTick
+
+test("processGameTick sets lastTrainingResult when training completes", () => {
+  const { ActivityState } = require("@/game/types/constants");
+
+  const pet = createTestPet({
+    activityState: ActivityState.Training,
+    activeTraining: {
+      facilityId: "facility_strength",
+      sessionType: "basic",
+      ticksRemaining: 1, // Will complete on this tick
+      durationTicks: 10,
+      startTick: 0,
+      energyCost: 0,
+    },
+  });
+
+  const state = createTestGameState({ pet });
+  const newState = processGameTick(state);
+
+  // Training should be complete
+  expect(newState.pet?.activeTraining).toBeUndefined();
+  // lastTrainingResult should be set with correct values
+  expect(newState.lastTrainingResult).toBeDefined();
+  expect(newState.lastTrainingResult?.facilityName).toBe("Strength Gym");
+  expect(newState.lastTrainingResult?.success).toBe(true);
+  expect(newState.lastTrainingResult?.statsGained).toBeDefined();
+  // Should have gained strength (primary stat for facility_strength)
+  expect(newState.lastTrainingResult?.statsGained?.strength).toBeGreaterThan(0);
+});
+
+test("processGameTick clears lastTrainingResult when no training completes", () => {
+  const { ActivityState } = require("@/game/types/constants");
+
+  const pet = createTestPet({
+    activityState: ActivityState.Training,
+    activeTraining: {
+      facilityId: "facility_strength",
+      sessionType: "basic",
+      ticksRemaining: 5, // Will NOT complete on this tick
+      durationTicks: 10,
+      startTick: 0,
+      energyCost: 0,
+    },
+  });
+
+  const state = createTestGameState({ pet });
+  const newState = processGameTick(state);
+
+  // Training should still be in progress
+  expect(newState.pet?.activeTraining).toBeDefined();
+  // lastTrainingResult should be undefined
+  expect(newState.lastTrainingResult).toBeUndefined();
+});
+
+// Tests for training result collection in offline catchup
+
+test("processOfflineCatchup collects training result when training completes", () => {
+  const { ActivityState } = require("@/game/types/constants");
+
+  const pet = createTestPet({
+    activityState: ActivityState.Training,
+    activeTraining: {
+      facilityId: "facility_strength",
+      sessionType: "basic",
+      ticksRemaining: 3, // Will complete on tick 3
+      durationTicks: 10,
+      startTick: 0,
+      energyCost: 0,
+    },
+  });
+
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100);
+
+  // Should have collected one training result
+  expect(result.report.trainingResults.length).toBe(1);
+  // The result should have the correct facility name
+  expect(result.report.trainingResults[0]?.facilityName).toBe("Strength Gym");
+  // The result should contain the training outcome
+  expect(result.report.trainingResults[0]?.result.success).toBe(true);
+  expect(
+    result.report.trainingResults[0]?.result.statsGained?.strength,
+  ).toBeGreaterThan(0);
+});
+
+test("processOfflineCatchup has empty trainingResults when no training completes", () => {
+  const pet = createTestPet({
+    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 0 },
+  });
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 10, 100);
+
+  // No training was active, so no results
+  expect(result.report.trainingResults).toEqual([]);
+});
+
+test("processOfflineCatchup collects training result for in-progress training session", () => {
+  const { ActivityState } = require("@/game/types/constants");
+
+  // Training that was already in progress before going offline
+  // with only 2 ticks remaining
+  const pet = createTestPet({
+    activityState: ActivityState.Training,
+    activeTraining: {
+      facilityId: "facility_agility",
+      sessionType: "basic",
+      ticksRemaining: 2,
+      durationTicks: 100, // Long duration, but only 2 ticks left
+      startTick: 0,
+      energyCost: 0,
+    },
+  });
+
+  const state = createTestGameState({ pet, totalTicks: 0 });
+  const result = processOfflineCatchup(state, 5, 100);
+
+  // Training should have completed and been collected
+  expect(result.report.trainingResults.length).toBe(1);
+  expect(result.report.trainingResults[0]?.facilityName).toBe("Agility Course");
+  expect(result.report.trainingResults[0]?.result.success).toBe(true);
+  // Should have gained agility (primary stat for facility_agility)
+  expect(
+    result.report.trainingResults[0]?.result.statsGained?.agility,
+  ).toBeGreaterThan(0);
+  // Pet should no longer be training
+  expect(result.state.pet?.activeTraining).toBeUndefined();
+});
