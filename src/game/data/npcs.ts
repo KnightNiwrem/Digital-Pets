@@ -142,7 +142,11 @@ export const sageLumina: NPC = {
   roles: [NpcRole.Trainer, NpcRole.Lore, NpcRole.QuestGiver],
   locationId: "starfall_sanctuary",
   dialogueId: "lumina_dialogue",
-  questIds: ["main_celestial_trial", "side_starlight_gathering"],
+  questIds: [
+    "main_celestial_trial",
+    "main_frozen_ascent",
+    "side_starlight_gathering",
+  ],
   emoji: "🧙‍♀️",
 };
 
@@ -204,8 +208,8 @@ export const trainerBlaze: NPC = {
  * Frost - an ice-specialized researcher.
  * Studies creatures adapted to extreme cold.
  */
-export const researcherFrost: NPC = {
-  id: "researcher_frost",
+export const drFrost: NPC = {
+  id: "dr_frost",
   name: "Dr. Frost",
   description:
     "A dedicated researcher bundled in heavy furs, studying how creatures survive in the frozen peaks. Their research could revolutionize pet training.",
@@ -268,7 +272,7 @@ export const npcs: Record<string, NPC> = {
   // Wandering/Location-based
   [herbalistFern.id]: herbalistFern,
   [trainerBlaze.id]: trainerBlaze,
-  [researcherFrost.id]: researcherFrost,
+  [drFrost.id]: drFrost,
   [explorerCoral.id]: explorerCoral,
   [shadowGloom.id]: shadowGloom,
 };

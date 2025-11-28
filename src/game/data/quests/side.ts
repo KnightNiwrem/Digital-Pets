@@ -590,7 +590,7 @@ export const sidePearlDiving: Quest = {
       id: "collect_materials",
       type: ObjectiveType.Collect,
       description: "Collect Coral Fragments",
-      target: "material_coral",
+      target: "material_crystal",
       quantity: 8,
     },
   ],
@@ -1017,7 +1017,7 @@ export const sideColdAdaptation: Quest = {
   description:
     "Dr. Frost needs data on how pets adapt to cold. Help with the research!",
   type: QuestType.Side,
-  giverId: "researcher_frost",
+  giverId: "dr_frost",
   requirements: [
     {
       type: RequirementType.Stage,
@@ -1076,7 +1076,7 @@ export const sideIceSampleCollection: Quest = {
   description:
     "Dr. Frost needs ice samples from the Glacial Cavern. Bring back pristine specimens!",
   type: QuestType.Side,
-  giverId: "researcher_frost",
+  giverId: "dr_frost",
   requirements: [
     {
       type: RequirementType.Quest,
