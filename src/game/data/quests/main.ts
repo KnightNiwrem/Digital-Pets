@@ -185,7 +185,7 @@ export const mainRisingFlames: Quest = {
 
 /**
  * Main Quest 4: Into the Shadow Depths
- * The final main story quest.
+ * Exploring the deepest caves.
  */
 export const mainShadowDepths: Quest = {
   id: "main_shadow_depths",
@@ -245,6 +245,196 @@ export const mainShadowDepths: Quest = {
     },
   ],
   chainPrevious: "main_rising_flames",
+  chainNext: "main_sunken_secrets",
+};
+
+/**
+ * Main Quest 5: Sunken Secrets
+ * Discovering the underwater temple.
+ */
+export const mainSunkenSecrets: Quest = {
+  id: "main_sunken_secrets",
+  name: "Sunken Secrets",
+  description:
+    "Captain Torrent speaks of an ancient temple beneath the waves. Its mysteries call to those brave enough to dive deep.",
+  type: QuestType.Main,
+  giverId: "captain_torrent",
+  requirements: [
+    {
+      type: RequirementType.Quest,
+      target: "main_shadow_depths",
+    },
+    {
+      type: RequirementType.Stage,
+      target: GrowthStage.YoungAdult,
+    },
+  ],
+  objectives: [
+    {
+      id: "visit_reef",
+      type: ObjectiveType.Visit,
+      description: "Explore the Coral Reef",
+      target: "coral_reef",
+      quantity: 1,
+    },
+    {
+      id: "visit_temple",
+      type: ObjectiveType.Visit,
+      description: "Enter the Sunken Temple",
+      target: "sunken_temple",
+      quantity: 1,
+    },
+    {
+      id: "defeat_guardians",
+      type: ObjectiveType.Defeat,
+      description: "Defeat temple guardians",
+      target: "any",
+      quantity: 10,
+    },
+  ],
+  rewards: [
+    {
+      type: RewardType.Currency,
+      target: "coins",
+      quantity: 1200,
+    },
+    {
+      type: RewardType.Item,
+      target: "equip_guardians_pendant",
+      quantity: 1,
+    },
+    {
+      type: RewardType.Unlock,
+      target: SPECIES.CORALITE.id,
+      quantity: 1,
+    },
+  ],
+  chainPrevious: "main_shadow_depths",
+  chainNext: "main_frozen_ascent",
+};
+
+/**
+ * Main Quest 6: Frozen Ascent
+ * Climbing the frozen peaks.
+ */
+export const mainFrozenAscent: Quest = {
+  id: "main_frozen_ascent",
+  name: "Frozen Ascent",
+  description:
+    "The path to the Starfall Sanctuary passes through the Frozen Peaks. Brave the cold and climb to new heights.",
+  type: QuestType.Main,
+  giverId: "sage_lumina",
+  requirements: [
+    {
+      type: RequirementType.Quest,
+      target: "main_sunken_secrets",
+    },
+    {
+      type: RequirementType.Stage,
+      target: GrowthStage.YoungAdult,
+    },
+  ],
+  objectives: [
+    {
+      id: "visit_peaks",
+      type: ObjectiveType.Visit,
+      description: "Reach the Frozen Peaks",
+      target: "frozen_peaks",
+      quantity: 1,
+    },
+    {
+      id: "visit_cavern",
+      type: ObjectiveType.Visit,
+      description: "Enter the Glacial Cavern",
+      target: "glacial_cavern",
+      quantity: 1,
+    },
+    {
+      id: "defeat_ice",
+      type: ObjectiveType.Defeat,
+      description: "Defeat ice creatures",
+      target: "any",
+      quantity: 12,
+    },
+  ],
+  rewards: [
+    {
+      type: RewardType.Currency,
+      target: "coins",
+      quantity: 1500,
+    },
+    {
+      type: RewardType.Item,
+      target: "medicine_super_potion",
+      quantity: 5,
+    },
+  ],
+  chainPrevious: "main_sunken_secrets",
+  chainNext: "main_celestial_trial",
+};
+
+/**
+ * Main Quest 7: Celestial Trial
+ * The ultimate challenge.
+ */
+export const mainCelestialTrial: Quest = {
+  id: "main_celestial_trial",
+  name: "Celestial Trial",
+  description:
+    "The Celestial Spire awaits. At its peak lies the ultimate test - prove that your bond with your pet transcends all limits.",
+  type: QuestType.Main,
+  giverId: "sage_lumina",
+  requirements: [
+    {
+      type: RequirementType.Quest,
+      target: "main_frozen_ascent",
+    },
+    {
+      type: RequirementType.Stage,
+      target: GrowthStage.Adult,
+    },
+  ],
+  objectives: [
+    {
+      id: "visit_spire",
+      type: ObjectiveType.Visit,
+      description: "Enter the Celestial Spire",
+      target: "celestial_spire",
+      quantity: 1,
+    },
+    {
+      id: "defeat_celestial",
+      type: ObjectiveType.Defeat,
+      description: "Overcome celestial guardians",
+      target: "any",
+      quantity: 25,
+    },
+    {
+      id: "explore_spire",
+      type: ObjectiveType.Explore,
+      description: "Reach the spire's peak",
+      target: "celestial_spire",
+      quantity: 10,
+    },
+  ],
+  rewards: [
+    {
+      type: RewardType.Currency,
+      target: "coins",
+      quantity: 5000,
+    },
+    {
+      type: RewardType.Item,
+      target: "equip_hunters_eye",
+      quantity: 1,
+    },
+    {
+      type: RewardType.Item,
+      target: "food_feast",
+      quantity: 10,
+    },
+  ],
+  chainPrevious: "main_frozen_ascent",
 };
 
 /**
@@ -255,4 +445,7 @@ export const mainQuests: Record<string, Quest> = {
   [mainCrystalDiscovery.id]: mainCrystalDiscovery,
   [mainRisingFlames.id]: mainRisingFlames,
   [mainShadowDepths.id]: mainShadowDepths,
+  [mainSunkenSecrets.id]: mainSunkenSecrets,
+  [mainFrozenAscent.id]: mainFrozenAscent,
+  [mainCelestialTrial.id]: mainCelestialTrial,
 };
