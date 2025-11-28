@@ -166,10 +166,12 @@ test("createInitialSkills creates all skills at level 1", () => {
   const skills = createInitialSkills();
 
   expect(skills[SkillType.Foraging].level).toBe(1);
+  expect(skills[SkillType.Mining].level).toBe(1);
+  expect(skills[SkillType.Fishing].level).toBe(1);
   expect(skills[SkillType.Scouting].level).toBe(1);
   expect(skills[SkillType.Crafting].level).toBe(1);
   expect(skills[SkillType.Trading].level).toBe(1);
-  expect(skills[SkillType.Taming].level).toBe(1);
+  expect(skills[SkillType.Social].level).toBe(1);
 });
 
 // Progress calculation

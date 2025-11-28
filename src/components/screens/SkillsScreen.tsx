@@ -12,10 +12,12 @@ import { SkillType } from "@/game/types/skill";
  */
 const SKILL_ORDER: SkillType[] = [
   SkillType.Foraging,
+  SkillType.Mining,
+  SkillType.Fishing,
   SkillType.Scouting,
   SkillType.Crafting,
   SkillType.Trading,
-  SkillType.Taming,
+  SkillType.Social,
 ];
 
 /**

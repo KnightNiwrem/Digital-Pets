@@ -108,7 +108,7 @@ export const dailyBattlePractice: Quest = {
     },
     {
       type: RewardType.XP,
-      target: "taming",
+      target: "social",
       quantity: 10,
     },
   ],
