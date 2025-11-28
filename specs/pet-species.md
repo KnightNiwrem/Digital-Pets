@@ -8,10 +8,9 @@ Each species is defined by:
 
 | Attribute | Description |
 |-----------|-------------|
-| **Base Stats** | Starting battle stat distribution |
-| **Stat Growth** | Growth multipliers per stat per stage |
-| **Care Cap Multiplier** | Float multiplier affecting max care stat values |
+| **Growth Stages** | Array of per-stage stat definitions |
 | **Resistance Profile** | Natural damage type resistances |
+| **Archetype** | Classification describing playstyle |
 
 ## Stat Distribution Categories
 
@@ -26,34 +25,63 @@ Species fall into archetypes based on stat distribution:
 | Defender | High Endurance/Fortitude | High survivability |
 | Status | High Cunning/Precision | Debuff specialist |
 
-## Care Cap Multiplier
+## Per-Species Growth Stages
 
-Species have different care requirements expressed as multipliers to base care max:
+Each species defines its complete growth progression through an array of growth stage definitions. Every growth stage includes:
 
-| Multiplier Range | Description |
-|------------------|-------------|
-| 0.7 - 0.85 | Low maintenance (smaller/simpler pets) |
-| 0.9 - 1.1 | Normal maintenance |
-| 1.15 - 1.3 | High maintenance (larger/complex pets) |
+| Property | Description |
+|----------|-------------|
+| **stage** | Main stage (baby, child, teen, youngAdult, adult) |
+| **subStage** | Substage number (typically 1-3, varies by species) |
+| **name** | Display name (e.g., "Baby I", "Child II") |
+| **minAgeTicks** | Minimum age to enter this stage |
+| **baseStats** | Complete stat maximums for this stage |
+| **minSleepTicks** | Sleep requirement for this stage |
 
-**Effect:**
+### Base Stats Per Stage
+
+Each growth stage defines all maximum stats:
+
+```typescript
+baseStats: {
+  care: {
+    satiety: MicroValue,   // Max satiety
+    hydration: MicroValue, // Max hydration
+    happiness: MicroValue  // Max happiness
+  },
+  battle: {
+    attack: number,
+    defense: number,
+    speed: number,
+    hp: number
+  },
+  energy: MicroValue,     // Max energy
+  careLife: MicroValue    // Max care life (hours)
+}
 ```
-actualCareMax = floor(baseCareMax × speciesCareCapMultiplier)
+
+### Species Variation
+
+Species can vary in:
+
+- **Number of substages**: Some species may have more or fewer substages per main stage
+- **Stat progression curves**: Different species reach their peaks at different rates
+- **Final adult stats**: Each species has unique maximum potential
+
+## Bonus Max Stats
+
+Pets can gain permanent bonus max stats from:
+
+- Quest rewards
+- Special items
+- Events
+- Achievements
+
+These bonuses stack on top of the species growth stage base stats:
+
+```typescript
+totalMaxStat = speciesGrowthStage.baseStats + pet.bonusMaxStats
 ```
-
-Lower multiplier = lower max care stats = need more frequent care.
-
-## Stat Growth
-
-At each main growth stage transition, pets gain stats based on species growth rates.
-
-| Growth Rate | Description |
-|-------------|-------------|
-| Low | +1-2 per stage |
-| Medium | +3-4 per stage |
-| High | +5-6 per stage |
-
-Each species has different growth rates per stat.
 
 ## Resistance Profile
 
@@ -91,8 +119,8 @@ Each species should have:
 
 When defining species:
 
-- Total base stats should be comparable across species
-- Higher growth in one stat offset by lower in others
-- Care Cap Multiplier balances overall ease
+- Total adult stats should be comparable across species
+- Higher stats in one area offset by lower in others
+- Different growth curves create unique gameplay experiences
 - No species should dominate all scenarios
 - Each species should excel in specific situations

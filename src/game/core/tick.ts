@@ -31,11 +31,19 @@ import type { Pet } from "@/game/types/pet";
  */
 export function processPetTick(pet: Pet): Pet {
   const maxStats = calculatePetMaxStats(pet);
-  const maxCareStat = maxStats?.careStatMax ?? 0;
-  const maxEnergy = maxStats?.energyMax ?? 0;
+
+  // Get minimum care max for backwards compatibility with functions expecting single value
+  const minCareMax = maxStats
+    ? Math.min(
+        maxStats.care.satiety,
+        maxStats.care.hydration,
+        maxStats.care.happiness,
+      )
+    : 0;
+  const maxEnergy = maxStats?.energy ?? 0;
 
   // 1. Care Life drain/recovery (evaluated on current care stat state)
-  const newCareLife = applyCareLifeChange(pet, maxCareStat);
+  const newCareLife = applyCareLifeChange(pet, minCareMax);
 
   // 2. Energy regeneration
   const newEnergy = applyEnergyRegen(

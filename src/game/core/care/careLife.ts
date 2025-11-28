@@ -2,7 +2,7 @@
  * Care life drain/recovery logic.
  */
 
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import { calculatePetMaxStats } from "@/game/core/petStats";
 import type { MicroValue } from "@/game/types/common";
 import { toDisplayCare } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
@@ -118,8 +118,8 @@ export function applyCareLifeChange(
   pet: Pet,
   maxCareStat: MicroValue,
 ): MicroValue {
-  const stageDef = GROWTH_STAGE_DEFINITIONS[pet.growth.stage];
-  const maxCareLife = stageDef.careLifeMax;
+  const maxStats = calculatePetMaxStats(pet);
+  const maxCareLife = maxStats?.careLife ?? 0;
 
   const delta = calculateCareLifeChange(pet, maxCareStat);
   const newCareLife = pet.careLifeStats.careLife + delta;

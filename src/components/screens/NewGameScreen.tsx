@@ -63,11 +63,7 @@ function SpeciesCard({ species, isSelected, onSelect }: SpeciesCardProps) {
           <div className="capitalize">{species.archetype}</div>
           <div className="text-muted-foreground">Care:</div>
           <div>
-            {species.careCapMultiplier < 1
-              ? "Low Maintenance"
-              : species.careCapMultiplier > 1
-                ? "High Maintenance"
-                : "Normal"}
+            {species.growthStages.length > 15 ? "Complex Growth" : "Normal"}
           </div>
         </div>
       </CardContent>

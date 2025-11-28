@@ -47,10 +47,15 @@ describe("Care system integration", () => {
 
     // Process care life - should drain since satiety is 0
     const maxStats = calculatePetMaxStats(pet);
-    const updatedCareLife = applyCareLifeChange(
-      pet,
-      maxStats?.careStatMax ?? 0,
-    );
+    // Use minimum care max for backwards compatibility
+    const minCareMax = maxStats
+      ? Math.min(
+          maxStats.care.satiety,
+          maxStats.care.hydration,
+          maxStats.care.happiness,
+        )
+      : 0;
+    const updatedCareLife = applyCareLifeChange(pet, minCareMax);
 
     // Care life should have decreased
     expect(updatedCareLife).toBeLessThan(72_000);

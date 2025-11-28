@@ -3,6 +3,7 @@
  */
 
 import { expect, test } from "bun:test";
+import { createDefaultBonusMaxStats } from "@/game/core/petStats";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import { createInitialSkills } from "@/game/types/skill";
@@ -22,7 +23,7 @@ function createTestGameState(isSleeping: boolean): GameState {
       identity: {
         id: "test-pet",
         name: "Test Pet",
-        speciesId: "slime",
+        speciesId: "florabit",
       },
       growth: {
         stage: GrowthStage.Baby,
@@ -43,6 +44,7 @@ function createTestGameState(isSleeping: boolean): GameState {
       },
       battleStats: createDefaultBattleStats(),
       resistances: createDefaultResistances(),
+      bonusMaxStats: createDefaultBonusMaxStats(),
       poop: {
         count: 0,
         ticksUntilNext: 480,

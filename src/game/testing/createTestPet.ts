@@ -2,6 +2,7 @@
  * Shared test utilities for creating mock Pet objects.
  */
 
+import { createDefaultBonusMaxStats } from "@/game/core/petStats";
 import { SPECIES } from "@/game/data/species";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
@@ -53,6 +54,7 @@ const createDefaultTestPet = (): Pet => ({
     sleepTicksToday: 0,
   },
   activityState: ActivityState.Idle,
+  bonusMaxStats: createDefaultBonusMaxStats(),
 });
 
 /**

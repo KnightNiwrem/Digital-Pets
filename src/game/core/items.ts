@@ -24,12 +24,16 @@ export interface UseItemResult {
 }
 
 /**
- * Calculate max care stat for current pet.
+ * Calculate max care stats for current pet.
  */
-function getMaxCareStat(state: GameState): number {
-  if (!state.pet) return 0;
+function getMaxCareStats(state: GameState): {
+  satiety: number;
+  hydration: number;
+  happiness: number;
+} {
+  if (!state.pet) return { satiety: 0, hydration: 0, happiness: 0 };
   const maxStats = calculatePetMaxStats(state.pet);
-  return maxStats?.careStatMax ?? 0;
+  return maxStats?.care ?? { satiety: 0, hydration: 0, happiness: 0 };
 }
 
 /**
@@ -38,7 +42,7 @@ function getMaxCareStat(state: GameState): number {
 function getMaxEnergy(state: GameState): number {
   if (!state.pet) return 0;
   const maxStats = calculatePetMaxStats(state.pet);
-  return maxStats?.energyMax ?? 0;
+  return maxStats?.energy ?? 0;
 }
 
 /**
@@ -71,10 +75,10 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
   }
 
   // Calculate new satiety (clamped to max)
-  const maxCareStat = getMaxCareStat(state);
+  const maxCareStats = getMaxCareStats(state);
   const newSatiety = Math.min(
     state.pet.careStats.satiety + itemDef.satietyRestore,
-    maxCareStat,
+    maxCareStats.satiety,
   );
 
   // Calculate new poop timer (apply acceleration if applicable)
@@ -149,10 +153,10 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
   }
 
   // Calculate new hydration (clamped to max)
-  const maxCareStat = getMaxCareStat(state);
+  const maxCareStats = getMaxCareStats(state);
   const newHydration = Math.min(
     state.pet.careStats.hydration + itemDef.hydrationRestore,
-    maxCareStat,
+    maxCareStats.hydration,
   );
 
   // Calculate new energy if drink provides it
@@ -318,10 +322,10 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
   const currentDurability = toyItem.currentDurability;
 
   // Calculate new happiness (clamped to max)
-  const maxCareStat = getMaxCareStat(state);
+  const maxCareStats = getMaxCareStats(state);
   const newHappiness = Math.min(
     state.pet.careStats.happiness + itemDef.happinessRestore,
-    maxCareStat,
+    maxCareStats.happiness,
   );
 
   // Calculate new durability

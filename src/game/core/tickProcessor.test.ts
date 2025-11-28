@@ -182,8 +182,11 @@ test("processOfflineCatchup report includes maxStats for valid pet", () => {
   const result = processOfflineCatchup(state, 10, 100);
 
   expect(result.report.maxStats).not.toBeNull();
-  expect(result.report.maxStats?.careStatMax).toBeGreaterThan(0);
-  expect(result.report.maxStats?.energyMax).toBeGreaterThan(0);
+  expect(result.report.maxStats?.care.satiety).toBeGreaterThan(0);
+  expect(result.report.maxStats?.care.hydration).toBeGreaterThan(0);
+  expect(result.report.maxStats?.care.happiness).toBeGreaterThan(0);
+  expect(result.report.maxStats?.energy).toBeGreaterThan(0);
+  expect(result.report.maxStats?.careLife).toBeGreaterThan(0);
 });
 
 test("processOfflineCatchup report maxStats is null when no pet", () => {
@@ -212,11 +215,11 @@ test("processOfflineCatchup report maxStats reflects growth stage", () => {
   const babyResult = processOfflineCatchup(babyState, 1, 100);
   const adultResult = processOfflineCatchup(adultState, 1, 100);
 
-  expect(adultResult.report.maxStats?.careStatMax).toBeGreaterThan(
-    babyResult.report.maxStats?.careStatMax ?? 0,
+  expect(adultResult.report.maxStats?.care.satiety).toBeGreaterThan(
+    babyResult.report.maxStats?.care.satiety ?? 0,
   );
-  expect(adultResult.report.maxStats?.energyMax).toBeGreaterThan(
-    babyResult.report.maxStats?.energyMax ?? 0,
+  expect(adultResult.report.maxStats?.energy).toBeGreaterThan(
+    babyResult.report.maxStats?.energy ?? 0,
   );
 });
 

@@ -31,8 +31,13 @@ export interface OfflineExplorationResult {
  * Maximum stat values for the pet at the time of the report.
  */
 export interface MaxStatsSnapshot {
-  careStatMax: MicroValue;
-  energyMax: MicroValue;
+  care: {
+    satiety: MicroValue;
+    hydration: MicroValue;
+    happiness: MicroValue;
+  };
+  energy: MicroValue;
+  careLife: MicroValue;
 }
 
 /**

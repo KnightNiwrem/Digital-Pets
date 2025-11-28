@@ -2,7 +2,7 @@
  * Sleep state transitions and logic.
  */
 
-import { GROWTH_STAGE_DEFINITIONS } from "@/game/data/growthStages";
+import { getSpeciesGrowthStage } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
 import { now } from "@/game/types/common";
 import type { GrowthStage } from "@/game/types/constants";
@@ -18,10 +18,33 @@ export interface SleepTransitionResult {
 }
 
 /**
+ * Default minimum sleep ticks by growth stage (fallback if species data unavailable).
+ */
+const DEFAULT_MIN_SLEEP_TICKS: Record<GrowthStage, Tick> = {
+  baby: 480,
+  child: 400,
+  teen: 320,
+  youngAdult: 240,
+  adult: 200,
+};
+
+/**
+ * Get the minimum sleep ticks required for a pet based on species and age.
+ */
+export function getMinSleepTicksForPet(pet: Pet): Tick {
+  const growthStage = getSpeciesGrowthStage(
+    pet.identity.speciesId,
+    pet.growth.ageTicks,
+  );
+  return growthStage?.minSleepTicks ?? DEFAULT_MIN_SLEEP_TICKS[pet.growth.stage];
+}
+
+/**
  * Get the minimum sleep ticks required for a growth stage.
+ * @deprecated Use getMinSleepTicksForPet instead for species-specific values.
  */
 export function getMinSleepTicks(stage: GrowthStage): Tick {
-  return GROWTH_STAGE_DEFINITIONS[stage].minSleepTicks;
+  return DEFAULT_MIN_SLEEP_TICKS[stage];
 }
 
 /**

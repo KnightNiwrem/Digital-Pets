@@ -240,7 +240,7 @@ export function cancelTraining(pet: Pet): {
 
   const energyRefunded = pet.activeTraining.energyCost;
   const maxStats = calculatePetMaxStats(pet);
-  const maxEnergy = maxStats?.energyMax ?? 0;
+  const maxEnergy = maxStats?.energy ?? 0;
 
   return {
     success: true,

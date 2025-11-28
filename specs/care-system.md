@@ -39,22 +39,39 @@ This uses ceiling rounding, meaning any remaining micro-units round up to the ne
 
 A stat is considered 0 only when its micro-value is exactly 0.
 
-### Stat Maximum by Growth Stage
+### Stat Maximum by Species and Growth Stage
 
-Base maximum is consistent across all care stats per growth stage. Species Care Cap Multiplier modifies these values.
+Each species defines maximum stat values for every growth stage. Stats can vary independently:
 
-| Stage | Base Max (display) | Base Max (micro) |
-|-------|-------------------|------------------|
-| Baby | 50 | 50,000 |
-| Child | 80 | 80,000 |
-| Teen | 120 | 120,000 |
-| Young Adult | 160 | 160,000 |
-| Adult | 200 | 200,000 |
-
-**Actual Maximum Calculation:**
+```typescript
+// Example: A species' baby stage might have
+care: {
+  satiety: 50_000,   // Max satiety in micro-units
+  hydration: 50_000, // Max hydration
+  happiness: 45_000  // Slightly lower happiness cap
+}
 ```
-actualMax = floor(baseMax × speciesCareCapMultiplier)
+
+The total max for a pet is calculated as:
 ```
+totalMaxStat = speciesGrowthStageMax + bonusMaxStats
+```
+
+Where `bonusMaxStats` come from items, quests, or events.
+
+### Typical Progression
+
+Stats generally increase as pets grow:
+
+| Stage | Typical Care Max Range (display) |
+|-------|----------------------------------|
+| Baby | 40-60 |
+| Child | 70-90 |
+| Teen | 100-130 |
+| Young Adult | 140-170 |
+| Adult | 180-220 |
+
+Actual values vary by species.
 
 ### Decay Rates
 

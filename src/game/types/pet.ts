@@ -62,6 +62,25 @@ export interface PetSleep {
 }
 
 /**
+ * Bonus max stats that can be added to a pet from items, quests, or events.
+ * These are added on top of the base max stats from the species growth stage.
+ */
+export interface BonusMaxStats {
+  /** Bonus to satiety max (micro-units) */
+  satiety: number;
+  /** Bonus to hydration max (micro-units) */
+  hydration: number;
+  /** Bonus to happiness max (micro-units) */
+  happiness: number;
+  /** Bonus to energy max (micro-units) */
+  energy: number;
+  /** Bonus to care life max (micro-units) */
+  careLife: number;
+  /** Bonus to battle stat maximums */
+  battle: BattleStats;
+}
+
+/**
  * Complete pet state combining all aspects.
  */
 export interface Pet {
@@ -89,6 +108,8 @@ export interface Pet {
   activeTraining?: ActiveTraining;
   /** Active exploration session (if exploring) */
   activeExploration?: ActiveExploration;
+  /** Bonus max stats from items, quests, events */
+  bonusMaxStats: BonusMaxStats;
 }
 
 /**
