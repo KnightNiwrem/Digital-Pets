@@ -94,8 +94,13 @@ export interface Pet {
   energyStats: EnergyStats;
   /** Hidden care life stat */
   careLifeStats: CareLifeStats;
-  /** Battle stats */
+  /** Battle stats (total = base from growth stage + trained + bonus) */
   battleStats: BattleStats;
+  /**
+   * Trained battle stats accumulated from training sessions.
+   * These are preserved across stage transitions and added to base stats.
+   */
+  trainedBattleStats: BattleStats;
   /** Damage type resistances */
   resistances: DamageResistances;
   /** Poop tracking */

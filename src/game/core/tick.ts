@@ -2,7 +2,10 @@
  * Single tick processing logic.
  */
 
-import { applyCareLifeChange } from "@/game/core/care/careLife";
+import {
+  applyCareLifeChange,
+  type MaxCareStats,
+} from "@/game/core/care/careLife";
 import { applyCareDecay } from "@/game/core/care/careStats";
 import { processPoopTick } from "@/game/core/care/poop";
 import { applyEnergyRegen } from "@/game/core/energy";
@@ -32,18 +35,18 @@ import type { Pet } from "@/game/types/pet";
 export function processPetTick(pet: Pet): Pet {
   const maxStats = calculatePetMaxStats(pet);
 
-  // Get minimum care max for backwards compatibility with functions expecting single value
-  const minCareMax = maxStats
-    ? Math.min(
-        maxStats.care.satiety,
-        maxStats.care.hydration,
-        maxStats.care.happiness,
-      )
-    : 0;
+  // Get max care stats for proper percentage calculations
+  const maxCareStats: MaxCareStats = maxStats
+    ? {
+        satiety: maxStats.care.satiety,
+        hydration: maxStats.care.hydration,
+        happiness: maxStats.care.happiness,
+      }
+    : { satiety: 0, hydration: 0, happiness: 0 };
   const maxEnergy = maxStats?.energy ?? 0;
 
   // 1. Care Life drain/recovery (evaluated on current care stat state)
-  const newCareLife = applyCareLifeChange(pet, minCareMax);
+  const newCareLife = applyCareLifeChange(pet, maxCareStats);
 
   // 2. Energy regeneration
   const newEnergy = applyEnergyRegen(

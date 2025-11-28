@@ -330,7 +330,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
  * High agility/precision, low endurance/fortitude.
  */
 const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
-  // Baby stages
+  // Baby stages (2 substages - Fast Grower)
   createGrowthStage(
     "baby",
     "1",
@@ -353,25 +353,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     "baby",
     "2",
     "Baby 2",
-    57_600,
-    { satiety: 46_000, hydration: 52_000, happiness: 49_000 },
-    {
-      strength: 9,
-      endurance: 6,
-      agility: 16,
-      precision: 16,
-      fortitude: 8,
-      cunning: 11,
-    },
-    44_000,
-    64_000,
-    1920,
-  ),
-  createGrowthStage(
-    "baby",
-    "3",
-    "Baby 3",
-    115_200,
+    86_400,
     { satiety: 50_000, hydration: 56_000, happiness: 53_000 },
     {
       strength: 10,
@@ -775,6 +757,24 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     },
     144_000,
     230_000,
+    1440,
+  ),
+  createGrowthStage(
+    "teen",
+    "4",
+    "Teen 4",
+    648_000,
+    { satiety: 176_000, hydration: 162_000, happiness: 146_000 },
+    {
+      strength: 38,
+      endurance: 61,
+      agility: 15,
+      precision: 27,
+      fortitude: 61,
+      cunning: 15,
+    },
+    162_000,
+    259_000,
     1440,
   ),
   // Young Adult stages
@@ -1697,6 +1697,24 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     230_000,
     1200,
   ),
+  createGrowthStage(
+    "youngAdult",
+    "4",
+    "Young Adult 4",
+    979_200,
+    { satiety: 150_000, hydration: 159_000, happiness: 177_000 },
+    {
+      strength: 20,
+      endurance: 29,
+      agility: 120,
+      precision: 53,
+      fortitude: 20,
+      cunning: 97,
+    },
+    152_000,
+    249_000,
+    1200,
+  ),
   // Adult stages
   createGrowthStage(
     "adult",
@@ -1750,6 +1768,24 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     },
     176_000,
     292_000,
+    960,
+  ),
+  createGrowthStage(
+    "adult",
+    "4",
+    "Adult 4",
+    1_296_000,
+    { satiety: 178_000, hydration: 188_000, happiness: 208_000 },
+    {
+      strength: 28,
+      endurance: 41,
+      agility: 160,
+      precision: 73,
+      fortitude: 28,
+      cunning: 132,
+    },
+    184_000,
+    304_000,
     960,
   ),
 ];
@@ -1908,6 +1944,9 @@ export function getStarterSpecies(): Species[] {
 /**
  * Get the growth stage definition for a species at a given age.
  * Accepts either a Species object or a species ID string.
+ *
+ * Note: A similar function getSpeciesStageStats exists in growthStages.ts
+ * but only accepts species ID strings. This function is more flexible.
  */
 export function getSpeciesGrowthStage(
   speciesOrId: Species | string,

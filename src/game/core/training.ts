@@ -189,7 +189,9 @@ export function completeTraining(pet: Pet): TrainingResult {
 
 /**
  * Apply training completion to pet state.
- * Returns the updated pet with training cleared and stats applied.
+ * Returns the updated pet with training cleared and trained stats applied.
+ * Training gains are added to trainedBattleStats (not battleStats directly)
+ * so they are preserved across stage transitions.
  */
 export function applyTrainingCompletion(pet: Pet): Pet {
   const result = completeTraining(pet);
@@ -203,10 +205,14 @@ export function applyTrainingCompletion(pet: Pet): Pet {
     };
   }
 
+  // Add gains to trainedBattleStats (preserved across stage transitions)
+  const newTrainedBattleStats = { ...pet.trainedBattleStats };
+  // Also update the total battleStats for immediate effect
   const newBattleStats = { ...pet.battleStats };
 
   for (const [stat, gain] of Object.entries(result.statsGained)) {
-    if (stat in newBattleStats && typeof gain === "number") {
+    if (stat in newTrainedBattleStats && typeof gain === "number") {
+      newTrainedBattleStats[stat as keyof BattleStats] += gain;
       newBattleStats[stat as keyof BattleStats] += gain;
     }
   }
@@ -215,6 +221,7 @@ export function applyTrainingCompletion(pet: Pet): Pet {
     ...pet,
     activityState: ActivityState.Idle,
     activeTraining: undefined,
+    trainedBattleStats: newTrainedBattleStats,
     battleStats: newBattleStats,
   };
 }

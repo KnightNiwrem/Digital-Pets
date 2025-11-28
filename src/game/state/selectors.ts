@@ -283,16 +283,14 @@ export function selectGrowthProgress(
 
   const ageDays = Math.floor(ageTicks / TICKS_PER_DAY);
 
-  // Find the next stage name
+  // Find the next stage name - use the display name directly from the stage stats
   let nextStageName: string | null = null;
   if (nextStageId) {
     const nextStageStats = species.growthStages.find(
       (gs) => gs.stage === nextStageId,
     );
     if (nextStageStats) {
-      nextStageName =
-        nextStageStats.stage.charAt(0).toUpperCase() +
-        nextStageStats.stage.slice(1).replace(/([A-Z])/g, " $1");
+      nextStageName = nextStageStats.name;
     }
   }
 

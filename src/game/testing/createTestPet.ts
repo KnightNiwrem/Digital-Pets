@@ -43,6 +43,14 @@ const createDefaultTestPet = (): Pet => ({
     fortitude: 10,
     cunning: 10,
   },
+  trainedBattleStats: {
+    strength: 0,
+    endurance: 0,
+    agility: 0,
+    precision: 0,
+    fortitude: 0,
+    cunning: 0,
+  },
   resistances: createDefaultResistances(),
   poop: {
     count: 0,

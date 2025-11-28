@@ -57,17 +57,19 @@ export function getMinSleepTicks(stage: GrowthStage): Tick {
 
 /**
  * Calculate remaining sleep needed for today.
+ * Uses species-specific sleep requirements.
  */
 export function getRemainingMinSleep(pet: Pet): Tick {
-  const minRequired = getMinSleepTicks(pet.growth.stage);
+  const minRequired = getMinSleepTicksForPet(pet);
   return Math.max(0, minRequired - pet.sleep.sleepTicksToday);
 }
 
 /**
  * Check if pet has met their minimum sleep requirement for today.
+ * Uses species-specific sleep requirements.
  */
 export function hasMetSleepRequirement(pet: Pet): boolean {
-  return pet.sleep.sleepTicksToday >= getMinSleepTicks(pet.growth.stage);
+  return pet.sleep.sleepTicksToday >= getMinSleepTicksForPet(pet);
 }
 
 /**

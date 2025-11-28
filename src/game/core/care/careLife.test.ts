@@ -13,9 +13,15 @@ import {
   CARE_LIFE_RECOVERY_ABOVE_75,
   CARE_LIFE_RECOVERY_AT_100,
   calculateCareLifeChange,
+  type MaxCareStats,
 } from "./careLife";
 
-const MAX_CARE_STAT = 50_000; // Baby stage max
+// Baby stage max stats - using same value for all for simplicity
+const MAX_CARE_STATS: MaxCareStats = {
+  satiety: 50_000,
+  hydration: 50_000,
+  happiness: 50_000,
+};
 
 test("calculateCareLifeChange drains when 1 stat is at 0", () => {
   const pet = createTestPet({
@@ -26,7 +32,7 @@ test("calculateCareLifeChange drains when 1 stat is at 0", () => {
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     -CARE_LIFE_DRAIN_1_STAT,
   );
 });
@@ -40,7 +46,7 @@ test("calculateCareLifeChange drains when 2 stats are at 0", () => {
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     -CARE_LIFE_DRAIN_2_STATS,
   );
 });
@@ -54,7 +60,7 @@ test("calculateCareLifeChange drains when 3 stats are at 0", () => {
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     -CARE_LIFE_DRAIN_3_STATS,
   );
 });
@@ -72,7 +78,7 @@ test("calculateCareLifeChange adds poop drain when 7+ poop and critical stats", 
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     -CARE_LIFE_DRAIN_1_STAT - CARE_LIFE_DRAIN_POOP,
   );
 });
@@ -85,7 +91,7 @@ test("calculateCareLifeChange drains from poop even when stats are okay", () => 
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     -CARE_LIFE_DRAIN_POOP,
   );
 });
@@ -99,7 +105,7 @@ test("calculateCareLifeChange recovers when all stats above 50%", () => {
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     CARE_LIFE_RECOVERY_ABOVE_50,
   );
 });
@@ -113,7 +119,7 @@ test("calculateCareLifeChange recovers faster when all stats above 75%", () => {
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     CARE_LIFE_RECOVERY_ABOVE_75,
   );
 });
@@ -127,7 +133,7 @@ test("calculateCareLifeChange recovers fastest when all stats at 100%", () => {
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(
     CARE_LIFE_RECOVERY_AT_100,
   );
 });
@@ -141,10 +147,10 @@ test("calculateCareLifeChange returns 0 when stats between 0% and 50%", () => {
     },
   });
 
-  expect(calculateCareLifeChange(pet, MAX_CARE_STAT)).toBe(0);
+  expect(calculateCareLifeChange(pet, MAX_CARE_STATS)).toBe(0);
 });
 
-test("calculateCareLifeChange handles maxCareStat of 0", () => {
+test("calculateCareLifeChange handles zero max care stats", () => {
   const pet = createTestPet({
     careStats: {
       satiety: 40_000,
@@ -153,6 +159,12 @@ test("calculateCareLifeChange handles maxCareStat of 0", () => {
     },
   });
 
-  // Should return 0 (no recovery) when maxCareStat is 0 to avoid division by zero
-  expect(calculateCareLifeChange(pet, 0)).toBe(0);
+  const zeroMaxStats: MaxCareStats = {
+    satiety: 0,
+    hydration: 0,
+    happiness: 0,
+  };
+
+  // Should return 0 (no recovery) when maxCareStats are 0 to avoid division by zero
+  expect(calculateCareLifeChange(pet, zeroMaxStats)).toBe(0);
 });

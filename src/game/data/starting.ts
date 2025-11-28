@@ -76,6 +76,14 @@ export function createNewPet(name: string, speciesId: string): Pet {
       careLife: maxStats.careLife,
     },
     battleStats: { ...stageStats.baseStats.battle },
+    trainedBattleStats: {
+      strength: 0,
+      endurance: 0,
+      agility: 0,
+      precision: 0,
+      fortitude: 0,
+      cunning: 0,
+    },
     resistances: { ...species.resistances },
     poop: {
       count: 0,

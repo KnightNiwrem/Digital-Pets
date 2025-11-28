@@ -43,6 +43,7 @@ function createTestGameState(isSleeping: boolean): GameState {
         careLife: 72_000,
       },
       battleStats: createDefaultBattleStats(),
+      trainedBattleStats: createDefaultBattleStats(),
       resistances: createDefaultResistances(),
       bonusMaxStats: createDefaultBonusMaxStats(),
       poop: {

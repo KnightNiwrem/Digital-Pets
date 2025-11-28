@@ -2,7 +2,10 @@
  * Utilities for calculating pet stats based on growth stage and species.
  */
 
-import { getSpeciesStageStats } from "@/game/data/growthStages";
+import {
+  getDefaultStageMinAges,
+  getSpeciesStageStats,
+} from "@/game/data/growthStages";
 import type { MicroValue } from "@/game/types/common";
 import type { GrowthStage } from "@/game/types/constants";
 import type { BonusMaxStats, Pet } from "@/game/types/pet";
@@ -102,14 +105,8 @@ export function calculateMaxStats(
   stage: GrowthStage,
 ): { careStatMax: MicroValue; energyMax: MicroValue } | null {
   // For legacy compatibility, we need to find a stage that matches
-  // We'll use the minimum age of that stage
-  const stageMinAges: Record<GrowthStage, number> = {
-    baby: 0,
-    child: 172_800,
-    teen: 432_000,
-    youngAdult: 691_200,
-    adult: 1_036_800,
-  };
+  // We'll use the minimum age of that stage, derived from species data
+  const stageMinAges = getDefaultStageMinAges();
 
   const ageTicks = stageMinAges[stage];
   const maxStats = calculateMaxStatsForAge(speciesId, ageTicks);

@@ -50,10 +50,12 @@ baseStats: {
     happiness: MicroValue  // Max happiness
   },
   battle: {
-    attack: number,
-    defense: number,
-    speed: number,
-    hp: number
+    strength: number,      // Physical power
+    endurance: number,     // Physical defense/stamina
+    agility: number,       // Speed/evasion
+    precision: number,     // Accuracy/critical
+    fortitude: number,     // HP/overall resilience
+    cunning: number        // Status/debuff effectiveness
   },
   energy: MicroValue,     // Max energy
   careLife: MicroValue    // Max care life (hours)

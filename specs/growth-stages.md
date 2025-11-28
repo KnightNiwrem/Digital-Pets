@@ -67,10 +67,12 @@ Each species defines every growth stage with complete stat values:
       happiness: 45_000
     },
     battle: {
-      attack: 5,
-      defense: 5,
-      speed: 8,
-      hp: 20
+      strength: 10,      // Physical power
+      endurance: 10,     // Physical defense/stamina
+      agility: 10,       // Speed/evasion
+      precision: 10,     // Accuracy/critical
+      fortitude: 10,     // HP/overall resilience
+      cunning: 10        // Status/debuff effectiveness
     },
     energy: 50_000,
     careLife: 72_000

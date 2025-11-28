@@ -2,7 +2,11 @@
  * Growth logic for pet age accumulation, stage transitions, and stat updates.
  */
 
-import { getSpeciesStageStats, toGrowthStage } from "@/game/data/growthStages";
+import {
+  getDefaultStageMinAges,
+  getSpeciesStageStats,
+  toGrowthStage,
+} from "@/game/data/growthStages";
 import type { Tick } from "@/game/types/common";
 import { TICKS_PER_MONTH } from "@/game/types/common";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
@@ -28,8 +32,30 @@ export interface GrowthTickResult {
 }
 
 /**
+ * Calculate total battle stats by combining base (from growth stage), trained, and bonus stats.
+ */
+function calculateTotalBattleStats(
+  baseStats: BattleStats,
+  trainedStats: BattleStats,
+  bonusStats: BattleStats,
+): BattleStats {
+  return {
+    strength: baseStats.strength + trainedStats.strength + bonusStats.strength,
+    endurance:
+      baseStats.endurance + trainedStats.endurance + bonusStats.endurance,
+    agility: baseStats.agility + trainedStats.agility + bonusStats.agility,
+    precision:
+      baseStats.precision + trainedStats.precision + bonusStats.precision,
+    fortitude:
+      baseStats.fortitude + trainedStats.fortitude + bonusStats.fortitude,
+    cunning: baseStats.cunning + trainedStats.cunning + bonusStats.cunning,
+  };
+}
+
+/**
  * Process growth for a single tick.
  * Increments age and checks for stage/substage transitions.
+ * Battle stats are recalculated on transitions as base + trained + bonus.
  */
 export function processGrowthTick(pet: Pet): GrowthTickResult {
   const newAgeTicks = pet.growth.ageTicks + 1;
@@ -64,8 +90,6 @@ export function processGrowthTick(pet: Pet): GrowthTickResult {
   const newGrowthStage = toGrowthStage(newStageStats.stage) ?? pet.growth.stage;
   const newSubstage = Number.parseInt(newStageStats.subStage, 10) || 1;
 
-  // Get new battle stats from the growth stage definition
-  // Battle stats now come from the species growth stage directly
   let newBattleStats = pet.battleStats;
   let previousStage: GrowthStage | null = null;
   let previousSubstage: number | null = null;
@@ -74,9 +98,13 @@ export function processGrowthTick(pet: Pet): GrowthTickResult {
     previousStage = stageTransitioned ? pet.growth.stage : null;
     previousSubstage = pet.growth.substage;
 
-    // Update battle stats to the new growth stage's base stats
-    // The pet's current battle stats should update to match the new stage
-    newBattleStats = { ...newStageStats.baseStats.battle };
+    // Recalculate total battle stats: new base + trained + bonus
+    // This preserves training gains while updating base stats to match new stage
+    newBattleStats = calculateTotalBattleStats(
+      newStageStats.baseStats.battle,
+      pet.trainedBattleStats,
+      pet.bonusMaxStats.battle,
+    );
   }
 
   return {
@@ -126,6 +154,7 @@ export function getTicksUntilNextSubstage(
  * Now uses species-specific data via getTicksUntilNextStageTransition.
  * Note: This is kept for backwards compatibility but callers should prefer
  * using getTicksUntilNextStageTransition with speciesId.
+ * @deprecated Use getTicksUntilNextStageTransition from growthStages.ts instead.
  */
 export function getTicksUntilNextStage(
   stage: GrowthStage,
@@ -137,14 +166,8 @@ export function getTicksUntilNextStage(
   const nextStage = getNextStage(stage);
   if (!nextStage) return null;
 
-  // Use generic thresholds as fallback
-  const stageMinAges: Record<GrowthStage, number> = {
-    baby: 0,
-    child: 172_800,
-    teen: 432_000,
-    youngAdult: 691_200,
-    adult: 1_036_800,
-  };
+  // Derive thresholds from default species data
+  const stageMinAges = getDefaultStageMinAges();
 
   return Math.max(0, stageMinAges[nextStage] - ageTicks);
 }
@@ -152,6 +175,7 @@ export function getTicksUntilNextStage(
 /**
  * Calculate progress percentage toward next stage (0-100).
  * For species-specific progress, use getStageProgress from growthStages.ts.
+ * @deprecated Use getStageProgress from growthStages.ts instead.
  */
 export function getStageProgressPercent(
   stage: GrowthStage,
@@ -159,14 +183,8 @@ export function getStageProgressPercent(
 ): number {
   const nextStage = getNextStage(stage);
 
-  // Use generic thresholds as fallback
-  const stageMinAges: Record<GrowthStage, number> = {
-    baby: 0,
-    child: 172_800,
-    teen: 432_000,
-    youngAdult: 691_200,
-    adult: 1_036_800,
-  };
+  // Derive thresholds from default species data
+  const stageMinAges = getDefaultStageMinAges();
 
   if (!nextStage) {
     // Adult stage: calculate based on fixed substages
