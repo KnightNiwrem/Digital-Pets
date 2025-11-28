@@ -200,27 +200,30 @@ export function CareScreen() {
         <ActivityBlockedCard blockingInfo={blockingInfo} />
       )}
 
-      {/* Care Actions */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
-              <SleepToggle />
+      {/* Care Actions - only show when idle or sleeping */}
+      {(state.pet.activityState === ActivityState.Idle ||
+        state.pet.activityState === ActivityState.Sleeping) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
+                <SleepToggle />
+              </div>
+              {state.pet.activityState === ActivityState.Idle && (
+                <>
+                  <FeedButton onSuccess={handleFeedSuccess} />
+                  <WaterButton onSuccess={handleWaterSuccess} />
+                  <PlayButton onSuccess={handlePlaySuccess} />
+                  <CleanButton onSuccess={handleCleanSuccess} />
+                </>
+              )}
             </div>
-            {state.pet.activityState === ActivityState.Idle && (
-              <>
-                <FeedButton onSuccess={handleFeedSuccess} />
-                <WaterButton onSuccess={handleWaterSuccess} />
-                <PlayButton onSuccess={handlePlaySuccess} />
-                <CleanButton onSuccess={handleCleanSuccess} />
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
