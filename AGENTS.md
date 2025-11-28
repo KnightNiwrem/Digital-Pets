@@ -1,83 +1,95 @@
-# AGENTS.md — Coding Agent Instructions
+# Instructions for Agents
 
-Instructions for AI coding agents working on this project.
+## Project Status
 
-## Project Overview
+This project is **not live yet**. Breaking changes to reach the ideal code state are expected and acceptable. There is no need to worry about backwards compatibility at this point.
 
-**Digital Pets** is a virtual pet game featuring care mechanics, exploration, turn-based battles, quests, and progression systems. Built with Bun + React 19 + TypeScript.
+## Tech Stack
 
-## Setup Commands
+- **Runtime/Bundler**: Bun (v1.3+)
+- **Frontend**: React 19, TypeScript 5.9+
+- **Styling**: Tailwind CSS 4, tw-animate-css
+- **UI Components**: shadcn/ui (Radix UI primitives)
+- **Linting/Formatting**: Biome 2.3+
+- **Testing**: Bun's built-in test runner
 
-```bash
-bun install          # Install dependencies
-bun dev              # Start dev server (http://localhost:3000)
-bun run build        # Build for production
-bun check            # Lint, format, and import checks (Biome)
-bun check:fix        # Auto-fix linting/formatting issues
-bun typecheck        # TypeScript type checking
-bun test             # Run tests with Bun's test runner
+## Project Structure
+
 ```
+├── src/
+│   ├── index.ts          # Bun server entry point with API routes
+│   ├── index.html        # HTML entry point
+│   ├── index.css         # Global styles and Tailwind imports
+│   ├── frontend.tsx      # React app entry point
+│   ├── App.tsx           # Main React component
+│   ├── components/ui/    # shadcn/ui components (button, card, input, etc.)
+│   ├── lib/utils.ts      # Utility functions (cn helper for classnames)
+│   └── utils/            # Additional utilities with tests
+├── styles/globals.css    # Additional global styles
+├── build.ts              # Custom build script
+├── biome.json            # Biome linting/formatting config
+└── tsconfig.json         # TypeScript configuration
+```
+
+## Dev Environment Setup
+
+1. Always run `bun install` first to ensure dependencies are installed
+2. Use `bun dev` to start the development server with hot reloading
+3. The server runs at `http://localhost:3000` by default
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `bun install` | Install dependencies |
+| `bun dev` | Start dev server with hot reloading |
+| `bun start` | Run production server |
+| `bun run build` | Build for production |
+| `bun check` | Run Biome linting, formatting, and import checks |
+| `bun check:fix` | Auto-fix linting, formatting, and import issues |
+| `bun typecheck` | Run TypeScript type checking |
+| `bun test` | Run tests with Bun's test runner |
 
 ## Validation Requirements
 
-**Always run before completing any task:**
+Before completing any task, ensure all checks pass:
 
 ```bash
 bun check && bun typecheck && bun test
 ```
 
-Fix any failures before proceeding.
+Run these commands in sequence. If any fail, fix the issues before proceeding.
 
-## Project Structure
+## Code Style Guidelines
 
-```
-src/
-├── index.ts              # Bun server entry point
-├── index.html            # HTML entry point
-├── index.css             # Global styles and Tailwind imports
-├── frontend.tsx          # React app entry point
-├── App.tsx               # Main React component
-├── components/
-│   ├── ui/               # shadcn/ui components
-│   ├── pet/              # Pet display components
-│   ├── care/             # Care action components
-│   ├── battle/           # Battle UI components
-│   ├── screens/          # Screen components
-│   └── ...               # Other component groups
-├── game/
-│   ├── types/            # TypeScript interfaces and types
-│   ├── data/             # Game data (items, species, locations, etc.)
-│   ├── core/             # Game logic (battle, care, exploration, etc.)
-│   ├── state/            # State management and actions
-│   ├── context/          # React context providers
-│   └── hooks/            # Custom React hooks
-├── lib/utils.ts          # Utility functions (cn helper)
-└── utils/                # Additional utilities with tests
-```
+### TypeScript
+- Strict mode is enabled with `noUncheckedIndexedAccess`
+- Use path alias `@/*` for imports from `src/` directory
+- Prefer explicit types over `any`
 
-## Do
-
-- Use `@/*` path alias for imports from `src/`
-- Use functional components with explicit TypeScript types
-- Use `cn()` helper from `@/lib/utils` for conditional classnames
-- Use Tailwind CSS utility classes for styling
-- Use double quotes for strings
+### Formatting (Biome)
 - Indent with spaces
-- Place tests alongside source files with `.test.ts` or `.test.tsx` suffix
-- Use `Response.json()` for API JSON responses
-- Follow existing patterns in the codebase
+- Use double quotes for strings
 
-## Don't
+### React Components
+- Use functional components with TypeScript
+- shadcn/ui components are in `src/components/ui/`
+- Use the `cn()` helper from `@/lib/utils` for conditional classnames
+- Prefer composition with Radix UI Slot pattern for component variants
 
-- Don't use `any` type — prefer explicit types
-- Don't hardcode magic numbers or strings — use constants from `src/game/types/constants.ts`
-- Don't add new dependencies without explicit approval
-- Don't modify `src/components/ui/` shadcn components unless necessary
-- Don't skip validation checks before completing tasks
-- Don't create files outside `src/` unless for configuration
+### Styling
+- Use Tailwind CSS utility classes
+- Custom animations available via tw-animate-css
+- Tailwind directives are enabled in CSS files
 
-## Testing
+## Testing Guidelines
 
+- Test files use `.test.ts` or `.test.tsx` suffix
+- Tests use Bun's built-in test runner (`import { expect, test } from "bun:test"`)
+- Place tests alongside source files in `src/utils/`
+- Add or update tests for any code changes
+
+Example test pattern:
 ```typescript
 import { expect, test } from "bun:test";
 import { myFunction } from "./myModule";
@@ -87,46 +99,23 @@ test("description of what is being tested", () => {
 });
 ```
 
-- Tests use Bun's built-in test runner
-- Run single file: `bun test path/to/file.test.ts`
-- Add tests for new logic in `src/game/core/` and `src/utils/`
+## API Development
 
-## Game Architecture
-
-### State Management
-- Game state managed via React Context (`src/game/context/GameContext.tsx`)
-- State actions in `src/game/state/actions/`
-- Pure tick processing in `src/game/core/tick.ts`
-
-### Game Loop
-- `GameManager` schedules ticks every 30 seconds
-- Tick processor updates care stats, energy, poop, growth, training, exploration
-- Offline progression calculates elapsed ticks on load (max 7 days)
-
-### Key Systems
-- **Care**: Satiety, hydration, happiness decay; cleaning poop; sleep/wake
-- **Battle**: Turn-based 1v1 with moves, damage types, status effects
-- **Exploration**: Foraging for items, random encounters
-- **Progression**: Pet growth stages, skill leveling, quests
+- API routes are defined in the `routes` object
+- Use `Response.json()` for JSON responses
+- Route parameters use `:param` syntax (e.g., `/api/hello/:name`)
+- The catch-all `/*` route serves the React SPA
 
 ## Adding shadcn/ui Components
 
-1. Check shadcn/ui documentation for the component
-2. Create component file in `src/components/ui/`
-3. Use Radix UI primitives and class-variance-authority
-4. Follow existing component patterns
+Components are manually added to `src/components/ui/`. When adding new shadcn/ui components:
+1. Check the shadcn/ui documentation for the component
+2. Create the component file in `src/components/ui/`
+3. Ensure proper imports from Radix UI and class-variance-authority
 
 ## Common Gotchas
 
-- TypeScript strict mode with `noUncheckedIndexedAccess` is enabled
-- `bun-plugin-tailwind` handles Tailwind CSS processing
+- Always import React types properly for TSX files
+- The `bun-plugin-tailwind` handles Tailwind CSS processing during build
+- CSS files support `@tailwind` directives
 - Use `NODE_ENV=production` for production builds
-- The `/*` catch-all route serves the React SPA
-
-## Boundaries
-
-Never edit without explicit approval:
-- `.env` files or secrets
-- `node_modules/`
-- Build outputs (`dist/`, `build/`)
-- Lock files (`bun.lock`) unless updating dependencies
