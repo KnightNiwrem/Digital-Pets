@@ -19,6 +19,10 @@ import {
   PetSprite,
   PetStatus,
 } from "@/components/pet";
+import {
+  ActivityBlockedCard,
+  getActivityBlockingInfo,
+} from "@/components/ui/ActivityBlockedCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameState } from "@/game/hooks/useGameState";
 import {
@@ -29,6 +33,7 @@ import {
   selectPetSpecies,
   selectPoop,
 } from "@/game/state/selectors";
+import { ActivityState } from "@/game/types/constants";
 
 type PetAnimationType = "idle" | "happy" | "eat" | "drink" | "play" | "hurt";
 
@@ -111,6 +116,10 @@ export function CareScreen() {
   const species = selectPetSpecies(state);
   const poop = selectPoop(state);
   const growthProgress = selectGrowthProgress(state);
+  const blockingInfo = getActivityBlockingInfo(
+    state.pet,
+    "feed, water, play, or clean",
+  );
 
   // Check all required data is available
   if (
@@ -172,7 +181,7 @@ export function CareScreen() {
         </CardContent>
       </Card>
 
-      {/* Sleep Status */}
+      {/* Activity Status */}
       {petInfo.isSleeping && (
         <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
           <CardContent className="pt-4 pb-4">
@@ -187,6 +196,9 @@ export function CareScreen() {
           </CardContent>
         </Card>
       )}
+      {!petInfo.isSleeping && blockingInfo && (
+        <ActivityBlockedCard blockingInfo={blockingInfo} />
+      )}
 
       {/* Care Actions */}
       <Card>
@@ -198,7 +210,7 @@ export function CareScreen() {
             <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
               <SleepToggle />
             </div>
-            {!petInfo.isSleeping && (
+            {state.pet.activityState === ActivityState.Idle && (
               <>
                 <FeedButton onSuccess={handleFeedSuccess} />
                 <WaterButton onSuccess={handleWaterSuccess} />
@@ -207,11 +219,6 @@ export function CareScreen() {
               </>
             )}
           </div>
-          {petInfo.isSleeping && (
-            <p className="text-sm text-muted-foreground text-center">
-              Wake up your pet to feed, water, play, or clean.
-            </p>
-          )}
         </CardContent>
       </Card>
     </div>
