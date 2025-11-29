@@ -51,12 +51,8 @@ function GameContent({
   const { state, isLoading, loadError, offlineReport, notification, actions } =
     useGameState();
 
-  // Battle state - stores full battle state for persistence across navigation
-  const [activeBattle, setActiveBattle] = useState<{
-    enemySpeciesId: string;
-    enemyLevel: number;
-    battleState: BattleState;
-  } | null>(null);
+  // Get active battle from game state (persisted across page refreshes)
+  const activeBattle = state?.activeBattle ?? null;
 
   // Redirect to exploration if battle tab is accessed without battle info
   // Also redirect back to battle if navigating to exploration during an active battle
@@ -96,40 +92,44 @@ function GameContent({
   const handleStartBattle = (enemySpeciesId: string, enemyLevel: number) => {
     if (!state?.pet) return;
 
-    // Set pet activity state to Battling
-    actions.updateState((prev) => ({
-      ...prev,
-      pet: prev.pet
-        ? { ...prev.pet, activityState: "battling" as const }
-        : prev.pet,
-    }));
-
     // Initialize battle state
     const playerCombatant = createCombatantFromPet(state.pet, true);
     const enemyCombatant = createWildCombatant(enemySpeciesId, enemyLevel);
     const battleState = initializeBattle(playerCombatant, enemyCombatant);
 
-    setActiveBattle({ enemySpeciesId, enemyLevel, battleState });
+    // Set pet activity state to Battling and store battle in game state
+    actions.updateState((prev) => ({
+      ...prev,
+      pet: prev.pet
+        ? { ...prev.pet, activityState: "battling" as const }
+        : prev.pet,
+      activeBattle: { enemySpeciesId, enemyLevel, battleState },
+    }));
+
     onTabChange("battle");
   };
 
   // Handle battle state changes (from BattleScreen)
   const handleBattleStateChange = (newBattleState: BattleState) => {
-    setActiveBattle((prev) =>
-      prev ? { ...prev, battleState: newBattleState } : null,
-    );
+    actions.updateState((prev) => ({
+      ...prev,
+      activeBattle: prev.activeBattle
+        ? { ...prev.activeBattle, battleState: newBattleState }
+        : undefined,
+    }));
   };
 
   // Handle battle end
   const handleBattleEnd = (victory: boolean, rewards: BattleRewards) => {
-    // Reset pet activity state and apply rewards
+    // Reset pet activity state, clear battle, and apply rewards
     actions.updateState((prev) => {
-      // First reset activity state
+      // First reset activity state and clear battle
       const stateWithIdlePet = {
         ...prev,
         pet: prev.pet
           ? { ...prev.pet, activityState: "idle" as const }
           : prev.pet,
+        activeBattle: undefined,
       };
 
       if (!victory) {
@@ -156,32 +156,31 @@ function GameContent({
       );
 
       // Also update for the specific species if activeBattle is available
-      if (activeBattle?.enemySpeciesId) {
+      if (prev.activeBattle?.enemySpeciesId) {
         finalState = updateQuestProgress(
           finalState,
           ObjectiveType.Defeat,
-          activeBattle.enemySpeciesId,
+          prev.activeBattle.enemySpeciesId,
         );
       }
 
       return finalState;
     });
 
-    setActiveBattle(null);
     onTabChange("exploration");
   };
 
   // Handle fleeing from battle
   const handleFlee = () => {
-    // Reset pet activity state
+    // Reset pet activity state and clear battle
     actions.updateState((prev) => ({
       ...prev,
       pet: prev.pet
         ? { ...prev.pet, activityState: "idle" as const }
         : prev.pet,
+      activeBattle: undefined,
     }));
 
-    setActiveBattle(null);
     onTabChange("exploration");
   };
 

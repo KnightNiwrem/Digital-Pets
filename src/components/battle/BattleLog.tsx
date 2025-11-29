@@ -33,16 +33,16 @@ export function BattleLog({ entries, maxEntries = 8 }: BattleLogProps) {
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <span>📜</span>
-          Battle Log
+      <CardHeader className="py-1.5 sm:pb-2">
+        <CardTitle className="text-sm sm:text-base flex items-center gap-1.5 sm:gap-2">
+          <span className="text-sm sm:text-base">📜</span>
+          Log
         </CardTitle>
       </CardHeader>
-      <CardContent className="py-2 sm:py-4">
+      <CardContent className="py-1.5 sm:py-4">
         <div
           ref={scrollRef}
-          className="h-16 sm:h-32 overflow-y-auto space-y-1 text-sm"
+          className="h-12 sm:h-32 overflow-y-auto space-y-0.5 sm:space-y-1 text-xs sm:text-sm"
         >
           {visibleEntries.map((entry, index) => (
             <LogEntry key={`${entry.turn}-${index}`} entry={entry} />
@@ -74,9 +74,11 @@ function LogEntry({ entry }: LogEntryProps) {
   };
 
   return (
-    <div className={cn("leading-snug", getEntryStyle(entry.type))}>
+    <div
+      className={cn("leading-tight sm:leading-snug", getEntryStyle(entry.type))}
+    >
       {entry.turn > 0 && (
-        <span className="text-muted-foreground text-xs mr-1">
+        <span className="text-muted-foreground text-[10px] sm:text-xs mr-0.5 sm:mr-1">
           [{entry.turn}]
         </span>
       )}

@@ -31,34 +31,32 @@ export function BattleArena({
   return (
     <div
       className={cn(
-        "flex flex-col md:flex-row md:items-center md:justify-around gap-4 md:gap-4 p-2 sm:p-4",
+        "flex flex-row items-center justify-around gap-2 sm:gap-4 p-1 sm:p-4",
         className,
       )}
     >
-      {/* Enemy (top on mobile, right on desktop) */}
-      <div className="flex justify-end md:order-3">
-        <PetBattleCard
-          combatant={enemy}
-          position="enemy"
-          isAttacking={enemyAttacking}
-          isHit={enemyHit}
-        />
-      </div>
+      {/* Player (left) */}
+      <PetBattleCard
+        combatant={player}
+        position="player"
+        isAttacking={playerAttacking}
+        isHit={playerHit}
+      />
 
       {/* VS indicator */}
-      <div className="flex justify-center md:order-2">
-        <span className="text-2xl font-bold text-muted-foreground">⚔️</span>
+      <div className="flex justify-center shrink-0">
+        <span className="text-lg sm:text-2xl font-bold text-muted-foreground">
+          ⚔️
+        </span>
       </div>
 
-      {/* Player (bottom on mobile, left on desktop) */}
-      <div className="flex justify-start md:order-1">
-        <PetBattleCard
-          combatant={player}
-          position="player"
-          isAttacking={playerAttacking}
-          isHit={playerHit}
-        />
-      </div>
+      {/* Enemy (right) */}
+      <PetBattleCard
+        combatant={enemy}
+        position="enemy"
+        isAttacking={enemyAttacking}
+        isHit={enemyHit}
+      />
     </div>
   );
 }
