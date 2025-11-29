@@ -18,11 +18,9 @@ import {
   calculateBattleRewards,
   executeEnemyTurn,
   executePlayerTurn,
-  initializeBattle,
   isBattleComplete,
   resolveTurnEnd,
 } from "@/game/core/battle/battle";
-import type { Combatant } from "@/game/core/battle/turn";
 import type { Move } from "@/game/types/move";
 
 /** Delay for enemy turn processing (ms) */
@@ -33,8 +31,8 @@ const TURN_RESOLUTION_DELAY_MS = 500;
 const ATTACK_ANIMATION_DURATION_MS = 400;
 
 interface BattleScreenProps {
-  playerCombatant: Combatant;
-  enemyCombatant: Combatant;
+  battleState: BattleState;
+  onBattleStateChange: (state: BattleState) => void;
   onBattleEnd: (victory: boolean, rewards: BattleRewards) => void;
   onFlee?: () => void;
 }
@@ -57,14 +55,11 @@ const initialAnimationState: AnimationState = {
  * Main battle screen component managing the battle flow.
  */
 export function BattleScreen({
-  playerCombatant,
-  enemyCombatant,
+  battleState,
+  onBattleStateChange,
   onBattleEnd,
   onFlee,
 }: BattleScreenProps) {
-  const [battleState, setBattleState] = useState<BattleState>(() =>
-    initializeBattle(playerCombatant, enemyCombatant),
-  );
   const [isProcessing, setIsProcessing] = useState(false);
   const [animationState, setAnimationState] = useState<AnimationState>(
     initialAnimationState,
@@ -111,7 +106,7 @@ export function BattleScreen({
       // Small delay for dramatic effect
       const timeout = setTimeout(() => {
         triggerAttackAnimation(false, () => {
-          setBattleState((prev) => executeEnemyTurn(prev));
+          onBattleStateChange(executeEnemyTurn(battleState));
           setIsProcessing(false);
         });
       }, ENEMY_TURN_DELAY_MS);
@@ -121,12 +116,12 @@ export function BattleScreen({
     if (battleState.phase === BattlePhase.TurnResolution) {
       setIsProcessing(true);
       const timeout = setTimeout(() => {
-        setBattleState((prev) => resolveTurnEnd(prev));
+        onBattleStateChange(resolveTurnEnd(battleState));
         setIsProcessing(false);
       }, TURN_RESOLUTION_DELAY_MS);
       return () => clearTimeout(timeout);
     }
-  }, [battleState.phase, triggerAttackAnimation]);
+  }, [battleState, onBattleStateChange, triggerAttackAnimation]);
 
   const handleSelectMove = (move: Move) => {
     if (battleState.phase !== BattlePhase.PlayerTurn || isProcessing) {
@@ -134,7 +129,7 @@ export function BattleScreen({
     }
     setIsProcessing(true);
     triggerAttackAnimation(true, () => {
-      setBattleState((prev) => executePlayerTurn(prev, move));
+      onBattleStateChange(executePlayerTurn(battleState, move));
       setIsProcessing(false);
     });
   };
@@ -164,7 +159,7 @@ export function BattleScreen({
   const isPlayerTurn = battleState.phase === BattlePhase.PlayerTurn;
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-8rem)] sm:h-auto sm:gap-4 sm:pb-4">
+    <div className="flex flex-col h-[calc(100dvh-8rem)] overflow-hidden sm:h-auto sm:overflow-visible sm:gap-4 sm:pb-4">
       {/* Turn indicator - compact */}
       <Card className="shrink-0">
         <CardContent className="py-1.5 px-3 sm:py-2 sm:px-4 flex items-center justify-between">
