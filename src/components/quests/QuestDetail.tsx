@@ -5,6 +5,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { areAllRequiredObjectivesComplete } from "@/game/core/quests";
+import { getItemById } from "@/game/data/items";
 import type { Quest, QuestProgress, QuestReward } from "@/game/types/quest";
 import { ObjectiveList } from "./ObjectiveList";
 
@@ -22,8 +23,11 @@ function formatReward(reward: QuestReward): string {
   switch (reward.type) {
     case "currency":
       return `${reward.quantity} coins`;
-    case "item":
-      return `${reward.quantity}x ${reward.target}`;
+    case "item": {
+      const item = getItemById(reward.target);
+      const itemName = item?.name ?? reward.target;
+      return `${reward.quantity}x ${itemName}`;
+    }
     case "xp":
       return `${reward.quantity} ${reward.target} XP`;
     case "unlock":
