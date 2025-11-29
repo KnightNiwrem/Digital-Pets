@@ -5,9 +5,77 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toDisplay, toDisplayCare } from "@/game/types/common";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
+import {
+  isBattleItem,
+  isCleaningItem,
+  isDrinkItem,
+  isEquipmentItem,
+  isFoodItem,
+  isMaterialItem,
+  isMedicineItem,
+  isToyItem,
+} from "@/game/types/item";
 import type { ShopItem } from "@/game/types/shop";
+
+/**
+ * Format a care stat value as a range if floor and ceil differ.
+ * Shows `+(min)~(max)` if there's a difference, otherwise just `+(value)`.
+ */
+function formatCareStatRange(microValue: number): string {
+  const min = toDisplay(microValue);
+  const max = toDisplayCare(microValue);
+  if (min === max) {
+    return `+${min}`;
+  }
+  return `+${min}~${max}`;
+}
+
+/**
+ * Get the effect text for an item based on its category.
+ */
+function getItemEffect(item: Item): string | null {
+  if (isFoodItem(item)) {
+    return `${formatCareStatRange(item.satietyRestore)} Satiety`;
+  }
+  if (isDrinkItem(item)) {
+    const parts = [`${formatCareStatRange(item.hydrationRestore)} Hydration`];
+    if (item.energyRestore) {
+      parts.push(`+${toDisplay(item.energyRestore)} Energy`);
+    }
+    return parts.join(", ");
+  }
+  if (isToyItem(item)) {
+    return `${formatCareStatRange(item.happinessRestore)} Happiness`;
+  }
+  if (isCleaningItem(item)) {
+    return `Removes ${item.poopRemoved} poop`;
+  }
+  if (isMedicineItem(item)) {
+    const parts: string[] = [];
+    if (item.isFullRestore) {
+      parts.push("Full HP restore");
+    } else if (item.healAmount) {
+      parts.push(`+${item.healAmount} HP`);
+    }
+    if (item.cureStatus && item.cureStatus.length > 0) {
+      parts.push(`Cures: ${item.cureStatus.join(", ")}`);
+    }
+    return parts.length > 0 ? parts.join(", ") : null;
+  }
+  if (isBattleItem(item)) {
+    return `+${item.modifierValue}% ${item.statModifier} (${item.duration} turns)`;
+  }
+  if (isEquipmentItem(item)) {
+    return item.effect;
+  }
+  if (isMaterialItem(item)) {
+    return "Crafting material";
+  }
+  return null;
+}
 
 interface BuySellPanelProps {
   mode: "buy" | "sell";
@@ -34,6 +102,7 @@ export function BuySellPanel({
   onSell,
 }: BuySellPanelProps) {
   const [quantity, setQuantity] = useState(1);
+  const itemEffect = getItemEffect(itemDef);
 
   const maxBuyQuantity =
     shopItem && shopItem.buyPrice > 0
@@ -78,6 +147,11 @@ export function BuySellPanel({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">{itemDef.description}</p>
+
+        {/* Item effect */}
+        {itemEffect && (
+          <p className="text-sm font-medium text-primary">{itemEffect}</p>
+        )}
 
         {/* Price info */}
         <div className="flex justify-between text-sm">
