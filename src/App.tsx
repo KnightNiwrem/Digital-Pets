@@ -56,9 +56,12 @@ function GameContent({
   } | null>(null);
 
   // Redirect to exploration if battle tab is accessed without battle info
+  // Redirect back to battle if user navigates away while battle is ongoing
   useEffect(() => {
     if (activeTab === "battle" && !battleInfo) {
       onTabChange("exploration");
+    } else if (battleInfo && activeTab !== "battle") {
+      onTabChange("battle");
     }
   }, [activeTab, battleInfo, onTabChange]);
 

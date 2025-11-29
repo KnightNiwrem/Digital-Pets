@@ -164,16 +164,18 @@ export function BattleScreen({
   const isPlayerTurn = battleState.phase === BattlePhase.PlayerTurn;
 
   return (
-    <div className="flex flex-col gap-4 pb-4">
+    <div className="flex flex-col gap-2 md:gap-4 pb-4 min-h-[calc(100dvh-8rem)]">
       {/* Turn indicator */}
       <Card>
-        <CardContent className="py-2 px-4 flex items-center justify-between">
+        <CardContent className="py-1.5 md:py-2 px-3 md:px-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">⚔️</span>
-            <span className="font-medium">Turn {battleState.turn}</span>
+            <span className="text-base md:text-lg">⚔️</span>
+            <span className="font-medium text-sm md:text-base">
+              Turn {battleState.turn}
+            </span>
           </div>
           <span
-            className={`text-sm ${isPlayerTurn ? "text-green-600" : "text-red-600"}`}
+            className={`text-xs md:text-sm ${isPlayerTurn ? "text-green-600" : "text-red-600"}`}
           >
             {isPlayerTurn ? "Your turn" : "Enemy's turn..."}
           </span>
@@ -193,26 +195,32 @@ export function BattleScreen({
       {/* Battle log */}
       <BattleLog entries={battleState.log} />
 
-      {/* Move selection (player's turn only) */}
-      {isPlayerTurn && (
-        <MoveSelect
-          combatant={battleState.player}
-          onSelectMove={handleSelectMove}
-          disabled={isProcessing}
-        />
-      )}
+      {/* Spacer to push actions to bottom on mobile */}
+      <div className="flex-1" />
 
-      {/* Flee button */}
-      {onFlee && isPlayerTurn && (
-        <Button
-          variant="outline"
-          onClick={onFlee}
-          disabled={isProcessing}
-          className="w-full"
-        >
-          🏃 Flee
-        </Button>
-      )}
+      {/* Move selection and flee button - sticky on mobile */}
+      <div className="sticky bottom-20 bg-background pt-2 space-y-2">
+        {/* Move selection (player's turn only) */}
+        {isPlayerTurn && (
+          <MoveSelect
+            combatant={battleState.player}
+            onSelectMove={handleSelectMove}
+            disabled={isProcessing}
+          />
+        )}
+
+        {/* Flee button */}
+        {onFlee && isPlayerTurn && (
+          <Button
+            variant="outline"
+            onClick={onFlee}
+            disabled={isProcessing}
+            className="w-full"
+          >
+            🏃 Flee
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

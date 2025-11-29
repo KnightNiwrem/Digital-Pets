@@ -31,7 +31,7 @@ export function BattleArena({
   return (
     <div
       className={cn(
-        "flex flex-col md:flex-row md:items-center md:justify-around gap-8 md:gap-4 p-4",
+        "flex flex-col md:flex-row md:items-center md:justify-around gap-2 md:gap-4 p-2 md:p-4",
         className,
       )}
     >
