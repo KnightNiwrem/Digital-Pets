@@ -39,8 +39,11 @@ export function BattleLog({ entries, maxEntries = 8 }: BattleLogProps) {
           Battle Log
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div ref={scrollRef} className="h-32 overflow-y-auto space-y-1 text-sm">
+      <CardContent className="py-2 sm:py-4">
+        <div
+          ref={scrollRef}
+          className="h-16 sm:h-32 overflow-y-auto space-y-1 text-sm"
+        >
           {visibleEntries.map((entry, index) => (
             <LogEntry key={`${entry.turn}-${index}`} entry={entry} />
           ))}

@@ -37,10 +37,10 @@ export function MoveSelect({
 }: MoveSelectProps) {
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Select Move</CardTitle>
+      <CardHeader className="py-2 sm:pb-2">
+        <CardTitle className="text-sm sm:text-base">Select Move</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <CardContent className="grid grid-cols-2 gap-1.5 sm:gap-2 py-2 sm:py-4">
         {combatant.moveSlots.map((slot) => (
           <MoveButton
             key={slot.move.id}
@@ -71,7 +71,7 @@ function MoveButton({ slot, combatant, onSelect, disabled }: MoveButtonProps) {
     <Button
       variant="outline"
       className={cn(
-        "h-auto py-2 px-3 flex flex-col items-start text-left gap-1",
+        "h-auto py-1.5 px-2 sm:py-2 sm:px-3 flex flex-col items-start text-left gap-0.5 sm:gap-1",
         !canUse && "opacity-50",
       )}
       onClick={onSelect}
@@ -79,16 +79,20 @@ function MoveButton({ slot, combatant, onSelect, disabled }: MoveButtonProps) {
       title={reason}
     >
       <div className="flex items-center gap-1 w-full">
-        <span className="text-sm">{getDamageTypeEmoji(move.damageType)}</span>
-        <span className="font-medium text-sm flex-1">{move.name}</span>
+        <span className="text-xs sm:text-sm">
+          {getDamageTypeEmoji(move.damageType)}
+        </span>
+        <span className="font-medium text-xs sm:text-sm flex-1 truncate">
+          {move.name}
+        </span>
         {currentCooldown > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[10px] sm:text-xs text-muted-foreground">
             ({currentCooldown})
           </span>
         )}
       </div>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground w-full">
-        {move.power > 0 && <span>Power: {move.power.toFixed(1)}</span>}
+      <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground w-full">
+        {move.power > 0 && <span>Pwr: {move.power.toFixed(1)}</span>}
         {move.staminaCost !== 0 && (
           <span
             className={cn(
