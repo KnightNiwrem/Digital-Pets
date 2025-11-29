@@ -6,12 +6,15 @@ import type { BattleStats, DerivedBattleStats } from "@/game/types/stats";
 
 /**
  * Battle formula constants.
+ *
+ * These values are tuned so that battles between pets with equal stats
+ * complete within 8-10 turns (4-5 turns per combatant).
  */
 export const BATTLE_CONSTANTS = {
   /** Base health value */
-  BASE_HEALTH: 50,
+  BASE_HEALTH: 30,
   /** Health per point of Endurance */
-  HEALTH_PER_ENDURANCE: 5,
+  HEALTH_PER_ENDURANCE: 2,
   /** Base stamina value */
   BASE_STAMINA: 30,
   /** Stamina per point of Fortitude */

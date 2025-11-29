@@ -8,10 +8,13 @@ import type { BattleStats, DamageResistances } from "@/game/types/stats";
 
 /**
  * Damage formula constants.
+ *
+ * These values are tuned so that battles between pets with equal stats
+ * complete within 8-10 turns (4-5 turns per combatant).
  */
 export const DAMAGE_CONSTANTS = {
-  /** Divisor for power scaling */
-  POWER_DIVISOR: 10,
+  /** Divisor for power scaling (lower = more damage) */
+  POWER_DIVISOR: 5,
   /** Base hit chance (%) */
   BASE_HIT_CHANCE: 85,
   /** Hit chance bonus per point of Precision */
