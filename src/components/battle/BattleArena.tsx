@@ -43,8 +43,8 @@ export function BattleArena({
         isHit={playerHit}
       />
 
-      {/* VS indicator */}
-      <div className="flex justify-center shrink-0">
+      {/* VS indicator - decorative, hidden from screen readers */}
+      <div className="flex justify-center shrink-0" aria-hidden="true">
         <span className="text-lg sm:text-2xl font-bold text-muted-foreground">
           ⚔️
         </span>

@@ -67,6 +67,10 @@ export function BattleScreen({
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  // Store battleState in ref to access current value in timeout callbacks
+  // without adding it to useEffect dependencies (which would cause restarts)
+  const battleStateRef = useRef(battleState);
+  battleStateRef.current = battleState;
 
   // Cleanup animation timeout on unmount
   useEffect(() => {
@@ -100,13 +104,14 @@ export function BattleScreen({
   );
 
   // Process game loop (Enemy Turn & Turn Resolution)
+  // Uses battleState.phase as dependency to avoid restarts from game tick updates
   useEffect(() => {
     if (battleState.phase === BattlePhase.EnemyTurn) {
       setIsProcessing(true);
       // Small delay for dramatic effect
       const timeout = setTimeout(() => {
         triggerAttackAnimation(false, () => {
-          onBattleStateChange(executeEnemyTurn(battleState));
+          onBattleStateChange(executeEnemyTurn(battleStateRef.current));
           setIsProcessing(false);
         });
       }, ENEMY_TURN_DELAY_MS);
@@ -116,12 +121,12 @@ export function BattleScreen({
     if (battleState.phase === BattlePhase.TurnResolution) {
       setIsProcessing(true);
       const timeout = setTimeout(() => {
-        onBattleStateChange(resolveTurnEnd(battleState));
+        onBattleStateChange(resolveTurnEnd(battleStateRef.current));
         setIsProcessing(false);
       }, TURN_RESOLUTION_DELAY_MS);
       return () => clearTimeout(timeout);
     }
-  }, [battleState, onBattleStateChange, triggerAttackAnimation]);
+  }, [battleState.phase, onBattleStateChange, triggerAttackAnimation]);
 
   const handleSelectMove = (move: Move) => {
     if (battleState.phase !== BattlePhase.PlayerTurn || isProcessing) {

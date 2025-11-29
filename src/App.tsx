@@ -3,7 +3,7 @@
  * Integrates the game context and layout.
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ExplorationCompleteNotification,
   Layout,
@@ -54,6 +54,21 @@ function GameContent({
   // Get active battle from game state (persisted across page refreshes)
   const activeBattle = state?.activeBattle ?? null;
 
+  // Handle battle state changes (from BattleScreen)
+  // Wrapped in useCallback for stable reference to prevent unnecessary re-renders
+  // Must be defined before early returns to follow React hooks rules
+  const handleBattleStateChange = useCallback(
+    (newBattleState: BattleState) => {
+      actions.updateState((prev) => ({
+        ...prev,
+        activeBattle: prev.activeBattle
+          ? { ...prev.activeBattle, battleState: newBattleState }
+          : undefined,
+      }));
+    },
+    [actions],
+  );
+
   // Redirect to exploration if battle tab is accessed without battle info
   // Also redirect back to battle if navigating to exploration during an active battle
   useEffect(() => {
@@ -92,31 +107,23 @@ function GameContent({
   const handleStartBattle = (enemySpeciesId: string, enemyLevel: number) => {
     if (!state?.pet) return;
 
-    // Initialize battle state
-    const playerCombatant = createCombatantFromPet(state.pet, true);
-    const enemyCombatant = createWildCombatant(enemySpeciesId, enemyLevel);
-    const battleState = initializeBattle(playerCombatant, enemyCombatant);
+    // Set pet activity state to Battling and initialize battle inside updateState
+    // to avoid stale pet data from concurrent state updates
+    actions.updateState((prev) => {
+      if (!prev.pet) return prev;
 
-    // Set pet activity state to Battling and store battle in game state
-    actions.updateState((prev) => ({
-      ...prev,
-      pet: prev.pet
-        ? { ...prev.pet, activityState: "battling" as const }
-        : prev.pet,
-      activeBattle: { enemySpeciesId, enemyLevel, battleState },
-    }));
+      const playerCombatant = createCombatantFromPet(prev.pet, true);
+      const enemyCombatant = createWildCombatant(enemySpeciesId, enemyLevel);
+      const battleState = initializeBattle(playerCombatant, enemyCombatant);
+
+      return {
+        ...prev,
+        pet: { ...prev.pet, activityState: "battling" as const },
+        activeBattle: { enemySpeciesId, enemyLevel, battleState },
+      };
+    });
 
     onTabChange("battle");
-  };
-
-  // Handle battle state changes (from BattleScreen)
-  const handleBattleStateChange = (newBattleState: BattleState) => {
-    actions.updateState((prev) => ({
-      ...prev,
-      activeBattle: prev.activeBattle
-        ? { ...prev.activeBattle, battleState: newBattleState }
-        : undefined,
-    }));
   };
 
   // Handle battle end
