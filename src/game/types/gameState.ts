@@ -2,6 +2,7 @@
  * Game state types for overall game and player state.
  */
 
+import type { BattleState } from "@/game/core/battle/battle";
 import type { ExplorationResult, TrainingResult } from "./activity";
 import type { Tick, Timestamp } from "./common";
 import type { Pet } from "./pet";
@@ -10,14 +11,15 @@ import { createInitialSkills, type PlayerSkills } from "./skill";
 
 /**
  * Active battle state stored in game state.
+ * Includes the full battle state for persistence across page refreshes.
  */
 export interface ActiveBattle {
   /** Enemy species ID */
   enemySpeciesId: string;
   /** Enemy level */
   enemyLevel: number;
-  /** Location where battle started */
-  locationId: string;
+  /** Full battle state for resuming battle */
+  battleState: BattleState;
 }
 
 /**
@@ -86,7 +88,7 @@ export interface GameState {
   lastTrainingResult?: TrainingResult & { facilityName: string };
   /**
    * Active battle (if in combat).
-   * Reserved for future use: currently, battle state is managed locally in BattleScreen.
+   * Persisted to allow resuming battle after page refresh.
    */
   activeBattle?: ActiveBattle;
   /**

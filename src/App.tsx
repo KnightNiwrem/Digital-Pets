@@ -3,7 +3,7 @@
  * Integrates the game context and layout.
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ExplorationCompleteNotification,
   Layout,
@@ -28,8 +28,10 @@ import { Button } from "@/components/ui/button";
 import { GameProvider } from "@/game/context/GameContext";
 import {
   type BattleRewards,
+  type BattleState,
   createCombatantFromPet,
   createWildCombatant,
+  initializeBattle,
 } from "@/game/core/battle/battle";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { useGameState } from "@/game/hooks/useGameState";
@@ -49,18 +51,33 @@ function GameContent({
   const { state, isLoading, loadError, offlineReport, notification, actions } =
     useGameState();
 
-  // Battle state
-  const [battleInfo, setBattleInfo] = useState<{
-    enemySpeciesId: string;
-    enemyLevel: number;
-  } | null>(null);
+  // Get active battle from game state (persisted across page refreshes)
+  const activeBattle = state?.activeBattle ?? null;
+
+  // Handle battle state changes (from BattleScreen)
+  // Wrapped in useCallback for stable reference to prevent unnecessary re-renders
+  // Must be defined before early returns to follow React hooks rules
+  const handleBattleStateChange = useCallback(
+    (newBattleState: BattleState) => {
+      actions.updateState((prev) => ({
+        ...prev,
+        activeBattle: prev.activeBattle
+          ? { ...prev.activeBattle, battleState: newBattleState }
+          : undefined,
+      }));
+    },
+    [actions],
+  );
 
   // Redirect to exploration if battle tab is accessed without battle info
+  // Also redirect back to battle if navigating to exploration during an active battle
   useEffect(() => {
-    if (activeTab === "battle" && !battleInfo) {
+    if (activeTab === "battle" && !activeBattle) {
       onTabChange("exploration");
+    } else if (activeTab === "exploration" && activeBattle) {
+      onTabChange("battle");
     }
-  }, [activeTab, battleInfo, onTabChange]);
+  }, [activeTab, activeBattle, onTabChange]);
 
   // Show loading state
   if (isLoading) {
@@ -88,63 +105,99 @@ function GameContent({
 
   // Handle starting a battle
   const handleStartBattle = (enemySpeciesId: string, enemyLevel: number) => {
-    setBattleInfo({ enemySpeciesId, enemyLevel });
+    if (!state?.pet) return;
+
+    // Set pet activity state to Battling and initialize battle inside updateState
+    // to avoid stale pet data from concurrent state updates
+    actions.updateState((prev) => {
+      if (!prev.pet) return prev;
+
+      const playerCombatant = createCombatantFromPet(prev.pet, true);
+      const enemyCombatant = createWildCombatant(enemySpeciesId, enemyLevel);
+      const battleState = initializeBattle(playerCombatant, enemyCombatant);
+
+      return {
+        ...prev,
+        pet: { ...prev.pet, activityState: "battling" as const },
+        activeBattle: { enemySpeciesId, enemyLevel, battleState },
+      };
+    });
+
     onTabChange("battle");
   };
 
   // Handle battle end
   const handleBattleEnd = (victory: boolean, rewards: BattleRewards) => {
-    if (victory && state) {
-      // Award coins and update quest progress for Defeat objectives
-      actions.updateState((prev) => {
-        let newState = {
-          ...prev,
-          player: {
-            ...prev.player,
-            currency: {
-              ...prev.player.currency,
-              coins: prev.player.currency.coins + rewards.coins,
-            },
+    // Reset pet activity state, clear battle, and apply rewards
+    actions.updateState((prev) => {
+      // First reset activity state and clear battle
+      const stateWithIdlePet = {
+        ...prev,
+        pet: prev.pet
+          ? { ...prev.pet, activityState: "idle" as const }
+          : prev.pet,
+        activeBattle: undefined,
+      };
+
+      if (!victory) {
+        return stateWithIdlePet;
+      }
+
+      // Award coins
+      const stateWithCoins = {
+        ...stateWithIdlePet,
+        player: {
+          ...stateWithIdlePet.player,
+          currency: {
+            ...stateWithIdlePet.player.currency,
+            coins: stateWithIdlePet.player.currency.coins + rewards.coins,
           },
-        };
+        },
+      };
 
-        // Update quest progress for defeating any enemy
-        newState = updateQuestProgress(newState, ObjectiveType.Defeat, "any");
+      // Update quest progress for defeating any enemy
+      let finalState = updateQuestProgress(
+        stateWithCoins,
+        ObjectiveType.Defeat,
+        "any",
+      );
 
-        // Also update for the specific species if battleInfo is available
-        if (battleInfo?.enemySpeciesId) {
-          newState = updateQuestProgress(
-            newState,
-            ObjectiveType.Defeat,
-            battleInfo.enemySpeciesId,
-          );
-        }
+      // Also update for the specific species if activeBattle is available
+      if (prev.activeBattle?.enemySpeciesId) {
+        finalState = updateQuestProgress(
+          finalState,
+          ObjectiveType.Defeat,
+          prev.activeBattle.enemySpeciesId,
+        );
+      }
 
-        return newState;
-      });
-    }
-    setBattleInfo(null);
+      return finalState;
+    });
+
     onTabChange("exploration");
   };
 
   // Handle fleeing from battle
   const handleFlee = () => {
-    setBattleInfo(null);
+    // Reset pet activity state and clear battle
+    actions.updateState((prev) => ({
+      ...prev,
+      pet: prev.pet
+        ? { ...prev.pet, activityState: "idle" as const }
+        : prev.pet,
+      activeBattle: undefined,
+    }));
+
     onTabChange("exploration");
   };
 
   const renderScreen = () => {
     // Battle screen (special case - not in normal navigation)
-    if (activeTab === "battle" && battleInfo && state?.pet) {
-      const playerCombatant = createCombatantFromPet(state.pet, true);
-      const enemyCombatant = createWildCombatant(
-        battleInfo.enemySpeciesId,
-        battleInfo.enemyLevel,
-      );
+    if (activeTab === "battle" && activeBattle) {
       return (
         <BattleScreen
-          playerCombatant={playerCombatant}
-          enemyCombatant={enemyCombatant}
+          battleState={activeBattle.battleState}
+          onBattleStateChange={handleBattleStateChange}
           onBattleEnd={handleBattleEnd}
           onFlee={handleFlee}
         />
@@ -176,9 +229,12 @@ function GameContent({
     }
   };
 
+  // Check if we're in battle mode (for layout adjustments)
+  const isBattleActive = activeTab === "battle" && activeBattle !== null;
+
   return (
     <Layout activeTab={activeTab} onTabChange={onTabChange}>
-      <div className="pb-20">{renderScreen()}</div>
+      <div className={isBattleActive ? "" : "pb-20"}>{renderScreen()}</div>
       {offlineReport && (
         <OfflineReport
           report={offlineReport}
