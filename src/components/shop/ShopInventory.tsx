@@ -2,7 +2,7 @@
  * Shop inventory component displaying items available for purchase.
  */
 
-import { toDisplay } from "@/game/types/common";
+import { toDisplay, toDisplayCare } from "@/game/types/common";
 import type { Rarity } from "@/game/types/constants";
 import type { Item } from "@/game/types/item";
 import {
@@ -47,21 +47,34 @@ function getRarityClass(rarity: Rarity): string {
 }
 
 /**
+ * Format a care stat value as a range if floor and ceil differ.
+ * Shows `+(min)~(max)` if there's a difference, otherwise just `+(value)`.
+ */
+function formatCareStatRange(microValue: number): string {
+  const min = toDisplay(microValue);
+  const max = toDisplayCare(microValue);
+  if (min === max) {
+    return `+${min}`;
+  }
+  return `+${min}~${max}`;
+}
+
+/**
  * Get the effect text for an item based on its category.
  */
 function getItemEffect(item: Item): string | null {
   if (isFoodItem(item)) {
-    return `+${toDisplay(item.satietyRestore)} Satiety`;
+    return `${formatCareStatRange(item.satietyRestore)} Satiety`;
   }
   if (isDrinkItem(item)) {
-    const parts = [`+${toDisplay(item.hydrationRestore)} Hydration`];
+    const parts = [`${formatCareStatRange(item.hydrationRestore)} Hydration`];
     if (item.energyRestore) {
       parts.push(`+${toDisplay(item.energyRestore)} Energy`);
     }
     return parts.join(", ");
   }
   if (isToyItem(item)) {
-    return `+${toDisplay(item.happinessRestore)} Happiness`;
+    return `${formatCareStatRange(item.happinessRestore)} Happiness`;
   }
   if (isCleaningItem(item)) {
     return `Removes ${item.poopRemoved} poop`;
@@ -112,6 +125,7 @@ export function ShopInventory({
       {items.map(({ shopItem, itemDef }) => {
         const isSelected = selectedItemId === shopItem.itemId;
         const canAfford = playerCoins >= shopItem.buyPrice;
+        const itemEffect = getItemEffect(itemDef);
 
         return (
           <button
@@ -130,9 +144,9 @@ export function ShopInventory({
             <span className="text-xs font-medium truncate max-w-full">
               {itemDef.name}
             </span>
-            {getItemEffect(itemDef) && (
+            {itemEffect && (
               <span className="text-xs text-muted-foreground truncate max-w-full">
-                {getItemEffect(itemDef)}
+                {itemEffect}
               </span>
             )}
             <span
