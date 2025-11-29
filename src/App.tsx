@@ -155,21 +155,15 @@ function GameContent({
         },
       };
 
-      // Update quest progress for defeating any enemy
-      let finalState = updateQuestProgress(
+      // Update quest progress for defeating the enemy
+      // Use specific species ID if available, otherwise use "any"
+      // Note: objectives with target "any" will match any species ID
+      const defeatedTarget = prev.activeBattle?.enemySpeciesId ?? "any";
+      const finalState = updateQuestProgress(
         stateWithCoins,
         ObjectiveType.Defeat,
-        "any",
+        defeatedTarget,
       );
-
-      // Also update for the specific species if activeBattle is available
-      if (prev.activeBattle?.enemySpeciesId) {
-        finalState = updateQuestProgress(
-          finalState,
-          ObjectiveType.Defeat,
-          prev.activeBattle.enemySpeciesId,
-        );
-      }
 
       return finalState;
     });
