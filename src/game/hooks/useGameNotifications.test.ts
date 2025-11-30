@@ -1,6 +1,12 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { renderHook } from "@testing-library/react";
-import { Window } from "happy-dom";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  spyOn,
+  test,
+} from "bun:test";
 import * as facilitiesData from "@/game/data/facilities";
 import type {
   ActiveTraining,
@@ -10,6 +16,8 @@ import type {
   Pet,
 } from "@/game/types";
 import { GrowthStage, TrainingSessionType } from "@/game/types";
+import { renderHook } from "@testing-library/react";
+import { Window } from "happy-dom";
 import { useGameNotifications } from "./useGameNotifications";
 
 // Setup DOM environment for React hooks
@@ -23,22 +31,21 @@ if (typeof window === "undefined") {
   global.navigator = window.navigator as any;
 }
 
-// Mock dependencies
-mock.module("@/game/data/facilities", () => ({
-  getFacility: mock(),
-  getSession: mock(),
-}));
-
 describe("useGameNotifications", () => {
   const mockSetNotification = mock((_n: GameNotification) => {});
+  let getFacilitySpy: ReturnType<typeof spyOn>;
+  let getSessionSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
     mockSetNotification.mockClear();
-    // Reset mocks
-    // biome-ignore lint/suspicious/noExplicitAny: Accessing mock methods
-    (facilitiesData.getFacility as any).mockClear();
-    // biome-ignore lint/suspicious/noExplicitAny: Accessing mock methods
-    (facilitiesData.getSession as any).mockClear();
+    // Spy on the facility methods
+    getFacilitySpy = spyOn(facilitiesData, "getFacility");
+    getSessionSpy = spyOn(facilitiesData, "getSession");
+  });
+
+  afterEach(() => {
+    getFacilitySpy.mockRestore();
+    getSessionSpy.mockRestore();
   });
 
   const createMockState = (overrides: Partial<GameState> = {}): GameState => {
@@ -79,7 +86,6 @@ describe("useGameNotifications", () => {
   describe("Stage Transitions", () => {
     test("notifies when growth stage changes", () => {
       const baseState = createMockState();
-      // Ensure pet exists
       if (!baseState.pet) throw new Error("Pet missing in mock state");
 
       const initialState = {
@@ -149,17 +155,27 @@ describe("useGameNotifications", () => {
       name: "Gym",
       primaryStat: "strength",
       secondaryStat: "endurance",
+      // Added required fields for TrainingFacility type satisfaction if needed by the hook or simple return
+      facilityType: "strength", 
+      description: "Test Gym",
+      sessions: [],
+      emoji: "🏋️",
     };
     const mockSession = {
+      type: TrainingSessionType.Basic,
+      name: "Basic",
+      description: "Desc",
+      durationTicks: 10,
+      energyCost: 10,
       primaryStatGain: 10,
       secondaryStatGain: 5,
     };
 
     beforeEach(() => {
       // biome-ignore lint/suspicious/noExplicitAny: Accessing mock methods
-      (facilitiesData.getFacility as any).mockReturnValue(mockFacility);
+      getFacilitySpy.mockReturnValue(mockFacility as any);
       // biome-ignore lint/suspicious/noExplicitAny: Accessing mock methods
-      (facilitiesData.getSession as any).mockReturnValue(mockSession);
+      getSessionSpy.mockReturnValue(mockSession as any);
     });
 
     test("notifies on natural completion (ticks <= 1 -> null)", () => {
