@@ -4,7 +4,10 @@
  * This component follows the "headless engine" pattern:
  * - Logic runs independently in the game tick processor
  * - UI reacts to state changes and events, playing animations
- * - Player input dispatches actions that emit events
+ * - Player input dispatches actions via the action-dispatch pattern
+ *
+ * The UI knows NOTHING about game rules/math - it simply expresses
+ * intent via dispatched actions, and the game engine handles the logic.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -21,9 +24,9 @@ import {
   type BattleRewards,
   type BattleState,
   calculateBattleRewards,
-  executePlayerTurn,
   isBattleComplete,
 } from "@/game/core/battle/battle";
+import type { BattleAction } from "@/game/core/battle/battleActions";
 import type { BattleActionEvent } from "@/game/types/event";
 import type { Move } from "@/game/types/move";
 
@@ -32,13 +35,12 @@ const ATTACK_ANIMATION_DURATION_MS = 400;
 
 interface BattleScreenProps {
   battleState: BattleState;
-  onBattleStateChange: (state: BattleState) => void;
   onBattleEnd: (victory: boolean, rewards: BattleRewards) => void;
   onFlee?: () => void;
   /** Battle events from the game state for UI animations */
   battleEvents?: BattleActionEvent[];
-  /** Callback for player attacks - emits events for consistent animation handling */
-  onPlayerAttack?: (newBattleState: BattleState, moveName: string) => void;
+  /** Dispatch function for battle actions */
+  dispatch: (action: BattleAction) => void;
 }
 
 interface AnimationState {
@@ -60,11 +62,10 @@ const initialAnimationState: AnimationState = {
  */
 export function BattleScreen({
   battleState,
-  onBattleStateChange,
   onBattleEnd,
   onFlee,
   battleEvents = [],
-  onPlayerAttack,
+  dispatch,
 }: BattleScreenProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationState, setAnimationState] = useState<AnimationState>(
@@ -152,26 +153,17 @@ export function BattleScreen({
   }, [battleEvents, triggerAttackAnimation]);
 
   // Handle player move selection
-  // Logic updates first, then events drive animations
+  // UI simply expresses intent via dispatch - logic runs in the engine
   const handleSelectMove = (move: Move) => {
     if (battleState.phase !== BattlePhase.PlayerTurn || isAnimating) {
       return;
     }
 
-    // Execute the move immediately - logic first, animation second
-    const newBattleState = executePlayerTurn(battleState, move);
-
-    // Use event-driven callback if available for consistent animation handling
-    if (onPlayerAttack) {
-      onPlayerAttack(newBattleState, move.name);
-    } else {
-      // Fallback: update state directly and trigger animation locally
-      onBattleStateChange(newBattleState);
-      setIsAnimating(true);
-      triggerAttackAnimation(true).then(() => {
-        setIsAnimating(false);
-      });
-    }
+    // Dispatch action - UI knows nothing about game rules/math
+    dispatch({
+      type: "BATTLE_PLAYER_ATTACK",
+      payload: { moveName: move.name },
+    });
   };
 
   // Memoize battle completion info to avoid recalculating

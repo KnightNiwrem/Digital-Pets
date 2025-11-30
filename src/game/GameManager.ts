@@ -5,9 +5,14 @@
  * regardless of frame rate or browser throttling in background tabs.
  * When the game wakes up after being throttled, it processes all
  * accumulated ticks to catch up to real-time.
+ *
+ * Battle tick processing is unified into the main loop to prevent
+ * synchronization issues between the game tick and battle processors.
  */
 
+import type { BattleAction } from "@/game/core/battle/battleActions";
 import { processBattleTick } from "@/game/core/battle/battleProcessor";
+import { battleReducer } from "@/game/core/battle/battleReducer";
 import {
   processGameTick,
   processOfflineCatchup,
@@ -30,6 +35,12 @@ const CHECK_INTERVAL_MS = 1000;
 const MAX_CATCHUP_TICKS = 10;
 
 /**
+ * Battle tick interval within the main loop (1 second).
+ * Battle processing runs more frequently than game ticks for responsive combat.
+ */
+const BATTLE_TICK_INTERVAL_MS = 1000;
+
+/**
  * Callback for state updates.
  */
 export type StateUpdateCallback = (
@@ -50,6 +61,7 @@ export class GameManager {
   private isRunning = false;
   private lastTickTime: number = 0;
   private accumulator: number = 0;
+  private battleAccumulator: number = 0;
 
   constructor(updateState: StateUpdateCallback) {
     this.updateState = updateState;
@@ -64,6 +76,7 @@ export class GameManager {
     this.isRunning = true;
     this.lastTickTime = Date.now();
     this.accumulator = 0;
+    this.battleAccumulator = 0;
 
     // Check for elapsed time frequently to catch up after background throttling
     this.intervalId = setInterval(() => {
@@ -87,12 +100,14 @@ export class GameManager {
    * Calculates elapsed time since last update and processes
    * as many ticks as needed to catch up (capped to prevent freezing).
    *
-   * Battle processing runs on every update cycle (1 second) for responsive combat.
+   * Battle tick processing is unified into this loop using its own accumulator
+   * to prevent synchronization issues between game ticks and battle processing.
    */
   private update(): void {
     const currentTime = Date.now();
     const deltaTime = currentTime - this.lastTickTime;
     this.accumulator += deltaTime;
+    this.battleAccumulator += deltaTime;
     this.lastTickTime = currentTime;
 
     // Process as many ticks as have accumulated (with cap)
@@ -111,9 +126,12 @@ export class GameManager {
       this.accumulator = 0;
     }
 
-    // Process battle tick on every update cycle for responsive combat
-    // This runs every CHECK_INTERVAL_MS (1 second), not tied to game ticks
-    this.updateState((state) => processBattleTick(state, currentTime));
+    // Process battle tick at BATTLE_TICK_INTERVAL_MS for responsive combat
+    // Unified into main loop to prevent synchronization issues
+    if (this.battleAccumulator >= BATTLE_TICK_INTERVAL_MS) {
+      this.updateState((state) => processBattleTick(state, currentTime));
+      this.battleAccumulator -= BATTLE_TICK_INTERVAL_MS;
+    }
   }
 
   /**
@@ -121,6 +139,15 @@ export class GameManager {
    */
   tick(): void {
     this.updateState(processGameTick);
+  }
+
+  /**
+   * Dispatch a battle action through the reducer.
+   * This is the primary way the UI interacts with battle logic.
+   */
+  dispatchBattleAction(action: BattleAction): void {
+    const currentTime = Date.now();
+    this.updateState((state) => battleReducer(state, action, currentTime));
   }
 
   /**
