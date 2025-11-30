@@ -27,7 +27,10 @@ export function formatTimeRemaining(expiresAt: number): string {
   }
 
   if (minutes > 0) {
-    return `${minutes}m`;
+    const remainingSeconds = seconds % 60;
+    return remainingSeconds > 0
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
   }
 
   return `${seconds}s`;

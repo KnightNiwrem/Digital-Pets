@@ -4,14 +4,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  type Quest,
-  type QuestProgress,
-  QuestState,
-  QuestType,
-} from "@/game/types/quest";
+import { type Quest, type QuestProgress, QuestState } from "@/game/types/quest";
 import { cn } from "@/lib/utils";
 import { formatTimeRemaining } from "./formatTimeRemaining";
+import { hasExpiration } from "./questUtils";
 
 interface QuestListProps {
   quests: Quest[];
@@ -33,17 +29,6 @@ const TYPE_STYLES: Record<string, string> = {
   timed: "bg-red-100 text-red-700",
   hidden: "bg-gray-100 text-gray-700",
 };
-
-/**
- * Check if quest type has an expiration.
- */
-function hasExpiration(type: QuestType): boolean {
-  return (
-    type === QuestType.Daily ||
-    type === QuestType.Weekly ||
-    type === QuestType.Timed
-  );
-}
 
 /**
  * Get quest type display name.
@@ -116,11 +101,13 @@ export function QuestList({
                     In Progress
                   </span>
                 )}
-                {hasExpiration(quest.type) && progress?.expiresAt && (
-                  <span className="text-xs text-orange-600">
-                    ⏰ {formatTimeRemaining(progress.expiresAt)}
-                  </span>
-                )}
+                {isActive &&
+                  hasExpiration(quest.type) &&
+                  progress?.expiresAt && (
+                    <span className="text-xs text-orange-600">
+                      ⏰ {formatTimeRemaining(progress.expiresAt)}
+                    </span>
+                  )}
               </div>
             </div>
           </Button>
