@@ -76,7 +76,7 @@ export function processGameTick(
   // Check for daily reset first
   const workingState = applyDailyResetIfNeeded(state, currentTime);
 
-  // Clear events from the previous tick (new events are added at the end of this tick)
+  // Clear pending events at the start of this tick (new events are added at the end)
   let updatedState: GameState = {
     ...workingState,
     pendingEvents: [],
