@@ -110,6 +110,8 @@ export function BattleScreen({
   // Consume battle events for animations
   // The game state is ALREADY updated - we just play animations to visualize what happened
   useEffect(() => {
+    let isMounted = true;
+
     const processEvents = async () => {
       // Guard against concurrent processing
       if (isProcessingRef.current) return;
@@ -122,7 +124,7 @@ export function BattleScreen({
       if (unprocessedEvents.length === 0) return;
 
       isProcessingRef.current = true;
-      setIsAnimating(true);
+      if (isMounted) setIsAnimating(true);
 
       for (const event of unprocessedEvents) {
         processedEventsRef.current.add(event.timestamp);
@@ -135,13 +137,17 @@ export function BattleScreen({
         }
       }
 
-      setIsAnimating(false);
+      if (isMounted) setIsAnimating(false);
       isProcessingRef.current = false;
     };
 
     if (battleEvents.length > 0) {
       processEvents();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [battleEvents, triggerAttackAnimation]);
 
   // Handle player move selection
@@ -172,6 +178,8 @@ export function BattleScreen({
     if (!isBattleComplete(battleState)) return null;
     const isVictory = battleState.phase === BattlePhase.Victory;
     const rewards = calculateBattleRewards(battleState, isVictory);
+    // Clear processed events when battle ends to prevent memory leak
+    processedEventsRef.current.clear();
     return { isVictory, rewards };
   }, [battleState]);
 

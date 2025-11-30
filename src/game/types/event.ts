@@ -84,12 +84,7 @@ export interface SkillLevelUpEvent extends BaseGameEvent {
 /**
  * Battle action types for battle events.
  */
-export type BattleActionType =
-  | "playerAttack"
-  | "enemyAttack"
-  | "playerDamaged"
-  | "enemyDamaged"
-  | "turnResolved";
+export type BattleActionType = "playerAttack" | "enemyAttack" | "turnResolved";
 
 /**
  * Event emitted when a battle action occurs.
