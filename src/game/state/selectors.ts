@@ -20,10 +20,10 @@ import {
   toDisplayCare,
 } from "@/game/types/common";
 import {
+  type ActivityState,
   type CareThreshold,
   type GrowthStage,
   getCareThreshold,
-  ActivityState,
 } from "@/game/types/constants";
 import type {
   Currency,
@@ -94,9 +94,7 @@ export function selectLastSaveTime(state: GameState): number {
 /**
  * Get the pet's activity state.
  */
-export function selectPetActivityState(
-  state: GameState,
-): ActivityState | null {
+export function selectPetActivityState(state: GameState): ActivityState | null {
   return state.pet?.activityState ?? null;
 }
 
