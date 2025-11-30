@@ -9,12 +9,19 @@ import {
 } from "@/game/core/exploration/forage";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import {
+  processTimedQuestExpiration,
   refreshDailyQuests,
+  refreshWeeklyQuests,
   updateQuestProgress,
 } from "@/game/core/quests/quests";
 import { resetDailySleep } from "@/game/core/sleep";
 import { processPetTick } from "@/game/core/tick";
-import { getMidnightTimestamp, shouldDailyReset } from "@/game/core/time";
+import {
+  getMidnightTimestamp,
+  getWeekStartTimestamp,
+  shouldDailyReset,
+  shouldWeeklyReset,
+} from "@/game/core/time";
 import { completeTraining } from "@/game/core/training";
 import { getFacility } from "@/game/data/facilities";
 import { getLocation } from "@/game/data/locations";
@@ -67,7 +74,31 @@ function applyDailyResetIfNeeded(
   };
 
   // Refresh daily quests on daily reset
-  updatedState = refreshDailyQuests(updatedState);
+  updatedState = refreshDailyQuests(updatedState, currentTime);
+
+  return updatedState;
+}
+
+/**
+ * Apply weekly reset if needed.
+ * Refreshes weekly quests at Monday midnight local time.
+ */
+function applyWeeklyResetIfNeeded(
+  state: GameState,
+  currentTime: number = now(),
+): GameState {
+  if (!shouldWeeklyReset(state.lastWeeklyReset, currentTime)) {
+    return state;
+  }
+
+  const thisWeekStart = getWeekStartTimestamp(currentTime);
+  let updatedState: GameState = {
+    ...state,
+    lastWeeklyReset: thisWeekStart,
+  };
+
+  // Refresh weekly quests on weekly reset
+  updatedState = refreshWeeklyQuests(updatedState, currentTime);
 
   return updatedState;
 }
@@ -83,7 +114,13 @@ export function processGameTick(
   currentTime: number = now(),
 ): GameState {
   // Check for daily reset first
-  const workingState = applyDailyResetIfNeeded(state, currentTime);
+  let workingState = applyDailyResetIfNeeded(state, currentTime);
+
+  // Check for weekly reset
+  workingState = applyWeeklyResetIfNeeded(workingState, currentTime);
+
+  // Process timed quest expiration
+  workingState = processTimedQuestExpiration(workingState, currentTime);
 
   // Clear pending events at the start of this tick (new events are added at the end)
   let updatedState: GameState = {

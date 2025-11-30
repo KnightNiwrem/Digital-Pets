@@ -2,7 +2,8 @@
  * Quest state machine and main quest logic.
  */
 
-import { getDailyQuests, getQuest } from "@/game/data/quests";
+import { getNextDailyReset, getNextWeeklyReset } from "@/game/core/time";
+import { getDailyQuests, getQuest, getWeeklyQuests } from "@/game/data/quests";
 import type { GameState } from "@/game/types/gameState";
 import {
   createQuestProgress,
@@ -264,25 +265,181 @@ export function getQuestProgress(
 
 /**
  * Refresh daily quests.
- * Removes completed/failed daily quests and activates all daily quests.
+ * Removes completed/expired daily quests and activates all daily quests.
  * Daily quests start in Active state (no manual acceptance required).
  */
-export function refreshDailyQuests(state: GameState): GameState {
+export function refreshDailyQuests(
+  state: GameState,
+  currentTime: number = Date.now(),
+): GameState {
   const dailyQuests = getDailyQuests();
+  const nextDailyReset = getNextDailyReset(currentTime);
 
-  // Remove all existing daily quest progress (completed, failed, or active)
+  // Remove all existing daily quest progress (completed, expired, or active)
   const nonDailyQuests = state.quests.filter((progress) => {
     const quest = getQuest(progress.questId);
     return quest?.type !== QuestType.Daily;
   });
 
-  // Create fresh progress for all daily quests (auto-activated)
+  // Create fresh progress for all daily quests (auto-activated with expiration)
   const freshDailyProgress: QuestProgress[] = dailyQuests.map((quest) =>
-    createQuestProgress(quest.id),
+    createQuestProgress(quest.id, nextDailyReset),
   );
 
   return {
     ...state,
     quests: [...nonDailyQuests, ...freshDailyProgress],
+  };
+}
+
+/**
+ * Refresh weekly quests.
+ * Removes completed/expired weekly quests and activates all weekly quests.
+ * Weekly quests start in Active state (no manual acceptance required).
+ */
+export function refreshWeeklyQuests(
+  state: GameState,
+  currentTime: number = Date.now(),
+): GameState {
+  const weeklyQuests = getWeeklyQuests();
+  const nextWeeklyReset = getNextWeeklyReset(currentTime);
+
+  // Remove all existing weekly quest progress (completed, expired, or active)
+  const nonWeeklyQuests = state.quests.filter((progress) => {
+    const quest = getQuest(progress.questId);
+    return quest?.type !== QuestType.Weekly;
+  });
+
+  // Create fresh progress for all weekly quests (auto-activated with expiration)
+  const freshWeeklyProgress: QuestProgress[] = weeklyQuests.map((quest) =>
+    createQuestProgress(quest.id, nextWeeklyReset),
+  );
+
+  return {
+    ...state,
+    quests: [...nonWeeklyQuests, ...freshWeeklyProgress],
+  };
+}
+
+/**
+ * Check and expire timed quests that have passed their expiration time.
+ * Only timed quests go to Expired state; daily/weekly are handled by refresh functions.
+ */
+export function processTimedQuestExpiration(
+  state: GameState,
+  currentTime: number = Date.now(),
+): GameState {
+  let hasChanges = false;
+  const newQuests = state.quests.map((progress) => {
+    // Only check active quests with expiration times
+    if (
+      progress.state !== QuestState.Active ||
+      progress.expiresAt === undefined
+    ) {
+      return progress;
+    }
+
+    const quest = getQuest(progress.questId);
+    // Only timed quests go to Expired state
+    if (quest?.type !== QuestType.Timed) {
+      return progress;
+    }
+
+    // Check if quest has expired
+    if (currentTime >= progress.expiresAt) {
+      hasChanges = true;
+      return {
+        ...progress,
+        state: QuestState.Expired,
+      };
+    }
+
+    return progress;
+  });
+
+  return hasChanges ? { ...state, quests: newQuests } : state;
+}
+
+/**
+ * Get all expired quests (timed quests that were not completed in time).
+ */
+export function getExpiredQuests(state: GameState): QuestProgress[] {
+  return state.quests.filter((q) => q.state === QuestState.Expired);
+}
+
+/**
+ * Calculate remaining time until quest expiration in milliseconds.
+ * Returns null if quest has no expiration or is not active.
+ */
+export function getQuestTimeRemaining(
+  progress: QuestProgress,
+  currentTime: number = Date.now(),
+): number | null {
+  if (
+    progress.state !== QuestState.Active ||
+    progress.expiresAt === undefined
+  ) {
+    return null;
+  }
+  const remaining = progress.expiresAt - currentTime;
+  return remaining > 0 ? remaining : 0;
+}
+
+/**
+ * Start a timed quest with calculated expiration.
+ */
+export function startTimedQuest(
+  state: GameState,
+  questId: string,
+  currentTime: number = Date.now(),
+): QuestActionResult {
+  const quest = getQuest(questId);
+  if (!quest) {
+    return {
+      success: false,
+      state,
+      message: "Quest not found.",
+    };
+  }
+
+  if (quest.type !== QuestType.Timed) {
+    return {
+      success: false,
+      state,
+      message: "Quest is not a timed quest.",
+    };
+  }
+
+  if (!quest.durationMs) {
+    return {
+      success: false,
+      state,
+      message: "Timed quest has no duration configured.",
+    };
+  }
+
+  const currentState = getQuestState(state, questId);
+  if (currentState !== QuestState.Available) {
+    return {
+      success: false,
+      state,
+      message:
+        currentState === QuestState.Locked
+          ? "Quest requirements not met."
+          : "Quest is already in progress, completed, or expired.",
+    };
+  }
+
+  const expiresAt = currentTime + quest.durationMs;
+  const progress = createQuestProgress(questId, expiresAt);
+  const newQuests = [...state.quests, progress];
+
+  return {
+    success: true,
+    state: {
+      ...state,
+      quests: newQuests,
+    },
+    message: `Started quest: ${quest.name}`,
   };
 }

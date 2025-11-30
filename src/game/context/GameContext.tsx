@@ -11,7 +11,10 @@ import {
   useState,
 } from "react";
 import type { BattleAction } from "@/game/core/battle/battleActions";
-import { refreshDailyQuests } from "@/game/core/quests/quests";
+import {
+  refreshDailyQuests,
+  refreshWeeklyQuests,
+} from "@/game/core/quests/quests";
 import { processOfflineCatchup } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
 import {
@@ -274,8 +277,9 @@ export function GameProvider({ children }: GameProviderProps) {
         isInitialized: true,
       };
 
-      // Initialize daily quests (auto-activated)
+      // Initialize daily and weekly quests (auto-activated)
       newState = refreshDailyQuests(newState);
+      newState = refreshWeeklyQuests(newState);
 
       // Start the game with the new state
       // Note: setHasSaveData is set after startGame for consistency,

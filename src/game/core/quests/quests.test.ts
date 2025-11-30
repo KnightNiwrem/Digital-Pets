@@ -8,19 +8,26 @@ import {
   tutorialExploration,
   tutorialFirstSteps,
 } from "@/game/data/quests/tutorial";
+import { weeklyCaretaker } from "@/game/data/quests/weekly";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import {
   ObjectiveType,
+  type Quest,
   type QuestProgress,
   QuestState,
+  QuestType,
 } from "@/game/types/quest";
 import { areAllRequiredObjectivesComplete } from "./objectives";
 import {
   completeQuest,
   getActiveQuests,
   getAvailableQuests,
+  getExpiredQuests,
   getQuestState,
+  getQuestTimeRemaining,
+  processTimedQuestExpiration,
   refreshDailyQuests,
+  refreshWeeklyQuests,
   startQuest,
   updateQuestProgress,
 } from "./quests";
@@ -297,4 +304,198 @@ test("refreshDailyQuests resets in-progress daily quests", () => {
   expect(dailyCare).toBeDefined();
   expect(dailyCare?.state).toBe(QuestState.Active);
   expect(dailyCare?.objectiveProgress).toEqual({});
+});
+
+test("refreshDailyQuests sets expiresAt for daily quests", () => {
+  const state = createTestState();
+  const currentTime = Date.now();
+  const result = refreshDailyQuests(state, currentTime);
+
+  const dailyQuest = result.quests.find(
+    (q) => q.questId === dailyCareRoutine.id,
+  );
+  expect(dailyQuest?.expiresAt).toBeDefined();
+  // Should expire at next midnight
+  expect(dailyQuest?.expiresAt).toBeGreaterThan(currentTime);
+});
+
+// Tests for refreshWeeklyQuests
+
+test("refreshWeeklyQuests activates all weekly quests", () => {
+  const state = createTestState();
+  const result = refreshWeeklyQuests(state);
+
+  const weeklyQuestProgress = result.quests.filter((q) =>
+    q.questId.startsWith("weekly_"),
+  );
+  expect(weeklyQuestProgress.length).toBeGreaterThan(0);
+
+  for (const progress of weeklyQuestProgress) {
+    expect(progress.state).toBe(QuestState.Active);
+  }
+});
+
+test("refreshWeeklyQuests preserves non-weekly quests", () => {
+  const tutorialProgress: QuestProgress = {
+    questId: tutorialFirstSteps.id,
+    state: QuestState.Active,
+    objectiveProgress: { feed_pet: 1 },
+  };
+  const state = createTestState({}, [tutorialProgress]);
+  const result = refreshWeeklyQuests(state);
+
+  const tutorial = result.quests.find(
+    (q) => q.questId === tutorialFirstSteps.id,
+  );
+  expect(tutorial).toBeDefined();
+  expect(tutorial?.state).toBe(QuestState.Active);
+});
+
+test("refreshWeeklyQuests resets completed weekly quests", () => {
+  const completedWeeklyProgress: QuestProgress = {
+    questId: weeklyCaretaker.id,
+    state: QuestState.Completed,
+    objectiveProgress: { feed_pet_weekly: 14 },
+    completedAt: Date.now(),
+  };
+  const state = createTestState({}, [completedWeeklyProgress]);
+  const result = refreshWeeklyQuests(state);
+
+  const weeklyQuest = result.quests.find(
+    (q) => q.questId === weeklyCaretaker.id,
+  );
+  expect(weeklyQuest).toBeDefined();
+  expect(weeklyQuest?.state).toBe(QuestState.Active);
+  expect(weeklyQuest?.objectiveProgress).toEqual({});
+});
+
+test("refreshWeeklyQuests sets expiresAt for weekly quests", () => {
+  const state = createTestState();
+  const currentTime = Date.now();
+  const result = refreshWeeklyQuests(state, currentTime);
+
+  const weeklyQuest = result.quests.find(
+    (q) => q.questId === weeklyCaretaker.id,
+  );
+  expect(weeklyQuest?.expiresAt).toBeDefined();
+  // Should expire at next Monday midnight
+  expect(weeklyQuest?.expiresAt).toBeGreaterThan(currentTime);
+});
+
+// Tests for timed quest expiration
+
+test("processTimedQuestExpiration expires timed quests past deadline", () => {
+  const expiredTime = Date.now() - 1000; // 1 second ago
+  const timedProgress: QuestProgress = {
+    questId: "timed_test_quest",
+    state: QuestState.Active,
+    objectiveProgress: {},
+    startedAt: Date.now() - 3600000,
+    expiresAt: expiredTime,
+  };
+
+  // Mock a timed quest in the quests registry
+  const { quests } = require("@/game/data/quests");
+  quests.timed_test_quest = {
+    id: "timed_test_quest",
+    name: "Test Timed Quest",
+    type: QuestType.Timed,
+    durationMs: 3600000,
+  } as Quest;
+
+  const state = createTestState({}, [timedProgress]);
+  const result = processTimedQuestExpiration(state);
+
+  const timedQuest = result.quests.find(
+    (q) => q.questId === "timed_test_quest",
+  );
+  expect(timedQuest?.state).toBe(QuestState.Expired);
+
+  // Cleanup
+  delete quests.timed_test_quest;
+});
+
+test("processTimedQuestExpiration does not expire daily quests", () => {
+  const expiredTime = Date.now() - 1000;
+  const dailyProgress: QuestProgress = {
+    questId: dailyCareRoutine.id,
+    state: QuestState.Active,
+    objectiveProgress: {},
+    expiresAt: expiredTime,
+  };
+
+  const state = createTestState({}, [dailyProgress]);
+  const result = processTimedQuestExpiration(state);
+
+  const dailyQuest = result.quests.find(
+    (q) => q.questId === dailyCareRoutine.id,
+  );
+  // Daily quests should NOT be expired by this function
+  expect(dailyQuest?.state).toBe(QuestState.Active);
+});
+
+test("getQuestTimeRemaining returns remaining time for active quest", () => {
+  const futureExpiry = Date.now() + 3600000; // 1 hour from now
+  const progress: QuestProgress = {
+    questId: "test_quest",
+    state: QuestState.Active,
+    objectiveProgress: {},
+    expiresAt: futureExpiry,
+  };
+
+  const remaining = getQuestTimeRemaining(progress);
+  expect(remaining).toBeGreaterThan(0);
+  expect(remaining).toBeLessThanOrEqual(3600000);
+});
+
+test("getQuestTimeRemaining returns null for quest without expiration", () => {
+  const progress: QuestProgress = {
+    questId: "test_quest",
+    state: QuestState.Active,
+    objectiveProgress: {},
+  };
+
+  const remaining = getQuestTimeRemaining(progress);
+  expect(remaining).toBeNull();
+});
+
+test("getQuestTimeRemaining returns 0 for expired quest", () => {
+  const pastExpiry = Date.now() - 1000;
+  const progress: QuestProgress = {
+    questId: "test_quest",
+    state: QuestState.Active,
+    objectiveProgress: {},
+    expiresAt: pastExpiry,
+  };
+
+  const remaining = getQuestTimeRemaining(progress);
+  expect(remaining).toBe(0);
+});
+
+test("getExpiredQuests returns only expired quests", () => {
+  const activeProgress: QuestProgress = {
+    questId: "active_quest",
+    state: QuestState.Active,
+    objectiveProgress: {},
+  };
+  const expiredProgress: QuestProgress = {
+    questId: "expired_quest",
+    state: QuestState.Expired,
+    objectiveProgress: {},
+  };
+  const completedProgress: QuestProgress = {
+    questId: "completed_quest",
+    state: QuestState.Completed,
+    objectiveProgress: {},
+  };
+
+  const state = createTestState({}, [
+    activeProgress,
+    expiredProgress,
+    completedProgress,
+  ]);
+  const expired = getExpiredQuests(state);
+
+  expect(expired.length).toBe(1);
+  expect(expired[0]?.questId).toBe("expired_quest");
 });

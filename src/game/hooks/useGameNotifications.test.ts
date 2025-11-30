@@ -91,6 +91,7 @@ describe("useGameNotifications", () => {
       isInitialized: true,
       lastSaveTime: Date.now(),
       lastDailyReset: Date.now(),
+      lastWeeklyReset: Date.now(),
       player: {
         inventory: { items: [] },
         currency: { coins: 0 },

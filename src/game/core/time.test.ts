@@ -7,8 +7,14 @@ import { formatTicksAsTime } from "@/game/types/common";
 import {
   calculateCappedOfflineTicks,
   calculateElapsedTicks,
+  getNextDailyReset,
+  getNextWeeklyReset,
+  getWeekStartTimestamp,
   MAX_OFFLINE_TICKS,
+  MS_PER_DAY,
+  MS_PER_WEEK,
   msUntilNextTick,
+  shouldWeeklyReset,
 } from "./time";
 
 test("calculateElapsedTicks returns 0 for same timestamp", () => {
@@ -199,4 +205,74 @@ test("countDailyResets returns correct count for 7 days offline", () => {
   to.setHours(12, 0, 0, 0); // Noon Day 8
 
   expect(countDailyResets(from.getTime(), to.getTime())).toBe(7);
+});
+
+// Weekly reset tests
+test("getWeekStartTimestamp returns Monday midnight", () => {
+  // Create a Wednesday
+  const wednesday = new Date("2024-01-17T14:30:00.000Z"); // Jan 17, 2024 is Wednesday
+  const weekStart = getWeekStartTimestamp(wednesday.getTime());
+  const weekStartDate = new Date(weekStart);
+
+  expect(weekStartDate.getDay()).toBe(1); // Monday
+  expect(weekStartDate.getHours()).toBe(0);
+  expect(weekStartDate.getMinutes()).toBe(0);
+});
+
+test("getWeekStartTimestamp handles Sunday correctly", () => {
+  // Create a Sunday
+  const sunday = new Date("2024-01-21T10:00:00.000Z"); // Jan 21, 2024 is Sunday
+  const weekStart = getWeekStartTimestamp(sunday.getTime());
+  const weekStartDate = new Date(weekStart);
+
+  // Should return previous Monday (Jan 15)
+  expect(weekStartDate.getDay()).toBe(1); // Monday
+  expect(weekStartDate.getDate()).toBe(15);
+});
+
+test("getWeekStartTimestamp handles Monday correctly", () => {
+  // Create a Monday
+  const monday = new Date("2024-01-15T10:00:00.000Z"); // Jan 15, 2024 is Monday
+  const weekStart = getWeekStartTimestamp(monday.getTime());
+  const weekStartDate = new Date(weekStart);
+
+  // Should return same Monday at midnight
+  expect(weekStartDate.getDay()).toBe(1); // Monday
+  expect(weekStartDate.getDate()).toBe(15);
+  expect(weekStartDate.getHours()).toBe(0);
+});
+
+test("shouldWeeklyReset returns true when last reset was before this week", () => {
+  // Last reset was last week
+  const lastWeek = new Date();
+  lastWeek.setDate(lastWeek.getDate() - 8); // 8 days ago
+  const now = Date.now();
+
+  expect(shouldWeeklyReset(lastWeek.getTime(), now)).toBe(true);
+});
+
+test("shouldWeeklyReset returns false when last reset was this week", () => {
+  const now = Date.now();
+  const thisWeekStart = getWeekStartTimestamp(now);
+
+  expect(shouldWeeklyReset(thisWeekStart, now)).toBe(false);
+});
+
+test("getNextDailyReset returns next midnight", () => {
+  const now = Date.now();
+  const nextReset = getNextDailyReset(now);
+
+  expect(nextReset).toBeGreaterThan(now);
+  expect(nextReset - now).toBeLessThanOrEqual(MS_PER_DAY);
+});
+
+test("getNextWeeklyReset returns next Monday midnight", () => {
+  const now = Date.now();
+  const nextReset = getNextWeeklyReset(now);
+
+  expect(nextReset).toBeGreaterThan(now);
+  expect(nextReset - now).toBeLessThanOrEqual(MS_PER_WEEK);
+
+  const nextResetDate = new Date(nextReset);
+  expect(nextResetDate.getDay()).toBe(1); // Monday
 });

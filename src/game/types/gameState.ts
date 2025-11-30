@@ -99,6 +99,12 @@ export interface GameState {
    */
   lastDailyReset: Timestamp;
   /**
+   * Timestamp of the last weekly reset.
+   * Used to track when to reset weekly quests.
+   * Weekly reset occurs at Monday midnight local time.
+   */
+  lastWeeklyReset: Timestamp;
+  /**
    * Event queue containing transient events from the last tick or action.
    * Events are cleared at the start of each tick. The UI tracks processed
    * events by timestamp to avoid duplicates.
@@ -131,6 +137,7 @@ export function createInitialGameState(): GameState {
     quests: [],
     isInitialized: false,
     lastDailyReset: currentTime,
+    lastWeeklyReset: currentTime,
     pendingEvents: [],
   };
 }

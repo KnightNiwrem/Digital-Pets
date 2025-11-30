@@ -9,6 +9,8 @@ export const QuestType = {
   Main: "main",
   Side: "side",
   Daily: "daily",
+  Weekly: "weekly",
+  Timed: "timed",
   Tutorial: "tutorial",
   Hidden: "hidden",
 } as const;
@@ -27,8 +29,8 @@ export const QuestState = {
   Active: "active",
   /** Finished, rewards claimed */
   Completed: "completed",
-  /** Objective failed, can retry */
-  Failed: "failed",
+  /** Timed quest expired without completion */
+  Expired: "expired",
 } as const;
 
 export type QuestState = (typeof QuestState)[keyof typeof QuestState];
@@ -141,6 +143,8 @@ export interface Quest {
   chainNext?: string;
   /** Previous quest ID in chain (optional) */
   chainPrevious?: string;
+  /** Duration in milliseconds for timed quests (required for Timed type) */
+  durationMs?: number;
 }
 
 /**
@@ -157,16 +161,22 @@ export interface QuestProgress {
   startedAt?: number;
   /** Timestamp when quest was completed */
   completedAt?: number;
+  /** Timestamp when quest expires (for daily, weekly, and timed quests) */
+  expiresAt?: number;
 }
 
 /**
  * Create initial quest progress for an active quest.
  */
-export function createQuestProgress(questId: string): QuestProgress {
+export function createQuestProgress(
+  questId: string,
+  expiresAt?: number,
+): QuestProgress {
   return {
     questId,
     state: QuestState.Active,
     objectiveProgress: {},
     startedAt: Date.now(),
+    expiresAt,
   };
 }

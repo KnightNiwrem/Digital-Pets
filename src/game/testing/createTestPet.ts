@@ -160,6 +160,7 @@ export function createTestGameState(
     quests: [],
     isInitialized: true,
     lastDailyReset: now,
+    lastWeeklyReset: now,
     pendingEvents: [],
     ...stateOverrides,
   };
