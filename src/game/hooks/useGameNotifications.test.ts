@@ -8,7 +8,6 @@ import {
   test,
 } from "bun:test";
 import { renderHook } from "@testing-library/react";
-import { Window } from "happy-dom";
 import * as facilitiesData from "@/game/data/facilities";
 import type {
   ActiveTraining,
@@ -21,17 +20,6 @@ import { GrowthStage, TrainingSessionType } from "@/game/types";
 import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 import { useGameNotifications } from "./useGameNotifications";
-
-// Setup DOM environment for React hooks
-if (typeof window === "undefined") {
-  const window = new Window();
-  // biome-ignore lint/suspicious/noExplicitAny: Mocking global window
-  global.window = window as any;
-  // biome-ignore lint/suspicious/noExplicitAny: Mocking global document
-  global.document = window.document as any;
-  // biome-ignore lint/suspicious/noExplicitAny: Mocking global navigator
-  global.navigator = window.navigator as any;
-}
 
 describe("useGameNotifications", () => {
   const mockSetNotification = mock((_n: GameNotification) => {});
@@ -148,7 +136,8 @@ describe("useGameNotifications", () => {
       };
 
       const { rerender } = renderHook(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
+        ({ state }: { state: GameState | null }) =>
+          useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -161,8 +150,7 @@ describe("useGameNotifications", () => {
         },
       };
 
-      // biome-ignore lint/suspicious/noExplicitAny: casting to avoid strict type inference issues in test
-      rerender({ state: newState as any });
+      rerender({ state: newState });
 
       expect(mockSetNotification).toHaveBeenCalledTimes(1);
       expect(mockSetNotification).toHaveBeenCalledWith({
@@ -176,7 +164,8 @@ describe("useGameNotifications", () => {
     test("does not notify if stage remains the same", () => {
       const initialState = createMockState();
       const { rerender } = renderHook(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
+        ({ state }: { state: GameState | null }) =>
+          useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -188,14 +177,14 @@ describe("useGameNotifications", () => {
     test("does not notify if pet is null", () => {
       const initialState = createMockState();
       const { rerender } = renderHook(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
+        ({ state }: { state: GameState | null }) =>
+          useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
       // Set pet to null (e.g. reset)
       const newState = { ...initialState, pet: null };
-      // biome-ignore lint/suspicious/noExplicitAny: Simulating null pet in state type
-      rerender({ state: newState as any });
+      rerender({ state: newState });
 
       expect(mockSetNotification).not.toHaveBeenCalled();
     });
@@ -251,7 +240,8 @@ describe("useGameNotifications", () => {
       };
 
       const { rerender } = renderHook(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
+        ({ state }: { state: GameState | null }) =>
+          useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -264,8 +254,7 @@ describe("useGameNotifications", () => {
         },
       };
 
-      // biome-ignore lint/suspicious/noExplicitAny: casting to avoid strict type inference issues in test
-      rerender({ state: newState as any });
+      rerender({ state: newState });
 
       expect(mockSetNotification).toHaveBeenCalledTimes(1);
       expect(mockSetNotification).toHaveBeenCalledWith({
@@ -298,7 +287,8 @@ describe("useGameNotifications", () => {
       };
 
       const { rerender } = renderHook(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
+        ({ state }: { state: GameState | null }) =>
+          useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -311,8 +301,7 @@ describe("useGameNotifications", () => {
         },
       };
 
-      // biome-ignore lint/suspicious/noExplicitAny: casting to avoid strict type inference issues in test
-      rerender({ state: newState as any });
+      rerender({ state: newState });
 
       expect(mockSetNotification).not.toHaveBeenCalled();
     });
@@ -325,7 +314,8 @@ describe("useGameNotifications", () => {
       });
 
       const { rerender } = renderHook(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
+        ({ state }: { state: GameState | null }) =>
+          useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -361,7 +351,8 @@ describe("useGameNotifications", () => {
       const initialState = createMockState({ lastExplorationResult: result });
 
       const { rerender } = renderHook(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
+        ({ state }: { state: GameState | null }) =>
+          useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
