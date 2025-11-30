@@ -8,7 +8,10 @@ import {
   processExplorationTick,
 } from "@/game/core/exploration/forage";
 import { calculatePetMaxStats } from "@/game/core/petStats";
-import { updateQuestProgress } from "@/game/core/quests/quests";
+import {
+  refreshDailyQuests,
+  updateQuestProgress,
+} from "@/game/core/quests/quests";
 import { resetDailySleep } from "@/game/core/sleep";
 import { processPetTick } from "@/game/core/tick";
 import { getMidnightTimestamp, shouldDailyReset } from "@/game/core/time";
@@ -41,6 +44,7 @@ import { SkillType } from "@/game/types/skill";
 /**
  * Apply daily reset if needed.
  * Resets daily counters like sleepTicksToday at midnight local time.
+ * Also refreshes daily quests.
  */
 function applyDailyResetIfNeeded(
   state: GameState,
@@ -51,7 +55,7 @@ function applyDailyResetIfNeeded(
   }
 
   const todayMidnight = getMidnightTimestamp(currentTime);
-  return {
+  let updatedState: GameState = {
     ...state,
     lastDailyReset: todayMidnight,
     pet: state.pet
@@ -61,6 +65,11 @@ function applyDailyResetIfNeeded(
         }
       : null,
   };
+
+  // Refresh daily quests on daily reset
+  updatedState = refreshDailyQuests(updatedState);
+
+  return updatedState;
 }
 
 /**

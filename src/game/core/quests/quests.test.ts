@@ -3,6 +3,7 @@
  */
 
 import { expect, test } from "bun:test";
+import { dailyCareRoutine } from "@/game/data/quests/daily";
 import {
   tutorialExploration,
   tutorialFirstSteps,
@@ -19,6 +20,7 @@ import {
   getActiveQuests,
   getAvailableQuests,
   getQuestState,
+  refreshDailyQuests,
   startQuest,
   updateQuestProgress,
 } from "./quests";
@@ -220,4 +222,79 @@ test("areAllRequiredObjectivesComplete returns false when incomplete", () => {
     progress,
   );
   expect(result).toBe(false);
+});
+
+// Tests for refreshDailyQuests
+
+test("refreshDailyQuests activates all daily quests", () => {
+  const state = createTestState();
+  const result = refreshDailyQuests(state);
+
+  // Should have all daily quests as active
+  const dailyQuestProgress = result.quests.filter((q) =>
+    q.questId.startsWith("daily_"),
+  );
+  expect(dailyQuestProgress.length).toBeGreaterThan(0);
+
+  // All daily quests should be in Active state
+  for (const progress of dailyQuestProgress) {
+    expect(progress.state).toBe(QuestState.Active);
+  }
+});
+
+test("refreshDailyQuests preserves non-daily quests", () => {
+  const tutorialProgress: QuestProgress = {
+    questId: tutorialFirstSteps.id,
+    state: QuestState.Active,
+    objectiveProgress: { feed_pet: 1 },
+  };
+  const state = createTestState({}, [tutorialProgress]);
+  const result = refreshDailyQuests(state);
+
+  // Tutorial quest should still be present
+  const tutorial = result.quests.find(
+    (q) => q.questId === tutorialFirstSteps.id,
+  );
+  expect(tutorial).toBeDefined();
+  expect(tutorial?.state).toBe(QuestState.Active);
+  expect(tutorial?.objectiveProgress.feed_pet).toBe(1);
+});
+
+test("refreshDailyQuests resets completed daily quests", () => {
+  const completedDailyProgress: QuestProgress = {
+    questId: dailyCareRoutine.id,
+    state: QuestState.Completed,
+    objectiveProgress: { feed_pet: 2, water_pet: 2 },
+    completedAt: Date.now(),
+  };
+  const state = createTestState({}, [completedDailyProgress]);
+  const result = refreshDailyQuests(state);
+
+  // Daily quest should be reset to Active with empty progress
+  const dailyCare = result.quests.find(
+    (q) => q.questId === dailyCareRoutine.id,
+  );
+  expect(dailyCare).toBeDefined();
+  expect(dailyCare?.state).toBe(QuestState.Active);
+  expect(dailyCare?.objectiveProgress).toEqual({});
+  expect(dailyCare?.completedAt).toBeUndefined();
+});
+
+test("refreshDailyQuests resets in-progress daily quests", () => {
+  const inProgressDailyProgress: QuestProgress = {
+    questId: dailyCareRoutine.id,
+    state: QuestState.Active,
+    objectiveProgress: { feed_pet: 1 },
+    startedAt: Date.now() - 86400000, // Started yesterday
+  };
+  const state = createTestState({}, [inProgressDailyProgress]);
+  const result = refreshDailyQuests(state);
+
+  // Daily quest should be reset with fresh progress
+  const dailyCare = result.quests.find(
+    (q) => q.questId === dailyCareRoutine.id,
+  );
+  expect(dailyCare).toBeDefined();
+  expect(dailyCare?.state).toBe(QuestState.Active);
+  expect(dailyCare?.objectiveProgress).toEqual({});
 });

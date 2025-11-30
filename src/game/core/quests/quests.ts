@@ -2,7 +2,7 @@
  * Quest state machine and main quest logic.
  */
 
-import { getQuest } from "@/game/data/quests";
+import { getDailyQuests, getQuest } from "@/game/data/quests";
 import type { GameState } from "@/game/types/gameState";
 import {
   createQuestProgress,
@@ -10,6 +10,7 @@ import {
   type Quest,
   type QuestProgress,
   QuestState,
+  QuestType,
 } from "@/game/types/quest";
 import {
   areAllRequiredObjectivesComplete,
@@ -259,4 +260,29 @@ export function getQuestProgress(
   questId: string,
 ): QuestProgress | undefined {
   return state.quests.find((q) => q.questId === questId);
+}
+
+/**
+ * Refresh daily quests.
+ * Removes completed/failed daily quests and activates all daily quests.
+ * Daily quests start in Active state (no manual acceptance required).
+ */
+export function refreshDailyQuests(state: GameState): GameState {
+  const dailyQuests = getDailyQuests();
+
+  // Remove all existing daily quest progress (completed, failed, or active)
+  const nonDailyQuests = state.quests.filter((progress) => {
+    const quest = getQuest(progress.questId);
+    return quest?.type !== QuestType.Daily;
+  });
+
+  // Create fresh progress for all daily quests (auto-activated)
+  const freshDailyProgress: QuestProgress[] = dailyQuests.map((quest) =>
+    createQuestProgress(quest.id),
+  );
+
+  return {
+    ...state,
+    quests: [...nonDailyQuests, ...freshDailyProgress],
+  };
 }

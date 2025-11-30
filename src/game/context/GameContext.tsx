@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import type { BattleAction } from "@/game/core/battle/battleActions";
+import { refreshDailyQuests } from "@/game/core/quests/quests";
 import { processOfflineCatchup } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
 import {
@@ -261,7 +262,7 @@ export function GameProvider({ children }: GameProviderProps) {
       }
 
       // Create initial game state with pet and starting items
-      const newState: GameState = {
+      let newState: GameState = {
         ...createInitialGameState(),
         pet,
         player: {
@@ -272,6 +273,9 @@ export function GameProvider({ children }: GameProviderProps) {
         },
         isInitialized: true,
       };
+
+      // Initialize daily quests (auto-activated)
+      newState = refreshDailyQuests(newState);
 
       // Start the game with the new state
       // Note: setHasSaveData is set after startGame for consistency,

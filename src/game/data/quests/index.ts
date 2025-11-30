@@ -3,6 +3,7 @@
  */
 
 import type { Quest } from "@/game/types/quest";
+import { QuestType } from "@/game/types/quest";
 import { dailyQuests } from "./daily";
 import { mainQuests } from "./main";
 import { sideQuests } from "./side";
@@ -37,4 +38,13 @@ export function getQuestsByType(type: string): Quest[] {
  */
 export function getQuestsByGiver(giverId: string): Quest[] {
   return Object.values(quests).filter((quest) => quest.giverId === giverId);
+}
+
+/**
+ * Get all daily quests.
+ */
+export function getDailyQuests(): Quest[] {
+  return Object.values(quests).filter(
+    (quest) => quest.type === QuestType.Daily,
+  );
 }
