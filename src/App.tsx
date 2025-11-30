@@ -194,6 +194,7 @@ function GameContent({
           onBattleStateChange={handleBattleStateChange}
           onBattleEnd={handleBattleEnd}
           onFlee={handleFlee}
+          dispatchUpdate={actions.updateState}
         />
       );
     }

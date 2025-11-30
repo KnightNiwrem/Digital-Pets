@@ -12,29 +12,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  type BattleEvent,
   BattlePhase,
   type BattleRewards,
   type BattleState,
   calculateBattleRewards,
-  executeEnemyTurn,
-  executePlayerTurn,
   isBattleComplete,
-  resolveTurnEnd,
 } from "@/game/core/battle/battle";
+import {
+  processBattleRound,
+  processFleeAttempt,
+} from "@/game/core/battle/system";
 import type { Move } from "@/game/types/move";
 
-/** Delay for enemy turn processing (ms) */
-const ENEMY_TURN_DELAY_MS = 800;
-/** Delay for turn resolution processing (ms) */
-const TURN_RESOLUTION_DELAY_MS = 500;
 /** Duration for attack animations (ms) */
 const ATTACK_ANIMATION_DURATION_MS = 400;
+/** Delay between sequential events (ms) */
+const EVENT_PLAYBACK_DELAY_MS = 800;
+
+import type { GameState } from "@/game/types/gameState";
 
 interface BattleScreenProps {
   battleState: BattleState;
-  onBattleStateChange: (state: BattleState) => void;
+  // Legacy prop - might be removed in future but kept for interface compatibility if needed elsewhere
+  onBattleStateChange?: (state: BattleState) => void;
   onBattleEnd: (victory: boolean, rewards: BattleRewards) => void;
   onFlee?: () => void;
+  // Helper to dispatch game updates (like context.updateState)
+  dispatchUpdate: (updater: (state: GameState) => GameState) => void;
 }
 
 interface AnimationState {
@@ -53,24 +58,30 @@ const initialAnimationState: AnimationState = {
 
 /**
  * Main battle screen component managing the battle flow.
+ * Refactored to be event-driven and "headless".
  */
 export function BattleScreen({
   battleState,
-  onBattleStateChange,
   onBattleEnd,
   onFlee,
+  dispatchUpdate,
 }: BattleScreenProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [animationState, setAnimationState] = useState<AnimationState>(
     initialAnimationState,
   );
+
+  // Track the last processed event timestamp to avoid replaying old events
+  // Initialize with current time so we don't replay old history on reload
+  const [lastProcessedEventTime, setLastProcessedEventTime] = useState<number>(
+    Date.now(),
+  );
+
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  // Store battleState in ref to access current value in timeout callbacks
-  // without adding it to useEffect dependencies (which would cause restarts)
-  const battleStateRef = useRef(battleState);
-  battleStateRef.current = battleState;
+  const playbackQueueRef = useRef<BattleEvent[]>([]);
+  const isPlayingRef = useRef(false);
 
   // Cleanup animation timeout on unmount
   useEffect(() => {
@@ -81,12 +92,15 @@ export function BattleScreen({
     };
   }, []);
 
-  // Trigger attack animation
+  // Trigger attack animation helper
   const triggerAttackAnimation = useCallback(
-    (isPlayerAttack: boolean, onComplete: () => void) => {
+    (actorId: string, onComplete: () => void) => {
       if (animationTimeoutRef.current) {
         clearTimeout(animationTimeoutRef.current);
       }
+
+      const isPlayerAttack = actorId === "player";
+
       setAnimationState((prev) => ({
         ...prev,
         playerAttacking: isPlayerAttack,
@@ -103,49 +117,106 @@ export function BattleScreen({
     [],
   );
 
-  // Process game loop (Enemy Turn & Turn Resolution)
-  // Uses battleState.phase as dependency to avoid restarts from game tick updates
-  useEffect(() => {
-    if (battleState.phase === BattlePhase.EnemyTurn) {
-      setIsProcessing(true);
-      // Small delay for dramatic effect
-      const timeout = setTimeout(() => {
-        triggerAttackAnimation(false, () => {
-          onBattleStateChange(executeEnemyTurn(battleStateRef.current));
-          setIsProcessing(false);
-        });
-      }, ENEMY_TURN_DELAY_MS);
-      return () => clearTimeout(timeout);
+  // Event Playback System
+  const playNextEvent = useCallback(() => {
+    if (playbackQueueRef.current.length === 0) {
+      isPlayingRef.current = false;
+      setIsProcessing(false);
+      return;
     }
 
-    if (battleState.phase === BattlePhase.TurnResolution) {
-      setIsProcessing(true);
-      const timeout = setTimeout(() => {
-        onBattleStateChange(resolveTurnEnd(battleStateRef.current));
-        setIsProcessing(false);
-      }, TURN_RESOLUTION_DELAY_MS);
-      return () => clearTimeout(timeout);
+    isPlayingRef.current = true;
+    const event = playbackQueueRef.current.shift();
+
+    if (!event) return;
+
+    // Process based on event type
+    if (event.type === "ATTACK") {
+      triggerAttackAnimation(event.actorId, () => {
+        // Add a small delay before next event
+        setTimeout(playNextEvent, EVENT_PLAYBACK_DELAY_MS / 2);
+      });
+    } else if (event.type === "VICTORY" || event.type === "DEFEAT") {
+      // For end game events, just wait a bit then continue
+      setTimeout(playNextEvent, EVENT_PLAYBACK_DELAY_MS);
+    } else {
+      // For other events (BUFF, HEAL, etc.), just wait delay
+      setTimeout(playNextEvent, EVENT_PLAYBACK_DELAY_MS);
     }
-  }, [battleState.phase, onBattleStateChange, triggerAttackAnimation]);
+
+    // We could update a "current displayed log" here if we wanted step-by-step logs
+  }, [triggerAttackAnimation]);
+
+  // Watch for new round events in the state
+  useEffect(() => {
+    if (battleState.roundEvents && battleState.roundEvents.length > 0) {
+      // Filter for new events only
+      // Capture local reference to avoid undefined checks inside filter
+      const events = battleState.roundEvents;
+      const newEvents = events.filter(
+        (e) => e.timestamp > lastProcessedEventTime,
+      );
+
+      if (newEvents.length > 0) {
+        // Update tracker
+        // Ensure we have a valid event before accessing timestamp
+        const lastEvent = newEvents[newEvents.length - 1];
+        if (lastEvent) {
+          setLastProcessedEventTime(lastEvent.timestamp);
+        }
+
+        // Add to queue
+        playbackQueueRef.current = [...playbackQueueRef.current, ...newEvents];
+
+        // Start playback if not already running
+        if (!isPlayingRef.current) {
+          setIsProcessing(true);
+          playNextEvent();
+        }
+      }
+    }
+  }, [battleState.roundEvents, lastProcessedEventTime, playNextEvent]);
 
   const handleSelectMove = (move: Move) => {
     if (battleState.phase !== BattlePhase.PlayerTurn || isProcessing) {
       return;
     }
+
     setIsProcessing(true);
-    triggerAttackAnimation(true, () => {
-      onBattleStateChange(executePlayerTurn(battleState, move));
-      setIsProcessing(false);
+
+    // Call the "Headless" system
+    // We use dispatchUpdate to update the global GameState
+    dispatchUpdate((state) => {
+      return processBattleRound(state, move);
     });
+  };
+
+  const handleFlee = () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    dispatchUpdate((state) => {
+      return processFleeAttempt(state);
+    });
+
+    if (onFlee) {
+      // We rely on state update to trigger effect or close screen,
+      // but legacy onFlee might just close the modal.
+      // For now we keep onFlee for compatibility if needed, but logic is in processFleeAttempt
+    }
   };
 
   // Memoize battle completion info to avoid recalculating
   const battleResult = useMemo(() => {
     if (!isBattleComplete(battleState)) return null;
+    // Only show result if we are done processing events (animations finished)
+    if (isProcessing) return null;
+
     const isVictory = battleState.phase === BattlePhase.Victory;
     const rewards = calculateBattleRewards(battleState, isVictory);
     return { isVictory, rewards };
-  }, [battleState]);
+  }, [battleState, isProcessing]);
 
   // Show victory/defeat screen
   if (battleResult) {
@@ -213,7 +284,7 @@ export function BattleScreen({
         {onFlee && isPlayerTurn && (
           <Button
             variant="outline"
-            onClick={onFlee}
+            onClick={handleFlee}
             disabled={isProcessing}
             className="w-full"
           >

@@ -93,6 +93,34 @@ export interface BattleState {
   playerActed: boolean;
   /** Whether enemy has acted this turn */
   enemyActed: boolean;
+  /** Events that occurred during the last round processing */
+  roundEvents?: BattleEvent[];
+}
+
+/**
+ * Battle event types for UI animation.
+ */
+export type BattleEventType =
+  | "ATTACK"
+  | "DAMAGE"
+  | "HEAL"
+  | "BUFF"
+  | "DEBUFF"
+  | "DEFEAT"
+  | "VICTORY"
+  | "FLEE";
+
+/**
+ * Event payload describing a battle action for the UI to replay.
+ */
+export interface BattleEvent {
+  type: BattleEventType;
+  actorId: "player" | "enemy";
+  targetId: "player" | "enemy";
+  moveName?: string;
+  value?: number;
+  message: string;
+  timestamp: number;
 }
 
 /**

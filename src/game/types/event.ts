@@ -82,6 +82,13 @@ export interface SkillLevelUpEvent extends BaseGameEvent {
 }
 
 /**
+ * Event emitted when battle is fled.
+ */
+export interface BattleFledEvent extends BaseGameEvent {
+  type: "battleFled";
+}
+
+/**
  * Union type of all game events.
  */
 export type GameEvent =
@@ -90,7 +97,8 @@ export type GameEvent =
   | ExplorationCompleteEvent
   | CareActionEvent
   | TravelEvent
-  | SkillLevelUpEvent;
+  | SkillLevelUpEvent
+  | BattleFledEvent;
 
 /**
  * Result type for actions that produce events.

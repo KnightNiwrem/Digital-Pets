@@ -21,9 +21,11 @@ export type StateUpdateCallback = (
  * Game manager handles the game loop and tick processing.
  */
 export class GameManager {
-  private intervalId: ReturnType<typeof setInterval> | null = null;
+  private loopId: number | null = null;
   private updateState: StateUpdateCallback;
   private isRunning = false;
+  private lastTickTime: number = 0;
+  private accumulator: number = 0;
 
   constructor(updateState: StateUpdateCallback) {
     this.updateState = updateState;
@@ -36,22 +38,57 @@ export class GameManager {
     if (this.isRunning) return;
 
     this.isRunning = true;
+    this.lastTickTime = Date.now();
+    this.accumulator = 0;
 
-    // Process ticks every 30 seconds
-    this.intervalId = setInterval(() => {
-      this.tick();
-    }, TICK_DURATION_MS);
+    // Use a tighter loop (1s) to check for tick processing
+    // This allows catching up if the tab was backgrounded
+    this.loopId = window.setInterval(() => {
+      this.gameLoop();
+    }, 1000);
   }
 
   /**
    * Stop the game loop.
    */
   stop(): void {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    if (this.loopId !== null) {
+      window.clearInterval(this.loopId);
+      this.loopId = null;
     }
     this.isRunning = false;
+  }
+
+  /**
+   * Main game loop using delta time accumulator pattern.
+   */
+  private gameLoop(): void {
+    if (!this.isRunning) return;
+
+    const now = Date.now();
+    const delta = now - this.lastTickTime;
+    this.lastTickTime = now;
+
+    this.accumulator += delta;
+
+    // Process as many ticks as fit in the accumulator
+    // Limit to a reasonable max to prevent spiral of death (e.g. 100 ticks)
+    let ticksProcessed = 0;
+    const maxTicksPerLoop = 100;
+
+    while (
+      this.accumulator >= TICK_DURATION_MS &&
+      ticksProcessed < maxTicksPerLoop
+    ) {
+      this.tick();
+      this.accumulator -= TICK_DURATION_MS;
+      ticksProcessed++;
+    }
+
+    // If we hit the limit, just discard the rest of the accumulator to prevent spiral
+    if (ticksProcessed >= maxTicksPerLoop) {
+      this.accumulator = 0;
+    }
   }
 
   /**
