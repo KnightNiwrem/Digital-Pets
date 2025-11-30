@@ -11,7 +11,7 @@ import {
   getTicksUntilNextStageTransition,
 } from "@/game/data/growthStages";
 import { getSpeciesById } from "@/game/data/species";
-import type { GameState, Pet } from "@/game/types";
+import type { Pet } from "@/game/types";
 import type { Tick } from "@/game/types/common";
 import {
   formatTicksAsTime,
@@ -29,10 +29,10 @@ import type {
   Currency,
   GameState,
   Inventory,
-  PlayerSkills,
   PlayerState,
 } from "@/game/types/gameState";
 import type { QuestProgress } from "@/game/types/quest";
+import type { PlayerSkills } from "@/game/types/skill";
 import type { Species, SpeciesGrowthStageStats } from "@/game/types/species";
 
 /**

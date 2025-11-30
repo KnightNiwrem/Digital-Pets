@@ -75,6 +75,13 @@ export function InventoryScreen() {
     );
   }
 
+  // Get selected item details
+  const selectedItem =
+    selectedIndex !== null ? filteredItems[selectedIndex] : null;
+  const selectedItemDef = selectedItem
+    ? getItemById(selectedItem.itemId)
+    : null;
+
   return (
     <div className="space-y-4">
       {/* Header with coin display */}

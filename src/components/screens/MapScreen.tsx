@@ -26,9 +26,7 @@ export function MapScreen() {
   const [shoppingAtNpcId, setShoppingAtNpcId] = useState<string | null>(null);
 
   // Get current location
-  const currentLocationId = state
-    ? selectCurrentLocationId(state)
-    : "home";
+  const currentLocationId = state ? selectCurrentLocationId(state) : "home";
   const currentLocation = getLocation(currentLocationId);
 
   // Get connected locations
