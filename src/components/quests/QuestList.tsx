@@ -4,8 +4,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { type Quest, type QuestProgress, QuestState } from "@/game/types/quest";
+import {
+  type Quest,
+  type QuestProgress,
+  QuestState,
+  QuestType,
+} from "@/game/types/quest";
 import { cn } from "@/lib/utils";
+import { formatTimeRemaining } from "./formatTimeRemaining";
 
 interface QuestListProps {
   quests: Quest[];
@@ -23,8 +29,21 @@ const TYPE_STYLES: Record<string, string> = {
   side: "bg-blue-100 text-blue-700",
   tutorial: "bg-green-100 text-green-700",
   daily: "bg-orange-100 text-orange-700",
+  weekly: "bg-amber-100 text-amber-700",
+  timed: "bg-red-100 text-red-700",
   hidden: "bg-gray-100 text-gray-700",
 };
+
+/**
+ * Check if quest type has an expiration.
+ */
+function hasExpiration(type: QuestType): boolean {
+  return (
+    type === QuestType.Daily ||
+    type === QuestType.Weekly ||
+    type === QuestType.Timed
+  );
+}
 
 /**
  * Get quest type display name.
@@ -35,6 +54,8 @@ function getQuestTypeLabel(type: string): string {
     side: "Side",
     tutorial: "Tutorial",
     daily: "Daily",
+    weekly: "Weekly",
+    timed: "Timed",
     hidden: "Hidden",
   };
   return labels[type] ?? type;
@@ -89,11 +110,18 @@ export function QuestList({
                   {getQuestTypeLabel(quest.type)}
                 </span>
               </div>
-              {isActive && (
-                <span className="text-xs text-muted-foreground">
-                  In Progress
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {isActive && (
+                  <span className="text-xs text-muted-foreground">
+                    In Progress
+                  </span>
+                )}
+                {hasExpiration(quest.type) && progress?.expiresAt && (
+                  <span className="text-xs text-orange-600">
+                    ⏰ {formatTimeRemaining(progress.expiresAt)}
+                  </span>
+                )}
+              </div>
             </div>
           </Button>
         );

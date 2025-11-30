@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { areAllRequiredObjectivesComplete } from "@/game/core/quests";
 import { getItemById } from "@/game/data/items";
-import type { Quest, QuestProgress, QuestReward } from "@/game/types/quest";
+import {
+  type Quest,
+  type QuestProgress,
+  type QuestReward,
+  QuestType,
+} from "@/game/types/quest";
+import { formatTimeRemaining } from "./formatTimeRemaining";
 import { ObjectiveList } from "./ObjectiveList";
 
 interface QuestDetailProps {
@@ -41,6 +47,17 @@ function formatReward(reward: QuestReward): string {
 }
 
 /**
+ * Check if quest type has an expiration.
+ */
+function hasExpiration(type: QuestType): boolean {
+  return (
+    type === QuestType.Daily ||
+    type === QuestType.Weekly ||
+    type === QuestType.Timed
+  );
+}
+
+/**
  * Displays detailed quest information with objectives and rewards.
  */
 export function QuestDetail({
@@ -67,6 +84,14 @@ export function QuestDetail({
       <CardContent className="space-y-4">
         {/* Description */}
         <p className="text-sm text-muted-foreground">{quest.description}</p>
+
+        {/* Expiration timer */}
+        {hasExpiration(quest.type) && progress?.expiresAt && (
+          <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-md">
+            <span>⏰</span>
+            <span>Expires in: {formatTimeRemaining(progress.expiresAt)}</span>
+          </div>
+        )}
 
         {/* Objectives */}
         {(isActive || isCompleted) && progress && (
