@@ -135,9 +135,8 @@ describe("useGameNotifications", () => {
         },
       };
 
-      const { rerender } = renderHook(
-        ({ state }: { state: GameState | null }) =>
-          useGameNotifications(state, mockSetNotification),
+      const { rerender } = renderHook<void, { state: GameState | null }>(
+        ({ state }) => useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -163,9 +162,8 @@ describe("useGameNotifications", () => {
 
     test("does not notify if stage remains the same", () => {
       const initialState = createMockState();
-      const { rerender } = renderHook(
-        ({ state }: { state: GameState | null }) =>
-          useGameNotifications(state, mockSetNotification),
+      const { rerender } = renderHook<void, { state: GameState | null }>(
+        ({ state }) => useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -176,9 +174,8 @@ describe("useGameNotifications", () => {
 
     test("does not notify if pet is null", () => {
       const initialState = createMockState();
-      const { rerender } = renderHook(
-        ({ state }: { state: GameState | null }) =>
-          useGameNotifications(state, mockSetNotification),
+      const { rerender } = renderHook<void, { state: GameState | null }>(
+        ({ state }) => useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -239,9 +236,8 @@ describe("useGameNotifications", () => {
         },
       };
 
-      const { rerender } = renderHook(
-        ({ state }: { state: GameState | null }) =>
-          useGameNotifications(state, mockSetNotification),
+      const { rerender } = renderHook<void, { state: GameState | null }>(
+        ({ state }) => useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -286,9 +282,8 @@ describe("useGameNotifications", () => {
         },
       };
 
-      const { rerender } = renderHook(
-        ({ state }: { state: GameState | null }) =>
-          useGameNotifications(state, mockSetNotification),
+      const { rerender } = renderHook<void, { state: GameState | null }>(
+        ({ state }) => useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -313,9 +308,8 @@ describe("useGameNotifications", () => {
         lastExplorationResult: undefined,
       });
 
-      const { rerender } = renderHook(
-        ({ state }: { state: GameState | null }) =>
-          useGameNotifications(state, mockSetNotification),
+      const { rerender } = renderHook<void, { state: GameState | null }>(
+        ({ state }) => useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
@@ -350,9 +344,8 @@ describe("useGameNotifications", () => {
 
       const initialState = createMockState({ lastExplorationResult: result });
 
-      const { rerender } = renderHook(
-        ({ state }: { state: GameState | null }) =>
-          useGameNotifications(state, mockSetNotification),
+      const { rerender } = renderHook<void, { state: GameState | null }>(
+        ({ state }) => useGameNotifications(state, mockSetNotification),
         { initialProps: { state: initialState } },
       );
 
