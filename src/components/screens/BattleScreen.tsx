@@ -135,6 +135,7 @@ export function BattleScreen({
         } else if (event.action === "enemyAttack") {
           await triggerAttackAnimation(false);
         }
+        // turnResolved has no animation - it's a state transition event only
       }
 
       if (isMounted) setIsAnimating(false);
