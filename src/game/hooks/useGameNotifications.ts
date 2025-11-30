@@ -24,13 +24,18 @@ export function useGameNotifications(
     (ExplorationResult & { locationName: string }) | null
   >(null);
 
+  const petName = state?.pet?.identity.name;
+  const stage = state?.pet?.growth.stage;
+  const training = state?.pet?.activeTraining;
+  const explorationResult = state?.lastExplorationResult;
+
   // Detect stage transitions
   useEffect(() => {
-    const currentStage = state?.pet?.growth.stage ?? null;
+    const currentStage = stage ?? null;
     const previousStage = previousStageRef.current;
 
     // Reset ref when pet is null (game reset or no pet yet)
-    if (!state?.pet) {
+    if (!petName) {
       previousStageRef.current = null;
       return;
     }
@@ -40,20 +45,20 @@ export function useGameNotifications(
         type: "stageTransition",
         previousStage: previousStage,
         newStage: currentStage,
-        petName: state.pet.identity.name,
+        petName: petName,
       });
     }
 
     previousStageRef.current = currentStage;
-  }, [state?.pet, setNotification]);
+  }, [stage, petName, setNotification]);
 
   // Detect training completion
   useEffect(() => {
-    const currentTraining = state?.pet?.activeTraining ?? null;
+    const currentTraining = training ?? null;
     const previousTraining = previousTrainingRef.current;
 
     // Reset ref when pet is null
-    if (!state?.pet) {
+    if (!petName) {
       previousTrainingRef.current = null;
       return;
     }
@@ -84,21 +89,21 @@ export function useGameNotifications(
           type: "trainingComplete",
           facilityName: facility.name,
           statsGained,
-          petName: state.pet.identity.name,
+          petName: petName,
         });
       }
     }
 
     previousTrainingRef.current = currentTraining;
-  }, [state?.pet, setNotification]);
+  }, [training, petName, setNotification]);
 
   // Detect exploration completion
   useEffect(() => {
-    const currentResult = state?.lastExplorationResult ?? null;
+    const currentResult = explorationResult ?? null;
     const previousResult = previousExplorationResultRef.current;
 
     // Reset ref when pet is null
-    if (!state?.pet) {
+    if (!petName) {
       previousExplorationResultRef.current = null;
       return;
     }
@@ -110,10 +115,10 @@ export function useGameNotifications(
         locationName: currentResult.locationName,
         itemsFound: currentResult.itemsFound,
         message: currentResult.message,
-        petName: state.pet.identity.name,
+        petName: petName,
       });
     }
 
     previousExplorationResultRef.current = currentResult;
-  }, [state?.lastExplorationResult, state?.pet, setNotification]);
+  }, [explorationResult, petName, setNotification]);
 }
