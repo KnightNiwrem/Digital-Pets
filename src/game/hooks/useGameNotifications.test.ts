@@ -292,7 +292,7 @@ describe("useGameNotifications", () => {
         ...initialState,
         pet: {
           ...initialState.pet,
-          activeTraining: undefined as ActiveTraining | undefined,
+          activeTraining: undefined,
         },
       };
 
