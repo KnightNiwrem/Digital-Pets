@@ -82,6 +82,42 @@ export interface SkillLevelUpEvent extends BaseGameEvent {
 }
 
 /**
+ * Battle action types for battle events.
+ */
+export type BattleActionType =
+  | "playerAttack"
+  | "enemyAttack"
+  | "playerDamaged"
+  | "enemyDamaged"
+  | "turnResolved";
+
+/**
+ * Event emitted when a battle action occurs.
+ * The UI consumes these events to play animations while the state is already updated.
+ */
+export interface BattleActionEvent extends BaseGameEvent {
+  type: "battleAction";
+  action: BattleActionType;
+  actorName: string;
+  targetName?: string;
+  moveName?: string;
+  damage?: number;
+  isCritical?: boolean;
+  isDodged?: boolean;
+  message?: string;
+}
+
+/**
+ * Event emitted when a battle ends.
+ */
+export interface BattleEndEvent extends BaseGameEvent {
+  type: "battleEnd";
+  isVictory: boolean;
+  playerName: string;
+  enemyName: string;
+}
+
+/**
  * Union type of all game events.
  */
 export type GameEvent =
@@ -90,7 +126,9 @@ export type GameEvent =
   | ExplorationCompleteEvent
   | CareActionEvent
   | TravelEvent
-  | SkillLevelUpEvent;
+  | SkillLevelUpEvent
+  | BattleActionEvent
+  | BattleEndEvent;
 
 /**
  * Result type for actions that produce events.

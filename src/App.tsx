@@ -3,7 +3,7 @@
  * Integrates the game context and layout.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ExplorationCompleteNotification,
   Layout,
@@ -35,6 +35,7 @@ import {
 } from "@/game/core/battle/battle";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { useGameState } from "@/game/hooks/useGameState";
+import type { BattleActionEvent } from "@/game/types/event";
 import { ObjectiveType } from "@/game/types/quest";
 import "./index.css";
 
@@ -53,6 +54,14 @@ function GameContent({
 
   // Get active battle from game state (persisted across page refreshes)
   const activeBattle = state?.activeBattle ?? null;
+
+  // Get battle events from pending events for UI animations
+  const battleEvents = useMemo(() => {
+    if (!state?.pendingEvents) return [];
+    return state.pendingEvents.filter(
+      (e): e is BattleActionEvent => e.type === "battleAction",
+    );
+  }, [state?.pendingEvents]);
 
   // Handle battle state changes (from BattleScreen)
   // Wrapped in useCallback for stable reference to prevent unnecessary re-renders
@@ -194,6 +203,7 @@ function GameContent({
           onBattleStateChange={handleBattleStateChange}
           onBattleEnd={handleBattleEnd}
           onFlee={handleFlee}
+          battleEvents={battleEvents}
         />
       );
     }

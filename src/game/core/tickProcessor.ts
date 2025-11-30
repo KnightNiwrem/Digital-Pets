@@ -2,6 +2,7 @@
  * Tick processor for batch processing multiple ticks.
  */
 
+import { processBattleTick } from "@/game/core/battle/battleProcessor";
 import { emitEvents } from "@/game/core/events";
 import {
   applyExplorationCompletion,
@@ -262,6 +263,9 @@ export function processGameTick(
   if (tickEvents.length > 0) {
     updatedState = emitEvents(updatedState, ...tickEvents);
   }
+
+  // Process battle tick (enemy turns and turn resolution happen automatically)
+  updatedState = processBattleTick(updatedState, currentTime);
 
   return updatedState;
 }
