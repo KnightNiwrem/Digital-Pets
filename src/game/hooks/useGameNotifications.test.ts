@@ -349,7 +349,7 @@ describe("useGameNotifications", () => {
         { initialProps: { state: initialState } },
       );
 
-      // First render triggers notification because ref was null
+      // First render triggers notification because currentResult !== previousResult (result !== null)
       expect(mockSetNotification).toHaveBeenCalledTimes(1);
       mockSetNotification.mockClear();
 
