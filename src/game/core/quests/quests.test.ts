@@ -29,6 +29,7 @@ import {
   refreshDailyQuests,
   refreshWeeklyQuests,
   startQuest,
+  startTimedQuest,
   updateQuestProgress,
 } from "./quests";
 
@@ -500,4 +501,170 @@ test("getExpiredQuests returns only expired quests", () => {
 
   expect(expired.length).toBe(1);
   expect(expired[0]?.questId).toBe("expired_quest");
+});
+
+// Tests for startTimedQuest
+
+test("startTimedQuest successfully starts a timed quest with expiration", () => {
+  const { quests } = require("@/game/data/quests");
+  const currentTime = Date.now();
+  const durationMs = 3600000; // 1 hour
+
+  try {
+    quests.timed_available_quest = {
+      id: "timed_available_quest",
+      name: "Test Timed Quest",
+      description: "A test timed quest",
+      type: QuestType.Timed,
+      giverId: "test_npc",
+      requirements: [],
+      durationMs,
+      objectives: [],
+      rewards: [],
+    } as Quest;
+
+    const state = createTestState();
+    const result = startTimedQuest(state, "timed_available_quest", currentTime);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Started quest: Test Timed Quest");
+
+    const progress = result.state.quests.find(
+      (q) => q.questId === "timed_available_quest",
+    );
+    expect(progress).toBeDefined();
+    expect(progress?.state).toBe(QuestState.Active);
+    expect(progress?.expiresAt).toBe(currentTime + durationMs);
+  } finally {
+    delete quests.timed_available_quest;
+  }
+});
+
+test("startTimedQuest rejects non-existent quests", () => {
+  const state = createTestState();
+  const result = startTimedQuest(state, "nonexistent_quest");
+
+  expect(result.success).toBe(false);
+  expect(result.message).toBe("Quest not found.");
+});
+
+test("startTimedQuest rejects non-timed quest types", () => {
+  const state = createTestState();
+  const result = startTimedQuest(state, tutorialFirstSteps.id);
+
+  expect(result.success).toBe(false);
+  expect(result.message).toBe("Quest is not a timed quest.");
+});
+
+test("startTimedQuest rejects quests without durationMs configured", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.timed_no_duration = {
+      id: "timed_no_duration",
+      name: "No Duration Quest",
+      description: "A timed quest without duration",
+      type: QuestType.Timed,
+      giverId: "test_npc",
+      requirements: [],
+      objectives: [],
+      rewards: [],
+    } as Quest;
+
+    const state = createTestState();
+    const result = startTimedQuest(state, "timed_no_duration");
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("Timed quest has no duration configured.");
+  } finally {
+    delete quests.timed_no_duration;
+  }
+});
+
+test("startTimedQuest rejects quests not in Available state", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.timed_locked_quest = {
+      id: "timed_locked_quest",
+      name: "Locked Timed Quest",
+      description: "A locked timed quest",
+      type: QuestType.Timed,
+      giverId: "test_npc",
+      durationMs: 3600000,
+      objectives: [],
+      rewards: [],
+      requirements: [{ type: "quest", target: "nonexistent_quest" }],
+    } as Quest;
+
+    const state = createTestState();
+    const result = startTimedQuest(state, "timed_locked_quest");
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("Quest requirements not met.");
+  } finally {
+    delete quests.timed_locked_quest;
+  }
+});
+
+test("startTimedQuest rejects already active quests", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.timed_already_active = {
+      id: "timed_already_active",
+      name: "Already Active Quest",
+      description: "An already active quest",
+      type: QuestType.Timed,
+      giverId: "test_npc",
+      requirements: [],
+      durationMs: 3600000,
+      objectives: [],
+      rewards: [],
+    } as Quest;
+
+    const activeProgress: QuestProgress = {
+      questId: "timed_already_active",
+      state: QuestState.Active,
+      objectiveProgress: {},
+      expiresAt: Date.now() + 3600000,
+    };
+    const state = createTestState({}, [activeProgress]);
+    const result = startTimedQuest(state, "timed_already_active");
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(
+      "Quest is already in progress, completed, or expired.",
+    );
+  } finally {
+    delete quests.timed_already_active;
+  }
+});
+
+// Test for startQuest rejecting timed quests
+
+test("startQuest rejects timed quests", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.timed_via_startquest = {
+      id: "timed_via_startquest",
+      name: "Timed Quest via startQuest",
+      description: "A timed quest via startQuest",
+      type: QuestType.Timed,
+      giverId: "test_npc",
+      requirements: [],
+      durationMs: 3600000,
+      objectives: [],
+      rewards: [],
+    } as Quest;
+
+    const state = createTestState();
+    const result = startQuest(state, "timed_via_startquest");
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("Use startTimedQuest for timed quests.");
+  } finally {
+    delete quests.timed_via_startquest;
+  }
 });

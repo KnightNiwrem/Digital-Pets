@@ -107,6 +107,14 @@ export function startQuest(
     };
   }
 
+  if (quest.type === QuestType.Timed) {
+    return {
+      success: false,
+      state,
+      message: "Use startTimedQuest for timed quests.",
+    };
+  }
+
   const currentState = getQuestState(state, questId);
   if (currentState !== QuestState.Available) {
     return {
