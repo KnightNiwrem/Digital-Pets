@@ -104,13 +104,16 @@ export interface ActionResult<T> {
 }
 
 /**
- * Create a new event with the current timestamp.
+ * Create a new event with the specified or current timestamp.
+ * @param event The event data without timestamp
+ * @param timestamp Optional timestamp (defaults to Date.now())
  */
 export function createEvent<T extends GameEvent>(
   event: Omit<T, "timestamp">,
+  timestamp: number = Date.now(),
 ): T {
   return {
     ...event,
-    timestamp: Date.now(),
+    timestamp,
   } as T;
 }

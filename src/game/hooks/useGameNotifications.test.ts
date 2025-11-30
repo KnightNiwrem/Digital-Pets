@@ -206,13 +206,17 @@ describe("useGameNotifications", () => {
       mockSetNotification.mockClear();
 
       // Create event with a specific timestamp
-      const event = createEvent<ExplorationCompleteEvent>({
-        type: "explorationComplete",
-        locationName: "Forest",
-        itemsFound: [],
-        message: "Found nothing",
-        petName: "Fluffy",
-      });
+      const eventTimestamp = Date.now();
+      const event = createEvent<ExplorationCompleteEvent>(
+        {
+          type: "explorationComplete",
+          locationName: "Forest",
+          itemsFound: [],
+          message: "Found nothing",
+          petName: "Fluffy",
+        },
+        eventTimestamp,
+      );
 
       const stateWithEvent = createMockState({
         pendingEvents: [event],
@@ -227,8 +231,13 @@ describe("useGameNotifications", () => {
       expect(mockSetNotification).toHaveBeenCalledTimes(1);
       mockSetNotification.mockClear();
 
-      // Rerender with SAME events (same timestamps) should not re-trigger
-      rerender({ state: stateWithEvent });
+      // Create a NEW state object with the SAME event (same timestamp)
+      // This tests that the timestamp-based filter prevents duplicates
+      const newStateWithSameEvent = createMockState({
+        pendingEvents: [event],
+      });
+
+      rerender({ state: newStateWithSameEvent });
       expect(mockSetNotification).not.toHaveBeenCalled();
     });
   });

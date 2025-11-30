@@ -35,19 +35,25 @@ export function useGameNotifications(
 
     if (newEvents.length === 0) return;
 
-    // Update the last processed timestamp
-    const maxTimestamp = Math.max(...newEvents.map((e) => e.timestamp));
+    // Update the last processed timestamp (use reduce to avoid stack overflow with large arrays)
+    // Safe to use 0 as initial value since we only process events with timestamp > lastProcessed
+    const maxTimestamp = newEvents.reduce(
+      (max, e) => Math.max(max, e.timestamp),
+      0,
+    );
     lastProcessedTimestampRef.current = maxTimestamp;
 
     // Process each event and create notifications
+    // Note: Only one notification is shown at a time (first one wins).
+    // Additional events are marked as processed and won't trigger duplicate notifications.
     for (const event of newEvents) {
       const notification = eventToNotification(event);
       if (notification) {
         setNotification(notification);
-        // Only show one notification at a time (first one wins)
         break;
       }
     }
+    // Depends on pendingEvents reference changing (created via spread in emitEvents)
   }, [state?.pendingEvents, setNotification]);
 }
 

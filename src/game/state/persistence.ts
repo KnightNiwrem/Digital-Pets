@@ -24,10 +24,8 @@ export type LoadResult =
  */
 export function saveGame(state: GameState): boolean {
   try {
-    // Exclude pendingEvents from save - they are transient
-    const { pendingEvents: _, ...persistableState } = state;
     const stateToSave: GameState = {
-      ...persistableState,
+      ...state,
       pendingEvents: [],
       lastSaveTime: Date.now(),
     };

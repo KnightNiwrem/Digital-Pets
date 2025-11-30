@@ -188,9 +188,12 @@ export function processGameTick(
       }
 
       // Store the result for UI notification (legacy support)
-      updatedState.lastExplorationResult = {
-        ...result,
-        locationName,
+      updatedState = {
+        ...updatedState,
+        lastExplorationResult: {
+          ...result,
+          locationName,
+        },
       };
 
       // Emit exploration complete event
@@ -226,9 +229,12 @@ export function processGameTick(
     if (trainingResultBeforeCompletion && facilityId) {
       const facility = getFacility(facilityId);
       const facilityName = facility?.name ?? "Unknown Facility";
-      updatedState.lastTrainingResult = {
-        ...trainingResultBeforeCompletion,
-        facilityName,
+      updatedState = {
+        ...updatedState,
+        lastTrainingResult: {
+          ...trainingResultBeforeCompletion,
+          facilityName,
+        },
       };
 
       // Emit training complete event using statsGained from the result

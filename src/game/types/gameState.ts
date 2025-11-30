@@ -100,7 +100,8 @@ export interface GameState {
   lastDailyReset: Timestamp;
   /**
    * Event queue containing transient events from the last tick or action.
-   * Events are consumed by the UI and cleared after processing.
+   * Events are cleared at the start of each tick. The UI tracks processed
+   * events by timestamp to avoid duplicates.
    * Not persisted to storage.
    */
   pendingEvents: GameEvent[];

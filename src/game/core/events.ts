@@ -31,7 +31,8 @@ export function emitEvent(state: GameState, event: GameEvent): GameState {
 
 /**
  * Clear all pending events from the game state.
- * Should be called after the UI has consumed the events.
+ * Note: Currently events are cleared at the start of each tick in tickProcessor.
+ * This function is provided for future use if explicit clearing is needed.
  */
 export function clearEvents(state: GameState): GameState {
   if (state.pendingEvents.length === 0) return state;
