@@ -1,12 +1,5 @@
 import { useEffect, useRef } from "react";
-import type {
-  ExplorationCompleteEvent,
-  GameEvent,
-  GameNotification,
-  GameState,
-  StageTransitionEvent,
-  TrainingCompleteEvent,
-} from "@/game/types";
+import type { GameEvent, GameNotification, GameState } from "@/game/types";
 
 /**
  * Hook to handle side effects and generate notifications based on game events.
@@ -62,34 +55,28 @@ export function useGameNotifications(
  */
 function eventToNotification(event: GameEvent): GameNotification | null {
   switch (event.type) {
-    case "stageTransition": {
-      const e = event as StageTransitionEvent;
+    case "stageTransition":
       return {
         type: "stageTransition",
-        previousStage: e.previousStage,
-        newStage: e.newStage,
-        petName: e.petName,
+        previousStage: event.previousStage,
+        newStage: event.newStage,
+        petName: event.petName,
       };
-    }
-    case "trainingComplete": {
-      const e = event as TrainingCompleteEvent;
+    case "trainingComplete":
       return {
         type: "trainingComplete",
-        facilityName: e.facilityName,
-        statsGained: e.statsGained,
-        petName: e.petName,
+        facilityName: event.facilityName,
+        statsGained: event.statsGained,
+        petName: event.petName,
       };
-    }
-    case "explorationComplete": {
-      const e = event as ExplorationCompleteEvent;
+    case "explorationComplete":
       return {
         type: "explorationComplete",
-        locationName: e.locationName,
-        itemsFound: e.itemsFound,
-        message: e.message,
-        petName: e.petName,
+        locationName: event.locationName,
+        itemsFound: event.itemsFound,
+        message: event.message,
+        petName: event.petName,
       };
-    }
     // Other event types don't have corresponding notifications yet
     default:
       return null;

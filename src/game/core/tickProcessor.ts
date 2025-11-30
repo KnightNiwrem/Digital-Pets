@@ -118,18 +118,21 @@ export function processGameTick(
     (updatedPet.activityState !== ActivityState.Training ||
       updatedPet.activeTraining === undefined);
 
-  // Events to emit this tick
+  // Events to emit this tick (use currentTime for consistent timestamps)
   const tickEvents: GameEvent[] = [];
 
   // Detect stage transition
   if (updatedPet.growth.stage !== previousStage) {
     tickEvents.push(
-      createEvent<StageTransitionEvent>({
-        type: "stageTransition",
-        previousStage,
-        newStage: updatedPet.growth.stage,
-        petName,
-      }),
+      createEvent<StageTransitionEvent>(
+        {
+          type: "stageTransition",
+          previousStage,
+          newStage: updatedPet.growth.stage,
+          petName,
+        },
+        currentTime,
+      ),
     );
   }
 
@@ -198,13 +201,16 @@ export function processGameTick(
 
       // Emit exploration complete event
       tickEvents.push(
-        createEvent<ExplorationCompleteEvent>({
-          type: "explorationComplete",
-          locationName,
-          itemsFound: result.itemsFound,
-          message: result.message,
-          petName,
-        }),
+        createEvent<ExplorationCompleteEvent>(
+          {
+            type: "explorationComplete",
+            locationName,
+            itemsFound: result.itemsFound,
+            message: result.message,
+            petName,
+          },
+          currentTime,
+        ),
       );
     } else {
       updatedState = {
@@ -239,12 +245,15 @@ export function processGameTick(
 
       // Emit training complete event using statsGained from the result
       tickEvents.push(
-        createEvent<TrainingCompleteEvent>({
-          type: "trainingComplete",
-          facilityName,
-          statsGained: trainingResultBeforeCompletion.statsGained ?? {},
-          petName,
-        }),
+        createEvent<TrainingCompleteEvent>(
+          {
+            type: "trainingComplete",
+            facilityName,
+            statsGained: trainingResultBeforeCompletion.statsGained ?? {},
+            petName,
+          },
+          currentTime,
+        ),
       );
     }
   }
