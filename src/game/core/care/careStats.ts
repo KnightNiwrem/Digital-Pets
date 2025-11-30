@@ -10,9 +10,6 @@ import {
   POOP_HAPPINESS_MULTIPLIERS,
 } from "./constants";
 
-// Re-export constants for backwards compatibility with tests
-export { CARE_DECAY_AWAKE, CARE_DECAY_SLEEPING };
-
 /**
  * Get the happiness decay multiplier based on poop count.
  */
