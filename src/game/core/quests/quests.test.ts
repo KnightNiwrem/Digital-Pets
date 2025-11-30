@@ -396,23 +396,25 @@ test("processTimedQuestExpiration expires timed quests past deadline", () => {
 
   // Mock a timed quest in the quests registry
   const { quests } = require("@/game/data/quests");
-  quests.timed_test_quest = {
-    id: "timed_test_quest",
-    name: "Test Timed Quest",
-    type: QuestType.Timed,
-    durationMs: 3600000,
-  } as Quest;
+  try {
+    quests.timed_test_quest = {
+      id: "timed_test_quest",
+      name: "Test Timed Quest",
+      type: QuestType.Timed,
+      durationMs: 3600000,
+    } as Quest;
 
-  const state = createTestState({}, [timedProgress]);
-  const result = processTimedQuestExpiration(state);
+    const state = createTestState({}, [timedProgress]);
+    const result = processTimedQuestExpiration(state);
 
-  const timedQuest = result.quests.find(
-    (q) => q.questId === "timed_test_quest",
-  );
-  expect(timedQuest?.state).toBe(QuestState.Expired);
-
-  // Cleanup
-  delete quests.timed_test_quest;
+    const timedQuest = result.quests.find(
+      (q) => q.questId === "timed_test_quest",
+    );
+    expect(timedQuest?.state).toBe(QuestState.Expired);
+  } finally {
+    // Cleanup
+    delete quests.timed_test_quest;
+  }
 });
 
 test("processTimedQuestExpiration does not expire daily quests", () => {

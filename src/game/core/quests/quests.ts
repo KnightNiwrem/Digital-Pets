@@ -264,6 +264,37 @@ export function getQuestProgress(
 }
 
 /**
+ * Helper function to refresh repeatable quests (daily or weekly).
+ * Removes all existing quest progress of the given type and creates fresh progress.
+ */
+function refreshRepeatableQuests(
+  state: GameState,
+  questType: typeof QuestType.Daily | typeof QuestType.Weekly,
+  getQuests: () => Quest[],
+  getNextReset: (currentTime: number) => number,
+  currentTime: number,
+): GameState {
+  const questsToRefresh = getQuests();
+  const nextReset = getNextReset(currentTime);
+
+  // Remove all existing quest progress of the given type
+  const otherQuests = state.quests.filter((progress) => {
+    const quest = getQuest(progress.questId);
+    return quest?.type !== questType;
+  });
+
+  // Create fresh progress for all quests of the given type
+  const freshProgress: QuestProgress[] = questsToRefresh.map((quest) =>
+    createQuestProgress(quest.id, nextReset),
+  );
+
+  return {
+    ...state,
+    quests: [...otherQuests, ...freshProgress],
+  };
+}
+
+/**
  * Refresh daily quests.
  * Removes completed/expired daily quests and activates all daily quests.
  * Daily quests start in Active state (no manual acceptance required).
@@ -272,24 +303,13 @@ export function refreshDailyQuests(
   state: GameState,
   currentTime: number = Date.now(),
 ): GameState {
-  const dailyQuests = getDailyQuests();
-  const nextDailyReset = getNextDailyReset(currentTime);
-
-  // Remove all existing daily quest progress (completed, expired, or active)
-  const nonDailyQuests = state.quests.filter((progress) => {
-    const quest = getQuest(progress.questId);
-    return quest?.type !== QuestType.Daily;
-  });
-
-  // Create fresh progress for all daily quests (auto-activated with expiration)
-  const freshDailyProgress: QuestProgress[] = dailyQuests.map((quest) =>
-    createQuestProgress(quest.id, nextDailyReset),
+  return refreshRepeatableQuests(
+    state,
+    QuestType.Daily,
+    getDailyQuests,
+    getNextDailyReset,
+    currentTime,
   );
-
-  return {
-    ...state,
-    quests: [...nonDailyQuests, ...freshDailyProgress],
-  };
 }
 
 /**
@@ -301,24 +321,13 @@ export function refreshWeeklyQuests(
   state: GameState,
   currentTime: number = Date.now(),
 ): GameState {
-  const weeklyQuests = getWeeklyQuests();
-  const nextWeeklyReset = getNextWeeklyReset(currentTime);
-
-  // Remove all existing weekly quest progress (completed, expired, or active)
-  const nonWeeklyQuests = state.quests.filter((progress) => {
-    const quest = getQuest(progress.questId);
-    return quest?.type !== QuestType.Weekly;
-  });
-
-  // Create fresh progress for all weekly quests (auto-activated with expiration)
-  const freshWeeklyProgress: QuestProgress[] = weeklyQuests.map((quest) =>
-    createQuestProgress(quest.id, nextWeeklyReset),
+  return refreshRepeatableQuests(
+    state,
+    QuestType.Weekly,
+    getWeeklyQuests,
+    getNextWeeklyReset,
+    currentTime,
   );
-
-  return {
-    ...state,
-    quests: [...nonWeeklyQuests, ...freshWeeklyProgress],
-  };
 }
 
 /**
@@ -330,34 +339,46 @@ export function processTimedQuestExpiration(
   currentTime: number = Date.now(),
 ): GameState {
   let hasChanges = false;
-  const newQuests = state.quests.map((progress) => {
+  let newQuests: QuestProgress[] | undefined;
+
+  for (let i = 0; i < state.quests.length; i++) {
+    const progress = state.quests[i];
+    if (!progress) continue;
+
     // Only check active quests with expiration times
     if (
       progress.state !== QuestState.Active ||
       progress.expiresAt === undefined
     ) {
-      return progress;
+      continue;
     }
 
     const quest = getQuest(progress.questId);
     // Only timed quests go to Expired state
     if (quest?.type !== QuestType.Timed) {
-      return progress;
+      continue;
     }
 
     // Check if quest has expired
     if (currentTime >= progress.expiresAt) {
-      hasChanges = true;
-      return {
-        ...progress,
-        state: QuestState.Expired,
-      };
+      if (!hasChanges) {
+        // First change detected, create a shallow copy of the array
+        newQuests = state.quests.slice();
+        hasChanges = true;
+      }
+      if (newQuests) {
+        newQuests[i] = {
+          ...progress,
+          state: QuestState.Expired,
+        };
+      }
     }
+  }
 
-    return progress;
-  });
-
-  return hasChanges ? { ...state, quests: newQuests } : state;
+  if (hasChanges && newQuests) {
+    return { ...state, quests: newQuests };
+  }
+  return state;
 }
 
 /**
