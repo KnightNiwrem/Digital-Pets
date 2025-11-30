@@ -33,6 +33,7 @@ import {
   createWildCombatant,
   initializeBattle,
 } from "@/game/core/battle/battle";
+import { processPlayerAttack } from "@/game/core/battle/battleProcessor";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { useGameState } from "@/game/hooks/useGameState";
 import type { BattleActionEvent } from "@/game/types/event";
@@ -74,6 +75,16 @@ function GameContent({
           ? { ...prev.activeBattle, battleState: newBattleState }
           : undefined,
       }));
+    },
+    [actions],
+  );
+
+  // Handle player attack - uses processPlayerAttack to emit events consistently
+  const handlePlayerAttack = useCallback(
+    (newBattleState: BattleState, moveName: string) => {
+      actions.updateState((prev) =>
+        processPlayerAttack(prev, newBattleState, moveName),
+      );
     },
     [actions],
   );
@@ -204,6 +215,7 @@ function GameContent({
           onBattleEnd={handleBattleEnd}
           onFlee={handleFlee}
           battleEvents={battleEvents}
+          onPlayerAttack={handlePlayerAttack}
         />
       );
     }

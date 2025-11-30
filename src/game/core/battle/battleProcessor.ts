@@ -22,90 +22,46 @@ import {
 } from "./battle";
 
 /**
- * Process battle tick - handles automatic enemy turns and turn resolution.
- * The player turn is still handled by direct user input in the UI.
- *
- * This inverts the control flow: Logic updates first, events are emitted,
- * and the UI reacts by playing animations.
+ * Update the battle state within the game state.
  */
-export function processBattleTick(
+function updateBattleState(
   state: GameState,
-  currentTime: number = Date.now(),
+  newBattleState: BattleState,
 ): GameState {
   if (!state.activeBattle) return state;
+  return {
+    ...state,
+    activeBattle: {
+      ...state.activeBattle,
+      battleState: newBattleState,
+    },
+  };
+}
 
-  const { battleState } = state.activeBattle;
+/**
+ * Emit a battle action event and check for battle completion.
+ * Returns the updated state with events emitted.
+ */
+function emitBattleAction(
+  state: GameState,
+  newBattleState: BattleState,
+  event: Omit<BattleActionEvent, "timestamp" | "type">,
+  currentTime: number,
+): GameState {
+  let newState = emitEvent(
+    updateBattleState(state, newBattleState),
+    createEvent<BattleActionEvent>(
+      { type: "battleAction", ...event },
+      currentTime,
+    ),
+  );
 
-  // Skip if battle is complete or waiting for player input
-  if (isBattleComplete(battleState)) return state;
-  if (battleState.phase === BattlePhase.PlayerTurn) return state;
-
-  let newState = state;
-
-  // Process enemy turn automatically
-  if (battleState.phase === BattlePhase.EnemyTurn) {
-    const newBattleState = executeEnemyTurn(battleState);
-
-    // Emit enemy attack event for UI animation
-    newState = emitEvent(
-      {
-        ...state,
-        activeBattle: {
-          ...state.activeBattle,
-          battleState: newBattleState,
-        },
-      },
-      createEvent<BattleActionEvent>(
-        {
-          type: "battleAction",
-          action: "enemyAttack",
-          actorName: battleState.enemy.name,
-          targetName: battleState.player.name,
-        },
-        currentTime,
-      ),
-    );
-
-    // Check if battle ended
-    if (isBattleComplete(newBattleState)) {
-      newState = emitBattleEndEvent(newState, newBattleState, currentTime);
-    }
-
-    return newState;
+  // Check if battle ended and emit end event if so
+  if (isBattleComplete(newBattleState)) {
+    newState = emitBattleEndEvent(newState, newBattleState, currentTime);
   }
 
-  // Process turn resolution automatically
-  if (battleState.phase === BattlePhase.TurnResolution) {
-    const newBattleState = resolveTurnEnd(battleState);
-
-    newState = emitEvent(
-      {
-        ...state,
-        activeBattle: {
-          ...state.activeBattle,
-          battleState: newBattleState,
-        },
-      },
-      createEvent<BattleActionEvent>(
-        {
-          type: "battleAction",
-          action: "turnResolved",
-          actorName: "system",
-          message: `Turn ${battleState.turn} resolved`,
-        },
-        currentTime,
-      ),
-    );
-
-    // Check if battle ended (from DoT damage)
-    if (isBattleComplete(newBattleState)) {
-      newState = emitBattleEndEvent(newState, newBattleState, currentTime);
-    }
-
-    return newState;
-  }
-
-  return state;
+  return newState;
 }
 
 /**
@@ -132,6 +88,58 @@ function emitBattleEndEvent(
 }
 
 /**
+ * Process battle tick - handles automatic enemy turns and turn resolution.
+ * The player turn is still handled by direct user input in the UI.
+ *
+ * This inverts the control flow: Logic updates first, events are emitted,
+ * and the UI reacts by playing animations.
+ */
+export function processBattleTick(
+  state: GameState,
+  currentTime: number = Date.now(),
+): GameState {
+  if (!state.activeBattle) return state;
+
+  const { battleState } = state.activeBattle;
+
+  // Skip if battle is complete or waiting for player input
+  if (isBattleComplete(battleState)) return state;
+  if (battleState.phase === BattlePhase.PlayerTurn) return state;
+
+  // Process enemy turn automatically
+  if (battleState.phase === BattlePhase.EnemyTurn) {
+    const newBattleState = executeEnemyTurn(battleState);
+    return emitBattleAction(
+      state,
+      newBattleState,
+      {
+        action: "enemyAttack",
+        actorName: battleState.enemy.name,
+        targetName: battleState.player.name,
+      },
+      currentTime,
+    );
+  }
+
+  // Process turn resolution automatically
+  if (battleState.phase === BattlePhase.TurnResolution) {
+    const newBattleState = resolveTurnEnd(battleState);
+    return emitBattleAction(
+      state,
+      newBattleState,
+      {
+        action: "turnResolved",
+        actorName: "system",
+        message: `Turn ${battleState.turn} resolved`,
+      },
+      currentTime,
+    );
+  }
+
+  return state;
+}
+
+/**
  * Process a player attack action and emit events.
  * Called directly from UI when player selects a move.
  * Returns the new state with battle updates and events.
@@ -144,33 +152,15 @@ export function processPlayerAttack(
 ): GameState {
   if (!state.activeBattle) return state;
 
-  let newState: GameState = {
-    ...state,
-    activeBattle: {
-      ...state.activeBattle,
-      battleState: newBattleState,
+  return emitBattleAction(
+    state,
+    newBattleState,
+    {
+      action: "playerAttack",
+      actorName: state.activeBattle.battleState.player.name,
+      targetName: state.activeBattle.battleState.enemy.name,
+      moveName,
     },
-  };
-
-  // Emit player attack event
-  newState = emitEvent(
-    newState,
-    createEvent<BattleActionEvent>(
-      {
-        type: "battleAction",
-        action: "playerAttack",
-        actorName: state.activeBattle.battleState.player.name,
-        targetName: state.activeBattle.battleState.enemy.name,
-        moveName,
-      },
-      currentTime,
-    ),
+    currentTime,
   );
-
-  // Check if battle ended
-  if (isBattleComplete(newBattleState)) {
-    newState = emitBattleEndEvent(newState, newBattleState, currentTime);
-  }
-
-  return newState;
 }

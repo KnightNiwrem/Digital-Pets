@@ -37,6 +37,8 @@ interface BattleScreenProps {
   onFlee?: () => void;
   /** Battle events from the game state for UI animations */
   battleEvents?: BattleActionEvent[];
+  /** Callback for player attacks - emits events for consistent animation handling */
+  onPlayerAttack?: (newBattleState: BattleState, moveName: string) => void;
 }
 
 interface AnimationState {
@@ -62,6 +64,7 @@ export function BattleScreen({
   onBattleEnd,
   onFlee,
   battleEvents = [],
+  onPlayerAttack,
 }: BattleScreenProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationState, setAnimationState] = useState<AnimationState>(
@@ -72,6 +75,8 @@ export function BattleScreen({
   );
   // Track which events we've already processed to avoid duplicate animations
   const processedEventsRef = useRef<Set<number>>(new Set());
+  // Guard against concurrent event processing
+  const isProcessingRef = useRef(false);
 
   // Cleanup animation timeout on unmount
   useEffect(() => {
@@ -106,22 +111,32 @@ export function BattleScreen({
   // The game state is ALREADY updated - we just play animations to visualize what happened
   useEffect(() => {
     const processEvents = async () => {
-      for (const event of battleEvents) {
-        // Skip already processed events
-        if (processedEventsRef.current.has(event.timestamp)) continue;
+      // Guard against concurrent processing
+      if (isProcessingRef.current) return;
+
+      // Filter unprocessed events first
+      const unprocessedEvents = battleEvents.filter(
+        (event) => !processedEventsRef.current.has(event.timestamp),
+      );
+
+      if (unprocessedEvents.length === 0) return;
+
+      isProcessingRef.current = true;
+      setIsAnimating(true);
+
+      for (const event of unprocessedEvents) {
         processedEventsRef.current.add(event.timestamp);
 
         // Play appropriate animation based on event type
         if (event.action === "playerAttack") {
-          setIsAnimating(true);
           await triggerAttackAnimation(true);
-          setIsAnimating(false);
         } else if (event.action === "enemyAttack") {
-          setIsAnimating(true);
           await triggerAttackAnimation(false);
-          setIsAnimating(false);
         }
       }
+
+      setIsAnimating(false);
+      isProcessingRef.current = false;
     };
 
     if (battleEvents.length > 0) {
@@ -130,7 +145,7 @@ export function BattleScreen({
   }, [battleEvents, triggerAttackAnimation]);
 
   // Handle player move selection
-  // The state update happens immediately, and the animation plays after
+  // Logic updates first, then events drive animations
   const handleSelectMove = (move: Move) => {
     if (battleState.phase !== BattlePhase.PlayerTurn || isAnimating) {
       return;
@@ -138,13 +153,18 @@ export function BattleScreen({
 
     // Execute the move immediately - logic first, animation second
     const newBattleState = executePlayerTurn(battleState, move);
-    onBattleStateChange(newBattleState);
 
-    // Play the attack animation (state is already updated)
-    setIsAnimating(true);
-    triggerAttackAnimation(true).then(() => {
-      setIsAnimating(false);
-    });
+    // Use event-driven callback if available for consistent animation handling
+    if (onPlayerAttack) {
+      onPlayerAttack(newBattleState, move.name);
+    } else {
+      // Fallback: update state directly and trigger animation locally
+      onBattleStateChange(newBattleState);
+      setIsAnimating(true);
+      triggerAttackAnimation(true).then(() => {
+        setIsAnimating(false);
+      });
+    }
   };
 
   // Memoize battle completion info to avoid recalculating
