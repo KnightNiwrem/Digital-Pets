@@ -150,12 +150,14 @@ test("battleReducer emits playerAttack event", () => {
 test("battleReducer emits battleEnd event when battle completes", () => {
   const battleState = createTestBattleState();
   // Give enemy very low health so attack will defeat them
+  // Set dodgeChance to 0 to ensure the attack always hits
   const lowHealthEnemy: Combatant = {
     ...battleState.enemy,
     derivedStats: {
       ...battleState.enemy.derivedStats,
       currentHealth: 1,
       maxHealth: 100,
+      dodgeChance: 0,
     },
   };
   const nearEndState: BattleState = {
