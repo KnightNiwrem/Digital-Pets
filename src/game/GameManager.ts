@@ -7,6 +7,7 @@
  * accumulated ticks to catch up to real-time.
  */
 
+import { processBattleTick } from "@/game/core/battle/battleProcessor";
 import {
   processGameTick,
   processOfflineCatchup,
@@ -85,6 +86,8 @@ export class GameManager {
    * Update the game state using delta-time accumulator pattern.
    * Calculates elapsed time since last update and processes
    * as many ticks as needed to catch up (capped to prevent freezing).
+   *
+   * Battle processing runs on every update cycle (1 second) for responsive combat.
    */
   private update(): void {
     const currentTime = Date.now();
@@ -107,6 +110,10 @@ export class GameManager {
     if (ticksProcessed >= MAX_CATCHUP_TICKS && this.accumulator > 0) {
       this.accumulator = 0;
     }
+
+    // Process battle tick on every update cycle for responsive combat
+    // This runs every CHECK_INTERVAL_MS (1 second), not tied to game ticks
+    this.updateState((state) => processBattleTick(state, currentTime));
   }
 
   /**
