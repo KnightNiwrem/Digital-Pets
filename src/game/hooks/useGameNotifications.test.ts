@@ -18,6 +18,8 @@ import type {
   Pet,
 } from "@/game/types";
 import { GrowthStage, TrainingSessionType } from "@/game/types";
+import { createInitialSkills } from "@/game/types/skill";
+import { createDefaultResistances } from "@/game/types/stats";
 import { useGameNotifications } from "./useGameNotifications";
 
 // Setup DOM environment for React hooks
@@ -50,14 +52,34 @@ describe("useGameNotifications", () => {
 
   const createMockState = (overrides: Partial<GameState> = {}): GameState => {
     const defaultPet: Pet = {
-      id: "test-pet",
-      identity: { name: "Fluffy", speciesId: "dog", speciesName: "Dog" },
-      growth: { stage: GrowthStage.Baby, progress: 0 },
-      stats: {
-        energy: 100,
-        hunger: 0,
+      identity: { id: "test-pet", name: "Fluffy", speciesId: "dog" },
+      growth: {
+        stage: GrowthStage.Baby,
+        substage: 0,
+        birthTime: 0,
+        ageTicks: 0,
+      },
+      activeTraining: undefined,
+      careStats: {
+        satiety: 100,
+        hydration: 100,
         happiness: 100,
-        hygiene: 100,
+      },
+      energyStats: {
+        energy: 100,
+      },
+      careLifeStats: {
+        careLife: 100,
+      },
+      battleStats: {
+        strength: 10,
+        endurance: 10,
+        agility: 10,
+        precision: 10,
+        fortitude: 10,
+        cunning: 10,
+      },
+      trainedBattleStats: {
         strength: 0,
         endurance: 0,
         agility: 0,
@@ -65,19 +87,48 @@ describe("useGameNotifications", () => {
         fortitude: 0,
         cunning: 0,
       },
-      status: { isSick: false, isAsleep: false },
-      activeTraining: null,
+      resistances: createDefaultResistances(),
+      poop: {
+        count: 0,
+        ticksUntilNext: 100,
+      },
+      sleep: {
+        isSleeping: false,
+        sleepStartTime: null,
+        sleepTicksToday: 0,
+      },
+      activityState: "idle",
+      bonusMaxStats: {
+        satiety: 0,
+        hydration: 0,
+        happiness: 0,
+        energy: 0,
+        careLife: 0,
+        battle: {
+          strength: 0,
+          endurance: 0,
+          agility: 0,
+          precision: 0,
+          fortitude: 0,
+          cunning: 0,
+        },
+      },
     };
 
     return {
+      version: 1,
+      totalTicks: 0,
+      quests: [],
       pet: defaultPet,
-      lastExplorationResult: null,
+      lastExplorationResult: undefined,
       isInitialized: true,
       lastSaveTime: Date.now(),
+      lastDailyReset: Date.now(),
       player: {
         inventory: { items: [] },
         currency: { coins: 0 },
         currentLocationId: "home",
+        skills: createInitialSkills(),
       },
       ...overrides,
     };
@@ -92,7 +143,7 @@ describe("useGameNotifications", () => {
         ...baseState,
         pet: {
           ...baseState.pet,
-          growth: { stage: GrowthStage.Baby, progress: 0 },
+          growth: { ...baseState.pet.growth, stage: GrowthStage.Baby },
         },
       };
 
@@ -106,11 +157,12 @@ describe("useGameNotifications", () => {
         ...initialState,
         pet: {
           ...initialState.pet,
-          growth: { stage: GrowthStage.Child, progress: 0 },
+          growth: { ...initialState.pet.growth, stage: GrowthStage.Child },
         },
       };
 
-      rerender({ state: newState });
+      // biome-ignore lint/suspicious/noExplicitAny: casting to avoid strict type inference issues in test
+      rerender({ state: newState as any });
 
       expect(mockSetNotification).toHaveBeenCalledTimes(1);
       expect(mockSetNotification).toHaveBeenCalledWith({
@@ -155,7 +207,6 @@ describe("useGameNotifications", () => {
       name: "Gym",
       primaryStat: "strength",
       secondaryStat: "endurance",
-      // Added required fields for TrainingFacility type satisfaction if needed by the hook or simple return
       facilityType: "strength",
       description: "Test Gym",
       sessions: [],
@@ -182,9 +233,10 @@ describe("useGameNotifications", () => {
       const trainingState: ActiveTraining = {
         facilityId: "gym",
         sessionType: TrainingSessionType.Basic,
-        startTime: Date.now(),
+        startTick: 100,
+        durationTicks: 10,
         ticksRemaining: 1,
-        originalDuration: 10,
+        energyCost: 10,
       };
 
       const baseState = createMockState();
@@ -208,11 +260,12 @@ describe("useGameNotifications", () => {
         ...initialState,
         pet: {
           ...initialState.pet,
-          activeTraining: null,
+          activeTraining: undefined as ActiveTraining | undefined,
         },
       };
 
-      rerender({ state: newState });
+      // biome-ignore lint/suspicious/noExplicitAny: casting to avoid strict type inference issues in test
+      rerender({ state: newState as any });
 
       expect(mockSetNotification).toHaveBeenCalledTimes(1);
       expect(mockSetNotification).toHaveBeenCalledWith({
@@ -227,9 +280,10 @@ describe("useGameNotifications", () => {
       const trainingState: ActiveTraining = {
         facilityId: "gym",
         sessionType: TrainingSessionType.Basic,
-        startTime: Date.now(),
-        ticksRemaining: 5, // > 1 means cancelled
-        originalDuration: 10,
+        startTick: 100,
+        durationTicks: 10,
+        ticksRemaining: 5,
+        energyCost: 10,
       };
 
       const baseState = createMockState();
@@ -253,11 +307,12 @@ describe("useGameNotifications", () => {
         ...initialState,
         pet: {
           ...initialState.pet,
-          activeTraining: null,
+          activeTraining: undefined as ActiveTraining | undefined,
         },
       };
 
-      rerender({ state: newState });
+      // biome-ignore lint/suspicious/noExplicitAny: casting to avoid strict type inference issues in test
+      rerender({ state: newState as any });
 
       expect(mockSetNotification).not.toHaveBeenCalled();
     });
@@ -265,7 +320,9 @@ describe("useGameNotifications", () => {
 
   describe("Exploration Completion", () => {
     test("notifies when new exploration result appears", () => {
-      const initialState = createMockState({ lastExplorationResult: null });
+      const initialState = createMockState({
+        lastExplorationResult: undefined,
+      });
 
       const { rerender } = renderHook(
         ({ state }) => useGameNotifications(state, mockSetNotification),
@@ -273,6 +330,7 @@ describe("useGameNotifications", () => {
       );
 
       const result: ExplorationResult & { locationName: string } = {
+        success: true,
         itemsFound: [],
         message: "Found nothing",
         locationName: "Forest",
@@ -294,6 +352,7 @@ describe("useGameNotifications", () => {
 
     test("does not duplicate notification for same result object", () => {
       const result: ExplorationResult & { locationName: string } = {
+        success: true,
         itemsFound: [],
         message: "Found nothing",
         locationName: "Forest",
