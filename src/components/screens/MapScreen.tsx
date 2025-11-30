@@ -11,7 +11,7 @@ import { ErrorDialog } from "@/components/ui/error-dialog";
 import { getConnectedLocations, getLocation } from "@/game/data/locations";
 import { useGameState } from "@/game/hooks/useGameState";
 import { checkCanTravel, travelToLocation } from "@/game/state/actions/travel";
-import { toDisplay } from "@/game/types/common";
+import { selectCurrentLocationId, selectEnergy } from "@/game/state/selectors";
 
 /**
  * Main map screen showing world locations and travel options.
@@ -26,7 +26,9 @@ export function MapScreen() {
   const [shoppingAtNpcId, setShoppingAtNpcId] = useState<string | null>(null);
 
   // Get current location
-  const currentLocationId = state?.player.currentLocationId ?? "home";
+  const currentLocationId = state
+    ? selectCurrentLocationId(state)
+    : "home";
   const currentLocation = getLocation(currentLocationId);
 
   // Get connected locations
@@ -126,7 +128,8 @@ export function MapScreen() {
     );
   }
 
-  const currentEnergy = state.pet ? toDisplay(state.pet.energyStats.energy) : 0;
+  const energy = selectEnergy(state);
+  const currentEnergy = energy ? energy.energy : 0;
 
   return (
     <>

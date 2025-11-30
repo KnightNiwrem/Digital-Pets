@@ -13,6 +13,7 @@ import { getItemById } from "@/game/data/items";
 import { getNpc } from "@/game/data/npcs";
 import { getShopForNpc } from "@/game/data/shops";
 import { useGameState } from "@/game/hooks/useGameState";
+import { selectCurrency, selectInventory } from "@/game/state/selectors";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,8 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
 
   const npc = getNpc(npcId);
   const shop = npc?.shopId ? getShopForNpc(npc.shopId) : undefined;
-  const playerCoins = state?.player.currency.coins ?? 0;
+  const currency = state ? selectCurrency(state) : null;
+  const playerCoins = currency?.coins ?? 0;
 
   // Clear message timeout on unmount
   useEffect(() => {
@@ -74,7 +76,8 @@ export function ShopScreen({ npcId, onClose }: ShopScreenProps) {
   // Get player's sellable items (stackable items with quantity > 0)
   const sellableItems = useMemo(() => {
     if (!state || !shop) return [];
-    return state.player.inventory.items.reduce<
+    const inventory = selectInventory(state);
+    return inventory.items.reduce<
       Array<{
         inventoryItem: InventoryItem;
         itemDef: Item;

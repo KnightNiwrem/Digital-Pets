@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { exportSave, importSave, saveGame } from "@/game/state/persistence";
+import { selectLastSaveTime } from "@/game/state/selectors";
 
 /**
  * Menu screen with save management and settings.
@@ -115,6 +116,8 @@ export function MenuScreen() {
     setShowResetConfirm(false);
   };
 
+  const lastSaveTime = state ? selectLastSaveTime(state) : null;
+
   return (
     <div className="space-y-4">
       {/* Save Status Toast */}
@@ -188,8 +191,8 @@ export function MenuScreen() {
           <div className="flex justify-between">
             <span className="text-muted-foreground">Last Save</span>
             <span className="font-mono">
-              {state?.lastSaveTime
-                ? new Date(state.lastSaveTime).toLocaleTimeString()
+              {lastSaveTime
+                ? new Date(lastSaveTime).toLocaleTimeString()
                 : "Never"}
             </span>
           </div>

@@ -3,12 +3,14 @@
  */
 
 import { useGameStateReadOnly } from "@/game/hooks/useGameState";
+import { selectPetInfo } from "@/game/state/selectors";
 
 /**
  * Header displaying game title and basic status.
  */
 export function Header() {
   const { state, isLoading } = useGameStateReadOnly();
+  const petInfo = state ? selectPetInfo(state) : null;
 
   return (
     <header className="border-b bg-card">
@@ -17,8 +19,8 @@ export function Header() {
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           {isLoading ? (
             <span>Loading...</span>
-          ) : state?.pet ? (
-            <span>{state.pet.identity.name}</span>
+          ) : petInfo ? (
+            <span>{petInfo.name}</span>
           ) : (
             <span>No Pet</span>
           )}

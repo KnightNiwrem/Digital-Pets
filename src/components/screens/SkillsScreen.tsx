@@ -5,6 +5,7 @@
 import { SkillBar } from "@/components/skills/SkillBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameState } from "@/game/hooks/useGameState";
+import { selectSkills } from "@/game/state/selectors";
 import { SkillType } from "@/game/types/skill";
 
 /**
@@ -30,7 +31,7 @@ export function SkillsScreen() {
     return null;
   }
 
-  const skills = state.player.skills;
+  const skills = selectSkills(state);
 
   return (
     <div className="flex flex-col gap-4">

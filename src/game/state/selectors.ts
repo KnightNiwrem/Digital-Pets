@@ -23,7 +23,16 @@ import {
   type CareThreshold,
   type GrowthStage,
   getCareThreshold,
+  ActivityState,
 } from "@/game/types/constants";
+import type {
+  Currency,
+  GameState,
+  Inventory,
+  PlayerSkills,
+  PlayerState,
+} from "@/game/types/gameState";
+import type { QuestProgress } from "@/game/types/quest";
 import type { Species, SpeciesGrowthStageStats } from "@/game/types/species";
 
 /**
@@ -31,6 +40,64 @@ import type { Species, SpeciesGrowthStageStats } from "@/game/types/species";
  */
 export function selectPet(state: GameState): Pet | null {
   return state.pet;
+}
+
+/**
+ * Get the player state.
+ */
+export function selectPlayer(state: GameState): PlayerState {
+  return state.player;
+}
+
+/**
+ * Get the player's inventory.
+ */
+export function selectInventory(state: GameState): Inventory {
+  return state.player.inventory;
+}
+
+/**
+ * Get the player's currency.
+ */
+export function selectCurrency(state: GameState): Currency {
+  return state.player.currency;
+}
+
+/**
+ * Get the player's current location ID.
+ */
+export function selectCurrentLocationId(state: GameState): string {
+  return state.player.currentLocationId;
+}
+
+/**
+ * Get the player's skills.
+ */
+export function selectSkills(state: GameState): PlayerSkills {
+  return state.player.skills;
+}
+
+/**
+ * Get the quests progress.
+ */
+export function selectQuests(state: GameState): QuestProgress[] {
+  return state.quests;
+}
+
+/**
+ * Get the last save time.
+ */
+export function selectLastSaveTime(state: GameState): number {
+  return state.lastSaveTime;
+}
+
+/**
+ * Get the pet's activity state.
+ */
+export function selectPetActivityState(
+  state: GameState,
+): ActivityState | null {
+  return state.pet?.activityState ?? null;
 }
 
 /**

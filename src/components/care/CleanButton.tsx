@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { cleanPet } from "@/game/state/actions/care";
+import { selectInventory, selectPoop } from "@/game/state/selectors";
 
 interface CleanButtonProps {
   onSuccess?: () => void;
@@ -36,7 +37,8 @@ export function CleanButton({ onSuccess }: CleanButtonProps) {
   };
 
   // Disable button if there's no poop to clean
-  const poopCount = state.pet?.poop.count ?? 0;
+  const poopDisplay = selectPoop(state);
+  const poopCount = poopDisplay?.count ?? 0;
   const isDisabled = poopCount === 0;
 
   return (
@@ -53,7 +55,7 @@ export function CleanButton({ onSuccess }: CleanButtonProps) {
       <ItemSelector
         open={open}
         onOpenChange={setOpen}
-        inventory={state.player.inventory}
+        inventory={selectInventory(state)}
         category="cleaning"
         title="Select Cleaning Item"
         description="Choose a cleaning item to clean up poop."

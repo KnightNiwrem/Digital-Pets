@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { waterPet } from "@/game/state/actions/care";
+import { selectInventory } from "@/game/state/selectors";
 
 interface WaterButtonProps {
   onSuccess?: () => void;
@@ -48,7 +49,7 @@ export function WaterButton({ onSuccess }: WaterButtonProps) {
       <ItemSelector
         open={open}
         onOpenChange={setOpen}
-        inventory={state.player.inventory}
+        inventory={selectInventory(state)}
         category="drink"
         title="Select Drink"
         description="Choose a drink to give your pet."

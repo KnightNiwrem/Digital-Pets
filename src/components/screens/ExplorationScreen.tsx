@@ -20,6 +20,7 @@ import {
   cancelExploration,
   startForaging,
 } from "@/game/state/actions/exploration";
+import { selectCurrentLocationId, selectPet } from "@/game/state/selectors";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
 import { FacilityType, LocationType } from "@/game/types/location";
@@ -42,7 +43,9 @@ export function ExplorationScreen({
     );
   }
 
-  if (!state?.pet) {
+  const pet = state ? selectPet(state) : null;
+
+  if (!state || !pet) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">No pet to explore with.</p>
@@ -50,13 +53,13 @@ export function ExplorationScreen({
     );
   }
 
-  const pet = state.pet;
+  const currentLocationId = selectCurrentLocationId(state);
   const currentEnergy = toDisplay(pet.energyStats.energy);
   const isExploring = pet.activityState === ActivityState.Exploring;
   const isBlocked = pet.activityState !== ActivityState.Idle;
   const blockingInfo = getActivityBlockingInfo(pet, "explore");
-  const currentLocation = getLocation(state.player.currentLocationId);
-  const forageInfo = getLocationForageInfo(state.player.currentLocationId);
+  const currentLocation = getLocation(currentLocationId);
+  const forageInfo = getLocationForageInfo(currentLocationId);
 
   // Check if current location is a wild area
   const isWildArea = currentLocation?.type === LocationType.Wild;
@@ -67,7 +70,7 @@ export function ExplorationScreen({
   );
 
   // Get foraging availability
-  const forageCheck = canStartForaging(pet, state.player.currentLocationId);
+  const forageCheck = canStartForaging(pet, currentLocationId);
 
   // Handle starting foraging
   const handleStartForage = () => {
@@ -89,7 +92,7 @@ export function ExplorationScreen({
   const handleSeekBattle = () => {
     if (!pet || !onStartBattle) return;
 
-    const encounterResult = forceEncounter(state.player.currentLocationId, pet);
+    const encounterResult = forceEncounter(currentLocationId, pet);
     if (encounterResult.hasEncounter && encounterResult.speciesId) {
       onStartBattle(encounterResult.speciesId, encounterResult.level ?? 1);
     }

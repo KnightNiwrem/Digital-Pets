@@ -8,6 +8,7 @@ import { ItemGrid } from "@/components/inventory/ItemGrid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getItemById } from "@/game/data/items";
 import { useGameState } from "@/game/hooks/useGameState";
+import { selectCurrency, selectInventory } from "@/game/state/selectors";
 import { ItemCategory } from "@/game/types/constants";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +38,8 @@ export function InventoryScreen() {
   >("all");
 
   // Filter items by category (memoized to avoid recalculating on every render)
-  const inventoryItems = state?.player.inventory.items;
+  const inventory = state ? selectInventory(state) : null;
+  const inventoryItems = inventory?.items;
   const filteredItems = useMemo(
     () =>
       inventoryItems === undefined
@@ -73,13 +75,6 @@ export function InventoryScreen() {
     );
   }
 
-  // Get selected item details
-  const selectedItem =
-    selectedIndex !== null ? filteredItems[selectedIndex] : null;
-  const selectedItemDef = selectedItem
-    ? getItemById(selectedItem.itemId)
-    : null;
-
   return (
     <div className="space-y-4">
       {/* Header with coin display */}
@@ -89,7 +84,7 @@ export function InventoryScreen() {
             <CardTitle className="text-lg">Inventory</CardTitle>
             <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
               <span className="text-lg">🪙</span>
-              <span className="font-medium">{state.player.currency.coins}</span>
+              <span className="font-medium">{selectCurrency(state).coins}</span>
             </div>
           </div>
         </CardHeader>
