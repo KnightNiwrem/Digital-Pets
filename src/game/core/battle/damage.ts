@@ -76,7 +76,7 @@ export function calculateHitChance(
  * Roll for whether an attack hits.
  */
 export function rollHit(hitChance: number): boolean {
-  return Math.random() * 100 < hitChance;
+  return Math.random() * 100 <= hitChance;
 }
 
 /**
