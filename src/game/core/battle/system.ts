@@ -152,8 +152,20 @@ export function processBattleRound(
 export function processFleeAttempt(state: GameState): GameState {
   if (!state.activeBattle) return state;
 
-  // Simple 50% chance for now, or based on stats
-  const canFlee = Math.random() > 0.5;
+  // Derive flee chance from combatant stats for determinism
+  // Calculate chance based on agility ratio: player / (player + enemy)
+  const playerAgility =
+    state.activeBattle.battleState.player.battleStats.agility;
+  const enemyAgility = state.activeBattle.battleState.enemy.battleStats.agility;
+
+  // Avoid division by zero
+  const totalAgility = playerAgility + enemyAgility;
+  const fleeChance = totalAgility > 0 ? playerAgility / totalAgility : 0.5;
+
+  // Base success on agility advantage (>= 50% relative agility)
+  // This makes it deterministic: if you are faster or equal, you escape.
+  // If you are slower, you fail.
+  const canFlee = fleeChance >= 0.5;
 
   if (canFlee) {
     // End battle
@@ -183,7 +195,7 @@ export function processFleeAttempt(state: GameState): GameState {
         targetId: "enemy",
         message: "Failed to flee!",
         timestamp: now(),
-      } as BattleEvent,
+      },
     ],
   };
 

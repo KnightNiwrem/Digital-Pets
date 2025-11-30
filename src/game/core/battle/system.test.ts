@@ -82,13 +82,16 @@ test("processBattleRound executes player turn, enemy turn, and resolution", () =
   }
 });
 
-test("processFleeAttempt handles success/failure", () => {
-  // This test is non-deterministic due to Math.random(),
-  // but we can verify it returns a valid state in either case.
-
+test("processFleeAttempt success when player has advantage", () => {
+  // Deterministic test: player agility > enemy agility
   const pet = createNewPet("TestPet", "florabit");
   const playerCombatant = createCombatantFromPet(pet, true);
   const enemyCombatant = createWildCombatant("florabit", 1);
+
+  // Ensure player has high agility
+  playerCombatant.battleStats.agility = 100;
+  enemyCombatant.battleStats.agility = 10;
+
   const battleState = initializeBattle(playerCombatant, enemyCombatant);
 
   const state = {
@@ -102,24 +105,47 @@ test("processFleeAttempt handles success/failure", () => {
 
   const newState = processFleeAttempt(state);
 
-  if (newState.activeBattle) {
-    // Failed to flee
-    const battle = newState.activeBattle.battleState;
-    const fleeEvent = battle.roundEvents?.find((e) => e.type === "FLEE");
-    expect(fleeEvent).toBeDefined();
-    expect(fleeEvent?.message).toBe("Failed to flee!");
+  // Should flee successfully
+  expect(newState.activeBattle).toBeUndefined();
+  const fledEvent = newState.pendingEvents.find((e) => e.type === "battleFled");
+  expect(fledEvent).toBeDefined();
+});
 
-    // Should have triggered enemy attack
-    const enemyAttack = battle.roundEvents?.find(
-      (e) => e.type === "ATTACK" && e.actorId === "enemy",
-    );
-    expect(enemyAttack).toBeDefined();
-  } else {
-    // Fled successfully
-    expect(newState.activeBattle).toBeUndefined();
-    const fledEvent = newState.pendingEvents.find(
-      (e) => e.type === "battleFled",
-    );
-    expect(fledEvent).toBeDefined();
-  }
+test("processFleeAttempt failure when player has disadvantage", () => {
+  // Deterministic test: player agility < enemy agility
+  const pet = createNewPet("TestPet", "florabit");
+  const playerCombatant = createCombatantFromPet(pet, true);
+  const enemyCombatant = createWildCombatant("florabit", 1);
+
+  // Ensure player has low agility
+  playerCombatant.battleStats.agility = 10;
+  enemyCombatant.battleStats.agility = 100;
+
+  const battleState = initializeBattle(playerCombatant, enemyCombatant);
+
+  const state = {
+    ...createInitialGameState(),
+    activeBattle: {
+      enemySpeciesId: "florabit",
+      enemyLevel: 1,
+      battleState,
+    },
+  };
+
+  const newState = processFleeAttempt(state);
+
+  // Should fail to flee
+  expect(newState.activeBattle).toBeDefined();
+  if (!newState.activeBattle) return;
+
+  const battle = newState.activeBattle.battleState;
+  const fleeEvent = battle.roundEvents?.find((e) => e.type === "FLEE");
+  expect(fleeEvent).toBeDefined();
+  expect(fleeEvent?.message).toBe("Failed to flee!");
+
+  // Should have triggered enemy attack
+  const enemyAttack = battle.roundEvents?.find(
+    (e) => e.type === "ATTACK" && e.actorId === "enemy",
+  );
+  expect(enemyAttack).toBeDefined();
 });
