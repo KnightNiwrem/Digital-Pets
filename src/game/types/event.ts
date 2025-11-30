@@ -95,6 +95,9 @@ export type GameEvent =
 /**
  * Result type for actions that produce events.
  * Actions return both the new state and any events that occurred.
+ *
+ * Note: This interface is defined for future use when actions are refactored
+ * to emit events directly. Currently, events are emitted by the tick processor.
  */
 export interface ActionResult<T> {
   /** Updated game state */

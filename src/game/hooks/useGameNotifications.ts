@@ -35,8 +35,8 @@ export function useGameNotifications(
 
     if (newEvents.length === 0) return;
 
-    // Update the last processed timestamp (use reduce to avoid stack overflow with large arrays)
-    // Safe to use 0 as initial value since we only process events with timestamp > lastProcessed
+    // Find the maximum timestamp using reduce (avoids potential stack overflow
+    // from Math.max(...array) with very large arrays)
     const maxTimestamp = newEvents.reduce(
       (max, e) => Math.max(max, e.timestamp),
       0,
