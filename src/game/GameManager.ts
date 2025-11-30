@@ -17,7 +17,7 @@ import type { GameState } from "@/game/types/gameState";
 
 /**
  * Interval for checking elapsed time (1 second).
- * This is much shorter than TICK_DURATION_MS to catch up quickly
+ * This is much shorter than TICK_DURATION_MS (30000ms) to catch up quickly
  * when returning from a background tab.
  */
 const CHECK_INTERVAL_MS = 1000;
