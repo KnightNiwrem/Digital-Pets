@@ -23,7 +23,9 @@ Each quest contains:
 |------|-------------|
 | Main | Story progression quests |
 | Side | Optional quests with rewards |
-| Daily | Reset each day, repeatable |
+| Daily | Reset each day at midnight, auto-activated |
+| Weekly | Reset each Monday at midnight, auto-activated |
+| Timed | Fixed duration from acceptance, can expire |
 | Tutorial | One-time learning quests |
 | Hidden | Discovered through exploration |
 
@@ -34,8 +36,7 @@ graph LR
     Locked --> Available
     Available --> Active
     Active --> Completed
-    Active --> Failed
-    Failed --> Available
+    Active --> Expired
 ```
 
 | State | Description |
@@ -44,7 +45,9 @@ graph LR
 | Available | Can be accepted |
 | Active | In progress |
 | Completed | Finished, rewards claimed |
-| Failed | Objective failed, can retry |
+| Expired | Timed quest not completed before deadline |
+
+Note: Daily and weekly quests never enter Expired state - they are reset on their schedule.
 
 ## NPCs
 
@@ -171,8 +174,33 @@ Related quests form chains where completing one unlocks the next.
 | Property | Description |
 |----------|-------------|
 | Reset | Midnight local time |
-| Limit | Maximum active daily quests |
-| Refresh | New dailies available each reset |
+| Auto-activate | Start in Active state on reset |
+| Expiration | Shows time until next reset |
+| No fail state | Reset instead of failing on expiration |
+
+Daily quests are automatically activated at midnight and show a countdown to the next reset.
+
+## Weekly Quests
+
+| Property | Description |
+|----------|-------------|
+| Reset | Monday midnight local time |
+| Auto-activate | Start in Active state on reset |
+| Expiration | Shows time until next Monday |
+| No fail state | Reset instead of failing on expiration |
+
+Weekly quests have larger objectives and better rewards than dailies.
+
+## Timed Quests
+
+| Property | Description |
+|----------|-------------|
+| Duration | Fixed time limit from quest start |
+| Expiration | Shows countdown from acceptance |
+| Fail state | Moves to Expired category on timeout |
+
+Timed quests have a fixed duration and must be completed before time runs out.
+Unlike daily/weekly quests, they enter the Expired state if not completed in time.
 
 ## Hidden Quests
 
@@ -187,7 +215,8 @@ Hidden quests often have unique rewards.
 ## Quest Journal
 
 UI shows:
-- Active quests (with limits)
+- Active quests (with expiration timers for daily/weekly/timed)
 - Available quests
 - Completed quests (history)
+- Expired quests (timed quests that weren't completed)
 - Current objectives and progress

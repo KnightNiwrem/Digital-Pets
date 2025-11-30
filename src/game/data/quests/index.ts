@@ -7,6 +7,7 @@ import { dailyQuests } from "./daily";
 import { mainQuests } from "./main";
 import { sideQuests } from "./side";
 import { tutorialQuests } from "./tutorial";
+import { weeklyQuests } from "./weekly";
 
 /**
  * All quests indexed by ID.
@@ -16,6 +17,7 @@ export const quests: Record<string, Quest> = {
   ...mainQuests,
   ...sideQuests,
   ...dailyQuests,
+  ...weeklyQuests,
 };
 
 /**
@@ -37,4 +39,18 @@ export function getQuestsByType(type: string): Quest[] {
  */
 export function getQuestsByGiver(giverId: string): Quest[] {
   return Object.values(quests).filter((quest) => quest.giverId === giverId);
+}
+
+/**
+ * Get all daily quests.
+ */
+export function getDailyQuests(): Quest[] {
+  return Object.values(dailyQuests);
+}
+
+/**
+ * Get all weekly quests.
+ */
+export function getWeeklyQuests(): Quest[] {
+  return Object.values(weeklyQuests);
 }

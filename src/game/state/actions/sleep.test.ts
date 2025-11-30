@@ -18,6 +18,7 @@ function createTestGameState(isSleeping: boolean): GameState {
     version: 1,
     lastSaveTime: Date.now(),
     lastDailyReset: Date.now(),
+    lastWeeklyReset: Date.now(),
     totalTicks: 0,
     pet: {
       identity: {
@@ -74,6 +75,7 @@ function createEmptyGameState(): GameState {
     version: 1,
     lastSaveTime: Date.now(),
     lastDailyReset: Date.now(),
+    lastWeeklyReset: Date.now(),
     totalTicks: 0,
     pet: null,
     player: {

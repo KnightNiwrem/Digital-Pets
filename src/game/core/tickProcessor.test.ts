@@ -395,6 +395,39 @@ test("processGameTick handles state with no pet during daily reset", () => {
   expect(newState.lastDailyReset).toBe(getMidnightTimestamp(now));
 });
 
+test("processGameTick refreshes daily quests on daily reset", () => {
+  const { QuestState } = require("@/game/types/quest");
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(12, 0, 0, 0);
+
+  const pet = createTestPet();
+  const state = createTestGameState({
+    pet,
+    lastDailyReset: yesterday.getTime(),
+    quests: [
+      {
+        questId: "daily_care_routine",
+        state: QuestState.Completed,
+        objectiveProgress: { feed_pet: 2, water_pet: 2 },
+        completedAt: yesterday.getTime(),
+      },
+    ],
+  });
+
+  const now = Date.now();
+  const newState = processGameTick(state, now);
+
+  // Daily quest should be reset to Active
+  const dailyQuest = newState.quests.find(
+    (q) => q.questId === "daily_care_routine",
+  );
+  expect(dailyQuest).toBeDefined();
+  expect(dailyQuest?.state).toBe(QuestState.Active);
+  expect(dailyQuest?.objectiveProgress).toEqual({});
+});
+
 test("processGameTick updates quest progress when training completes", () => {
   const { ActivityState } = require("@/game/types/constants");
   const { QuestState } = require("@/game/types/quest");
