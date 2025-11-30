@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { sleepPet, wakePet } from "@/game/state/actions/sleep";
+import { selectPet, selectPetInfo } from "@/game/state/selectors";
 
 /**
  * Button to toggle the pet's sleep state.
@@ -15,16 +16,19 @@ export function SleepToggle() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { state, actions } = useGameState();
 
-  if (!state?.pet) return null;
+  if (!state) return null;
+  const petInfo = selectPetInfo(state);
+  if (!petInfo) return null;
 
-  const isSleeping = state.pet.sleep.isSleeping;
+  const isSleeping = petInfo.isSleeping;
 
   const handleToggle = () => {
     actions.updateState((currentState) => {
-      if (!currentState.pet) {
+      const currentPet = selectPet(currentState);
+      if (!currentPet) {
         return currentState;
       }
-      const result = currentState.pet.sleep.isSleeping
+      const result = currentPet.sleep.isSleeping
         ? wakePet(currentState)
         : sleepPet(currentState);
       if (!result.success) {

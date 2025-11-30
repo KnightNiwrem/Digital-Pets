@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { playWithPet } from "@/game/state/actions/care";
+import { selectInventory } from "@/game/state/selectors";
 
 interface PlayButtonProps {
   onSuccess?: () => void;
@@ -47,7 +48,7 @@ export function PlayButton({ onSuccess }: PlayButtonProps) {
       <ItemSelector
         open={open}
         onOpenChange={setOpen}
-        inventory={state.player.inventory}
+        inventory={selectInventory(state)}
         category="toy"
         title="Select Toy"
         description="Choose a toy to play with your pet."

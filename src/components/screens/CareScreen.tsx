@@ -29,6 +29,8 @@ import {
   selectCareStats,
   selectEnergy,
   selectGrowthProgress,
+  selectPet,
+  selectPetActivityState,
   selectPetInfo,
   selectPetSpecies,
   selectPoop,
@@ -102,7 +104,9 @@ export function CareScreen() {
     );
   }
 
-  if (!state?.pet) {
+  const pet = state ? selectPet(state) : null;
+
+  if (!state || !pet) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">No pet found.</p>
@@ -116,8 +120,9 @@ export function CareScreen() {
   const species = selectPetSpecies(state);
   const poop = selectPoop(state);
   const growthProgress = selectGrowthProgress(state);
+  const activityState = selectPetActivityState(state);
   const blockingInfo = getActivityBlockingInfo(
-    state.pet,
+    pet,
     "feed, water, play, or clean",
   );
 
@@ -201,8 +206,8 @@ export function CareScreen() {
       )}
 
       {/* Care Actions - only show when idle or sleeping */}
-      {(state.pet.activityState === ActivityState.Idle ||
-        state.pet.activityState === ActivityState.Sleeping) && (
+      {(activityState === ActivityState.Idle ||
+        activityState === ActivityState.Sleeping) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Actions</CardTitle>
@@ -212,7 +217,7 @@ export function CareScreen() {
               <div className="col-span-2 sm:col-span-4 flex justify-center pb-2">
                 <SleepToggle />
               </div>
-              {state.pet.activityState === ActivityState.Idle && (
+              {activityState === ActivityState.Idle && (
                 <>
                   <FeedButton onSuccess={handleFeedSuccess} />
                   <WaterButton onSuccess={handleWaterSuccess} />

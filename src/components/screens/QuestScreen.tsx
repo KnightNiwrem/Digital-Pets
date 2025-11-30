@@ -15,6 +15,7 @@ import {
 } from "@/game/core/quests";
 import { quests as allQuestsData, getQuest } from "@/game/data/quests";
 import { useGameActions, useGameState } from "@/game/hooks/useGameState";
+import { selectQuests } from "@/game/state/selectors";
 import type { Quest, QuestProgress } from "@/game/types/quest";
 
 type TabType = "active" | "available" | "completed";
@@ -45,7 +46,8 @@ export function QuestScreen() {
       const completed = getCompletedQuests(state);
 
       const map = new Map<string, QuestProgress>();
-      for (const progress of state.quests) {
+      const quests = selectQuests(state);
+      for (const progress of quests) {
         map.set(progress.questId, progress);
       }
 

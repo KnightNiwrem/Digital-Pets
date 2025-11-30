@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAllFacilities } from "@/game/data/facilities";
 import { useGameState } from "@/game/hooks/useGameState";
 import { cancelTraining, startTraining } from "@/game/state/actions/training";
+import { selectPet } from "@/game/state/selectors";
 import type { TrainingSessionType } from "@/game/types/activity";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
@@ -36,7 +37,9 @@ export function TrainingScreen() {
     );
   }
 
-  if (!state?.pet) {
+  const pet = state ? selectPet(state) : null;
+
+  if (!state || !pet) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">No pet to train.</p>
@@ -44,7 +47,6 @@ export function TrainingScreen() {
     );
   }
 
-  const pet = state.pet;
   const currentEnergy = toDisplay(pet.energyStats.energy);
   const isTraining = pet.activityState === ActivityState.Training;
   const isBlocked = pet.activityState !== ActivityState.Idle;

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useGameState } from "@/game/hooks/useGameState";
 import { feedPet } from "@/game/state/actions/care";
+import { selectInventory } from "@/game/state/selectors";
 
 interface FeedButtonProps {
   onSuccess?: () => void;
@@ -47,7 +48,7 @@ export function FeedButton({ onSuccess }: FeedButtonProps) {
       <ItemSelector
         open={open}
         onOpenChange={setOpen}
-        inventory={state.player.inventory}
+        inventory={selectInventory(state)}
         category="food"
         title="Select Food"
         description="Choose a food item to feed your pet."
