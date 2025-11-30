@@ -3,7 +3,7 @@
  * Integrates the game context and layout.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ExplorationCompleteNotification,
   Layout,
@@ -28,12 +28,10 @@ import { Button } from "@/components/ui/button";
 import { GameProvider } from "@/game/context/GameContext";
 import {
   type BattleRewards,
-  type BattleState,
   createCombatantFromPet,
   createWildCombatant,
   initializeBattle,
 } from "@/game/core/battle/battle";
-import { processPlayerAttack } from "@/game/core/battle/battleProcessor";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { useGameState } from "@/game/hooks/useGameState";
 import type { BattleActionEvent } from "@/game/types/event";
@@ -63,31 +61,6 @@ function GameContent({
       (e): e is BattleActionEvent => e.type === "battleAction",
     );
   }, [state?.pendingEvents]);
-
-  // Handle battle state changes (from BattleScreen)
-  // Wrapped in useCallback for stable reference to prevent unnecessary re-renders
-  // Must be defined before early returns to follow React hooks rules
-  const handleBattleStateChange = useCallback(
-    (newBattleState: BattleState) => {
-      actions.updateState((prev) => ({
-        ...prev,
-        activeBattle: prev.activeBattle
-          ? { ...prev.activeBattle, battleState: newBattleState }
-          : undefined,
-      }));
-    },
-    [actions],
-  );
-
-  // Handle player attack - uses processPlayerAttack to emit events consistently
-  const handlePlayerAttack = useCallback(
-    (newBattleState: BattleState, moveName: string) => {
-      actions.updateState((prev) =>
-        processPlayerAttack(prev, newBattleState, moveName),
-      );
-    },
-    [actions],
-  );
 
   // Redirect to exploration if battle tab is accessed without battle info
   // Also redirect back to battle if navigating to exploration during an active battle
@@ -211,11 +184,10 @@ function GameContent({
       return (
         <BattleScreen
           battleState={activeBattle.battleState}
-          onBattleStateChange={handleBattleStateChange}
           onBattleEnd={handleBattleEnd}
           onFlee={handleFlee}
           battleEvents={battleEvents}
-          onPlayerAttack={handlePlayerAttack}
+          dispatch={actions.dispatchBattleAction}
         />
       );
     }

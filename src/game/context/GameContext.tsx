@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { BattleAction } from "@/game/core/battle/battleActions";
 import { processOfflineCatchup } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
 import {
@@ -40,6 +41,8 @@ import {
 export interface GameContextActions {
   /** Update the game state */
   updateState: (updater: (state: GameState) => GameState) => void;
+  /** Dispatch a battle action */
+  dispatchBattleAction: (action: BattleAction) => void;
   /** Save the current game state */
   save: () => boolean;
   /** Reset the game to initial state */
@@ -279,6 +282,12 @@ export function GameProvider({ children }: GameProviderProps) {
     [startGame],
   );
 
+  const dispatchBattleAction = useCallback((action: BattleAction) => {
+    if (gameManagerRef.current) {
+      gameManagerRef.current.dispatchBattleAction(action);
+    }
+  }, []);
+
   const contextValue: GameContextValue = {
     state,
     isLoading,
@@ -288,6 +297,7 @@ export function GameProvider({ children }: GameProviderProps) {
     notification,
     actions: {
       updateState,
+      dispatchBattleAction,
       save,
       resetGame,
       startNewGame,
