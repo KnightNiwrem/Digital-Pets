@@ -83,7 +83,7 @@ export function rollHit(hitChance: number): boolean {
  * Roll for whether an attack is a critical hit.
  */
 export function rollCritical(criticalChance: number): boolean {
-  return Math.random() * 100 < criticalChance;
+  return Math.random() * 100 <= criticalChance;
 }
 
 /**
