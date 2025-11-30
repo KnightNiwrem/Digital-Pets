@@ -1,5 +1,10 @@
 /**
  * Battle screen for combat encounters.
+ *
+ * This component follows the "headless engine" pattern:
+ * - Logic runs independently in the game tick processor
+ * - UI reacts to state changes and events, playing animations
+ * - Player input dispatches actions that emit events
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -16,17 +21,12 @@ import {
   type BattleRewards,
   type BattleState,
   calculateBattleRewards,
-  executeEnemyTurn,
   executePlayerTurn,
   isBattleComplete,
-  resolveTurnEnd,
 } from "@/game/core/battle/battle";
+import type { BattleActionEvent } from "@/game/types/event";
 import type { Move } from "@/game/types/move";
 
-/** Delay for enemy turn processing (ms) */
-const ENEMY_TURN_DELAY_MS = 800;
-/** Delay for turn resolution processing (ms) */
-const TURN_RESOLUTION_DELAY_MS = 500;
 /** Duration for attack animations (ms) */
 const ATTACK_ANIMATION_DURATION_MS = 400;
 
@@ -35,6 +35,10 @@ interface BattleScreenProps {
   onBattleStateChange: (state: BattleState) => void;
   onBattleEnd: (victory: boolean, rewards: BattleRewards) => void;
   onFlee?: () => void;
+  /** Battle events from the game state for UI animations */
+  battleEvents?: BattleActionEvent[];
+  /** Callback for player attacks - emits events for consistent animation handling */
+  onPlayerAttack?: (newBattleState: BattleState, moveName: string) => void;
 }
 
 interface AnimationState {
@@ -59,18 +63,20 @@ export function BattleScreen({
   onBattleStateChange,
   onBattleEnd,
   onFlee,
+  battleEvents = [],
+  onPlayerAttack,
 }: BattleScreenProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [animationState, setAnimationState] = useState<AnimationState>(
     initialAnimationState,
   );
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  // Store battleState in ref to access current value in timeout callbacks
-  // without adding it to useEffect dependencies (which would cause restarts)
-  const battleStateRef = useRef(battleState);
-  battleStateRef.current = battleState;
+  // Track which events we've already processed to avoid duplicate animations
+  const processedEventsRef = useRef<Set<number>>(new Set());
+  // Guard against concurrent event processing
+  const isProcessingRef = useRef(false);
 
   // Cleanup animation timeout on unmount
   useEffect(() => {
@@ -81,62 +87,91 @@ export function BattleScreen({
     };
   }, []);
 
-  // Trigger attack animation
-  const triggerAttackAnimation = useCallback(
-    (isPlayerAttack: boolean, onComplete: () => void) => {
+  // Trigger attack animation (returns a promise for sequencing)
+  const triggerAttackAnimation = useCallback((isPlayerAttack: boolean) => {
+    return new Promise<void>((resolve) => {
       if (animationTimeoutRef.current) {
         clearTimeout(animationTimeoutRef.current);
       }
-      setAnimationState((prev) => ({
-        ...prev,
+      setAnimationState({
         playerAttacking: isPlayerAttack,
         enemyAttacking: !isPlayerAttack,
         playerHit: !isPlayerAttack,
         enemyHit: isPlayerAttack,
-      }));
+      });
 
       animationTimeoutRef.current = setTimeout(() => {
         setAnimationState(initialAnimationState);
-        onComplete();
+        resolve();
       }, ATTACK_ANIMATION_DURATION_MS);
-    },
-    [],
-  );
+    });
+  }, []);
 
-  // Process game loop (Enemy Turn & Turn Resolution)
-  // Uses battleState.phase as dependency to avoid restarts from game tick updates
+  // Consume battle events for animations
+  // The game state is ALREADY updated - we just play animations to visualize what happened
   useEffect(() => {
-    if (battleState.phase === BattlePhase.EnemyTurn) {
-      setIsProcessing(true);
-      // Small delay for dramatic effect
-      const timeout = setTimeout(() => {
-        triggerAttackAnimation(false, () => {
-          onBattleStateChange(executeEnemyTurn(battleStateRef.current));
-          setIsProcessing(false);
-        });
-      }, ENEMY_TURN_DELAY_MS);
-      return () => clearTimeout(timeout);
+    let isMounted = true;
+
+    const processEvents = async () => {
+      // Guard against concurrent processing
+      if (isProcessingRef.current) return;
+
+      // Filter unprocessed events first
+      const unprocessedEvents = battleEvents.filter(
+        (event) => !processedEventsRef.current.has(event.timestamp),
+      );
+
+      if (unprocessedEvents.length === 0) return;
+
+      isProcessingRef.current = true;
+      if (isMounted) setIsAnimating(true);
+
+      for (const event of unprocessedEvents) {
+        processedEventsRef.current.add(event.timestamp);
+
+        // Play appropriate animation based on event type
+        if (event.action === "playerAttack") {
+          await triggerAttackAnimation(true);
+        } else if (event.action === "enemyAttack") {
+          await triggerAttackAnimation(false);
+        }
+        // turnResolved has no animation - it's a state transition event only
+      }
+
+      if (isMounted) setIsAnimating(false);
+      isProcessingRef.current = false;
+    };
+
+    if (battleEvents.length > 0) {
+      processEvents();
     }
 
-    if (battleState.phase === BattlePhase.TurnResolution) {
-      setIsProcessing(true);
-      const timeout = setTimeout(() => {
-        onBattleStateChange(resolveTurnEnd(battleStateRef.current));
-        setIsProcessing(false);
-      }, TURN_RESOLUTION_DELAY_MS);
-      return () => clearTimeout(timeout);
-    }
-  }, [battleState.phase, onBattleStateChange, triggerAttackAnimation]);
+    return () => {
+      isMounted = false;
+    };
+  }, [battleEvents, triggerAttackAnimation]);
 
+  // Handle player move selection
+  // Logic updates first, then events drive animations
   const handleSelectMove = (move: Move) => {
-    if (battleState.phase !== BattlePhase.PlayerTurn || isProcessing) {
+    if (battleState.phase !== BattlePhase.PlayerTurn || isAnimating) {
       return;
     }
-    setIsProcessing(true);
-    triggerAttackAnimation(true, () => {
-      onBattleStateChange(executePlayerTurn(battleState, move));
-      setIsProcessing(false);
-    });
+
+    // Execute the move immediately - logic first, animation second
+    const newBattleState = executePlayerTurn(battleState, move);
+
+    // Use event-driven callback if available for consistent animation handling
+    if (onPlayerAttack) {
+      onPlayerAttack(newBattleState, move.name);
+    } else {
+      // Fallback: update state directly and trigger animation locally
+      onBattleStateChange(newBattleState);
+      setIsAnimating(true);
+      triggerAttackAnimation(true).then(() => {
+        setIsAnimating(false);
+      });
+    }
   };
 
   // Memoize battle completion info to avoid recalculating
@@ -146,6 +181,13 @@ export function BattleScreen({
     const rewards = calculateBattleRewards(battleState, isVictory);
     return { isVictory, rewards };
   }, [battleState]);
+
+  // Clear processed events when battle ends to prevent memory leak
+  useEffect(() => {
+    if (battleResult) {
+      processedEventsRef.current.clear();
+    }
+  }, [battleResult]);
 
   // Show victory/defeat screen
   if (battleResult) {
@@ -205,7 +247,7 @@ export function BattleScreen({
           <MoveSelect
             combatant={battleState.player}
             onSelectMove={handleSelectMove}
-            disabled={isProcessing}
+            disabled={isAnimating}
           />
         )}
 
@@ -214,7 +256,7 @@ export function BattleScreen({
           <Button
             variant="outline"
             onClick={onFlee}
-            disabled={isProcessing}
+            disabled={isAnimating}
             className="w-full"
           >
             🏃 Flee
