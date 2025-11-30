@@ -179,10 +179,15 @@ export function BattleScreen({
     if (!isBattleComplete(battleState)) return null;
     const isVictory = battleState.phase === BattlePhase.Victory;
     const rewards = calculateBattleRewards(battleState, isVictory);
-    // Clear processed events when battle ends to prevent memory leak
-    processedEventsRef.current.clear();
     return { isVictory, rewards };
   }, [battleState]);
+
+  // Clear processed events when battle ends to prevent memory leak
+  useEffect(() => {
+    if (battleResult) {
+      processedEventsRef.current.clear();
+    }
+  }, [battleResult]);
 
   // Show victory/defeat screen
   if (battleResult) {
