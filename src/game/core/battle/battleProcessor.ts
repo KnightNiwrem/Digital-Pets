@@ -7,11 +7,7 @@
  */
 
 import { emitEvent } from "@/game/core/events";
-import {
-  type BattleActionEvent,
-  type BattleEndEvent,
-  createEvent,
-} from "@/game/types/event";
+import { type BattleActionEvent, createEvent } from "@/game/types/event";
 import type { GameState } from "@/game/types/gameState";
 import {
   BattlePhase,
@@ -20,23 +16,7 @@ import {
   isBattleComplete,
   resolveTurnEnd,
 } from "./battle";
-
-/**
- * Update the battle state within the game state.
- */
-function updateBattleState(
-  state: GameState,
-  newBattleState: BattleState,
-): GameState {
-  if (!state.activeBattle) return state;
-  return {
-    ...state,
-    activeBattle: {
-      ...state.activeBattle,
-      battleState: newBattleState,
-    },
-  };
-}
+import { emitBattleEndEvent, updateBattleState } from "./battleUtils";
 
 /**
  * Emit a battle action event and check for battle completion.
@@ -62,29 +42,6 @@ function emitBattleAction(
   }
 
   return newState;
-}
-
-/**
- * Emit a battle end event.
- */
-function emitBattleEndEvent(
-  state: GameState,
-  battleState: BattleState,
-  currentTime: number,
-): GameState {
-  const isVictory = battleState.phase === BattlePhase.Victory;
-  return emitEvent(
-    state,
-    createEvent<BattleEndEvent>(
-      {
-        type: "battleEnd",
-        isVictory,
-        playerName: battleState.player.name,
-        enemyName: battleState.enemy.name,
-      },
-      currentTime,
-    ),
-  );
 }
 
 /**

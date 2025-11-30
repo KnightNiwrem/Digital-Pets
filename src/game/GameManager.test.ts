@@ -3,9 +3,18 @@
  */
 
 import { expect, mock, test } from "bun:test";
+import { BattlePhase, initializeBattle } from "@/game/core/battle/battle";
+import { basicAttack } from "@/game/data/moves";
+import { SPECIES } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
 import type { GameState } from "@/game/types/gameState";
 import { createInitialGameState } from "@/game/types/gameState";
+import {
+  createDefaultBattleStats,
+  createDefaultResistances,
+} from "@/game/types/stats";
+import { calculateDerivedStats } from "./core/battle/stats";
+import type { Combatant } from "./core/battle/turn";
 import {
   createGameManager,
   GameManager,
@@ -151,4 +160,85 @@ test("createGameManager creates a GameManager instance", () => {
 
   expect(manager).toBeInstanceOf(GameManager);
   expect(manager.running).toBe(false);
+});
+
+// Tests for dispatchBattleAction method
+
+function createTestCombatant(overrides: Partial<Combatant> = {}): Combatant {
+  const battleStats = createDefaultBattleStats();
+  battleStats.strength = 10;
+  battleStats.endurance = 10;
+  battleStats.agility = 10;
+  battleStats.precision = 10;
+  battleStats.fortitude = 10;
+  battleStats.cunning = 10;
+
+  return {
+    name: "Test Pet",
+    speciesId: SPECIES.FLORABIT.id,
+    battleStats,
+    derivedStats: calculateDerivedStats(battleStats),
+    resistances: createDefaultResistances(),
+    statusEffects: [],
+    moveSlots: [{ move: basicAttack, currentCooldown: 0 }],
+    isPlayer: true,
+    ...overrides,
+  };
+}
+
+test("GameManager.dispatchBattleAction() calls updateState with battleReducer", () => {
+  let capturedUpdater: ((state: GameState) => GameState) | null = null;
+  const updateState: StateUpdateCallback = (updater) => {
+    capturedUpdater = updater;
+  };
+
+  const manager = new GameManager(updateState);
+  manager.dispatchBattleAction({
+    type: "BATTLE_PLAYER_ATTACK",
+    payload: { moveName: "Basic Attack" },
+  });
+
+  // Verify updater was called
+  expect(capturedUpdater).not.toBeNull();
+});
+
+test("GameManager.dispatchBattleAction() processes battle action correctly", () => {
+  let capturedState: GameState | null = null;
+  const updateState: StateUpdateCallback = (updater) => {
+    const player = createTestCombatant({ name: "Player Pet", isPlayer: true });
+    const enemy = createTestCombatant({ name: "Enemy Pet", isPlayer: false });
+    const battleState = initializeBattle(player, enemy);
+    // Ensure it's player turn
+    const playerTurnBattle = {
+      ...battleState,
+      phase: BattlePhase.PlayerTurn,
+    };
+    const initialState: GameState = {
+      ...createInitialGameState(),
+      pet: createTestPet(),
+      activeBattle: {
+        enemySpeciesId: SPECIES.FLORABIT.id,
+        enemyLevel: 1,
+        battleState: playerTurnBattle,
+      },
+    };
+    capturedState = updater(initialState);
+  };
+
+  const manager = new GameManager(updateState);
+  manager.dispatchBattleAction({
+    type: "BATTLE_PLAYER_ATTACK",
+    payload: { moveName: "Basic Attack" },
+  });
+
+  // Verify state was updated
+  expect(capturedState).not.toBeNull();
+  // biome-ignore lint/style/noNonNullAssertion: We verified capturedState is not null above
+  const state = capturedState!;
+  // Battle should have progressed (no longer player turn)
+  expect(state.activeBattle?.battleState.phase).not.toBe(
+    BattlePhase.PlayerTurn,
+  );
+  // Should have emitted an event
+  expect(state.pendingEvents.length).toBeGreaterThan(0);
 });

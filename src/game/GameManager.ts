@@ -128,9 +128,25 @@ export class GameManager {
 
     // Process battle tick at BATTLE_TICK_INTERVAL_MS for responsive combat
     // Unified into main loop to prevent synchronization issues
-    if (this.battleAccumulator >= BATTLE_TICK_INTERVAL_MS) {
-      this.updateState((state) => processBattleTick(state, currentTime));
+    // Using while loop for consistent catch-up behavior after background throttling
+    let battleTicksProcessed = 0;
+    while (
+      this.battleAccumulator >= BATTLE_TICK_INTERVAL_MS &&
+      battleTicksProcessed < MAX_CATCHUP_TICKS
+    ) {
+      // Using Date.now() to get a new timestamp for each tick to help avoid
+      // event timestamp collisions, which would cause UI animations to be skipped.
+      this.updateState((state) => processBattleTick(state, Date.now()));
       this.battleAccumulator -= BATTLE_TICK_INTERVAL_MS;
+      battleTicksProcessed++;
+    }
+
+    // If we hit the cap, reset accumulator to prevent runaway catch-up
+    if (
+      battleTicksProcessed >= MAX_CATCHUP_TICKS &&
+      this.battleAccumulator > 0
+    ) {
+      this.battleAccumulator = 0;
     }
   }
 
