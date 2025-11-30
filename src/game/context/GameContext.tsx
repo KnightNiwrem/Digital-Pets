@@ -12,13 +12,13 @@ import {
 } from "react";
 import { processOfflineCatchup } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
-import { getFacility, getSession } from "@/game/data/facilities";
 import {
   createNewPet,
   getStartingInventory,
   STARTING_COINS,
 } from "@/game/data/starting";
 import { createGameManager, type GameManager } from "@/game/GameManager";
+import { useGameNotifications } from "@/game/hooks/useGameNotifications";
 import {
   deleteSave,
   hasSave,
@@ -26,12 +26,9 @@ import {
   saveGame,
 } from "@/game/state/persistence";
 import {
-  type ActiveTraining,
   createInitialGameState,
-  type ExplorationResult,
   type GameNotification,
   type GameState,
-  type GrowthStage,
   MIN_OFFLINE_REPORT_MS,
   type OfflineReport,
   type Pet,
@@ -105,11 +102,6 @@ export function GameProvider({ children }: GameProviderProps) {
     null,
   );
   const gameManagerRef = useRef<GameManager | null>(null);
-  const previousStageRef = useRef<GrowthStage | null>(null);
-  const previousTrainingRef = useRef<ActiveTraining | null>(null);
-  const previousExplorationResultRef = useRef<
-    (ExplorationResult & { locationName: string }) | null
-  >(null);
 
   // Standard updateState that just updates the state
   const updateState = useCallback(
@@ -122,98 +114,8 @@ export function GameProvider({ children }: GameProviderProps) {
     [],
   );
 
-  // Detect stage transitions via useEffect (idiomatic React pattern)
-  useEffect(() => {
-    const currentStage = state?.pet?.growth.stage ?? null;
-    const previousStage = previousStageRef.current;
-
-    // Reset ref when pet is null (game reset or no pet yet)
-    if (!state?.pet) {
-      previousStageRef.current = null;
-      return;
-    }
-
-    if (currentStage && previousStage && currentStage !== previousStage) {
-      setNotification({
-        type: "stageTransition",
-        previousStage: previousStage,
-        newStage: currentStage,
-        petName: state.pet.identity.name,
-      });
-    }
-
-    previousStageRef.current = currentStage;
-  }, [state?.pet]);
-
-  // Detect training completion via useEffect
-  useEffect(() => {
-    const currentTraining = state?.pet?.activeTraining ?? null;
-    const previousTraining = previousTrainingRef.current;
-
-    // Reset ref when pet is null
-    if (!state?.pet) {
-      previousTrainingRef.current = null;
-      return;
-    }
-
-    // Training completed: was training before, not training now, and was on last tick
-    // If ticksRemaining > 1, training was cancelled, not completed
-    const wasNaturalCompletion =
-      previousTraining &&
-      !currentTraining &&
-      previousTraining.ticksRemaining <= 1;
-
-    if (wasNaturalCompletion) {
-      const facility = getFacility(previousTraining.facilityId);
-      const session = getSession(
-        previousTraining.facilityId,
-        previousTraining.sessionType,
-      );
-
-      if (facility && session) {
-        const statsGained: Record<string, number> = {
-          [facility.primaryStat]: session.primaryStatGain,
-        };
-        if (session.secondaryStatGain > 0) {
-          statsGained[facility.secondaryStat] = session.secondaryStatGain;
-        }
-
-        setNotification({
-          type: "trainingComplete",
-          facilityName: facility.name,
-          statsGained,
-          petName: state.pet.identity.name,
-        });
-      }
-    }
-
-    previousTrainingRef.current = currentTraining;
-  }, [state?.pet]);
-
-  // Detect exploration completion via useEffect (using ref-based pattern for consistency)
-  useEffect(() => {
-    const currentResult = state?.lastExplorationResult ?? null;
-    const previousResult = previousExplorationResultRef.current;
-
-    // Reset ref when pet is null
-    if (!state?.pet) {
-      previousExplorationResultRef.current = null;
-      return;
-    }
-
-    // Only show notification for new results (avoid duplicates on re-renders)
-    if (currentResult && currentResult !== previousResult) {
-      setNotification({
-        type: "explorationComplete",
-        locationName: currentResult.locationName,
-        itemsFound: currentResult.itemsFound,
-        message: currentResult.message,
-        petName: state.pet.identity.name,
-      });
-    }
-
-    previousExplorationResultRef.current = currentResult;
-  }, [state?.lastExplorationResult, state?.pet]);
+  // Use the notification hook to handle state-based notifications
+  useGameNotifications(state, setNotification);
 
   const dismissOfflineReport = useCallback(() => {
     setOfflineReport(null);
