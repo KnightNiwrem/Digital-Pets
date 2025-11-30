@@ -7,6 +7,8 @@ import {
   spyOn,
   test,
 } from "bun:test";
+import { renderHook } from "@testing-library/react";
+import { Window } from "happy-dom";
 import * as facilitiesData from "@/game/data/facilities";
 import type {
   ActiveTraining,
@@ -16,8 +18,6 @@ import type {
   Pet,
 } from "@/game/types";
 import { GrowthStage, TrainingSessionType } from "@/game/types";
-import { renderHook } from "@testing-library/react";
-import { Window } from "happy-dom";
 import { useGameNotifications } from "./useGameNotifications";
 
 // Setup DOM environment for React hooks
@@ -156,7 +156,7 @@ describe("useGameNotifications", () => {
       primaryStat: "strength",
       secondaryStat: "endurance",
       // Added required fields for TrainingFacility type satisfaction if needed by the hook or simple return
-      facilityType: "strength", 
+      facilityType: "strength",
       description: "Test Gym",
       sessions: [],
       emoji: "🏋️",
