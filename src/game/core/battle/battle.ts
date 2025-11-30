@@ -108,7 +108,8 @@ export type BattleEventType =
   | "DEBUFF"
   | "DEFEAT"
   | "VICTORY"
-  | "FLEE";
+  | "FLEE"
+  | "TURN_END";
 
 /**
  * Event payload describing a battle action for the UI to replay.

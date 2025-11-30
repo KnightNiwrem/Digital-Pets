@@ -7,7 +7,7 @@ import {
   processOfflineCatchup,
 } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
-import { TICK_DURATION_MS } from "@/game/types/common";
+import { now, TICK_DURATION_MS } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
 
 /**
@@ -16,6 +16,13 @@ import type { GameState } from "@/game/types/gameState";
 export type StateUpdateCallback = (
   updater: (state: GameState) => GameState,
 ) => void;
+
+/**
+ * Maximum ticks to process in a single loop iteration.
+ * Prevents spiral of death when catching up after long inactivity.
+ * 100 ticks ≈ 50 minutes at 30s/tick.
+ */
+const MAX_TICKS_PER_LOOP = 100;
 
 /**
  * Game manager handles the game loop and tick processing.
@@ -38,7 +45,7 @@ export class GameManager {
     if (this.isRunning) return;
 
     this.isRunning = true;
-    this.lastTickTime = Date.now();
+    this.lastTickTime = now();
     this.accumulator = 0;
 
     // Use a tighter loop (1s) to check for tick processing
@@ -65,20 +72,19 @@ export class GameManager {
   private gameLoop(): void {
     if (!this.isRunning) return;
 
-    const now = Date.now();
-    const delta = now - this.lastTickTime;
-    this.lastTickTime = now;
+    const currentTime = now();
+    const delta = currentTime - this.lastTickTime;
+    this.lastTickTime = currentTime;
 
     this.accumulator += delta;
 
     // Process as many ticks as fit in the accumulator
     // Limit to a reasonable max to prevent spiral of death (e.g. 100 ticks)
     let ticksProcessed = 0;
-    const maxTicksPerLoop = 100;
 
     while (
       this.accumulator >= TICK_DURATION_MS &&
-      ticksProcessed < maxTicksPerLoop
+      ticksProcessed < MAX_TICKS_PER_LOOP
     ) {
       this.tick();
       this.accumulator -= TICK_DURATION_MS;
@@ -86,7 +92,7 @@ export class GameManager {
     }
 
     // If we hit the limit, just discard the rest of the accumulator to prevent spiral
-    if (ticksProcessed >= maxTicksPerLoop) {
+    if (ticksProcessed >= MAX_TICKS_PER_LOOP) {
       this.accumulator = 0;
     }
   }

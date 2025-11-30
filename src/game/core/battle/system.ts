@@ -33,20 +33,22 @@ export function processBattleRound(
     return state;
   }
 
+  // Monotonic counter for event ordering within this round
+  let eventOrder = 0;
+  const baseTime = now();
+  const nextTimestamp = () => baseTime + eventOrder++;
+
   // 1. Player Turn
   // We start with a fresh list of round events
   let currentBattle: BattleState = {
     ...state.activeBattle.battleState,
     roundEvents: [] as BattleEvent[],
   };
-  const _initialTurn = currentBattle.turn;
 
   // Execute player action
   currentBattle = executePlayerTurn(currentBattle, playerMove);
 
   // Capture events from logs that happened during player turn
-  // (In a more advanced refactor, executePlayerTurn would return events directly,
-  // but for now we parse the log or just infer events - to keep it simple we'll add a helper)
   currentBattle.roundEvents = [
     ...(currentBattle.roundEvents || []),
     {
@@ -55,7 +57,7 @@ export function processBattleRound(
       targetId: "enemy",
       moveName: playerMove.name,
       message: `Player used ${playerMove.name}`,
-      timestamp: now(),
+      timestamp: nextTimestamp(),
     },
   ];
 
@@ -67,7 +69,7 @@ export function processBattleRound(
       targetId: "enemy",
       message:
         currentBattle.phase === BattlePhase.Victory ? "Victory!" : "Defeat...",
-      timestamp: now() + 1,
+      timestamp: nextTimestamp(),
     });
 
     return {
@@ -85,16 +87,13 @@ export function processBattleRound(
     // The enemy logic is deterministic here
     currentBattle = executeEnemyTurn(currentBattle);
 
-    // We need to find what move the enemy used.
-    // Since executeEnemyTurn handles AI internally, we'd ideally extract that.
-    // For this refactor, we can check the last log entry or just generic "Enemy Attacked"
     if (currentBattle.roundEvents) {
       currentBattle.roundEvents.push({
         type: "ATTACK",
         actorId: "enemy",
         targetId: "player",
-        message: "Enemy attacked!", // We could improve this by returning the move from executeEnemyTurn
-        timestamp: now() + 2,
+        message: "Enemy attacked!",
+        timestamp: nextTimestamp(),
       });
     }
 
@@ -109,7 +108,7 @@ export function processBattleRound(
           currentBattle.phase === BattlePhase.Victory
             ? "Victory!"
             : "Defeat...",
-        timestamp: now() + 3,
+        timestamp: nextTimestamp(),
       });
 
       return {
@@ -129,11 +128,11 @@ export function processBattleRound(
     // Add end-of-turn event
     if (currentBattle.roundEvents) {
       currentBattle.roundEvents.push({
-        type: "BUFF", // Generic type for turn end resolution
+        type: "TURN_END",
         actorId: "player",
         targetId: "enemy",
         message: "Turn ended. Effects resolved.",
-        timestamp: now() + 4,
+        timestamp: nextTimestamp(),
       });
     }
   }
@@ -189,7 +188,11 @@ export function processFleeAttempt(state: GameState): GameState {
   };
 
   // Force phase to enemy turn if not already (it should be player turn when fleeing)
-  currentBattle.phase = BattlePhase.EnemyTurn;
+  // Avoid mutation - create new object if changing phase
+  currentBattle = {
+    ...currentBattle,
+    phase: BattlePhase.EnemyTurn,
+  };
 
   // Execute enemy turn
   currentBattle = executeEnemyTurn(currentBattle);
