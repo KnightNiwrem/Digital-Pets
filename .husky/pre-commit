@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+set -e
+
+bun check
+bun typecheck
+AGENT=1 bun test
