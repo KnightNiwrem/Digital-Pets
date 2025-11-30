@@ -5,7 +5,9 @@
 import { createDefaultBonusMaxStats } from "@/game/core/petStats";
 import { SPECIES } from "@/game/data/species";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
+import type { GameState } from "@/game/types/gameState";
 import type { Pet } from "@/game/types/pet";
+import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 
 /**
@@ -127,4 +129,38 @@ export function createSleepingTestPet(overrides: DeepPartial<Pet> = {}): Pet {
     },
     activityState: ActivityState.Sleeping,
   });
+}
+
+/**
+ * Create a test game state with a pet and optional overrides.
+ */
+export function createTestGameState(
+  pet: Pet | null = createTestPet(),
+  overrides: Partial<
+    Omit<GameState, "pet" | "player"> & {
+      player?: Partial<GameState["player"]>;
+    }
+  > = {},
+): GameState {
+  const now = Date.now();
+  const { player: playerOverrides, ...stateOverrides } = overrides;
+
+  return {
+    version: 1,
+    lastSaveTime: now,
+    totalTicks: 0,
+    pet,
+    player: {
+      inventory: { items: [] },
+      currency: { coins: 0 },
+      currentLocationId: "home",
+      skills: createInitialSkills(),
+      ...playerOverrides,
+    },
+    quests: [],
+    isInitialized: true,
+    lastDailyReset: now,
+    pendingEvents: [],
+    ...stateOverrides,
+  };
 }

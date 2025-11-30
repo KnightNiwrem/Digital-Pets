@@ -75,6 +75,7 @@ function createTestState(): GameState {
     },
     quests: [],
     isInitialized: true,
+    pendingEvents: [],
   };
 }
 
