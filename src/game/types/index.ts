@@ -5,6 +5,7 @@
 export * from "./activity";
 export * from "./common";
 export * from "./constants";
+export * from "./event";
 export * from "./gameState";
 export * from "./item";
 export * from "./location";

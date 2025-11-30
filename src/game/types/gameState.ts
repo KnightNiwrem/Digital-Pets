@@ -5,6 +5,7 @@
 import type { BattleState } from "@/game/core/battle/battle";
 import type { ExplorationResult, TrainingResult } from "./activity";
 import type { Tick, Timestamp } from "./common";
+import type { GameEvent } from "./event";
 import type { Pet } from "./pet";
 import type { QuestProgress } from "./quest";
 import { createInitialSkills, type PlayerSkills } from "./skill";
@@ -97,6 +98,13 @@ export interface GameState {
    * Per spec (time-mechanics.md): Daily reset occurs at midnight local time.
    */
   lastDailyReset: Timestamp;
+  /**
+   * Event queue containing transient events from the last tick or action.
+   * Events are cleared at the start of each tick. The UI tracks processed
+   * events by timestamp to avoid duplicates.
+   * Not persisted to storage.
+   */
+  pendingEvents: GameEvent[];
 }
 
 /**
@@ -123,5 +131,6 @@ export function createInitialGameState(): GameState {
     quests: [],
     isInitialized: false,
     lastDailyReset: currentTime,
+    pendingEvents: [],
   };
 }

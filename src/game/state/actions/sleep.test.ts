@@ -65,6 +65,7 @@ function createTestGameState(isSleeping: boolean): GameState {
     },
     quests: [],
     isInitialized: true,
+    pendingEvents: [],
   };
 }
 
@@ -83,6 +84,7 @@ function createEmptyGameState(): GameState {
     },
     quests: [],
     isInitialized: true,
+    pendingEvents: [],
   };
 }
 

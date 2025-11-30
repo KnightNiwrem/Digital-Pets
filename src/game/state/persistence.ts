@@ -20,11 +20,13 @@ export type LoadResult =
 /**
  * Save game state to localStorage.
  * Updates lastSaveTime before saving.
+ * Excludes transient pendingEvents from the saved state.
  */
 export function saveGame(state: GameState): boolean {
   try {
     const stateToSave: GameState = {
       ...state,
+      pendingEvents: [],
       lastSaveTime: Date.now(),
     };
     const serialized = JSON.stringify(stateToSave);
@@ -39,6 +41,7 @@ export function saveGame(state: GameState): boolean {
 /**
  * Load game state from localStorage.
  * Returns initial state if no save exists.
+ * Initializes pendingEvents to empty array (not persisted).
  */
 export function loadGame(): LoadResult {
   try {
@@ -58,7 +61,13 @@ export function loadGame(): LoadResult {
       );
     }
 
-    return { success: true, state: parsed };
+    // Ensure pendingEvents is initialized (not persisted)
+    const stateWithEvents: GameState = {
+      ...parsed,
+      pendingEvents: parsed.pendingEvents ?? [],
+    };
+
+    return { success: true, state: stateWithEvents };
   } catch (error) {
     console.error("Failed to load game:", error);
     return {

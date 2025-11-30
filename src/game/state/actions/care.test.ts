@@ -64,6 +64,7 @@ function createTestState(quests: QuestProgress[] = []): GameState {
     },
     quests,
     isInitialized: true,
+    pendingEvents: [],
   };
 }
 

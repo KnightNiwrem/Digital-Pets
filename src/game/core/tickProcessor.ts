@@ -2,6 +2,7 @@
  * Tick processor for batch processing multiple ticks.
  */
 
+import { emitEvents } from "@/game/core/events";
 import {
   applyExplorationCompletion,
   processExplorationTick,
@@ -18,7 +19,14 @@ import { applyExplorationResults } from "@/game/state/actions/exploration";
 import type { TrainingResult } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
-import { ActivityState } from "@/game/types/constants";
+import { ActivityState, type GrowthStage } from "@/game/types/constants";
+import {
+  createEvent,
+  type ExplorationCompleteEvent,
+  type GameEvent,
+  type StageTransitionEvent,
+  type TrainingCompleteEvent,
+} from "@/game/types/event";
 import type { GameState } from "@/game/types/gameState";
 import type {
   CareStatsSnapshot,
@@ -57,6 +65,7 @@ function applyDailyResetIfNeeded(
 
 /**
  * Process a single game tick, updating the entire game state.
+ * Emits events for significant occurrences (training/exploration completion, stage transitions).
  * @param state The current game state
  * @param currentTime Optional timestamp for the tick (defaults to now(), pass explicit time for offline catch-up)
  */
@@ -67,31 +76,41 @@ export function processGameTick(
   // Check for daily reset first
   const workingState = applyDailyResetIfNeeded(state, currentTime);
 
+  // Clear pending events at the start of this tick (new events are added at the end)
+  let updatedState: GameState = {
+    ...workingState,
+    pendingEvents: [],
+  };
+
   // If no pet, just update time
-  if (!workingState.pet) {
+  if (!updatedState.pet) {
     return {
-      ...workingState,
-      totalTicks: workingState.totalTicks + 1,
+      ...updatedState,
+      totalTicks: updatedState.totalTicks + 1,
       lastSaveTime: currentTime,
     };
   }
 
+  // Track previous stage for transition detection
+  const previousStage: GrowthStage = updatedState.pet.growth.stage;
+
   // Track if training was active before tick (to detect completion)
   const wasTraining =
-    workingState.pet.activityState === ActivityState.Training &&
-    workingState.pet.activeTraining !== undefined;
+    updatedState.pet.activityState === ActivityState.Training &&
+    updatedState.pet.activeTraining !== undefined;
 
   // Capture training result BEFORE processing tick (since processPetTick clears the training state)
   // Training completes when ticksRemaining === 1 (will be decremented to 0)
   let trainingResultBeforeCompletion: TrainingResult | null = null;
   let facilityId: string | null = null;
-  if (wasTraining && workingState.pet.activeTraining?.ticksRemaining === 1) {
-    trainingResultBeforeCompletion = completeTraining(workingState.pet);
-    facilityId = workingState.pet.activeTraining.facilityId;
+  if (wasTraining && updatedState.pet.activeTraining?.ticksRemaining === 1) {
+    trainingResultBeforeCompletion = completeTraining(updatedState.pet);
+    facilityId = updatedState.pet.activeTraining.facilityId;
   }
 
   // Process pet tick (handles training, care, growth, etc.)
-  const updatedPet = processPetTick(workingState.pet);
+  const updatedPet = processPetTick(updatedState.pet);
+  const petName = updatedPet.identity.name;
 
   // Detect training completion (was training, now not training)
   const trainingCompleted =
@@ -99,10 +118,28 @@ export function processGameTick(
     (updatedPet.activityState !== ActivityState.Training ||
       updatedPet.activeTraining === undefined);
 
-  let updatedState: GameState = {
-    ...workingState,
+  // Events to emit this tick (use currentTime for consistent timestamps)
+  const tickEvents: GameEvent[] = [];
+
+  // Detect stage transition
+  if (updatedPet.growth.stage !== previousStage) {
+    tickEvents.push(
+      createEvent<StageTransitionEvent>(
+        {
+          type: "stageTransition",
+          previousStage,
+          newStage: updatedPet.growth.stage,
+          petName,
+        },
+        currentTime,
+      ),
+    );
+  }
+
+  updatedState = {
+    ...updatedState,
     pet: updatedPet,
-    totalTicks: workingState.totalTicks + 1,
+    totalTicks: updatedState.totalTicks + 1,
     lastSaveTime: currentTime,
     // Clear any previous exploration result
     lastExplorationResult: undefined,
@@ -121,8 +158,9 @@ export function processGameTick(
       // Exploration completed - apply item drops to inventory
       const locationId = updatedPet.activeExploration.locationId;
       const location = getLocation(locationId);
+      const locationName = location?.name ?? "Unknown Location";
       const foragingLevel =
-        workingState.player.skills?.[SkillType.Foraging]?.level ?? 1;
+        updatedState.player.skills?.[SkillType.Foraging]?.level ?? 1;
       const { pet: completedPet, result } = applyExplorationCompletion(
         updatedPet,
         foragingLevel,
@@ -152,11 +190,28 @@ export function processGameTick(
         }
       }
 
-      // Store the result for UI notification
-      updatedState.lastExplorationResult = {
-        ...result,
-        locationName: location?.name ?? "Unknown Location",
+      // Store the result for UI notification (legacy support)
+      updatedState = {
+        ...updatedState,
+        lastExplorationResult: {
+          ...result,
+          locationName,
+        },
       };
+
+      // Emit exploration complete event
+      tickEvents.push(
+        createEvent<ExplorationCompleteEvent>(
+          {
+            type: "explorationComplete",
+            locationName,
+            itemsFound: result.itemsFound,
+            message: result.message,
+            petName,
+          },
+          currentTime,
+        ),
+      );
     } else {
       updatedState = {
         ...updatedState,
@@ -176,14 +231,36 @@ export function processGameTick(
       "any",
     );
 
-    // Store the training result for UI notification
+    // Store the training result for UI notification (legacy support)
     if (trainingResultBeforeCompletion && facilityId) {
       const facility = getFacility(facilityId);
-      updatedState.lastTrainingResult = {
-        ...trainingResultBeforeCompletion,
-        facilityName: facility?.name ?? "Unknown Facility",
+      const facilityName = facility?.name ?? "Unknown Facility";
+      updatedState = {
+        ...updatedState,
+        lastTrainingResult: {
+          ...trainingResultBeforeCompletion,
+          facilityName,
+        },
       };
+
+      // Emit training complete event using statsGained from the result
+      tickEvents.push(
+        createEvent<TrainingCompleteEvent>(
+          {
+            type: "trainingComplete",
+            facilityName,
+            statsGained: trainingResultBeforeCompletion.statsGained ?? {},
+            petName,
+          },
+          currentTime,
+        ),
+      );
     }
+  }
+
+  // Add all tick events to state
+  if (tickEvents.length > 0) {
+    updatedState = emitEvents(updatedState, ...tickEvents);
   }
 
   return updatedState;
