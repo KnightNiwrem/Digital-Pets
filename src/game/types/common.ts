@@ -74,23 +74,10 @@ export const TICKS_PER_HOUR = 120;
 export const TICKS_PER_DAY = 2880;
 
 /**
- * Ticks per month (86,400 = 30 days).
- * Used for adult substage duration.
- */
-export const TICKS_PER_MONTH = 86_400;
-
-/**
  * Convert milliseconds to ticks.
  */
 export function msToTicks(ms: number): Tick {
   return Math.floor(ms / TICK_DURATION_MS);
-}
-
-/**
- * Convert ticks to milliseconds.
- */
-export function ticksToMs(ticks: Tick): number {
-  return ticks * TICK_DURATION_MS;
 }
 
 /**
@@ -101,9 +88,9 @@ export function now(): Timestamp {
 }
 
 /**
- * Duration of one game tick in seconds.
+ * Duration of one game tick in seconds (internal use only).
  */
-export const TICK_DURATION_SECONDS = TICK_DURATION_MS / 1000;
+const TICK_DURATION_SECONDS = TICK_DURATION_MS / 1000;
 
 /**
  * Format ticks as a human-readable time string.

@@ -4,7 +4,6 @@
 
 import { expect, test } from "bun:test";
 import {
-  applyStatModifier,
   BATTLE_CONSTANTS,
   calculateDerivedStats,
   calculateStaminaRegen,
@@ -122,39 +121,10 @@ test("calculateDerivedStats calculates critical damage from cunning", () => {
   expect(derived.criticalDamage).toBe(expectedCritDmg);
 });
 
-test("calculateDerivedStats caps counter chance", () => {
-  const stats = {
-    strength: 10,
-    endurance: 10,
-    agility: 10,
-    precision: 10,
-    fortitude: 10,
-    cunning: 200,
-  };
-  const derived = calculateDerivedStats(stats);
-
-  expect(derived.counterChance).toBe(BATTLE_CONSTANTS.MAX_COUNTER_CHANCE);
-});
-
 test("calculateStaminaRegen returns percentage of max stamina", () => {
   const regen = calculateStaminaRegen(100);
   const expected = Math.floor(
     (100 * BATTLE_CONSTANTS.STAMINA_REGEN_PERCENT) / 100,
   );
   expect(regen).toBe(expected);
-});
-
-test("applyStatModifier increases stat for buff", () => {
-  const result = applyStatModifier(100, 20, false);
-  expect(result).toBe(120);
-});
-
-test("applyStatModifier decreases stat for debuff", () => {
-  const result = applyStatModifier(100, 20, true);
-  expect(result).toBe(80);
-});
-
-test("applyStatModifier returns minimum 1", () => {
-  const result = applyStatModifier(10, 99, true);
-  expect(result).toBeGreaterThanOrEqual(1);
 });

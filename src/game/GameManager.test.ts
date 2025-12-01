@@ -6,13 +6,13 @@ import { expect, mock, test } from "bun:test";
 import { BattlePhase, initializeBattle } from "@/game/core/battle/battle";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
-import { createTestPet } from "@/game/testing/createTestPet";
-import type { GameState } from "@/game/types/gameState";
-import { createInitialGameState } from "@/game/types/gameState";
 import {
   createDefaultBattleStats,
-  createDefaultResistances,
-} from "@/game/types/stats";
+  createTestPet,
+} from "@/game/testing/createTestPet";
+import type { GameState } from "@/game/types/gameState";
+import { createInitialGameState } from "@/game/types/gameState";
+import { createDefaultResistances } from "@/game/types/stats";
 import { calculateDerivedStats } from "./core/battle/stats";
 import type { Combatant } from "./core/battle/turn";
 import {

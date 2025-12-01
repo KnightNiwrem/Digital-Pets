@@ -60,22 +60,6 @@ export interface TurnAction {
 }
 
 /**
- * Result of a complete turn.
- */
-export interface TurnResult {
-  /** Actions taken this turn */
-  actions: TurnAction[];
-  /** Updated player state */
-  player: Combatant;
-  /** Updated enemy state */
-  enemy: Combatant;
-  /** Whether battle is over */
-  isBattleOver: boolean;
-  /** Winner if battle is over */
-  winner?: "player" | "enemy";
-}
-
-/**
  * Determine turn order based on initiative.
  */
 export function determineTurnOrder(

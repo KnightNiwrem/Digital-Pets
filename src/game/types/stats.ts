@@ -77,8 +77,6 @@ export interface DerivedBattleStats {
   criticalChance: number;
   /** Critical hit damage multiplier */
   criticalDamage: number;
-  /** Chance to counter-attack (percentage, 0-100) */
-  counterChance: number;
 }
 
 /**
@@ -98,19 +96,5 @@ export function createDefaultResistances(): DamageResistances {
     chemical: 0,
     thermal: 0,
     electric: 0,
-  };
-}
-
-/**
- * Create default (zero) battle stats.
- */
-export function createDefaultBattleStats(): BattleStats {
-  return {
-    strength: 0,
-    endurance: 0,
-    agility: 0,
-    precision: 0,
-    fortitude: 0,
-    cunning: 0,
   };
 }

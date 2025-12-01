@@ -4,10 +4,8 @@
 
 import { expect, test } from "bun:test";
 import { SPECIES } from "@/game/data/species";
-import {
-  createDefaultBattleStats,
-  createDefaultResistances,
-} from "@/game/types/stats";
+import { createDefaultBattleStats } from "@/game/testing/createTestPet";
+import { createDefaultResistances } from "@/game/types/stats";
 import {
   BattlePhase,
   calculateBattleRewards,

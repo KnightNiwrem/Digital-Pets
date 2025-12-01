@@ -35,10 +35,6 @@ export const BATTLE_CONSTANTS = {
   BASE_CRIT_MULTIPLIER: 1.5,
   /** Critical damage bonus per point of Cunning */
   CRIT_DAMAGE_PER_CUNNING: 0.01,
-  /** Counter chance per point of Cunning */
-  COUNTER_PER_CUNNING: 0.4,
-  /** Maximum counter chance (%) */
-  MAX_COUNTER_CHANCE: 30,
   /** Stamina regeneration per turn (percentage of max) */
   STAMINA_REGEN_PERCENT: 10,
 } as const;
@@ -90,12 +86,6 @@ export function calculateDerivedStats(
     BATTLE_CONSTANTS.BASE_CRIT_MULTIPLIER +
     cunning * BATTLE_CONSTANTS.CRIT_DAMAGE_PER_CUNNING;
 
-  // Counter chance: cunning based, capped
-  const counterChance = Math.min(
-    BATTLE_CONSTANTS.MAX_COUNTER_CHANCE,
-    cunning * BATTLE_CONSTANTS.COUNTER_PER_CUNNING,
-  );
-
   return {
     maxHealth,
     currentHealth: maxHealth,
@@ -105,7 +95,6 @@ export function calculateDerivedStats(
     dodgeChance,
     criticalChance,
     criticalDamage,
-    counterChance,
   };
 }
 
@@ -116,19 +105,4 @@ export function calculateStaminaRegen(maxStamina: number): number {
   return Math.floor(
     (maxStamina * BATTLE_CONSTANTS.STAMINA_REGEN_PERCENT) / 100,
   );
-}
-
-/**
- * Apply stat modifier from buff/debuff.
- * Returns the modified stat value.
- */
-export function applyStatModifier(
-  baseStat: number,
-  modifierPercent: number,
-  isDebuff: boolean,
-): number {
-  const multiplier = isDebuff
-    ? 1 - modifierPercent / 100
-    : 1 + modifierPercent / 100;
-  return Math.max(1, Math.floor(baseStat * multiplier));
 }
