@@ -31,6 +31,9 @@ export const willowbrookTown: Location = {
     FacilityType.Inn,
     FacilityType.QuestBoard,
   ],
+  requirements: {
+    questId: "tutorial_training",
+  },
   npcIds: ["shopkeeper_mira", "trainer_oak"],
   emoji: "🏘️",
 };
@@ -52,6 +55,7 @@ export const ironhavenTown: Location = {
   ],
   requirements: {
     stage: GrowthStage.Child,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.Shop,
@@ -84,6 +88,9 @@ export const tidecrestTown: Location = {
     FacilityType.Inn,
     FacilityType.QuestBoard,
   ],
+  requirements: {
+    questId: "tutorial_training",
+  },
   npcIds: ["fisher_marina", "captain_torrent"],
   emoji: "⚓",
 };
@@ -105,6 +112,7 @@ export const starfallSanctuary: Location = {
   ],
   requirements: {
     stage: GrowthStage.YoungAdult,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.Shop,

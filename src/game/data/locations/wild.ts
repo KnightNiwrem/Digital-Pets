@@ -28,6 +28,9 @@ export const sunnyMeadow: Location = {
   ],
   levelMin: 1,
   levelMax: 5,
+  requirements: {
+    questId: "tutorial_first_steps",
+  },
   facilities: [
     FacilityType.RestPoint,
     FacilityType.ForageZone,
@@ -60,6 +63,7 @@ export const mistyWoods: Location = {
   levelMax: 15,
   requirements: {
     stage: GrowthStage.Child,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.RestPoint,
@@ -89,6 +93,9 @@ export const whisperingCoast: Location = {
   ],
   levelMin: 3,
   levelMax: 10,
+  requirements: {
+    questId: "tutorial_training",
+  },
   facilities: [
     FacilityType.RestPoint,
     FacilityType.ForageZone,
@@ -119,6 +126,7 @@ export const scorchedHighlands: Location = {
   levelMax: 25,
   requirements: {
     stage: GrowthStage.Teen,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.RestPoint,
@@ -151,6 +159,7 @@ export const crystalCaves: Location = {
   levelMax: 20,
   requirements: {
     stage: GrowthStage.Child,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.RestPoint,
@@ -180,6 +189,7 @@ export const shadowDepths: Location = {
   levelMax: 30,
   requirements: {
     stage: GrowthStage.YoungAdult,
+    questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
   forageTableId: "depths_forage",
@@ -204,6 +214,9 @@ export const ancientGrove: Location = {
   ],
   levelMin: 4,
   levelMax: 12,
+  requirements: {
+    questId: "tutorial_training",
+  },
   facilities: [
     FacilityType.RestPoint,
     FacilityType.ForageZone,
@@ -233,6 +246,7 @@ export const mushroomHollow: Location = {
   levelMax: 16,
   requirements: {
     stage: GrowthStage.Child,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.RestPoint,
@@ -263,6 +277,7 @@ export const coralReef: Location = {
   levelMax: 18,
   requirements: {
     stage: GrowthStage.Child,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.RestPoint,
@@ -293,6 +308,7 @@ export const frozenPeaks: Location = {
   levelMax: 28,
   requirements: {
     stage: GrowthStage.Teen,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.RestPoint,
@@ -321,6 +337,7 @@ export const volcanicCaldera: Location = {
   levelMax: 32,
   requirements: {
     stage: GrowthStage.YoungAdult,
+    questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
   forageTableId: "caldera_forage",
@@ -346,6 +363,7 @@ export const sunkenTemple: Location = {
   levelMax: 26,
   requirements: {
     stage: GrowthStage.Teen,
+    questId: "tutorial_training",
   },
   facilities: [
     FacilityType.RestPoint,
@@ -375,6 +393,7 @@ export const glacialCavern: Location = {
   levelMax: 34,
   requirements: {
     stage: GrowthStage.YoungAdult,
+    questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
   forageTableId: "glacial_forage",
@@ -400,6 +419,7 @@ export const celestialSpire: Location = {
   levelMax: 40,
   requirements: {
     stage: GrowthStage.Adult,
+    questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
   forageTableId: "spire_forage",
