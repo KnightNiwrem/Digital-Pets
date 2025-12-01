@@ -22,6 +22,48 @@ import { checkAllRequirements } from "./requirements";
 import { grantQuestRewards, type RewardGrantResult } from "./rewards";
 
 /**
+ * Result of a location validation check.
+ */
+type LocationValidationResult =
+  | { valid: true }
+  | { valid: false; message: string };
+
+/**
+ * Validate that the player is at the required start location for a quest.
+ */
+function validateStartLocation(
+  quest: Quest,
+  currentLocationId: string,
+): LocationValidationResult {
+  if (quest.startLocationId && currentLocationId !== quest.startLocationId) {
+    return {
+      valid: false,
+      message: "You must be at the quest's starting location to accept it.",
+    };
+  }
+  return { valid: true };
+}
+
+/**
+ * Validate that the player is at the required completion location for a quest.
+ */
+function validateCompleteLocation(
+  quest: Quest,
+  currentLocationId: string,
+): LocationValidationResult {
+  if (
+    quest.completeLocationId &&
+    currentLocationId !== quest.completeLocationId
+  ) {
+    return {
+      valid: false,
+      message: "You must be at the quest's turn-in location to complete it.",
+    };
+  }
+  return { valid: true };
+}
+
+/**
  * Result of a quest action.
  */
 export interface QuestActionResult {
@@ -128,14 +170,15 @@ export function startQuest(
   }
 
   // Check if quest requires starting at a specific location
-  if (
-    quest.startLocationId &&
-    state.player.currentLocationId !== quest.startLocationId
-  ) {
+  const locationCheck = validateStartLocation(
+    quest,
+    state.player.currentLocationId,
+  );
+  if (!locationCheck.valid) {
     return {
       success: false,
       state,
-      message: "You must be at the quest's starting location to accept it.",
+      message: locationCheck.message,
     };
   }
 
@@ -195,14 +238,15 @@ export function completeQuest(
   }
 
   // Check if quest requires completing at a specific location
-  if (
-    quest.completeLocationId &&
-    state.player.currentLocationId !== quest.completeLocationId
-  ) {
+  const locationCheck = validateCompleteLocation(
+    quest,
+    state.player.currentLocationId,
+  );
+  if (!locationCheck.valid) {
     return {
       success: false,
       state,
-      message: "You must be at the quest's turn-in location to complete it.",
+      message: locationCheck.message,
     };
   }
 
@@ -484,14 +528,15 @@ export function startTimedQuest(
   }
 
   // Check if quest requires starting at a specific location
-  if (
-    quest.startLocationId &&
-    state.player.currentLocationId !== quest.startLocationId
-  ) {
+  const locationCheck = validateStartLocation(
+    quest,
+    state.player.currentLocationId,
+  );
+  if (!locationCheck.valid) {
     return {
       success: false,
       state,
-      message: "You must be at the quest's starting location to accept it.",
+      message: locationCheck.message,
     };
   }
 

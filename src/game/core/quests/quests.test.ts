@@ -671,21 +671,62 @@ test("startQuest rejects timed quests", () => {
 
 // Tests for location-based quest restrictions
 
+// Shared mock quest fixtures for location-based tests
+const locationStartQuest: Quest = {
+  id: "location_start_quest",
+  name: "Location Start Quest",
+  description: "A quest that must be started at a specific location",
+  type: QuestType.Side,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  startLocationId: "town_square",
+};
+
+const locationCompleteQuest: Quest = {
+  id: "location_complete_quest",
+  name: "Location Complete Quest",
+  description: "A quest that must be completed at a specific location",
+  type: QuestType.Side,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  completeLocationId: "guild_hall",
+};
+
+const differentLocationsQuest: Quest = {
+  id: "different_locations_quest",
+  name: "Different Locations Quest",
+  description: "Start in one place, complete in another",
+  type: QuestType.Side,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  startLocationId: "town_square",
+  completeLocationId: "guild_hall",
+};
+
+const timedLocationQuest: Quest = {
+  id: "timed_location_quest",
+  name: "Timed Location Quest",
+  description: "A timed quest with location requirement",
+  type: QuestType.Timed,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  durationMs: 3600000,
+  startLocationId: "arena",
+};
+
 test("startQuest fails when not at required start location", () => {
   const { quests } = require("@/game/data/quests");
 
   try {
-    quests.location_start_quest = {
-      id: "location_start_quest",
-      name: "Location Start Quest",
-      description: "A quest that must be started at a specific location",
-      type: QuestType.Side,
-      giverId: "test_npc",
-      requirements: [],
-      objectives: [],
-      rewards: [],
-      startLocationId: "town_square",
-    } as Quest;
+    quests.location_start_quest = locationStartQuest;
 
     // Player is at "home" by default
     const state = createTestState();
@@ -704,17 +745,7 @@ test("startQuest succeeds when at required start location", () => {
   const { quests } = require("@/game/data/quests");
 
   try {
-    quests.location_start_quest = {
-      id: "location_start_quest",
-      name: "Location Start Quest",
-      description: "A quest that must be started at a specific location",
-      type: QuestType.Side,
-      giverId: "test_npc",
-      requirements: [],
-      objectives: [],
-      rewards: [],
-      startLocationId: "town_square",
-    } as Quest;
+    quests.location_start_quest = locationStartQuest;
 
     const state = createTestState({
       player: {
@@ -748,17 +779,7 @@ test("completeQuest fails when not at required complete location", () => {
   const { quests } = require("@/game/data/quests");
 
   try {
-    quests.location_complete_quest = {
-      id: "location_complete_quest",
-      name: "Location Complete Quest",
-      description: "A quest that must be completed at a specific location",
-      type: QuestType.Side,
-      giverId: "test_npc",
-      requirements: [],
-      objectives: [],
-      rewards: [],
-      completeLocationId: "guild_hall",
-    } as Quest;
+    quests.location_complete_quest = locationCompleteQuest;
 
     const progress: QuestProgress = {
       questId: "location_complete_quest",
@@ -782,17 +803,7 @@ test("completeQuest succeeds when at required complete location", () => {
   const { quests } = require("@/game/data/quests");
 
   try {
-    quests.location_complete_quest = {
-      id: "location_complete_quest",
-      name: "Location Complete Quest",
-      description: "A quest that must be completed at a specific location",
-      type: QuestType.Side,
-      giverId: "test_npc",
-      requirements: [],
-      objectives: [],
-      rewards: [],
-      completeLocationId: "guild_hall",
-    } as Quest;
+    quests.location_complete_quest = locationCompleteQuest;
 
     const progress: QuestProgress = {
       questId: "location_complete_quest",
@@ -821,18 +832,7 @@ test("quest with different start and complete locations works correctly", () => 
   const { quests } = require("@/game/data/quests");
 
   try {
-    quests.different_locations_quest = {
-      id: "different_locations_quest",
-      name: "Different Locations Quest",
-      description: "Start in one place, complete in another",
-      type: QuestType.Side,
-      giverId: "test_npc",
-      requirements: [],
-      objectives: [],
-      rewards: [],
-      startLocationId: "town_square",
-      completeLocationId: "guild_hall",
-    } as Quest;
+    quests.different_locations_quest = differentLocationsQuest;
 
     // Start at town_square
     const startState = createTestState({
@@ -878,18 +878,7 @@ test("startTimedQuest fails when not at required start location", () => {
   const { quests } = require("@/game/data/quests");
 
   try {
-    quests.timed_location_quest = {
-      id: "timed_location_quest",
-      name: "Timed Location Quest",
-      description: "A timed quest with location requirement",
-      type: QuestType.Timed,
-      giverId: "test_npc",
-      requirements: [],
-      objectives: [],
-      rewards: [],
-      durationMs: 3600000,
-      startLocationId: "arena",
-    } as Quest;
+    quests.timed_location_quest = timedLocationQuest;
 
     // Player is at "home" by default
     const state = createTestState();
@@ -908,18 +897,7 @@ test("startTimedQuest succeeds when at required start location", () => {
   const { quests } = require("@/game/data/quests");
 
   try {
-    quests.timed_location_quest = {
-      id: "timed_location_quest",
-      name: "Timed Location Quest",
-      description: "A timed quest with location requirement",
-      type: QuestType.Timed,
-      giverId: "test_npc",
-      requirements: [],
-      objectives: [],
-      rewards: [],
-      durationMs: 3600000,
-      startLocationId: "arena",
-    } as Quest;
+    quests.timed_location_quest = timedLocationQuest;
 
     const state = createTestState({
       player: {
