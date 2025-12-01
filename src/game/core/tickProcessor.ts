@@ -276,6 +276,7 @@ export function processGameTick(
             type: "trainingComplete",
             facilityName,
             statsGained: trainingResultBeforeCompletion.statsGained ?? {},
+            message: trainingResultBeforeCompletion.message,
             petName,
           },
           currentTime,
@@ -412,7 +413,7 @@ export function processOfflineCatchup(
             facilityName: event.facilityName,
             result: {
               success: true,
-              message: `Completed training at ${event.facilityName}`,
+              message: event.message,
               statsGained: event.statsGained,
             },
           });

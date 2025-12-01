@@ -37,6 +37,7 @@ export interface TrainingCompleteEvent extends BaseGameEvent {
   type: "trainingComplete";
   facilityName: string;
   statsGained: Partial<BattleStats>;
+  message: string;
   petName: string;
 }
 
