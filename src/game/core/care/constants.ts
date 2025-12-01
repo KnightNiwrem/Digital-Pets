@@ -42,13 +42,6 @@ export const POOP_DECAY_AWAKE: Tick = 2;
 export const POOP_DECAY_SLEEPING: Tick = 1;
 
 /**
- * Legacy constants for reference (intervals in ticks).
- * These represent the effective time to generate poop in each state.
- */
-export const POOP_INTERVAL_AWAKE: Tick = 480;
-export const POOP_INTERVAL_SLEEPING: Tick = 960;
-
-/**
  * Base poop acceleration value in micro-units.
  * Per spec (care-system.md): 60 ticks (30 minutes) standard = 120 micro-units.
  * Item poop acceleration values are in micro-units and applied directly to the timer.

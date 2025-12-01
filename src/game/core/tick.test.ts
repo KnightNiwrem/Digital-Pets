@@ -3,8 +3,11 @@
  */
 
 import { expect, test } from "bun:test";
+import {
+  ENERGY_REGEN_AWAKE,
+  ENERGY_REGEN_SLEEPING,
+} from "@/game/core/care/constants";
 import { createTestPet } from "@/game/testing/createTestPet";
-import { ENERGY_REGEN_AWAKE, ENERGY_REGEN_SLEEPING } from "./energy";
 import { processPetTick } from "./tick";
 
 test("processPetTick increments ageTicks by 1", () => {

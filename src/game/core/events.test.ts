@@ -7,7 +7,6 @@ import {
   clearEvents,
   emitEvent,
   emitEvents,
-  getEventsByType,
   hasPendingEvents,
 } from "@/game/core/events";
 import {
@@ -17,7 +16,6 @@ import {
 import { GrowthStage } from "@/game/types/constants";
 import {
   createEvent,
-  type ExplorationCompleteEvent,
   type StageTransitionEvent,
   type TrainingCompleteEvent,
 } from "@/game/types/event";
@@ -101,60 +99,6 @@ test("clearEvents returns same state when already empty", () => {
   const clearedState = clearEvents(state);
 
   expect(clearedState).toBe(state);
-});
-
-test("getEventsByType filters events by type correctly", () => {
-  const stageEvent = createEvent<StageTransitionEvent>({
-    type: "stageTransition",
-    previousStage: GrowthStage.Baby,
-    newStage: GrowthStage.Child,
-    petName: "Test Pet",
-  });
-
-  const trainingEvent = createEvent<TrainingCompleteEvent>({
-    type: "trainingComplete",
-    facilityName: "Gym",
-    statsGained: { strength: 5 },
-    message: "Training complete! +5 strength",
-    petName: "Test Pet",
-  });
-
-  const explorationEvent = createEvent<ExplorationCompleteEvent>({
-    type: "explorationComplete",
-    locationName: "Forest",
-    itemsFound: [],
-    message: "Nothing found",
-    petName: "Test Pet",
-  });
-
-  const state = createTestGameState(createTestPet(), {
-    pendingEvents: [stageEvent, trainingEvent, explorationEvent],
-  });
-
-  const stageEvents = getEventsByType<StageTransitionEvent>(
-    state,
-    "stageTransition",
-  );
-  expect(stageEvents).toHaveLength(1);
-  expect(stageEvents[0]).toBe(stageEvent);
-
-  const trainingEvents = getEventsByType<TrainingCompleteEvent>(
-    state,
-    "trainingComplete",
-  );
-  expect(trainingEvents).toHaveLength(1);
-  expect(trainingEvents[0]).toBe(trainingEvent);
-});
-
-test("getEventsByType returns empty array for non-existent type", () => {
-  const state = createTestGameState(createTestPet());
-
-  const events = getEventsByType<StageTransitionEvent>(
-    state,
-    "stageTransition",
-  );
-
-  expect(events).toHaveLength(0);
 });
 
 test("hasPendingEvents returns true when events exist", () => {

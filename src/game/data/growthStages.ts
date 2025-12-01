@@ -9,12 +9,6 @@ import type { SpeciesGrowthStageStats } from "@/game/types/species";
 import { getSpeciesById } from "./species";
 
 /**
- * Default species ID used for deriving generic stage thresholds.
- * Florabit is the balanced starter, making it a good default reference.
- */
-const DEFAULT_REFERENCE_SPECIES = "florabit";
-
-/**
  * Convert a stage string to a GrowthStage constant.
  * Returns null if invalid.
  */
@@ -23,43 +17,6 @@ export function toGrowthStage(stage: string): GrowthStage | null {
     return stage as GrowthStage;
   }
   return null;
-}
-
-/**
- * Get the minimum age ticks for each growth stage, derived from a default species.
- * This is used by legacy functions that don't have access to a specific species.
- * Returns the minAgeTicks of the first substage of each main stage.
- */
-export function getDefaultStageMinAges(): Record<GrowthStage, Tick> {
-  const species = getSpeciesById(DEFAULT_REFERENCE_SPECIES);
-  if (!species) {
-    // Hardcoded fallback if species not found (should never happen)
-    return {
-      baby: 0,
-      child: 172_800,
-      teen: 432_000,
-      youngAdult: 691_200,
-      adult: 1_036_800,
-    };
-  }
-
-  const stageMinAges: Record<GrowthStage, Tick> = {
-    baby: 0,
-    child: 0,
-    teen: 0,
-    youngAdult: 0,
-    adult: 0,
-  };
-
-  // Find the first substage of each main stage
-  for (const stage of GROWTH_STAGE_ORDER) {
-    const firstSubstage = species.growthStages.find((gs) => gs.stage === stage);
-    if (firstSubstage) {
-      stageMinAges[stage] = firstSubstage.minAgeTicks;
-    }
-  }
-
-  return stageMinAges;
 }
 
 /**
@@ -106,16 +63,6 @@ export function getNextSpeciesStage(
     }
   }
   return null;
-}
-
-/**
- * Get the GrowthStage enum value from a species growth stage.
- */
-export function getGrowthStageFromSpeciesStage(
-  stageStats: SpeciesGrowthStageStats,
-): GrowthStage {
-  const stage = toGrowthStage(stageStats.stage);
-  return stage ?? "baby";
 }
 
 /**

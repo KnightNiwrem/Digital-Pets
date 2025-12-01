@@ -20,14 +20,6 @@ import {
   POOP_MICRO_THRESHOLD,
 } from "./constants";
 
-// Re-export constants for backwards compatibility with tests
-export {
-  MAX_POOP_COUNT,
-  POOP_DECAY_AWAKE,
-  POOP_DECAY_SLEEPING,
-  POOP_MICRO_THRESHOLD,
-};
-
 /**
  * Process poop generation for a single tick.
  * Uses decay rate approach: timer decreases by different amounts based on state.

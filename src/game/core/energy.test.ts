@@ -4,11 +4,10 @@
 
 import { expect, test } from "bun:test";
 import {
-  applyEnergyRegen,
   ENERGY_REGEN_AWAKE,
   ENERGY_REGEN_SLEEPING,
-  getEnergyRegenRate,
-} from "./energy";
+} from "@/game/core/care/constants";
+import { applyEnergyRegen, getEnergyRegenRate } from "./energy";
 
 test("getEnergyRegenRate returns correct rate for awake state", () => {
   expect(getEnergyRegenRate(false)).toBe(ENERGY_REGEN_AWAKE);
