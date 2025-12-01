@@ -620,6 +620,7 @@ test("processGameTick emits trainingComplete event when training completes", () 
   if (trainingEvent?.type === "trainingComplete") {
     expect(trainingEvent.facilityName).toBe("Strength Gym");
     expect(trainingEvent.statsGained.strength).toBeGreaterThan(0);
+    expect(trainingEvent.message).toBeDefined();
   }
 });
 
