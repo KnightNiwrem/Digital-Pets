@@ -2,7 +2,7 @@
  * Tests for battle reducer.
  */
 
-import { expect, mock, spyOn, test } from "bun:test";
+import { expect, spyOn, test } from "bun:test";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
 import { createDefaultBattleStats } from "@/game/testing/createTestPet";
