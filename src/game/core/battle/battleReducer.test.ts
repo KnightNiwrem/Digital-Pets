@@ -156,7 +156,7 @@ test("battleReducer emits battleEnd event when battle completes", () => {
     },
   };
   // Give enemy very low health so attack will defeat them
-  // Set dodgeChance to 0 to ensure the attack always hits
+  // Set dodgeChance to 0 and high precision to guarantee hit
   const lowHealthEnemy: Combatant = {
     ...battleState.enemy,
     derivedStats: {
