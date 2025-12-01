@@ -147,8 +147,16 @@ test("battleReducer emits playerAttack event", () => {
 
 test("battleReducer emits battleEnd event when battle completes", () => {
   const battleState = createTestBattleState();
+  // Give player high precision to guarantee hit (need 30+ for 100% hit chance)
+  const highPrecisionPlayer: Combatant = {
+    ...battleState.player,
+    battleStats: {
+      ...battleState.player.battleStats,
+      precision: 50,
+    },
+  };
   // Give enemy very low health so attack will defeat them
-  // Set dodgeChance to 0 to ensure the attack always hits
+  // Set dodgeChance to 0 and high precision to guarantee hit
   const lowHealthEnemy: Combatant = {
     ...battleState.enemy,
     derivedStats: {
@@ -161,6 +169,7 @@ test("battleReducer emits battleEnd event when battle completes", () => {
   const nearEndState: BattleState = {
     ...battleState,
     phase: BattlePhase.PlayerTurn,
+    player: highPrecisionPlayer,
     enemy: lowHealthEnemy,
   };
   const state = createTestGameState(nearEndState);
