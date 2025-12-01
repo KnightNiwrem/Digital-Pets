@@ -2,7 +2,6 @@
  * Status effect processing for the battle system.
  */
 
-import type { DamageType } from "@/game/types/constants";
 import {
   createStatusEffectId,
   type MoveEffect,
@@ -59,17 +58,14 @@ export function applyMoveEffect(
 export function processStatusEffects(effects: StatusEffect[]): {
   effects: StatusEffect[];
   dotDamage: number;
-  dotType?: DamageType;
 } {
   let dotDamage = 0;
-  let dotType: DamageType | undefined;
 
   const remainingEffects = effects
     .map((effect) => {
       // Process DoT damage
       if (effect.type === StatusEffectType.DamageOverTime) {
         dotDamage += effect.value;
-        dotType = effect.damageType;
       }
 
       // Reduce duration
@@ -80,7 +76,7 @@ export function processStatusEffects(effects: StatusEffect[]): {
     })
     .filter((effect) => effect.duration > 0);
 
-  return { effects: remainingEffects, dotDamage, dotType };
+  return { effects: remainingEffects, dotDamage };
 }
 
 /**

@@ -8,7 +8,22 @@ import { ActivityState, GrowthStage } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type { Pet } from "@/game/types/pet";
 import { createInitialSkills } from "@/game/types/skill";
+import type { BattleStats } from "@/game/types/stats";
 import { createDefaultResistances } from "@/game/types/stats";
+
+/**
+ * Create default (zero) battle stats for testing.
+ */
+export function createDefaultBattleStats(): BattleStats {
+  return {
+    strength: 0,
+    endurance: 0,
+    agility: 0,
+    precision: 0,
+    fortitude: 0,
+    cunning: 0,
+  };
+}
 
 /**
  * Factory function to create default test pet values.

@@ -203,9 +203,9 @@ export const heatWave: Move = {
 };
 
 /**
- * All learnable moves (excluding default moves).
+ * Learnable moves (excluding default moves).
  */
-export const LEARNABLE_MOVES: Move[] = [
+const LEARNABLE_MOVES: Move[] = [
   quickStrike,
   powerSlam,
   venomBite,

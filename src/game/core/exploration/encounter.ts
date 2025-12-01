@@ -93,53 +93,6 @@ function isEncounterAvailable(
 }
 
 /**
- * Roll for an encounter at a location.
- */
-export function rollEncounter(locationId: string, pet: Pet): EncounterResult {
-  const location = getLocation(locationId);
-  if (!location?.encounterTableId) {
-    return { hasEncounter: false };
-  }
-
-  const encounterTable = getEncounterTable(location.encounterTableId);
-  if (!encounterTable) {
-    return { hasEncounter: false };
-  }
-
-  // Roll for whether any encounter happens
-  if (Math.random() > encounterTable.baseEncounterChance) {
-    return { hasEncounter: false };
-  }
-
-  // Filter available encounters
-  const availableEntries = encounterTable.entries.filter((entry) =>
-    isEncounterAvailable(entry, pet.growth.stage),
-  );
-
-  if (availableEntries.length === 0) {
-    return { hasEncounter: false };
-  }
-
-  // Roll for specific encounter
-  const roll = Math.random();
-  let cumulativeProbability = 0;
-
-  for (const entry of availableEntries) {
-    cumulativeProbability += entry.probability;
-    if (roll <= cumulativeProbability) {
-      return generateEncounter(entry, locationId, pet);
-    }
-  }
-
-  // Fallback to first available
-  const firstEntry = availableEntries[0];
-  if (!firstEntry) {
-    return { hasEncounter: false };
-  }
-  return generateEncounter(firstEntry, locationId, pet);
-}
-
-/**
  * Generate an encounter from an entry.
  */
 function generateEncounter(

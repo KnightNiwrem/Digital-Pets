@@ -5,11 +5,9 @@
 import { expect, test } from "bun:test";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
+import { createDefaultBattleStats } from "@/game/testing/createTestPet";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
-import {
-  createDefaultBattleStats,
-  createDefaultResistances,
-} from "@/game/types/stats";
+import { createDefaultResistances } from "@/game/types/stats";
 import { BattlePhase, type BattleState, initializeBattle } from "./battle";
 import { battleReducer } from "./battleReducer";
 import { calculateDerivedStats } from "./stats";

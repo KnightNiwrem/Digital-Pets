@@ -127,20 +127,6 @@ export type GameEvent =
   | BattleEndEvent;
 
 /**
- * Result type for actions that produce events.
- * Actions return both the new state and any events that occurred.
- *
- * Note: This interface is defined for future use when actions are refactored
- * to emit events directly. Currently, events are emitted by the tick processor.
- */
-export interface ActionResult<T> {
-  /** Updated game state */
-  state: T;
-  /** Events emitted by this action */
-  events: GameEvent[];
-}
-
-/**
  * Create a new event with the specified or current timestamp.
  * @param event The event data without timestamp
  * @param timestamp Optional timestamp (defaults to Date.now())
