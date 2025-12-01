@@ -142,7 +142,10 @@ test("canTravel fails when no pet", () => {
 });
 
 test("canTravel fails when pet is sleeping", () => {
-  const state = createTestState({ pet: createSleepingTestPet() });
+  const state = createTestState({
+    pet: createSleepingTestPet(),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
+  });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
   expect(result.message).toContain("sleeping");
@@ -151,6 +154,7 @@ test("canTravel fails when pet is sleeping", () => {
 test("canTravel fails when pet is training", () => {
   const state = createTestState({
     pet: createTestPet({ activityState: ActivityState.Training }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
@@ -160,6 +164,7 @@ test("canTravel fails when pet is training", () => {
 test("canTravel fails when pet is exploring", () => {
   const state = createTestState({
     pet: createTestPet({ activityState: ActivityState.Exploring }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
@@ -169,6 +174,7 @@ test("canTravel fails when pet is exploring", () => {
 test("canTravel fails when pet is battling", () => {
   const state = createTestState({
     pet: createTestPet({ activityState: ActivityState.Battling }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
@@ -192,6 +198,7 @@ test("canTravel fails for disconnected locations", () => {
 test("canTravel fails when energy insufficient", () => {
   const state = createTestState({
     pet: createTestPet({ energyStats: { energy: toMicro(2) } }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
@@ -202,6 +209,7 @@ test("canTravel fails when energy insufficient", () => {
 test("canTravel succeeds with sufficient energy", () => {
   const state = createTestState({
     pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(true);
@@ -216,6 +224,7 @@ test("canTravel fails when stage requirement not met", () => {
       energyStats: { energy: toMicro(50) },
     }),
     currentLocationId: "meadow",
+    quests: [{ questId: "tutorial_training", isCompleted: true }],
   });
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
@@ -231,9 +240,30 @@ test("canTravel succeeds when stage requirement met", () => {
       energyStats: { energy: toMicro(50) },
     }),
     currentLocationId: "meadow",
+    quests: [{ questId: "tutorial_training", isCompleted: true }],
   });
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(true);
+});
+
+test("canTravel fails when quest requirement not completed", () => {
+  const state = createTestState({
+    pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: false }],
+  });
+  const result = canTravel(state, "meadow");
+  expect(result.success).toBe(false);
+  expect(result.message).toBe("Quest required");
+});
+
+test("canTravel fails when quest requirement not started", () => {
+  const state = createTestState({
+    pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
+    quests: [],
+  });
+  const result = canTravel(state, "meadow");
+  expect(result.success).toBe(false);
+  expect(result.message).toBe("Quest required");
 });
 
 // travel tests
@@ -249,6 +279,7 @@ test("travel succeeds and deducts energy", () => {
   const initialEnergy = toMicro(50);
   const state = createTestState({
     pet: createTestPet({ energyStats: { energy: initialEnergy } }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const result = travel(state, "meadow");
 
@@ -261,6 +292,7 @@ test("travel succeeds and deducts energy", () => {
 test("travel preserves other state properties", () => {
   const state = createTestState({
     pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   state.player.currency.coins = 100;
   const result = travel(state, "meadow");
@@ -272,6 +304,7 @@ test("travel preserves other state properties", () => {
 test("travel does not mutate original state", () => {
   const state = createTestState({
     pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const originalLocation = state.player.currentLocationId;
   const originalEnergy = state.pet?.energyStats.energy;
@@ -286,6 +319,7 @@ test("travel energy cannot go below 0", () => {
   // Set energy to exactly the cost
   const state = createTestState({
     pet: createTestPet({ energyStats: { energy: toMicro(5) } }),
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   const result = travel(state, "meadow");
 
@@ -296,10 +330,11 @@ test("travel energy cannot go below 0", () => {
 test("travel updates quest progress for Visit objectives", () => {
   const state = createTestState({
     pet: createTestPet({ energyStats: { energy: toMicro(50) } }),
-    quests: [],
+    quests: [{ questId: "tutorial_first_steps", isCompleted: true }],
   });
   // Add an active quest with a visit objective for meadow
   state.quests = [
+    ...state.quests,
     {
       questId: "tutorial_exploration",
       state: "active",
@@ -310,5 +345,8 @@ test("travel updates quest progress for Visit objectives", () => {
   const result = travel(state, "meadow");
 
   expect(result.success).toBe(true);
-  expect(result.state.quests[0]?.objectiveProgress.visit_meadow).toBe(1);
+  const explorationQuest = result.state.quests.find(
+    (q) => q.questId === "tutorial_exploration",
+  );
+  expect(explorationQuest?.objectiveProgress.visit_meadow).toBe(1);
 });
