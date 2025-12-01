@@ -154,11 +154,11 @@ Follow this workflow when implementing new features:
 1. **Create a feature branch** if on main: `git checkout -b feature/<name>`
 2. **Implement the feature**, making commits as you go (pre-commit hooks will validate each commit) so there is no need to manually validate
 3. **Push and open a PR** for the branch using the `gh` cli
-4. **Wait ~10 minutes** for PR feedback comments
+4. **Wait ~10 minutes** for PR feedback comments by using `sleep`
 5. **Fetch and review PR feedback** comments left after your latest commit using the `github` MCP server
 6. **Evaluate each review comment** and determine if it's valid
 7. **Address valid issues** with code changes
 8. **Commit and push** to the current branch
 9. **Request re-review** from Copilot using the `gh pr edit` with the `--add-reviewer` flag
-10. **Wait ~10 minutes** again for PR feedback comments
+10. **Wait ~10 minutes** again for PR feedback comments by using `sleep`
 11. **Repeat from step 5** until the PR is approved

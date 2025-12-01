@@ -2,7 +2,7 @@
  * Tests for battle reducer.
  */
 
-import { expect, type Mock, mock, test } from "bun:test";
+import { expect, mock, spyOn, test } from "bun:test";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
 import { createDefaultBattleStats } from "@/game/testing/createTestPet";
@@ -83,9 +83,7 @@ test("battleReducer returns unchanged state when not player turn", () => {
 });
 
 test("battleReducer returns unchanged state when move not found", () => {
-  const originalWarn = console.warn;
-  const mockWarn: Mock<(...args: unknown[]) => void> = mock();
-  console.warn = mockWarn;
+  const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
 
   try {
     const battleState = createTestBattleState();
@@ -98,9 +96,9 @@ test("battleReducer returns unchanged state when move not found", () => {
     const newState = battleReducer(state, action, 1000);
 
     expect(newState).toBe(state);
-    expect(mockWarn).toHaveBeenCalledWith("Move not found: Nonexistent Move");
+    expect(warnSpy).toHaveBeenCalledWith("Move not found: Nonexistent Move");
   } finally {
-    console.warn = originalWarn;
+    warnSpy.mockRestore();
   }
 });
 
