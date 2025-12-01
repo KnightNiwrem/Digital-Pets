@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { areAllRequiredObjectivesComplete } from "@/game/core/quests";
 import { getItemById } from "@/game/data/items";
 import type { Quest, QuestProgress, QuestReward } from "@/game/types/quest";
+import { formatTimeRemaining } from "./formatTimeRemaining";
 import { ObjectiveList } from "./ObjectiveList";
+import { hasExpiration } from "./questUtils";
 
 interface QuestDetailProps {
   quest: Quest;
@@ -67,6 +69,14 @@ export function QuestDetail({
       <CardContent className="space-y-4">
         {/* Description */}
         <p className="text-sm text-muted-foreground">{quest.description}</p>
+
+        {/* Expiration timer */}
+        {isActive && hasExpiration(quest.type) && progress?.expiresAt && (
+          <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-md">
+            <span>⏰</span>
+            <span>Expires in: {formatTimeRemaining(progress.expiresAt)}</span>
+          </div>
+        )}
 
         {/* Objectives */}
         {(isActive || isCompleted) && progress && (

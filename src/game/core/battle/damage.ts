@@ -76,14 +76,14 @@ export function calculateHitChance(
  * Roll for whether an attack hits.
  */
 export function rollHit(hitChance: number): boolean {
-  return Math.random() * 100 < hitChance;
+  return Math.random() * 100 <= hitChance;
 }
 
 /**
  * Roll for whether an attack is a critical hit.
  */
 export function rollCritical(criticalChance: number): boolean {
-  return Math.random() * 100 < criticalChance;
+  return Math.random() * 100 <= criticalChance;
 }
 
 /**
