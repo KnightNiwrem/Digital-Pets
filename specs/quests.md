@@ -16,6 +16,8 @@ Each quest contains:
 | objectives | Tasks to complete |
 | rewards | Items, currency, unlocks |
 | chain | Next quest ID in series (optional) |
+| startLocationId | Location where quest can be accepted (optional) |
+| completeLocationId | Location where quest can be turned in (optional) |
 
 ## Quest Types
 
@@ -201,6 +203,26 @@ Weekly quests have larger objectives and better rewards than dailies.
 
 Timed quests have a fixed duration and must be completed before time runs out.
 Unlike daily/weekly quests, they enter the Expired state if not completed in time.
+
+## Location-Based Quests
+
+Quests can be restricted to specific locations for starting and/or completing:
+
+| Property | Description |
+|----------|-------------|
+| startLocationId | Player must be at this location to accept the quest |
+| completeLocationId | Player must be at this location to turn in the quest |
+
+### Location Restriction Combinations
+
+| Start Location | Complete Location | Behavior |
+|----------------|-------------------|----------|
+| Not set | Not set | Quest can be accepted and completed anywhere |
+| Set | Not set | Quest must be accepted at specific location, can be completed anywhere |
+| Not set | Set | Quest can be accepted anywhere, must be turned in at specific location |
+| Set | Set | Quest must be accepted at one location, turned in at another (or same) |
+
+This simulates location-specific quest boards where players must physically travel to accept quests and return to turn them in.
 
 ## Hidden Quests
 

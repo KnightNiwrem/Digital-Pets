@@ -668,3 +668,248 @@ test("startQuest rejects timed quests", () => {
     delete quests.timed_via_startquest;
   }
 });
+
+// Tests for location-based quest restrictions
+
+// Shared mock quest fixtures for location-based tests
+const locationStartQuest: Quest = {
+  id: "location_start_quest",
+  name: "Location Start Quest",
+  description: "A quest that must be started at a specific location",
+  type: QuestType.Side,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  startLocationId: "town_square",
+};
+
+const locationCompleteQuest: Quest = {
+  id: "location_complete_quest",
+  name: "Location Complete Quest",
+  description: "A quest that must be completed at a specific location",
+  type: QuestType.Side,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  completeLocationId: "guild_hall",
+};
+
+const differentLocationsQuest: Quest = {
+  id: "different_locations_quest",
+  name: "Different Locations Quest",
+  description: "Start in one place, complete in another",
+  type: QuestType.Side,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  startLocationId: "town_square",
+  completeLocationId: "guild_hall",
+};
+
+const timedLocationQuest: Quest = {
+  id: "timed_location_quest",
+  name: "Timed Location Quest",
+  description: "A timed quest with location requirement",
+  type: QuestType.Timed,
+  giverId: "test_npc",
+  requirements: [],
+  objectives: [],
+  rewards: [],
+  durationMs: 3600000,
+  startLocationId: "arena",
+};
+
+test("startQuest fails when not at required start location", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.location_start_quest = locationStartQuest;
+
+    // Player is at "home" by default
+    const state = createTestState();
+    const result = startQuest(state, "location_start_quest");
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(
+      "You must be at the quest's starting location to accept it.",
+    );
+  } finally {
+    delete quests.location_start_quest;
+  }
+});
+
+test("startQuest succeeds when at required start location", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.location_start_quest = locationStartQuest;
+
+    const state = createTestState({
+      player: {
+        ...createTestState().player,
+        currentLocationId: "town_square",
+      },
+    });
+    const result = startQuest(state, "location_start_quest");
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Started quest: Location Start Quest");
+  } finally {
+    delete quests.location_start_quest;
+  }
+});
+
+test("startQuest succeeds when no start location restriction", () => {
+  // tutorialFirstSteps has no startLocationId, so it should work from any location
+  const state = createTestState({
+    player: {
+      ...createTestState().player,
+      currentLocationId: "random_location",
+    },
+  });
+  const result = startQuest(state, tutorialFirstSteps.id);
+
+  expect(result.success).toBe(true);
+});
+
+test("completeQuest fails when not at required complete location", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.location_complete_quest = locationCompleteQuest;
+
+    const progress: QuestProgress = {
+      questId: "location_complete_quest",
+      state: QuestState.Active,
+      objectiveProgress: {},
+    };
+    // Player is at "home" by default
+    const state = createTestState({}, [progress]);
+    const result = completeQuest(state, "location_complete_quest");
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(
+      "You must be at the quest's turn-in location to complete it.",
+    );
+  } finally {
+    delete quests.location_complete_quest;
+  }
+});
+
+test("completeQuest succeeds when at required complete location", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.location_complete_quest = locationCompleteQuest;
+
+    const progress: QuestProgress = {
+      questId: "location_complete_quest",
+      state: QuestState.Active,
+      objectiveProgress: {},
+    };
+    const state = createTestState(
+      {
+        player: {
+          ...createTestState().player,
+          currentLocationId: "guild_hall",
+        },
+      },
+      [progress],
+    );
+    const result = completeQuest(state, "location_complete_quest");
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Completed quest: Location Complete Quest");
+  } finally {
+    delete quests.location_complete_quest;
+  }
+});
+
+test("quest with different start and complete locations works correctly", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.different_locations_quest = differentLocationsQuest;
+
+    // Start at town_square
+    const startState = createTestState({
+      player: {
+        ...createTestState().player,
+        currentLocationId: "town_square",
+      },
+    });
+    const startResult = startQuest(startState, "different_locations_quest");
+
+    expect(startResult.success).toBe(true);
+
+    // Try to complete at town_square (should fail)
+    const failCompleteResult = completeQuest(
+      startResult.state,
+      "different_locations_quest",
+    );
+    expect(failCompleteResult.success).toBe(false);
+    expect(failCompleteResult.message).toBe(
+      "You must be at the quest's turn-in location to complete it.",
+    );
+
+    // Move to guild_hall and complete
+    const movedState = {
+      ...startResult.state,
+      player: {
+        ...startResult.state.player,
+        currentLocationId: "guild_hall",
+      },
+    };
+    const completeResult = completeQuest(
+      movedState,
+      "different_locations_quest",
+    );
+
+    expect(completeResult.success).toBe(true);
+  } finally {
+    delete quests.different_locations_quest;
+  }
+});
+
+test("startTimedQuest fails when not at required start location", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.timed_location_quest = timedLocationQuest;
+
+    // Player is at "home" by default
+    const state = createTestState();
+    const result = startTimedQuest(state, "timed_location_quest");
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(
+      "You must be at the quest's starting location to accept it.",
+    );
+  } finally {
+    delete quests.timed_location_quest;
+  }
+});
+
+test("startTimedQuest succeeds when at required start location", () => {
+  const { quests } = require("@/game/data/quests");
+
+  try {
+    quests.timed_location_quest = timedLocationQuest;
+
+    const state = createTestState({
+      player: {
+        ...createTestState().player,
+        currentLocationId: "arena",
+      },
+    });
+    const result = startTimedQuest(state, "timed_location_quest");
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Started quest: Timed Location Quest");
+  } finally {
+    delete quests.timed_location_quest;
+  }
+});

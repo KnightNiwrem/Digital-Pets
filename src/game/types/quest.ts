@@ -145,6 +145,10 @@ export interface Quest {
   chainPrevious?: string;
   /** Duration in milliseconds for timed quests (required for Timed type) */
   durationMs?: number;
+  /** Location ID where quest can be started (omit for any location) */
+  startLocationId?: string;
+  /** Location ID where quest can be completed (omit for any location) */
+  completeLocationId?: string;
 }
 
 /**
