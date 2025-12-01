@@ -95,29 +95,3 @@ export function processBattleTick(
 
   return state;
 }
-
-/**
- * Process a player attack action and emit events.
- * Called directly from UI when player selects a move.
- * Returns the new state with battle updates and events.
- */
-export function processPlayerAttack(
-  state: GameState,
-  newBattleState: BattleState,
-  moveName: string,
-  currentTime: number = Date.now(),
-): GameState {
-  if (!state.activeBattle) return state;
-
-  return emitBattleAction(
-    state,
-    newBattleState,
-    {
-      action: "playerAttack",
-      actorName: state.activeBattle.battleState.player.name,
-      targetName: state.activeBattle.battleState.enemy.name,
-      moveName,
-    },
-    currentTime,
-  );
-}

@@ -8,9 +8,6 @@ import {
 } from "@/game/core/care/constants";
 import type { MicroValue } from "@/game/types/common";
 
-// Re-export constants for backwards compatibility with tests
-export { ENERGY_REGEN_AWAKE, ENERGY_REGEN_SLEEPING };
-
 /**
  * Get energy regeneration rate based on sleep state.
  */

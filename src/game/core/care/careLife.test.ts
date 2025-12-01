@@ -4,6 +4,7 @@
 
 import { expect, test } from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { calculateCareLifeChange, type MaxCareStats } from "./careLife";
 import {
   CARE_LIFE_DRAIN_1_STAT,
   CARE_LIFE_DRAIN_2_STATS,
@@ -12,9 +13,7 @@ import {
   CARE_LIFE_RECOVERY_ABOVE_50,
   CARE_LIFE_RECOVERY_ABOVE_75,
   CARE_LIFE_RECOVERY_AT_100,
-  calculateCareLifeChange,
-  type MaxCareStats,
-} from "./careLife";
+} from "./constants";
 
 // Baby stage max stats - using same value for all for simplicity
 const MAX_CARE_STATS: MaxCareStats = {

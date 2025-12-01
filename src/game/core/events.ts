@@ -44,16 +44,6 @@ export function clearEvents(state: GameState): GameState {
 }
 
 /**
- * Get pending events of a specific type.
- */
-export function getEventsByType<T extends GameEvent>(
-  state: GameState,
-  type: T["type"],
-): T[] {
-  return state.pendingEvents.filter((e) => e.type === type) as T[];
-}
-
-/**
  * Check if there are any pending events.
  */
 export function hasPendingEvents(state: GameState): boolean {

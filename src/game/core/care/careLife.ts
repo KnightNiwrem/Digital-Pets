@@ -19,20 +19,6 @@ import {
   POOP_CARE_LIFE_DRAIN_THRESHOLD,
 } from "./constants";
 
-// Re-export constants for backwards compatibility with tests
-export {
-  CARE_LIFE_DRAIN_1_STAT,
-  CARE_LIFE_DRAIN_2_STATS,
-  CARE_LIFE_DRAIN_3_STATS,
-  CARE_LIFE_DRAIN_POOP,
-  CARE_LIFE_RECOVERY_ABOVE_50,
-  CARE_LIFE_RECOVERY_ABOVE_75,
-  CARE_LIFE_RECOVERY_AT_100,
-  CARE_LIFE_RECOVERY_THRESHOLD_100,
-  CARE_LIFE_RECOVERY_THRESHOLD_75,
-  CARE_LIFE_RECOVERY_THRESHOLD_50,
-};
-
 /**
  * Maximum care stats for percentage calculations.
  */
