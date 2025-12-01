@@ -84,7 +84,7 @@ Pre-commit hooks automatically run `bun check`, `bun typecheck`, and `bun test` 
 If you need to verify changes without committing (e.g., during debugging), you can run:
 
 ```bash
-bun check && bun typecheck && bun test
+bun check && bun typecheck && AGENTS=1 bun test
 ```
 
 ## Code Style Guidelines
