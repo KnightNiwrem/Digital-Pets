@@ -127,6 +127,18 @@ export function startQuest(
     };
   }
 
+  // Check if quest requires starting at a specific location
+  if (
+    quest.startLocationId &&
+    state.player.currentLocationId !== quest.startLocationId
+  ) {
+    return {
+      success: false,
+      state,
+      message: "You must be at the quest's starting location to accept it.",
+    };
+  }
+
   const progress = createQuestProgress(questId);
   const newQuests = [...state.quests, progress];
 
@@ -179,6 +191,18 @@ export function completeQuest(
       success: false,
       state,
       message: "Not all objectives are complete.",
+    };
+  }
+
+  // Check if quest requires completing at a specific location
+  if (
+    quest.completeLocationId &&
+    state.player.currentLocationId !== quest.completeLocationId
+  ) {
+    return {
+      success: false,
+      state,
+      message: "You must be at the quest's turn-in location to complete it.",
     };
   }
 
@@ -456,6 +480,18 @@ export function startTimedQuest(
         currentState === QuestState.Locked
           ? "Quest requirements not met."
           : "Quest is already in progress, completed, or expired.",
+    };
+  }
+
+  // Check if quest requires starting at a specific location
+  if (
+    quest.startLocationId &&
+    state.player.currentLocationId !== quest.startLocationId
+  ) {
+    return {
+      success: false,
+      state,
+      message: "You must be at the quest's starting location to accept it.",
     };
   }
 
