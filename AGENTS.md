@@ -77,11 +77,11 @@ This project is **not live yet**. Breaking changes to reach the ideal code state
 
 ## Validation Requirements
 
-Pre-commit hooks automatically run `bun check`, `bun typecheck`, and `bun test` when you commit. You do not need to run these manually before committing—just commit your changes and the hooks will validate them.
+Pre-commit hooks automatically run `bun check`, `bun typecheck`, and `bun test` when you commit. You do not need to run these manually before committing. Just commit your changes and the hooks will validate them.
 
 **Important:** Never use `--no-verify` with `git commit`. Pre-commit checks must always run to ensure code quality.
 
-If you need to verify changes without committing (e.g., during development or debugging), you can run:
+If you need to verify changes without committing (e.g., during debugging), you can run:
 
 ```bash
 bun check && bun typecheck && bun test
@@ -152,13 +152,13 @@ Components are manually added to `src/components/ui/`. When adding new shadcn/ui
 Follow this workflow when implementing new features:
 
 1. **Create a feature branch** if on main: `git checkout -b feature/<name>`
-2. **Implement the feature**, making commits as you go (pre-commit hooks will validate each commit)
-3. **Push and open a PR** for the branch
+2. **Implement the feature**, making commits as you go (pre-commit hooks will validate each commit) so there is no need to manually validate
+3. **Push and open a PR** for the branch using the `gh` cli
 4. **Wait ~10 minutes** for PR feedback comments
-5. **Fetch and review PR feedback** comments left after your latest commit
+5. **Fetch and review PR feedback** comments left after your latest commit using the `github` MCP server
 6. **Evaluate each review comment** and determine if it's valid
 7. **Address valid issues** with code changes
 8. **Commit and push** to the current branch
-9. **Request re-review** from Copilot
+9. **Request re-review** from Copilot using the `gh pr edit` with the `--add-reviewer` flag
 10. **Wait ~10 minutes** again for PR feedback comments
 11. **Repeat from step 5** until the PR is approved
