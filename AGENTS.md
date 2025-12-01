@@ -77,13 +77,15 @@ This project is **not live yet**. Breaking changes to reach the ideal code state
 
 ## Validation Requirements
 
-Before completing any task, ensure all checks pass:
+Pre-commit hooks automatically run `bun check`, `bun typecheck`, and `bun test` when you commit. You do not need to run these manually before committing—just commit your changes and the hooks will validate them.
+
+**Important:** Never use `--no-verify` with `git commit`. Pre-commit checks must always run to ensure code quality.
+
+If you need to verify changes without committing (e.g., during development or debugging), you can run:
 
 ```bash
 bun check && bun typecheck && bun test
 ```
-
-Run these commands in sequence. If any fail, fix the issues before proceeding.
 
 ## Code Style Guidelines
 
@@ -144,3 +146,19 @@ Components are manually added to `src/components/ui/`. When adding new shadcn/ui
 - The `bun-plugin-tailwind` handles Tailwind CSS processing during build
 - CSS files support `@tailwind` directives
 - Use `NODE_ENV=production` for production builds
+
+## Implementing New Features
+
+Follow this workflow when implementing new features:
+
+1. **Create a feature branch** if on main: `git checkout -b feature/<name>`
+2. **Implement the feature**, making commits as you go (pre-commit hooks will validate each commit)
+3. **Push and open a PR** for the branch
+4. **Wait ~10 minutes** for PR feedback comments
+5. **Fetch and review PR feedback** comments left after your latest commit
+6. **Evaluate each review comment** and determine if it's valid
+7. **Address valid issues** with code changes
+8. **Commit and push** to the current branch
+9. **Request re-review** from Copilot
+10. **Wait ~10 minutes** again for PR feedback comments
+11. **Repeat from step 5** until the PR is approved
