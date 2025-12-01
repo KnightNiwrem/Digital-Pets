@@ -2,7 +2,7 @@
  * Tests for battle reducer.
  */
 
-import { expect, test } from "bun:test";
+import { expect, type Mock, mock, test } from "bun:test";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
 import { createDefaultBattleStats } from "@/game/testing/createTestPet";
@@ -83,16 +83,25 @@ test("battleReducer returns unchanged state when not player turn", () => {
 });
 
 test("battleReducer returns unchanged state when move not found", () => {
-  const battleState = createTestBattleState();
-  const state = createTestGameState(battleState);
-  const action = {
-    type: "BATTLE_PLAYER_ATTACK" as const,
-    payload: { moveName: "Nonexistent Move" },
-  };
+  const originalWarn = console.warn;
+  const mockWarn: Mock<(...args: unknown[]) => void> = mock();
+  console.warn = mockWarn;
 
-  const newState = battleReducer(state, action, 1000);
+  try {
+    const battleState = createTestBattleState();
+    const state = createTestGameState(battleState);
+    const action = {
+      type: "BATTLE_PLAYER_ATTACK" as const,
+      payload: { moveName: "Nonexistent Move" },
+    };
 
-  expect(newState).toBe(state);
+    const newState = battleReducer(state, action, 1000);
+
+    expect(newState).toBe(state);
+    expect(mockWarn).toHaveBeenCalledWith("Move not found: Nonexistent Move");
+  } finally {
+    console.warn = originalWarn;
+  }
 });
 
 test("battleReducer processes player attack action", () => {
