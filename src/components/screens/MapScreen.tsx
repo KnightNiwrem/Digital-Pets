@@ -6,12 +6,20 @@ import { useMemo, useState } from "react";
 import { LocationDetail, LocationNode } from "@/components/map";
 import { DialogueScreen } from "@/components/npc";
 import { ShopScreen } from "@/components/screens/ShopScreen";
+import {
+  ActivityBlockedCard,
+  getActivityBlockingInfo,
+} from "@/components/ui/ActivityBlockedCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { getConnectedLocations, getLocation } from "@/game/data/locations";
 import { useGameState } from "@/game/hooks/useGameState";
 import { checkCanTravel, travelToLocation } from "@/game/state/actions/travel";
-import { selectCurrentLocationId, selectEnergy } from "@/game/state/selectors";
+import {
+  selectCurrentLocationId,
+  selectEnergy,
+  selectPet,
+} from "@/game/state/selectors";
 
 /**
  * Main map screen showing world locations and travel options.
@@ -110,6 +118,9 @@ export function MapScreen() {
     );
   }
 
+  // Get pet for blocking info
+  const pet = selectPet(state);
+
   // If shopping at an NPC, show shop screen
   if (shoppingAtNpcId) {
     return <ShopScreen npcId={shoppingAtNpcId} onClose={handleCloseShop} />;
@@ -128,6 +139,7 @@ export function MapScreen() {
 
   const energy = selectEnergy(state);
   const currentEnergy = energy ? energy.energy : 0;
+  const blockingInfo = pet ? getActivityBlockingInfo(pet, "travel") : null;
 
   return (
     <>
@@ -174,7 +186,7 @@ export function MapScreen() {
                       key={location.id}
                       location={location}
                       isCurrentLocation={false}
-                      isAccessible={info?.canTravel ?? false}
+                      isSelected={selectedLocationId === location.id}
                       energyCost={info?.energyCost}
                       onClick={() => setSelectedLocationId(location.id)}
                     />
@@ -184,6 +196,9 @@ export function MapScreen() {
             )}
           </CardContent>
         </Card>
+
+        {/* Activity Blocking Status */}
+        {blockingInfo && <ActivityBlockedCard blockingInfo={blockingInfo} />}
 
         {/* Selected Location Detail */}
         {selectedLocation && (
