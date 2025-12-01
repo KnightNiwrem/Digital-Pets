@@ -67,7 +67,7 @@ test("checkLocationRequirements returns not met when stage insufficient", () => 
   });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(false);
-  expect(result.reason).toContain("Requires");
+  expect(result.reason).toBe(`Requires ${GrowthStage.Child} stage`);
 });
 
 test("checkLocationRequirements returns met when stage sufficient", () => {
@@ -92,7 +92,7 @@ test("checkLocationRequirements returns not met for incomplete quest", () => {
   });
   const result = checkLocationRequirements(state, { questId: "test-quest" });
   expect(result.met).toBe(false);
-  expect(result.reason).toContain("Quest required");
+  expect(result.reason).toBe("Quest required");
 });
 
 test("checkLocationRequirements returns met for completed quest", () => {
@@ -180,7 +180,7 @@ test("canTravel fails for disconnected locations", () => {
   const state = createTestState({});
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
-  expect(result.message).toContain("Not connected");
+  expect(result.message).toBe("Not connected");
 });
 
 test("canTravel fails when energy insufficient", () => {
@@ -213,7 +213,7 @@ test("canTravel fails when stage requirement not met", () => {
   });
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
-  expect(result.message).toContain("Requires");
+  expect(result.message).toBe(`Requires ${GrowthStage.Child} stage`);
 });
 
 test("canTravel succeeds when stage requirement met", () => {
