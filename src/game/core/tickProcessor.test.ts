@@ -589,9 +589,9 @@ test("processOfflineCatchup collects exploration result for in-progress explorat
   expect(result.state.pet?.activeExploration).toBeUndefined();
 });
 
-// Tests for lastTrainingResult in processGameTick
+// Tests for training completion emits event
 
-test("processGameTick sets lastTrainingResult when training completes", () => {
+test("processGameTick emits trainingComplete event when training completes", () => {
   const { ActivityState } = require("@/game/types/constants");
 
   const pet = createTestPet({
@@ -611,16 +611,19 @@ test("processGameTick sets lastTrainingResult when training completes", () => {
 
   // Training should be complete
   expect(newState.pet?.activeTraining).toBeUndefined();
-  // lastTrainingResult should be set with correct values
-  expect(newState.lastTrainingResult).toBeDefined();
-  expect(newState.lastTrainingResult?.facilityName).toBe("Strength Gym");
-  expect(newState.lastTrainingResult?.success).toBe(true);
-  expect(newState.lastTrainingResult?.statsGained).toBeDefined();
-  // Should have gained strength (primary stat for facility_strength)
-  expect(newState.lastTrainingResult?.statsGained?.strength).toBeGreaterThan(0);
+  // Should have a training complete event in pendingEvents
+  const trainingEvent = newState.pendingEvents.find(
+    (e) => e.type === "trainingComplete",
+  );
+  expect(trainingEvent).toBeDefined();
+  expect(trainingEvent?.type).toBe("trainingComplete");
+  if (trainingEvent?.type === "trainingComplete") {
+    expect(trainingEvent.facilityName).toBe("Strength Gym");
+    expect(trainingEvent.statsGained.strength).toBeGreaterThan(0);
+  }
 });
 
-test("processGameTick clears lastTrainingResult when no training completes", () => {
+test("processGameTick does not emit trainingComplete event when training in progress", () => {
   const { ActivityState } = require("@/game/types/constants");
 
   const pet = createTestPet({
@@ -640,8 +643,11 @@ test("processGameTick clears lastTrainingResult when no training completes", () 
 
   // Training should still be in progress
   expect(newState.pet?.activeTraining).toBeDefined();
-  // lastTrainingResult should be undefined
-  expect(newState.lastTrainingResult).toBeUndefined();
+  // No training complete event should be emitted
+  const trainingEvent = newState.pendingEvents.find(
+    (e) => e.type === "trainingComplete",
+  );
+  expect(trainingEvent).toBeUndefined();
 });
 
 // Tests for training result collection in offline catchup

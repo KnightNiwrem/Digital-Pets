@@ -187,10 +187,6 @@ export function processGameTick(
     pet: updatedPet,
     totalTicks: updatedState.totalTicks + 1,
     lastSaveTime: currentTime,
-    // Clear any previous exploration result
-    lastExplorationResult: undefined,
-    // Clear any previous training result
-    lastTrainingResult: undefined,
   };
 
   // Process exploration at game state level (needs access to inventory)
@@ -236,15 +232,6 @@ export function processGameTick(
         }
       }
 
-      // Store the result for UI notification (legacy support)
-      updatedState = {
-        ...updatedState,
-        lastExplorationResult: {
-          ...result,
-          locationName,
-        },
-      };
-
       // Emit exploration complete event
       tickEvents.push(
         createEvent<ExplorationCompleteEvent>(
@@ -277,17 +264,10 @@ export function processGameTick(
       "any",
     );
 
-    // Store the training result for UI notification (legacy support)
+    // Emit training complete event
     if (trainingResultBeforeCompletion && facilityId) {
       const facility = getFacility(facilityId);
       const facilityName = facility?.name ?? "Unknown Facility";
-      updatedState = {
-        ...updatedState,
-        lastTrainingResult: {
-          ...trainingResultBeforeCompletion,
-          facilityName,
-        },
-      };
 
       // Emit training complete event using statsGained from the result
       tickEvents.push(
@@ -419,21 +399,24 @@ export function processOfflineCatchup(
     cappedTicks,
     state.lastSaveTime,
     (tickState) => {
-      // Collect exploration result if one was generated this tick
-      if (tickState.lastExplorationResult) {
-        explorationResults.push({
-          locationName: tickState.lastExplorationResult.locationName,
-          itemsFound: tickState.lastExplorationResult.itemsFound,
-          message: tickState.lastExplorationResult.message,
-        });
-      }
-      // Collect training result if one was generated this tick
-      if (tickState.lastTrainingResult) {
-        const { facilityName, ...result } = tickState.lastTrainingResult;
-        trainingResults.push({
-          facilityName,
-          result,
-        });
+      // Collect exploration and training results from pendingEvents
+      for (const event of tickState.pendingEvents) {
+        if (event.type === "explorationComplete") {
+          explorationResults.push({
+            locationName: event.locationName,
+            itemsFound: event.itemsFound,
+            message: event.message,
+          });
+        } else if (event.type === "trainingComplete") {
+          trainingResults.push({
+            facilityName: event.facilityName,
+            result: {
+              success: true,
+              message: `Completed training at ${event.facilityName}`,
+              statsGained: event.statsGained,
+            },
+          });
+        }
       }
     },
   );

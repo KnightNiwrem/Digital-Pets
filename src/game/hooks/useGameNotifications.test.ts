@@ -87,7 +87,6 @@ describe("useGameNotifications", () => {
       totalTicks: 0,
       quests: [],
       pet: defaultPet,
-      lastExplorationResult: undefined,
       isInitialized: true,
       lastSaveTime: Date.now(),
       lastDailyReset: Date.now(),
