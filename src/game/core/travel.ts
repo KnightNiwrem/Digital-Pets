@@ -6,7 +6,11 @@ import { checkActivityIdle, checkEnergy } from "@/game/core/activityGating";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { areLocationsConnected, getLocation } from "@/game/data/locations";
 import { toMicro } from "@/game/types/common";
-import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
+import {
+  GROWTH_STAGE_DISPLAY_NAMES,
+  GROWTH_STAGE_ORDER,
+  type GrowthStage,
+} from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type { LocationRequirement, TravelResult } from "@/game/types/location";
 import { ObjectiveType } from "@/game/types/quest";
@@ -43,13 +47,13 @@ export function checkLocationRequirements(
     if (!state.pet) {
       return {
         met: false,
-        reason: "You need a pet to access this location.",
+        reason: "Pet required",
       };
     }
     if (!meetsStageRequirement(state.pet.growth.stage, requirements.stage)) {
       return {
         met: false,
-        reason: `Your pet must be at least ${requirements.stage} stage to access this location.`,
+        reason: `Requires ${GROWTH_STAGE_DISPLAY_NAMES[requirements.stage]} stage`,
       };
     }
   }
@@ -62,7 +66,7 @@ export function checkLocationRequirements(
     if (!questCompleted) {
       return {
         met: false,
-        reason: "You need to complete a required quest first.",
+        reason: "Quest required",
       };
     }
   }
@@ -102,7 +106,7 @@ export function canTravel(
 ): TravelResult {
   // Must have a pet
   if (!state.pet) {
-    return { success: false, message: "You need a pet to travel." };
+    return { success: false, message: "Pet required" };
   }
 
   const currentLocationId = state.player.currentLocationId;
@@ -117,7 +121,7 @@ export function canTravel(
   if (!areLocationsConnected(currentLocationId, destinationId)) {
     return {
       success: false,
-      message: "You cannot travel there directly from here.",
+      message: "Not connected",
     };
   }
 

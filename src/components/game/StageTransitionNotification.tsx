@@ -11,7 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { GrowthStage } from "@/game/types/constants";
+import {
+  GROWTH_STAGE_DISPLAY_NAMES,
+  type GrowthStage,
+} from "@/game/types/constants";
 import { cn } from "@/lib/utils";
 
 interface StageTransitionNotificationProps {
@@ -20,17 +23,6 @@ interface StageTransitionNotificationProps {
   petName: string;
   onDismiss: () => void;
 }
-
-/**
- * Display names for each growth stage.
- */
-const STAGE_DISPLAY_NAMES: Record<GrowthStage, string> = {
-  baby: "Baby",
-  child: "Child",
-  teen: "Teen",
-  youngAdult: "Young Adult",
-  adult: "Adult",
-};
 
 /**
  * Emojis for each growth stage.
@@ -47,7 +39,7 @@ const STAGE_EMOJIS: Record<GrowthStage, string> = {
  * Get display name for a growth stage.
  */
 function getStageDisplayName(stage: GrowthStage): string {
-  return STAGE_DISPLAY_NAMES[stage];
+  return GROWTH_STAGE_DISPLAY_NAMES[stage];
 }
 
 /**

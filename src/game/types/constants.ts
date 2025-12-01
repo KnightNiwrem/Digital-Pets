@@ -18,6 +18,17 @@ export const GrowthStage = {
 export type GrowthStage = (typeof GrowthStage)[keyof typeof GrowthStage];
 
 /**
+ * Human-friendly display names for growth stages.
+ */
+export const GROWTH_STAGE_DISPLAY_NAMES: Record<GrowthStage, string> = {
+  baby: "Baby",
+  child: "Child",
+  teen: "Teen",
+  youngAdult: "Young Adult",
+  adult: "Adult",
+} as const;
+
+/**
  * Ordered array of growth stages for iteration.
  */
 export const GROWTH_STAGE_ORDER: readonly GrowthStage[] = [
