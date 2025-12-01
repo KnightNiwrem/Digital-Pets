@@ -8,7 +8,11 @@ import {
   createTestPet,
 } from "@/game/testing/createTestPet";
 import { toMicro } from "@/game/types/common";
-import { ActivityState, GrowthStage } from "@/game/types/constants";
+import {
+  ActivityState,
+  GROWTH_STAGE_DISPLAY_NAMES,
+  GrowthStage,
+} from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import type { Pet } from "@/game/types/pet";
 import {
@@ -67,7 +71,9 @@ test("checkLocationRequirements returns not met when stage insufficient", () => 
   });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(false);
-  expect(result.reason).toBe(`Requires ${GrowthStage.Child} stage`);
+  expect(result.reason).toBe(
+    `Requires ${GROWTH_STAGE_DISPLAY_NAMES[GrowthStage.Child]} stage`,
+  );
 });
 
 test("checkLocationRequirements returns met when stage sufficient", () => {
@@ -213,7 +219,9 @@ test("canTravel fails when stage requirement not met", () => {
   });
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
-  expect(result.message).toBe(`Requires ${GrowthStage.Child} stage`);
+  expect(result.message).toBe(
+    `Requires ${GROWTH_STAGE_DISPLAY_NAMES[GrowthStage.Child]} stage`,
+  );
 });
 
 test("canTravel succeeds when stage requirement met", () => {

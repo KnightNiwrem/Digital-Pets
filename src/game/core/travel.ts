@@ -6,7 +6,11 @@ import { checkActivityIdle, checkEnergy } from "@/game/core/activityGating";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { areLocationsConnected, getLocation } from "@/game/data/locations";
 import { toMicro } from "@/game/types/common";
-import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
+import {
+  GROWTH_STAGE_DISPLAY_NAMES,
+  GROWTH_STAGE_ORDER,
+  type GrowthStage,
+} from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import type { LocationRequirement, TravelResult } from "@/game/types/location";
 import { ObjectiveType } from "@/game/types/quest";
@@ -49,7 +53,7 @@ export function checkLocationRequirements(
     if (!meetsStageRequirement(state.pet.growth.stage, requirements.stage)) {
       return {
         met: false,
-        reason: `Requires ${requirements.stage} stage`,
+        reason: `Requires ${GROWTH_STAGE_DISPLAY_NAMES[requirements.stage]} stage`,
       };
     }
   }
