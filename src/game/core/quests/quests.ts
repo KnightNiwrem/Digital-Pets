@@ -38,7 +38,7 @@ function validateStartLocation(
   if (quest.startLocationId && currentLocationId !== quest.startLocationId) {
     return {
       valid: false,
-      message: "You must be at the quest's starting location to accept it.",
+      message: "Go to start location",
     };
   }
   return { valid: true };
@@ -57,7 +57,7 @@ function validateCompleteLocation(
   ) {
     return {
       valid: false,
-      message: "You must be at the quest's turn-in location to complete it.",
+      message: "Go to turn-in location",
     };
   }
   return { valid: true };

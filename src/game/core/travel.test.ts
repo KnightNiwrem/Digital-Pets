@@ -58,7 +58,7 @@ test("checkLocationRequirements returns not met when pet is null and stage requi
   const state = createTestState({ pet: null });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(false);
-  expect(result.reason).toBe("You need a pet to access this location.");
+  expect(result.reason).toBe("Pet required");
 });
 
 test("checkLocationRequirements returns not met when stage insufficient", () => {
@@ -67,7 +67,7 @@ test("checkLocationRequirements returns not met when stage insufficient", () => 
   });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(false);
-  expect(result.reason).toContain("must be at least");
+  expect(result.reason).toContain("Requires");
 });
 
 test("checkLocationRequirements returns met when stage sufficient", () => {
@@ -92,7 +92,7 @@ test("checkLocationRequirements returns not met for incomplete quest", () => {
   });
   const result = checkLocationRequirements(state, { questId: "test-quest" });
   expect(result.met).toBe(false);
-  expect(result.reason).toContain("complete a required quest");
+  expect(result.reason).toContain("Quest required");
 });
 
 test("checkLocationRequirements returns met for completed quest", () => {
@@ -132,7 +132,7 @@ test("canTravel fails when no pet", () => {
   const state = createTestState({ pet: null });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
-  expect(result.message).toBe("You need a pet to travel.");
+  expect(result.message).toBe("Pet required");
 });
 
 test("canTravel fails when pet is sleeping", () => {
@@ -180,7 +180,7 @@ test("canTravel fails for disconnected locations", () => {
   const state = createTestState({});
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
-  expect(result.message).toContain("cannot travel there directly");
+  expect(result.message).toContain("Not connected");
 });
 
 test("canTravel fails when energy insufficient", () => {
@@ -213,7 +213,7 @@ test("canTravel fails when stage requirement not met", () => {
   });
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
-  expect(result.message).toContain("must be at least");
+  expect(result.message).toContain("Requires");
 });
 
 test("canTravel succeeds when stage requirement met", () => {
