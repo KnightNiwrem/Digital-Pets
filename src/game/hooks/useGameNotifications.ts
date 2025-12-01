@@ -67,6 +67,7 @@ function eventToNotification(event: GameEvent): GameNotification | null {
         type: "trainingComplete",
         facilityName: event.facilityName,
         statsGained: event.statsGained,
+        message: event.message,
         petName: event.petName,
       };
     case "explorationComplete":

@@ -168,6 +168,7 @@ describe("useGameNotifications", () => {
         type: "trainingComplete",
         facilityName: "Gym",
         statsGained: { strength: 10, endurance: 5 },
+        message: "Training complete! +10 strength, +5 endurance",
         petName: "Fluffy",
       });
     });
