@@ -105,12 +105,6 @@ export function canTravel(
     return { success: false, message: "You need a pet to travel." };
   }
 
-  // Check activity state
-  const activityCheck = checkActivityIdle(state.pet, "travel");
-  if (!activityCheck.allowed) {
-    return { success: false, message: activityCheck.message };
-  }
-
   const currentLocationId = state.player.currentLocationId;
   const destination = getLocation(destinationId);
 
@@ -143,6 +137,12 @@ export function canTravel(
   const energyCost = calculateTravelCost(currentLocationId, destinationId);
   if (energyCost === null) {
     return { success: false, message: "Cannot calculate travel cost." };
+  }
+
+  // Check activity state (after calculating energy cost so it's included in response)
+  const activityCheck = checkActivityIdle(state.pet, "travel");
+  if (!activityCheck.allowed) {
+    return { success: false, message: activityCheck.message, energyCost };
   }
 
   const energyCheck = checkEnergy(state.pet.energyStats.energy, energyCost);
