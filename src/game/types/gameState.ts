@@ -3,7 +3,6 @@
  */
 
 import type { BattleState } from "@/game/core/battle/battle";
-import type { ExplorationResult, TrainingResult } from "./activity";
 import type { Tick, Timestamp } from "./common";
 import type { GameEvent } from "./event";
 import type { Pet } from "./pet";
@@ -83,10 +82,6 @@ export interface GameState {
   quests: QuestProgress[];
   /** Whether the game has been initialized */
   isInitialized: boolean;
-  /** Last exploration result (for UI notification, cleared after display) */
-  lastExplorationResult?: ExplorationResult & { locationName: string };
-  /** Last training result (for UI notification, cleared after display) */
-  lastTrainingResult?: TrainingResult & { facilityName: string };
   /**
    * Active battle (if in combat).
    * Persisted to allow resuming battle after page refresh.

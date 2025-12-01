@@ -87,7 +87,6 @@ describe("useGameNotifications", () => {
       totalTicks: 0,
       quests: [],
       pet: defaultPet,
-      lastExplorationResult: undefined,
       isInitialized: true,
       lastSaveTime: Date.now(),
       lastDailyReset: Date.now(),
@@ -154,6 +153,7 @@ describe("useGameNotifications", () => {
             type: "trainingComplete",
             facilityName: "Gym",
             statsGained: { strength: 10, endurance: 5 },
+            message: "Training complete! +10 strength, +5 endurance",
             petName: "Fluffy",
           }),
         ],
@@ -168,6 +168,7 @@ describe("useGameNotifications", () => {
         type: "trainingComplete",
         facilityName: "Gym",
         statsGained: { strength: 10, endurance: 5 },
+        message: "Training complete! +10 strength, +5 endurance",
         petName: "Fluffy",
       });
     });

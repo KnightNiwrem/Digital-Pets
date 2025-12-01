@@ -28,6 +28,8 @@ export interface TrainingCompleteNotification {
   facilityName: string;
   /** Stats gained from training */
   statsGained: Partial<BattleStats>;
+  /** Result message */
+  message: string;
   /** Pet name */
   petName: string;
 }

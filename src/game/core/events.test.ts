@@ -37,6 +37,7 @@ test("emitEvents appends events to the queue", () => {
     type: "trainingComplete",
     facilityName: "Gym",
     statsGained: { strength: 5 },
+    message: "Training complete! +5 strength",
     petName: "Test Pet",
   });
 
@@ -114,6 +115,7 @@ test("getEventsByType filters events by type correctly", () => {
     type: "trainingComplete",
     facilityName: "Gym",
     statsGained: { strength: 5 },
+    message: "Training complete! +5 strength",
     petName: "Test Pet",
   });
 
