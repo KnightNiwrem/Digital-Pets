@@ -3,6 +3,7 @@
  */
 
 import { checkActivityIdle } from "@/game/core/activityGating";
+import { SleepMessages } from "@/game/data/messages";
 import { getSpeciesGrowthStage } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
 import { now } from "@/game/types/common";
@@ -87,7 +88,7 @@ export function putToSleep(pet: Pet): SleepTransitionResult {
     return {
       success: false,
       sleep: pet.sleep,
-      message: "Pet is already sleeping.",
+      message: SleepMessages.alreadySleeping,
     };
   }
 
@@ -98,7 +99,7 @@ export function putToSleep(pet: Pet): SleepTransitionResult {
       sleepStartTime: now(),
       sleepTicksToday: pet.sleep.sleepTicksToday,
     },
-    message: "Pet is now sleeping.",
+    message: SleepMessages.nowSleeping,
   };
 }
 
@@ -110,7 +111,7 @@ export function wakeUp(pet: Pet): SleepTransitionResult {
     return {
       success: false,
       sleep: pet.sleep,
-      message: "Pet is already awake.",
+      message: SleepMessages.alreadyAwake,
     };
   }
 
@@ -121,7 +122,7 @@ export function wakeUp(pet: Pet): SleepTransitionResult {
       sleepStartTime: null,
       sleepTicksToday: pet.sleep.sleepTicksToday,
     },
-    message: "Pet is now awake.",
+    message: SleepMessages.nowAwake,
   };
 }
 

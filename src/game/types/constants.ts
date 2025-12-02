@@ -140,25 +140,6 @@ export function getActivityDisplayName(activity: ActivityState): string {
 }
 
 /**
- * Generate an error message for when an activity cannot start due to another activity.
- * Provides clearer messaging when the pet is already doing the same activity.
- *
- * @param attemptedAction - The action being attempted (e.g., "train", "forage")
- * @param currentActivity - The pet's current activity state
- * @param sameActivityState - The activity state that matches the attempted action (optional)
- */
-export function getActivityConflictMessage(
-  attemptedAction: string,
-  currentActivity: ActivityState,
-  sameActivityState?: ActivityState,
-): string {
-  if (sameActivityState && currentActivity === sameActivityState) {
-    return `Your pet is already ${getActivityDisplayName(currentActivity)}.`;
-  }
-  return `Cannot ${attemptedAction} while ${getActivityDisplayName(currentActivity)}.`;
-}
-
-/**
  * Care stat thresholds for UI/feedback purposes.
  */
 export const CareThreshold = {

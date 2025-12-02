@@ -18,9 +18,9 @@
 ## 2. Core Logic Refactor
 
 ### User-Facing Messages
-- [ ] Centralize hardcoded error/status messages in `src/game/core/sleep.ts` (e.g., "Pet is already sleeping.").
-- [ ] Centralize hardcoded error/status messages in `src/game/core/activityGating.ts`.
-- [ ] Create a message registry or translation file (e.g., `src/game/data/messages.ts`) to hold these strings.
+- [x] Centralize hardcoded error/status messages in `src/game/core/sleep.ts` (e.g., "Pet is already sleeping.").
+- [x] Centralize hardcoded error/status messages in `src/game/core/activityGating.ts`.
+- [x] Create a message registry or translation file (e.g., `src/game/data/messages.ts`) to hold these strings.
 
 ## 3. Components Refactor
 - [ ] Audit components for hardcoded display strings that should be derived from constants (e.g., checking `stage === 'baby'` instead of `stage === GrowthStage.Baby`).

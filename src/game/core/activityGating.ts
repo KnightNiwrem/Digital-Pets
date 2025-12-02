@@ -6,11 +6,10 @@
  * - Sufficient energy to perform the action
  */
 
-import { type MicroValue, toDisplay } from "@/game/types/common";
-import {
-  ActivityState,
-  getActivityConflictMessage,
-} from "@/game/types/constants";
+import { ActivityMessages, EnergyMessages } from "@/game/data/messages";
+import type { MicroValue } from "@/game/types/common";
+import { toDisplay } from "@/game/types/common";
+import { ActivityState } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 
 /**
@@ -36,13 +35,16 @@ export function checkActivityIdle(
   sameActivityState?: ActivityState,
 ): ActivityGatingResult {
   if (pet.activityState !== ActivityState.Idle) {
+    const message =
+      sameActivityState && pet.activityState === sameActivityState
+        ? ActivityMessages.alreadyDoingActivity(pet.activityState)
+        : ActivityMessages.cannotPerformWhileBusy(
+            attemptedAction,
+            pet.activityState,
+          );
     return {
       allowed: false,
-      message: getActivityConflictMessage(
-        attemptedAction,
-        pet.activityState,
-        sameActivityState,
-      ),
+      message,
     };
   }
   return { allowed: true, message: "" };
@@ -62,7 +64,7 @@ export function checkEnergy(
   if (displayEnergy < requiredEnergy) {
     return {
       allowed: false,
-      message: `Not enough energy. Need ${requiredEnergy}, have ${displayEnergy}.`,
+      message: EnergyMessages.notEnoughEnergy(requiredEnergy, displayEnergy),
     };
   }
   return { allowed: true, message: "" };
