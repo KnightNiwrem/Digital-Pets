@@ -64,7 +64,7 @@ export function checkEnergy(
   if (displayEnergy < requiredEnergy) {
     return {
       allowed: false,
-      message: EnergyMessages.notEnoughEnergy(requiredEnergy, currentEnergy),
+      message: EnergyMessages.notEnoughEnergy(requiredEnergy, displayEnergy),
     };
   }
   return { allowed: true, message: "" };

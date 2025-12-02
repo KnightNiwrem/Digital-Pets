@@ -12,8 +12,6 @@
  * - Single source of truth for UI text
  */
 
-import type { MicroValue } from "@/game/types/common";
-import { toDisplay } from "@/game/types/common";
 import {
   type ActivityState,
   getActivityDisplayName,
@@ -40,10 +38,10 @@ export const EnergyMessages = {
   /**
    * Generate a message for insufficient energy.
    * @param required - Required energy in display units
-   * @param current - Current energy in micro-units
+   * @param current - Current energy in display units
    */
-  notEnoughEnergy: (required: number, current: MicroValue): string =>
-    `Not enough energy. Need ${required}, have ${toDisplay(current)}.`,
+  notEnoughEnergy: (required: number, current: number): string =>
+    `Not enough energy. Need ${required}, have ${current}.`,
 } as const;
 
 /**
