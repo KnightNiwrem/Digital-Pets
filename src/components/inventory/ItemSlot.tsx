@@ -2,7 +2,7 @@
  * Single item slot displaying an item with count or durability.
  */
 
-import { ItemCategory, Rarity } from "@/game/types/constants";
+import { Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
 import { isToyItem } from "@/game/types/item";
