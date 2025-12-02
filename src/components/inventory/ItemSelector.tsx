@@ -14,6 +14,7 @@ import { getInventoryItemsByCategory } from "@/game/core/inventory";
 import { getItemById } from "@/game/data/items";
 import type { Inventory, InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
+import { isToyItem } from "@/game/types/item";
 
 interface ItemSelectorProps {
   open: boolean;
@@ -33,9 +34,7 @@ interface ItemButtonProps {
 
 function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
   const durability = inventoryItem.currentDurability;
-  // TypeScript narrows itemDef to ToyItem when category === "toy"
-  const maxDurability =
-    itemDef.category === "toy" ? itemDef.maxDurability : undefined;
+  const maxDurability = isToyItem(itemDef) ? itemDef.maxDurability : undefined;
 
   return (
     <Button

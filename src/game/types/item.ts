@@ -3,7 +3,7 @@
  */
 
 import type { MicroValue } from "./common";
-import type { ItemCategory, Rarity } from "./constants";
+import { ItemCategory, type Rarity } from "./constants";
 import type { BattleStats } from "./stats";
 
 /**
@@ -162,54 +162,54 @@ export type Item =
  * Type guard for food items.
  */
 export function isFoodItem(item: Item): item is FoodItem {
-  return item.category === "food";
+  return item.category === ItemCategory.Food;
 }
 
 /**
  * Type guard for drink items.
  */
 export function isDrinkItem(item: Item): item is DrinkItem {
-  return item.category === "drink";
+  return item.category === ItemCategory.Drink;
 }
 
 /**
  * Type guard for toy items.
  */
 export function isToyItem(item: Item): item is ToyItem {
-  return item.category === "toy";
+  return item.category === ItemCategory.Toy;
 }
 
 /**
  * Type guard for cleaning items.
  */
 export function isCleaningItem(item: Item): item is CleaningItem {
-  return item.category === "cleaning";
+  return item.category === ItemCategory.Cleaning;
 }
 
 /**
  * Type guard for medicine items.
  */
 export function isMedicineItem(item: Item): item is MedicineItem {
-  return item.category === "medicine";
+  return item.category === ItemCategory.Medicine;
 }
 
 /**
  * Type guard for battle items.
  */
 export function isBattleItem(item: Item): item is BattleItem {
-  return item.category === "battle";
+  return item.category === ItemCategory.Battle;
 }
 
 /**
  * Type guard for equipment items.
  */
 export function isEquipmentItem(item: Item): item is EquipmentItem {
-  return item.category === "equipment";
+  return item.category === ItemCategory.Equipment;
 }
 
 /**
  * Type guard for material items.
  */
 export function isMaterialItem(item: Item): item is MaterialItem {
-  return item.category === "material";
+  return item.category === ItemCategory.Material;
 }

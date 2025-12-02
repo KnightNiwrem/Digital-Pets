@@ -2,9 +2,10 @@
  * Single item slot displaying an item with count or durability.
  */
 
-import type { Rarity } from "@/game/types/constants";
+import { Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
+import { isToyItem } from "@/game/types/item";
 import { cn } from "@/lib/utils";
 
 interface ItemSlotProps {
@@ -19,16 +20,16 @@ interface ItemSlotProps {
  */
 function getRarityClass(rarity: Rarity): string {
   switch (rarity) {
-    case "common":
+    case Rarity.Common:
       // Common items use the default border intentionally
       return "border-border";
-    case "uncommon":
+    case Rarity.Uncommon:
       return "border-green-500";
-    case "rare":
+    case Rarity.Rare:
       return "border-blue-500";
-    case "epic":
+    case Rarity.Epic:
       return "border-purple-500";
-    case "legendary":
+    case Rarity.Legendary:
       return "border-yellow-500";
   }
 }
@@ -43,8 +44,7 @@ export function ItemSlot({
   onClick,
 }: ItemSlotProps) {
   const durability = inventoryItem.currentDurability;
-  const maxDurability =
-    itemDef.category === "toy" ? itemDef.maxDurability : undefined;
+  const maxDurability = isToyItem(itemDef) ? itemDef.maxDurability : undefined;
 
   return (
     <button
