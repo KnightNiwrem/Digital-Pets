@@ -91,18 +91,17 @@ The codebase already has good constant extraction in several areas:
 
 ### Food Items (`src/game/data/items/food.ts`)
 
-- [ ] **Lines 31, 44, 57, etc.**: Poop acceleration values (60, 120, 180, 40, 90, 200, 240, 360) - Consider creating POOP_ACCELERATION constants
+- [x] **Lines 31, 44, 57, etc.**: Poop acceleration values (60, 120, 180, 40, 90, 200, 240, 360) - Extracted as `POOP_ACCELERATION` constants
   ```typescript
-  // Currently inline comments explain: "Light meal: 15 minutes (micro-units)"
-  // Could be: POOP_ACCEL_LIGHT = 60, POOP_ACCEL_STANDARD = 120, etc.
+  // POOP_ACCELERATION object with named tiers:
+  // VERY_LIGHT = 40, LIGHT = 60, LIGHT_MEDIUM = 90, STANDARD = 120,
+  // HEAVY = 180, VERY_HEAVY = 200, INDULGENT = 240, MASSIVE = 360
   ```
 
-- [ ] **Lines 30, 43, etc.**: Satiety restore values and max stack sizes (99, 50, 20, 5) - Consider STACK_SIZE constants
+- [x] **Lines 30, 43, etc.**: Satiety restore values and max stack sizes (99, 50, 20, 5) - Extracted as `MAX_STACK_BY_RARITY`
   ```typescript
-  // maxStack: 99 for common items
-  // maxStack: 50 for uncommon
-  // maxStack: 20 for rare
-  // maxStack: 5 for epic
+  // MAX_STACK_BY_RARITY object:
+  // common: 99, uncommon: 50, rare: 20, epic: 5, legendary: 1
   ```
 
 ### Persistence (`src/game/state/persistence.ts`)
@@ -165,8 +164,8 @@ The codebase already has good constant extraction in several areas:
 4. [x] Define MIN_HIT_CHANCE and MAX_HIT_CHANCE in battle constants
 
 ### Medium Priority
-1. [ ] Extract stack size constants (COMMON_MAX_STACK = 99, UNCOMMON_MAX_STACK = 50, etc.)
-2. [ ] Create POOP_ACCELERATION tier constants for food items
+1. [x] Extract stack size constants (COMMON_MAX_STACK = 99, UNCOMMON_MAX_STACK = 50, etc.)
+2. [x] Create POOP_ACCELERATION tier constants for food items
 3. [x] Refactor DEFAULT_MIN_SLEEP_TICKS to use TICKS_PER_HOUR for clarity
 4. [x] Move BASE_XP to skill types file with other skill constants
 5. [x] Extract MAX_OFFLINE_DAYS = 30 constant

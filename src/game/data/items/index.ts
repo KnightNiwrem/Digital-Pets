@@ -5,6 +5,7 @@
 import type { Item } from "@/game/types/item";
 import { BATTLE_ITEMS, BATTLE_ITEMS_LIST } from "./battle";
 import { CLEANING_ITEMS, CLEANING_ITEMS_LIST } from "./cleaning";
+import { MAX_STACK_BY_RARITY, POOP_ACCELERATION } from "./constants";
 import { DRINK_ITEMS, DRINK_ITEMS_LIST } from "./drinks";
 import { EQUIPMENT_ITEMS, EQUIPMENT_ITEMS_LIST } from "./equipment";
 import { FOOD_ITEMS, FOOD_ITEMS_LIST } from "./food";
@@ -44,6 +45,9 @@ export {
   MEDICINE_ITEMS,
   TOY_ITEMS,
 };
+
+// Re-export item constants
+export { MAX_STACK_BY_RARITY, POOP_ACCELERATION };
 
 // Re-export item arrays for iteration
 export {

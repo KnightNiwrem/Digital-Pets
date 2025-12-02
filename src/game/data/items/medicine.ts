@@ -2,7 +2,9 @@
  * Medicine item definitions that heal HP or cure status effects.
  */
 
+import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { MedicineItem } from "@/game/types/item";
+import { MAX_STACK_BY_RARITY } from "./constants";
 
 /**
  * Medicine items for healing and curing status effects.
@@ -15,10 +17,10 @@ export const MEDICINE_ITEMS = {
     name: "Bandage",
     description:
       "A simple bandage for minor wounds. Restores a small amount of HP.",
-    category: "medicine",
-    rarity: "common",
+    category: ItemCategory.Medicine,
+    rarity: Rarity.Common,
     stackable: true,
-    maxStack: 30,
+    maxStack: MAX_STACK_BY_RARITY.rare + 10,
     sellValue: 10,
     icon: "🩹",
     healAmount: 20,
@@ -27,10 +29,10 @@ export const MEDICINE_ITEMS = {
     id: "medicine_potion",
     name: "Health Potion",
     description: "A basic healing potion. Restores moderate HP.",
-    category: "medicine",
-    rarity: "common",
+    category: ItemCategory.Medicine,
+    rarity: Rarity.Common,
     stackable: true,
-    maxStack: 20,
+    maxStack: MAX_STACK_BY_RARITY.rare,
     sellValue: 25,
     icon: "🧪",
     healAmount: 50,
@@ -39,10 +41,10 @@ export const MEDICINE_ITEMS = {
     id: "medicine_antidote",
     name: "Antidote",
     description: "Cures poison status effect.",
-    category: "medicine",
-    rarity: "uncommon",
+    category: ItemCategory.Medicine,
+    rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: 20,
+    maxStack: MAX_STACK_BY_RARITY.rare,
     sellValue: 30,
     icon: "💊",
     cureStatus: ["poison"],
@@ -51,10 +53,10 @@ export const MEDICINE_ITEMS = {
     id: "medicine_smelling_salts",
     name: "Smelling Salts",
     description: "Cures sleep and stun status effects.",
-    category: "medicine",
-    rarity: "uncommon",
+    category: ItemCategory.Medicine,
+    rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: 20,
+    maxStack: MAX_STACK_BY_RARITY.rare,
     sellValue: 35,
     icon: "🧂",
     cureStatus: ["sleep", "stun"],
@@ -63,10 +65,10 @@ export const MEDICINE_ITEMS = {
     id: "medicine_super_potion",
     name: "Super Potion",
     description: "A powerful healing potion. Restores significant HP.",
-    category: "medicine",
-    rarity: "rare",
+    category: ItemCategory.Medicine,
+    rarity: Rarity.Rare,
     stackable: true,
-    maxStack: 15,
+    maxStack: MAX_STACK_BY_RARITY.rare - 5,
     sellValue: 75,
     icon: "⚗️",
     healAmount: 100,
@@ -76,10 +78,10 @@ export const MEDICINE_ITEMS = {
     name: "Full Restore",
     description:
       "A miraculous elixir. Fully restores HP and cures all status effects.",
-    category: "medicine",
-    rarity: "epic",
+    category: ItemCategory.Medicine,
+    rarity: Rarity.Epic,
     stackable: true,
-    maxStack: 5,
+    maxStack: MAX_STACK_BY_RARITY.epic,
     sellValue: 200,
     icon: "✨",
     isFullRestore: true,
