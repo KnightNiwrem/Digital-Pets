@@ -7,6 +7,7 @@ import { removePoop } from "@/game/core/care/poop";
 import { hasItem, removeItem } from "@/game/core/inventory";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getItemById } from "@/game/data/items";
+import { ItemMessages } from "@/game/data/messages";
 import type { GameState, InventoryItem } from "@/game/types/gameState";
 import {
   isCleaningItem,
@@ -52,7 +53,7 @@ function getMaxEnergy(state: GameState): number {
 export function useFoodItem(state: GameState, itemId: string): UseItemResult {
   // Check if pet exists
   if (!state.pet) {
-    return { success: false, state, message: "No pet to feed!" };
+    return { success: false, state, message: ItemMessages.noPetToFeed };
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
@@ -64,7 +65,7 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
   // Check if item exists and is food
   const itemDef = getItemById(itemId);
   if (!itemDef || !isFoodItem(itemDef)) {
-    return { success: false, state, message: "Invalid food item!" };
+    return { success: false, state, message: ItemMessages.invalidFoodItem };
   }
 
   // Check if player has the item
@@ -72,7 +73,7 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
     return {
       success: false,
       state,
-      message: `No ${itemDef.name} in inventory!`,
+      message: ItemMessages.notInInventory(itemDef.name),
     };
   }
 
@@ -117,7 +118,7 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
   return {
     success: true,
     state: newState,
-    message: `Fed ${itemDef.name}!`,
+    message: ItemMessages.fed(itemDef.name),
   };
 }
 
@@ -127,7 +128,7 @@ export function useFoodItem(state: GameState, itemId: string): UseItemResult {
 export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
   // Check if pet exists
   if (!state.pet) {
-    return { success: false, state, message: "No pet to give water!" };
+    return { success: false, state, message: ItemMessages.noPetToWater };
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
@@ -139,7 +140,7 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
   // Check if item exists and is drink
   const itemDef = getItemById(itemId);
   if (!itemDef || !isDrinkItem(itemDef)) {
-    return { success: false, state, message: "Invalid drink item!" };
+    return { success: false, state, message: ItemMessages.invalidDrinkItem };
   }
 
   // Check if player has the item
@@ -147,7 +148,7 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
     return {
       success: false,
       state,
-      message: `No ${itemDef.name} in inventory!`,
+      message: ItemMessages.notInInventory(itemDef.name),
     };
   }
 
@@ -190,7 +191,7 @@ export function useDrinkItem(state: GameState, itemId: string): UseItemResult {
   return {
     success: true,
     state: newState,
-    message: `Gave ${itemDef.name}!`,
+    message: ItemMessages.gaveDrink(itemDef.name),
   };
 }
 
@@ -203,7 +204,7 @@ export function useCleaningItem(
 ): UseItemResult {
   // Check if pet exists
   if (!state.pet) {
-    return { success: false, state, message: "No pet to clean!" };
+    return { success: false, state, message: ItemMessages.noPetToClean };
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
@@ -215,7 +216,7 @@ export function useCleaningItem(
   // Check if item exists and is cleaning
   const itemDef = getItemById(itemId);
   if (!itemDef || !isCleaningItem(itemDef)) {
-    return { success: false, state, message: "Invalid cleaning item!" };
+    return { success: false, state, message: ItemMessages.invalidCleaningItem };
   }
 
   // Check if player has the item
@@ -223,13 +224,13 @@ export function useCleaningItem(
     return {
       success: false,
       state,
-      message: `No ${itemDef.name} in inventory!`,
+      message: ItemMessages.notInInventory(itemDef.name),
     };
   }
 
   // Check if there's poop to clean
   if (state.pet.poop.count === 0) {
-    return { success: false, state, message: "Nothing to clean!" };
+    return { success: false, state, message: ItemMessages.nothingToClean };
   }
 
   // Calculate new poop count
@@ -257,7 +258,7 @@ export function useCleaningItem(
   return {
     success: true,
     state: newState,
-    message: `Cleaned ${cleaned} poop with ${itemDef.name}!`,
+    message: ItemMessages.cleaned(cleaned, itemDef.name),
   };
 }
 
@@ -287,7 +288,7 @@ function findToyInventoryItem(
 export function useToyItem(state: GameState, itemId: string): UseItemResult {
   // Check if pet exists
   if (!state.pet) {
-    return { success: false, state, message: "No pet to play with!" };
+    return { success: false, state, message: ItemMessages.noPetToPlay };
   }
 
   // Check if pet is idle (not sleeping, training, exploring, or battling)
@@ -299,7 +300,7 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
   // Check if item exists and is a toy
   const itemDef = getItemById(itemId);
   if (!itemDef || !isToyItem(itemDef)) {
-    return { success: false, state, message: "Invalid toy item!" };
+    return { success: false, state, message: ItemMessages.invalidToyItem };
   }
 
   // Find the toy in inventory (with durability)
@@ -308,7 +309,7 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
     return {
       success: false,
       state,
-      message: `No ${itemDef.name} in inventory!`,
+      message: ItemMessages.notInInventory(itemDef.name),
     };
   }
 
@@ -318,7 +319,7 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
     return {
       success: false,
       state,
-      message: `Corrupted inventory: ${itemDef.name} is missing durability!`,
+      message: ItemMessages.corruptedDurability(itemDef.name),
     };
   }
   const currentDurability = toyItem.currentDurability;
@@ -361,14 +362,9 @@ export function useToyItem(state: GameState, itemId: string): UseItemResult {
     },
   };
 
-  const message =
-    newDurability <= 0
-      ? `Played with ${itemDef.name}! It broke!`
-      : `Played with ${itemDef.name}!`;
-
   return {
     success: true,
     state: newState,
-    message,
+    message: ItemMessages.playedWith(itemDef.name, newDurability <= 0),
   };
 }

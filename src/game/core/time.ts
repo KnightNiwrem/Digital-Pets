@@ -17,11 +17,16 @@ export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 export const MS_PER_WEEK = 7 * MS_PER_DAY;
 
 /**
- * Maximum ticks to process for offline catch-up (30 days).
+ * Maximum number of days to process for offline catch-up.
+ */
+export const MAX_OFFLINE_DAYS = 30;
+
+/**
+ * Maximum ticks to process for offline catch-up.
  * This cap applies universally to all offline processing (care, growth, training, etc.)
  * to prevent extreme scenarios while still allowing for pet death by neglect.
  */
-export const MAX_OFFLINE_TICKS: Tick = TICKS_PER_DAY * 30;
+export const MAX_OFFLINE_TICKS: Tick = TICKS_PER_DAY * MAX_OFFLINE_DAYS;
 
 /**
  * Calculate elapsed ticks between two timestamps.

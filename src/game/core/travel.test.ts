@@ -62,7 +62,7 @@ test("checkLocationRequirements returns not met when pet is null and stage requi
   const state = createTestState({ pet: null });
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(false);
-  expect(result.reason).toBe("Pet required");
+  expect(result.reason).toBe("A pet is required to travel.");
 });
 
 test("checkLocationRequirements returns not met when stage insufficient", () => {
@@ -72,7 +72,7 @@ test("checkLocationRequirements returns not met when stage insufficient", () => 
   const result = checkLocationRequirements(state, { stage: GrowthStage.Child });
   expect(result.met).toBe(false);
   expect(result.reason).toBe(
-    `Requires ${GROWTH_STAGE_DISPLAY_NAMES[GrowthStage.Child]} stage`,
+    `Requires ${GROWTH_STAGE_DISPLAY_NAMES[GrowthStage.Child]} stage.`,
   );
 });
 
@@ -138,7 +138,7 @@ test("canTravel fails when no pet", () => {
   const state = createTestState({ pet: null });
   const result = canTravel(state, "meadow");
   expect(result.success).toBe(false);
-  expect(result.message).toBe("Pet required");
+  expect(result.message).toBe("A pet is required to travel.");
 });
 
 test("canTravel fails when pet is sleeping", () => {
@@ -192,7 +192,7 @@ test("canTravel fails for disconnected locations", () => {
   const state = createTestState({});
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
-  expect(result.message).toBe("Not connected");
+  expect(result.message).toBe("You cannot travel to this location from here.");
 });
 
 test("canTravel fails when energy insufficient", () => {
@@ -229,7 +229,7 @@ test("canTravel fails when stage requirement not met", () => {
   const result = canTravel(state, "misty_woods");
   expect(result.success).toBe(false);
   expect(result.message).toBe(
-    `Requires ${GROWTH_STAGE_DISPLAY_NAMES[GrowthStage.Child]} stage`,
+    `Requires ${GROWTH_STAGE_DISPLAY_NAMES[GrowthStage.Child]} stage.`,
   );
 });
 
