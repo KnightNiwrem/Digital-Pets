@@ -302,7 +302,7 @@ Implement the new exploration system logic.
 
 ### Task 3.1: Create Exploration Module (`src/game/core/exploration/exploration.ts`)
 
-- [ ] Implement exploration module functions:
+- [x] Implement exploration module functions:
   - `canStartExplorationActivity(pet, locationId, activityId)`
   - `startExplorationActivity(pet, locationId, activityId, currentTick)`
   - `processExplorationTick(exploration)`
@@ -314,18 +314,18 @@ Implement the new exploration system logic.
 
 ### Task 3.2: Update Encounter System (`src/game/core/exploration/encounter.ts`)
 
-- [ ] Filter encounters by activityIds
-- [ ] Implement level calculation per spec
+- [x] Filter encounters by activityIds
+- [x] Implement level calculation per spec
 
 ### Task 3.3: Update Tick Processor (`src/game/core/tickProcessor.ts`)
 
-- [ ] Use new exploration functions
-- [ ] Award skill XP via activity's skillFactors
-- [ ] Apply cooldowns on completion
+- [x] Use new exploration functions
+- [x] Award skill XP via activity's skillFactors
+- [x] Apply cooldowns on completion
 
 ### Task 3.4: Write Tests (`src/game/core/exploration/exploration.test.ts`)
 
-- [ ] Test all new functions with the new type system
+- [x] Test all new functions with the new type system
 
 ---
 

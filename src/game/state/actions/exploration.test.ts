@@ -2,127 +2,157 @@
  * Tests for exploration state actions.
  */
 
-import { expect, test } from "bun:test";
-import { FOOD_ITEMS } from "@/game/data/items";
-import { applyExplorationResults } from "@/game/state/actions/exploration";
-import type { ExplorationResult } from "@/game/types/activity";
+import { describe, expect, test } from "bun:test";
+import { ActivityId } from "@/game/data/exploration/activities";
+import {
+  cancelExploration,
+  canStartExploration,
+  startExploration,
+} from "@/game/state/actions/exploration";
+import { createTestPet } from "@/game/testing/createTestPet";
+import type { ActiveExploration } from "@/game/types/activity";
+import { type Tick, toMicro } from "@/game/types/common";
+import { ActivityState } from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
-import { SkillType } from "@/game/types/skill";
+import type { Pet } from "@/game/types/pet";
 
-function createTestState(): GameState {
+function createTestState(petOverrides?: Partial<Pet>): GameState {
+  const pet = createTestPet({
+    energyStats: { energy: toMicro(100) },
+    ...petOverrides,
+  });
   return {
     ...createInitialGameState(),
+    pet,
     isInitialized: true,
   };
 }
 
-// applyExplorationResults tests
-test("applyExplorationResults grants foraging XP for completed exploration", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [],
-  };
+describe("canStartExploration", () => {
+  test("returns false when no pet", () => {
+    const state = { ...createInitialGameState(), pet: null };
+    const result = canStartExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.canStart).toBe(false);
+    expect(result.reason).toContain("No pet");
+  });
 
-  const { xpGained, leveledUp } = applyExplorationResults(state, result);
+  test("returns true when conditions met", () => {
+    const state = createTestState();
+    const result = canStartExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.canStart).toBe(true);
+  });
 
-  // Base XP of 15 with 0 items
-  expect(xpGained).toBe(15);
-  expect(leveledUp).toBe(false);
+  test("returns false when pet not idle", () => {
+    const state = createTestState({ activityState: ActivityState.Training });
+    const result = canStartExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.canStart).toBe(false);
+  });
 });
 
-test("applyExplorationResults grants bonus XP for items found", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [
-      { itemId: FOOD_ITEMS.APPLE.id, quantity: 2 },
-      { itemId: FOOD_ITEMS.MEAT.id, quantity: 3 },
-    ],
-  };
+describe("startExploration", () => {
+  test("returns failure when no pet", () => {
+    const state = { ...createInitialGameState(), pet: null };
+    const result = startExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("No pet");
+  });
 
-  const { xpGained } = applyExplorationResults(state, result);
+  test("starts exploration successfully", () => {
+    const state = createTestState();
+    const result = startExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      10 as Tick,
+    );
 
-  // Base XP 15 + (5 items * 5 XP per item) = 40
-  expect(xpGained).toBe(40);
+    expect(result.success).toBe(true);
+    expect(result.state.pet?.activityState).toBe(ActivityState.Exploring);
+    expect(result.state.pet?.activeExploration).toBeDefined();
+    expect(result.state.pet?.activeExploration?.activityId).toBe(
+      ActivityId.Foraging,
+    );
+  });
+
+  test("deducts energy when starting exploration", () => {
+    const initialEnergy = toMicro(100);
+    const state = createTestState({ energyStats: { energy: initialEnergy } });
+    const result = startExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+
+    expect(result.success).toBe(true);
+    // Foraging costs 15 energy
+    expect(result.state.pet?.energyStats.energy).toBe(
+      initialEnergy - toMicro(15),
+    );
+  });
 });
 
-test("applyExplorationResults updates skills in game state", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 1 }],
-  };
+describe("cancelExploration", () => {
+  test("returns failure when no pet", () => {
+    const state = { ...createInitialGameState(), pet: null };
+    const result = cancelExploration(state);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("No pet");
+  });
 
-  const { state: newState, xpGained } = applyExplorationResults(state, result);
+  test("returns failure when no active exploration", () => {
+    const state = createTestState();
+    const result = cancelExploration(state);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("No exploration");
+  });
 
-  expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(xpGained);
-});
+  test("refunds energy on cancel", () => {
+    const initialEnergy = toMicro(50);
+    const energyCost = toMicro(15);
+    const exploration: ActiveExploration = {
+      activityId: ActivityId.Foraging,
+      locationId: "meadow",
+      startTick: 0 as Tick,
+      durationTicks: 10 as Tick,
+      ticksRemaining: 5 as Tick,
+      energyCost,
+    };
 
-test("applyExplorationResults adds items to inventory", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 3 }],
-  };
+    const state = createTestState({
+      activityState: ActivityState.Exploring,
+      energyStats: { energy: initialEnergy },
+      activeExploration: exploration,
+    });
 
-  const { state: newState } = applyExplorationResults(state, result);
+    const result = cancelExploration(state);
 
-  const appleItem = newState.player.inventory.items.find(
-    (item) => item.itemId === FOOD_ITEMS.APPLE.id,
-  );
-  expect(appleItem).toBeDefined();
-  expect(appleItem?.quantity).toBe(3);
-});
-
-test("applyExplorationResults returns leveledUp true when skill levels up", () => {
-  const state = createTestState();
-  // Give enough XP to level up (need 150 XP for level 2)
-  // Simulate getting lots of items
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 30 }], // 15 + 30*5 = 165 XP
-  };
-
-  const { leveledUp } = applyExplorationResults(state, result);
-
-  expect(leveledUp).toBe(true);
-});
-
-test("applyExplorationResults still grants XP when no items found", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Nothing found",
-    itemsFound: [],
-  };
-
-  const { xpGained, state: newState } = applyExplorationResults(state, result);
-
-  expect(xpGained).toBe(15); // Base XP only
-  expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(15);
-});
-
-test("applyExplorationResults does not grant XP when exploration fails", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: false,
-    message: "Exploration failed",
-    itemsFound: [],
-  };
-
-  const {
-    xpGained,
-    leveledUp,
-    state: newState,
-  } = applyExplorationResults(state, result);
-
-  expect(xpGained).toBe(0);
-  expect(leveledUp).toBe(false);
-  expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(0);
+    expect(result.success).toBe(true);
+    expect(result.state.pet?.activityState).toBe(ActivityState.Idle);
+    expect(result.state.pet?.activeExploration).toBeUndefined();
+    expect(result.state.pet?.energyStats.energy).toBe(
+      initialEnergy + energyCost,
+    );
+    expect(result.message).toContain("refunded");
+  });
 });

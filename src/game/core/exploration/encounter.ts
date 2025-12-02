@@ -76,20 +76,33 @@ export function getApproximatePetLevel(pet: Pet): number {
 }
 
 /**
- * Check if an encounter entry is available for the pet's stage.
+ * Check if an encounter entry is available for the pet's stage and activity.
+ * @param entry - The encounter entry to check
+ * @param petStage - The pet's current growth stage
+ * @param activityId - The activity being performed (optional, filters by activityIds)
  */
 function isEncounterAvailable(
   entry: EncounterEntry,
   petStage: GrowthStage,
+  activityId?: string,
 ): boolean {
-  if (!entry.minStage) {
-    return true;
+  // Check growth stage requirement
+  if (entry.minStage) {
+    const petStageIndex = GROWTH_STAGE_ORDER.indexOf(petStage);
+    const requiredIndex = GROWTH_STAGE_ORDER.indexOf(entry.minStage);
+    if (petStageIndex < requiredIndex) {
+      return false;
+    }
   }
 
-  const petStageIndex = GROWTH_STAGE_ORDER.indexOf(petStage);
-  const requiredIndex = GROWTH_STAGE_ORDER.indexOf(entry.minStage);
+  // Check activity filter - if activityIds is defined, only allow matching activities
+  if (activityId && entry.activityIds && entry.activityIds.length > 0) {
+    if (!entry.activityIds.includes(activityId)) {
+      return false;
+    }
+  }
 
-  return petStageIndex >= requiredIndex;
+  return true;
 }
 
 /**
@@ -139,8 +152,15 @@ function generateEncounter(
 
 /**
  * Force an encounter for testing/specific triggers.
+ * @param locationId - Location where the encounter occurs
+ * @param pet - The pet exploring
+ * @param activityId - Optional activity ID to filter encounters
  */
-export function forceEncounter(locationId: string, pet: Pet): EncounterResult {
+export function forceEncounter(
+  locationId: string,
+  pet: Pet,
+  activityId?: string,
+): EncounterResult {
   const location = getLocation(locationId);
   if (!location?.encounterTableId) {
     return { hasEncounter: false };
@@ -151,9 +171,9 @@ export function forceEncounter(locationId: string, pet: Pet): EncounterResult {
     return { hasEncounter: false };
   }
 
-  // Get first available entry
+  // Get first available entry filtered by stage and activity
   const availableEntries = encounterTable.entries.filter((entry) =>
-    isEncounterAvailable(entry, pet.growth.stage),
+    isEncounterAvailable(entry, pet.growth.stage, activityId),
   );
 
   if (availableEntries.length === 0) {
@@ -165,4 +185,76 @@ export function forceEncounter(locationId: string, pet: Pet): EncounterResult {
     return { hasEncounter: false };
   }
   return generateEncounter(firstEntry, locationId, pet);
+}
+
+/**
+ * Roll for an encounter during exploration.
+ * Uses the activity's encounter chance and location's encounter table.
+ *
+ * @param locationId - Location where exploration is occurring
+ * @param pet - The pet exploring
+ * @param activityId - The activity being performed
+ * @param encounterChance - Base probability of triggering an encounter (0.0 to 1.0)
+ * @returns EncounterResult with hasEncounter=true if an encounter occurred
+ */
+export function rollForEncounter(
+  locationId: string,
+  pet: Pet,
+  activityId: string,
+  encounterChance: number,
+): EncounterResult {
+  // First check if encounter triggers based on activity's encounter chance
+  if (Math.random() >= encounterChance) {
+    return { hasEncounter: false };
+  }
+
+  const location = getLocation(locationId);
+  if (!location?.encounterTableId) {
+    return { hasEncounter: false };
+  }
+
+  const encounterTable = getEncounterTable(location.encounterTableId);
+  if (!encounterTable || encounterTable.entries.length === 0) {
+    return { hasEncounter: false };
+  }
+
+  // Filter entries by stage and activity, then select based on probability
+  const availableEntries = encounterTable.entries.filter((entry) =>
+    isEncounterAvailable(entry, pet.growth.stage, activityId),
+  );
+
+  if (availableEntries.length === 0) {
+    return { hasEncounter: false };
+  }
+
+  // Normalize probabilities and select an entry
+  const totalProbability = availableEntries.reduce(
+    (sum, entry) => sum + entry.probability,
+    0,
+  );
+
+  if (totalProbability <= 0) {
+    return { hasEncounter: false };
+  }
+
+  let roll = Math.random() * totalProbability;
+  let selectedEntry: EncounterEntry | undefined;
+
+  for (const entry of availableEntries) {
+    roll -= entry.probability;
+    if (roll <= 0) {
+      selectedEntry = entry;
+      break;
+    }
+  }
+
+  if (!selectedEntry) {
+    selectedEntry = availableEntries[availableEntries.length - 1];
+  }
+
+  if (!selectedEntry) {
+    return { hasEncounter: false };
+  }
+
+  return generateEncounter(selectedEntry, locationId, pet);
 }

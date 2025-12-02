@@ -471,7 +471,7 @@ test("processGameTick updates quest progress when exploration completes", () => 
     activityState: ActivityState.Exploring,
     activeExploration: {
       locationId: "meadow",
-      activityId: "forage",
+      activityId: "foraging", // Must match the activity ID in exploration system
       ticksRemaining: 1, // Will complete on this tick
       durationTicks: 10,
       startTick: 0,

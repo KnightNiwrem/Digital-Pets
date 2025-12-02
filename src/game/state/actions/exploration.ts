@@ -1,24 +1,16 @@
 /**
  * Exploration state actions.
- * TODO: Implement with new exploration system
+ * Provides high-level state action handlers for the exploration system.
  */
 
-import { addItem } from "@/game/core/inventory";
-import { addXpToPlayerSkill } from "@/game/core/skills";
-import type { ExplorationDrop, ExplorationResult } from "@/game/types/activity";
-import { ActivityState } from "@/game/types/constants";
+import {
+  cancelExploration as cancelExplorationCore,
+  canStartExplorationActivity,
+  startExplorationActivity,
+} from "@/game/core/exploration/exploration";
+import type { ExplorationDrop } from "@/game/types/activity";
+import type { Tick } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
-import { SkillType } from "@/game/types/skill";
-
-/**
- * Base XP for completing a foraging session.
- */
-const FORAGING_BASE_XP = 15;
-
-/**
- * Bonus XP per item found.
- */
-const FORAGING_XP_PER_ITEM = 5;
 
 /**
  * Result of an exploration action.
@@ -33,21 +25,86 @@ export interface ExplorationActionResult {
 }
 
 /**
- * Start a foraging session at the current location.
- * TODO: Implement with new exploration system
+ * Start an exploration activity at the specified location.
  */
-export function startForaging(state: GameState): ExplorationActionResult {
-  // TODO: Implement with new exploration system
+export function startExploration(
+  state: GameState,
+  locationId: string,
+  activityId: string,
+  currentTick: Tick,
+): ExplorationActionResult {
+  if (!state.pet) {
+    return {
+      success: false,
+      state,
+      message: "No pet.",
+    };
+  }
+
+  // Get completed quest IDs for requirement checking
+  const completedQuestIds = state.quests
+    .filter((q) => q.state === "completed")
+    .map((q) => q.questId);
+
+  // Attempt to start the exploration
+  const result = startExplorationActivity(
+    state.pet,
+    state.player.skills,
+    completedQuestIds,
+    locationId,
+    activityId,
+    currentTick,
+  );
+
+  if (!result.success) {
+    return {
+      success: false,
+      state,
+      message: result.message ?? "Failed to start exploration.",
+    };
+  }
+
   return {
-    success: false,
-    state,
-    message: "Exploration system is being upgraded. Please try again later.",
+    success: true,
+    state: {
+      ...state,
+      pet: result.pet,
+    },
+    message: `Started exploration at ${locationId}.`,
   };
 }
 
 /**
+ * Check if an exploration activity can be started.
+ */
+export function canStartExploration(
+  state: GameState,
+  locationId: string,
+  activityId: string,
+  currentTick: Tick,
+): { canStart: boolean; reason?: string } {
+  if (!state.pet) {
+    return { canStart: false, reason: "No pet." };
+  }
+
+  // Get completed quest IDs for requirement checking
+  const completedQuestIds = state.quests
+    .filter((q) => q.state === "completed")
+    .map((q) => q.questId);
+
+  return canStartExplorationActivity(
+    state.pet,
+    state.player.skills,
+    completedQuestIds,
+    locationId,
+    activityId,
+    currentTick,
+  );
+}
+
+/**
  * Cancel the current exploration session.
- * TODO: Implement with new exploration system
+ * Energy is fully refunded as per the spec.
  */
 export function cancelExploration(state: GameState): ExplorationActionResult {
   if (!state.pet) {
@@ -66,86 +123,14 @@ export function cancelExploration(state: GameState): ExplorationActionResult {
     };
   }
 
-  // Refund energy and clear exploration state
-  const energyRefunded = state.pet.activeExploration.energyCost;
+  const result = cancelExplorationCore(state.pet);
 
   return {
     success: true,
     state: {
       ...state,
-      pet: {
-        ...state.pet,
-        activityState: ActivityState.Idle,
-        activeExploration: undefined,
-        energyStats: {
-          energy: state.pet.energyStats.energy + energyRefunded,
-        },
-      },
+      pet: result.pet,
     },
-    message: "Exploration cancelled. Energy has been refunded.",
-  };
-}
-
-/**
- * Apply exploration results to game state (called when exploration completes).
- * Adds found items to inventory and grants foraging XP.
- * XP is only granted for successful explorations.
- */
-export function applyExplorationResults(
-  state: GameState,
-  result: ExplorationResult,
-): { state: GameState; xpGained: number; leveledUp: boolean } {
-  // Do not grant XP for failed explorations
-  if (!result.success) {
-    return {
-      state,
-      xpGained: 0,
-      leveledUp: false,
-    };
-  }
-
-  // Calculate XP: base + bonus per item found
-  const itemCount = result.itemsFound.reduce(
-    (sum, drop) => sum + drop.quantity,
-    0,
-  );
-  const xpGained = FORAGING_BASE_XP + itemCount * FORAGING_XP_PER_ITEM;
-
-  // Grant foraging XP
-  const { skills, result: xpResult } = addXpToPlayerSkill(
-    state.player.skills,
-    SkillType.Foraging,
-    xpGained,
-  );
-
-  let updatedState: GameState = {
-    ...state,
-    player: {
-      ...state.player,
-      skills,
-    },
-  };
-
-  // Add each found item to inventory
-  if (result.itemsFound.length > 0) {
-    let currentInventory = updatedState.player.inventory;
-
-    for (const drop of result.itemsFound) {
-      currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
-    }
-
-    updatedState = {
-      ...updatedState,
-      player: {
-        ...updatedState.player,
-        inventory: currentInventory,
-      },
-    };
-  }
-
-  return {
-    state: updatedState,
-    xpGained: xpResult.xpGained,
-    leveledUp: xpResult.leveledUp,
+    message: result.message,
   };
 }

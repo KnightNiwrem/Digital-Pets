@@ -13,10 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { forceEncounter } from "@/game/core/exploration/encounter";
 import { getLocation } from "@/game/data/locations";
 import { useGameState } from "@/game/hooks/useGameState";
-import {
-  cancelExploration,
-  startForaging,
-} from "@/game/state/actions/exploration";
+import { cancelExploration } from "@/game/state/actions/exploration";
 import { selectCurrentLocationId, selectPet } from "@/game/state/selectors";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
@@ -71,12 +68,10 @@ export function ExplorationScreen({
   const canStartActivity = false;
   const activityMessage = "Exploration system is being upgraded";
 
-  // Handle starting exploration (currently disabled)
+  // Handle starting exploration (currently disabled - Phase 5 will update UI)
   const handleStartActivity = () => {
-    const result = startForaging(state);
-    if (result.success) {
-      actions.updateState(() => result.state);
-    }
+    // TODO: Phase 5 will implement proper activity selection
+    // For now, this is stubbed out
   };
 
   // Handle canceling exploration
