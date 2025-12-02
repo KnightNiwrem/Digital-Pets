@@ -74,6 +74,17 @@ export const TICKS_PER_HOUR = 120;
 export const TICKS_PER_DAY = 2880;
 
 /**
+ * Percentage maximum value (100%).
+ * Used for progress bars, completion calculations, and percentage caps.
+ */
+export const PERCENTAGE_MAX = 100;
+
+/**
+ * Default starting location ID.
+ */
+export const DEFAULT_LOCATION_ID = "home";
+
+/**
  * Convert milliseconds to ticks.
  */
 export function msToTicks(ms: number): Tick {

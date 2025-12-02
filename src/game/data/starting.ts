@@ -115,21 +115,63 @@ export function createDefaultStarterPet(): Pet {
 }
 
 /**
+ * Starting inventory item default values.
+ * Provides a balanced starter kit for new players.
+ */
+export const STARTING_INVENTORY_DEFAULTS = {
+  KIBBLE: { quantity: 5 },
+  APPLE: { quantity: 3 },
+  WATER: { quantity: 5 },
+  JUICE: { quantity: 3 },
+  TISSUE: { quantity: 5 },
+  WIPES: { quantity: 2 },
+  BALL: { quantity: 1, durability: 10 },
+} as const;
+
+/**
  * Starting inventory items for new players.
  * Provides basic care items to get started.
  */
 export const STARTING_INVENTORY: readonly InventoryItem[] = [
   // Food items
-  { itemId: FOOD_ITEMS.KIBBLE.id, quantity: 5, currentDurability: null },
-  { itemId: FOOD_ITEMS.APPLE.id, quantity: 3, currentDurability: null },
+  {
+    itemId: FOOD_ITEMS.KIBBLE.id,
+    quantity: STARTING_INVENTORY_DEFAULTS.KIBBLE.quantity,
+    currentDurability: null,
+  },
+  {
+    itemId: FOOD_ITEMS.APPLE.id,
+    quantity: STARTING_INVENTORY_DEFAULTS.APPLE.quantity,
+    currentDurability: null,
+  },
   // Drink items
-  { itemId: DRINK_ITEMS.WATER.id, quantity: 5, currentDurability: null },
-  { itemId: DRINK_ITEMS.JUICE.id, quantity: 3, currentDurability: null },
+  {
+    itemId: DRINK_ITEMS.WATER.id,
+    quantity: STARTING_INVENTORY_DEFAULTS.WATER.quantity,
+    currentDurability: null,
+  },
+  {
+    itemId: DRINK_ITEMS.JUICE.id,
+    quantity: STARTING_INVENTORY_DEFAULTS.JUICE.quantity,
+    currentDurability: null,
+  },
   // Cleaning items
-  { itemId: CLEANING_ITEMS.TISSUE.id, quantity: 5, currentDurability: null },
-  { itemId: CLEANING_ITEMS.WIPES.id, quantity: 2, currentDurability: null },
+  {
+    itemId: CLEANING_ITEMS.TISSUE.id,
+    quantity: STARTING_INVENTORY_DEFAULTS.TISSUE.quantity,
+    currentDurability: null,
+  },
+  {
+    itemId: CLEANING_ITEMS.WIPES.id,
+    quantity: STARTING_INVENTORY_DEFAULTS.WIPES.quantity,
+    currentDurability: null,
+  },
   // Toy (with durability)
-  { itemId: TOY_ITEMS.BALL.id, quantity: 1, currentDurability: 10 },
+  {
+    itemId: TOY_ITEMS.BALL.id,
+    quantity: STARTING_INVENTORY_DEFAULTS.BALL.quantity,
+    currentDurability: STARTING_INVENTORY_DEFAULTS.BALL.durability,
+  },
 ] as const;
 
 /**

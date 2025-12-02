@@ -3,7 +3,7 @@
  * Growth stage definitions are now embedded in species data.
  */
 
-import type { Tick } from "@/game/types/common";
+import { PERCENTAGE_MAX, type Tick } from "@/game/types/common";
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { SpeciesGrowthStageStats } from "@/game/types/species";
 import { getSpeciesById } from "./species";
@@ -113,10 +113,13 @@ export function getStageProgress(speciesId: string, ageTicks: Tick): number {
   const nextStage = species.growthStages[currentIndex + 1];
 
   if (!currentStage) return 0;
-  if (!nextStage) return 100;
+  if (!nextStage) return PERCENTAGE_MAX;
 
   const stageDuration = nextStage.minAgeTicks - currentStage.minAgeTicks;
   const timeInStage = ageTicks - currentStage.minAgeTicks;
 
-  return Math.min(100, Math.floor((timeInStage / stageDuration) * 100));
+  return Math.min(
+    PERCENTAGE_MAX,
+    Math.floor((timeInStage / stageDuration) * PERCENTAGE_MAX),
+  );
 }

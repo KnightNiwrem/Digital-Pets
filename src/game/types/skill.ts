@@ -31,6 +31,17 @@ export const SkillTier = {
 export type SkillTier = (typeof SkillTier)[keyof typeof SkillTier];
 
 /**
+ * Display names for skill tiers.
+ */
+export const SKILL_TIER_DISPLAY_NAMES: Record<SkillTier, string> = {
+  [SkillTier.Novice]: "Novice",
+  [SkillTier.Apprentice]: "Apprentice",
+  [SkillTier.Journeyman]: "Journeyman",
+  [SkillTier.Expert]: "Expert",
+  [SkillTier.Master]: "Master",
+};
+
+/**
  * Skill tier level ranges.
  */
 export const SKILL_TIER_THRESHOLDS: Record<SkillTier, { min: number }> = {

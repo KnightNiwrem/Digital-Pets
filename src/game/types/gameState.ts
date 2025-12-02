@@ -3,7 +3,7 @@
  */
 
 import type { BattleState } from "@/game/core/battle/battle";
-import type { Tick, Timestamp } from "./common";
+import { DEFAULT_LOCATION_ID, type Tick, type Timestamp } from "./common";
 import type { GameEvent } from "./event";
 import type { Pet } from "./pet";
 import type { QuestProgress } from "./quest";
@@ -126,7 +126,7 @@ export function createInitialGameState(): GameState {
     player: {
       inventory: { items: [] },
       currency: { coins: 0 },
-      currentLocationId: "home",
+      currentLocationId: DEFAULT_LOCATION_ID,
       skills: createInitialSkills(),
     },
     quests: [],
