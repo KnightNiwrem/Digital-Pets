@@ -23,4 +23,4 @@
 - [x] Create a message registry or translation file (e.g., `src/game/data/messages.ts`) to hold these strings.
 
 ## 3. Components Refactor
-- [ ] Audit components for hardcoded display strings that should be derived from constants (e.g., checking `stage === 'baby'` instead of `stage === GrowthStage.Baby`).
+- [x] Audit components for hardcoded display strings that should be derived from constants (e.g., checking `stage === 'baby'` instead of `stage === GrowthStage.Baby`).

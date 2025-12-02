@@ -4,7 +4,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTicksAsTime, toDisplay } from "@/game/types/common";
-import type { ItemCategory, Rarity } from "@/game/types/constants";
+import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
 
@@ -44,15 +44,15 @@ function getRarityLabel(rarity: Rarity): string {
  */
 function getRarityTextClass(rarity: Rarity): string {
   switch (rarity) {
-    case "common":
+    case Rarity.Common:
       return "text-muted-foreground";
-    case "uncommon":
+    case Rarity.Uncommon:
       return "text-green-600 dark:text-green-400";
-    case "rare":
+    case Rarity.Rare:
       return "text-blue-600 dark:text-blue-400";
-    case "epic":
+    case Rarity.Epic:
       return "text-purple-600 dark:text-purple-400";
-    case "legendary":
+    case Rarity.Legendary:
       return "text-yellow-600 dark:text-yellow-400";
   }
 }
@@ -64,7 +64,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
   const stats: { label: string; value: string }[] = [];
 
   switch (itemDef.category) {
-    case "food":
+    case ItemCategory.Food:
       stats.push({
         label: "Satiety",
         value: `+${toDisplay(itemDef.satietyRestore)}`,
@@ -76,7 +76,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
         });
       }
       break;
-    case "drink":
+    case ItemCategory.Drink:
       stats.push({
         label: "Hydration",
         value: `+${toDisplay(itemDef.hydrationRestore)}`,
@@ -88,7 +88,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
         });
       }
       break;
-    case "toy":
+    case ItemCategory.Toy:
       stats.push({
         label: "Happiness",
         value: `+${toDisplay(itemDef.happinessRestore)}`,
@@ -98,7 +98,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
         value: `${itemDef.maxDurability} uses`,
       });
       break;
-    case "cleaning":
+    case ItemCategory.Cleaning:
       stats.push({
         label: "Poop Removed",
         value: `${itemDef.poopRemoved}`,
@@ -118,7 +118,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
 export function ItemDetail({ inventoryItem, itemDef }: ItemDetailProps) {
   const durability = inventoryItem.currentDurability;
   const maxDurability =
-    itemDef.category === "toy" ? itemDef.maxDurability : undefined;
+    itemDef.category === ItemCategory.Toy ? itemDef.maxDurability : undefined;
   const stats = getItemStats(itemDef);
 
   return (

@@ -2,7 +2,7 @@
  * Shop inventory component displaying items available for purchase.
  */
 
-import type { Rarity } from "@/game/types/constants";
+import { Rarity } from "@/game/types/constants";
 import type { Item } from "@/game/types/item";
 import type { ShopItem } from "@/game/types/shop";
 import { cn } from "@/lib/utils";
@@ -22,15 +22,15 @@ interface ShopInventoryProps {
  */
 function getRarityClass(rarity: Rarity): string {
   switch (rarity) {
-    case "common":
+    case Rarity.Common:
       return "border-border";
-    case "uncommon":
+    case Rarity.Uncommon:
       return "border-green-500";
-    case "rare":
+    case Rarity.Rare:
       return "border-blue-500";
-    case "epic":
+    case Rarity.Epic:
       return "border-purple-500";
-    case "legendary":
+    case Rarity.Legendary:
       return "border-yellow-500";
   }
 }
