@@ -57,7 +57,7 @@ The codebase already has good constant extraction in several areas:
 
 ### Training Facilities (`src/game/data/facilities.ts`)
 
-- [ ] **Lines 22, 26, 34, 35, 44, 45, 50**: Training session values (energy costs, stat gains, duration multipliers)
+- [x] **Lines 22, 26, 34, 35, 44, 45, 50**: Training session values (energy costs, stat gains, duration multipliers)
   ```typescript
   // basicSession
   durationTicks: TICKS_PER_HOUR, // 1 hour
@@ -76,7 +76,7 @@ The codebase already has good constant extraction in several areas:
   primaryStatGain: 6,
   secondaryStatGain: 2,
   ```
-  Consider creating a TRAINING_SESSION_CONFIG object.
+  Extracted to `TRAINING_SESSION_CONFIG` in `src/game/data/facilities/constants.ts`.
 
 ### Starting Data (`src/game/data/starting.ts`)
 
@@ -161,7 +161,7 @@ The codebase already has good constant extraction in several areas:
 ### High Priority
 1. [x] Create `src/game/core/exploration/constants.ts` for BASE_EXPLORATION_XP and exploration-related values
 2. [x] Create message constant objects for training, shop, travel, quest, and exploration systems
-3. [ ] Extract training session configuration values to a dedicated constants file
+3. [x] Extract training session configuration values to a dedicated constants file
 4. [x] Define MIN_HIT_CHANCE and MAX_HIT_CHANCE in battle constants
 
 ### Medium Priority
