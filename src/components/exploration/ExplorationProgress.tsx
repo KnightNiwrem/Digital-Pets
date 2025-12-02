@@ -1,10 +1,11 @@
 /**
  * Exploration progress indicator component.
- * TODO: Implement with new exploration system
+ * Displays the current progress of an active exploration session.
  */
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getActivityById } from "@/game/data/exploration/activities";
 import { getLocation } from "@/game/data/locations";
 import type { ActiveExploration } from "@/game/types/activity";
 import { formatTicksAsTime } from "@/game/types/common";
@@ -16,7 +17,6 @@ interface ExplorationProgressProps {
 
 /**
  * Get exploration progress as a percentage.
- * TODO: Move to new exploration module in Phase 3
  */
 function getExplorationProgress(exploration: ActiveExploration): number {
   if (exploration.durationTicks === 0) {
@@ -27,28 +27,45 @@ function getExplorationProgress(exploration: ActiveExploration): number {
 }
 
 /**
+ * Get an emoji icon for an activity based on its ID.
+ */
+function getActivityIcon(activityId: string): string {
+  switch (activityId) {
+    case "foraging":
+      return "🌿";
+    case "mining":
+      return "⛏️";
+    case "fishing":
+      return "🎣";
+    case "deep_exploration":
+      return "🗺️";
+    default:
+      return "🔍";
+  }
+}
+
+/**
  * Active exploration progress display.
- * TODO: Update to use new activity-based exploration system
  */
 export function ExplorationProgress({
   exploration,
   onCancel,
 }: ExplorationProgressProps) {
   const location = getLocation(exploration.locationId);
+  const activity = getActivityById(exploration.activityId);
   const progress = getExplorationProgress(exploration);
   const timeRemaining = formatTicksAsTime(exploration.ticksRemaining);
 
-  // Use activity ID to determine the activity name
-  // TODO: Look up activity name from activity data in Phase 2+
-  const activityName =
-    exploration.activityId === "forage" ? "Foraging" : "Exploring";
+  // Get activity name from activity data
+  const activityName = activity?.name ?? "Exploring";
+  const activityIcon = getActivityIcon(exploration.activityId);
 
   return (
     <Card className="border-green-500/50">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🌿</span>
+            <span className="text-2xl">{activityIcon}</span>
             <div>
               <CardTitle className="text-base">{activityName}...</CardTitle>
               <p className="text-sm text-muted-foreground">

@@ -92,6 +92,13 @@ export function selectLastSaveTime(state: GameState): number {
 }
 
 /**
+ * Get the total ticks (current game tick).
+ */
+export function selectTotalTicks(state: GameState): Tick {
+  return state.totalTicks;
+}
+
+/**
  * Get the pet's activity state.
  */
 export function selectPetActivityState(state: GameState): ActivityState | null {

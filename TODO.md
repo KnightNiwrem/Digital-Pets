@@ -351,20 +351,20 @@ Update UI components to use the new system.
 
 ### Task 5.1: Update ActivitySelect Component
 
-- [ ] Accept list of activities from data
-- [ ] Show requirements and costs
-- [ ] Indicate cooldown status
+- [x] Accept list of activities from data
+- [x] Show requirements and costs
+- [x] Indicate cooldown status
 
 ### Task 5.2: Update ExplorationProgress Component
 
-- [ ] Display activity name from activity data
-- [ ] Remove hardcoded "Foraging"
+- [x] Display activity name from activity data
+- [x] Remove hardcoded "Foraging"
 
 ### Task 5.3: Update ExplorationScreen Component
 
-- [ ] Fetch available activities for location
-- [ ] Filter by requirements
-- [ ] Handle activity selection
+- [x] Fetch available activities for location
+- [x] Filter by requirements
+- [x] Handle activity selection
 
 ---
 

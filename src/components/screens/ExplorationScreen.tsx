@@ -1,9 +1,13 @@
 /**
- * Exploration screen for foraging and exploring wild areas.
- * TODO: Implement with new exploration system
+ * Exploration screen for exploring wild areas and gathering resources.
+ * Uses the activity-based exploration system with requirements, cooldowns, and drop tables.
  */
 
-import { ActivitySelect, ExplorationProgress } from "@/components/exploration";
+import {
+  ActivitySelect,
+  type ActivityStatus,
+  ExplorationProgress,
+} from "@/components/exploration";
 import {
   ActivityBlockedCard,
   getActivityBlockingInfo,
@@ -11,17 +15,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { forceEncounter } from "@/game/core/exploration/encounter";
+import {
+  canStartExplorationActivity,
+  getActivityCooldownRemaining,
+  getAvailableActivities,
+} from "@/game/core/exploration/exploration";
 import { getLocation } from "@/game/data/locations";
 import { useGameState } from "@/game/hooks/useGameState";
-import { cancelExploration } from "@/game/state/actions/exploration";
-import { selectCurrentLocationId, selectPet } from "@/game/state/selectors";
+import {
+  cancelExploration,
+  startExploration,
+} from "@/game/state/actions/exploration";
+import {
+  selectCurrentLocationId,
+  selectPet,
+  selectSkills,
+  selectTotalTicks,
+} from "@/game/state/selectors";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
 import { FacilityType, LocationType } from "@/game/types/location";
 
 /**
  * Main exploration screen component.
- * TODO: Update to use new activity-based exploration system
  */
 export function ExplorationScreen({
   onStartBattle,
@@ -49,6 +65,8 @@ export function ExplorationScreen({
   }
 
   const currentLocationId = selectCurrentLocationId(state);
+  const currentTick = selectTotalTicks(state);
+  const skills = selectSkills(state);
   const currentEnergy = toDisplay(pet.energyStats.energy);
   const isExploring = pet.activityState === ActivityState.Exploring;
   const isBlocked = pet.activityState !== ActivityState.Idle;
@@ -63,15 +81,48 @@ export function ExplorationScreen({
     FacilityType.BattleArea,
   );
 
-  // TODO: Get activity availability from new exploration system
-  // For now, exploration is disabled while the system is being upgraded
-  const canStartActivity = false;
-  const activityMessage = "Exploration system is being upgraded";
+  // Get completed quest IDs for requirement checking
+  const completedQuestIds = state.quests
+    .filter((q) => q.state === "completed")
+    .map((q) => q.questId);
 
-  // Handle starting exploration (currently disabled - Phase 5 will update UI)
-  const handleStartActivity = () => {
-    // TODO: Phase 5 will implement proper activity selection
-    // For now, this is stubbed out
+  // Get available activities for this location with their status
+  const availableActivities = getAvailableActivities(currentLocationId);
+  const activityStatuses: ActivityStatus[] = availableActivities.map(
+    (activity) => {
+      const canStart = canStartExplorationActivity(
+        pet,
+        skills,
+        completedQuestIds,
+        currentLocationId,
+        activity.id,
+        currentTick,
+      );
+      const cooldownRemaining = getActivityCooldownRemaining(
+        pet,
+        currentLocationId,
+        activity.id,
+        currentTick,
+      );
+      return {
+        activity,
+        canStart,
+        cooldownRemaining,
+      };
+    },
+  );
+
+  // Handle starting exploration
+  const handleStartActivity = (activityId: string) => {
+    const result = startExploration(
+      state,
+      currentLocationId,
+      activityId,
+      currentTick,
+    );
+    if (result.success) {
+      actions.updateState(() => result.state);
+    }
   };
 
   // Handle canceling exploration
@@ -144,10 +195,8 @@ export function ExplorationScreen({
         <>
           <h2 className="text-lg font-semibold px-1">Activities</h2>
           <ActivitySelect
-            activityInfo={undefined}
+            activities={activityStatuses}
             currentEnergy={currentEnergy}
-            canStartActivity={canStartActivity}
-            activityMessage={activityMessage}
             onStartActivity={handleStartActivity}
           />
 
