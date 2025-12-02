@@ -335,13 +335,13 @@ Wire up the exploration system to game state.
 
 ### Task 4.1: Update Exploration Actions (`src/game/state/actions/exploration.ts`)
 
-- [ ] Implement `startExplorationActivity(state, activityId)`
-- [ ] Implement `cancelExploration(state)`
-- [ ] Implement `applyExplorationResults(state, result)`
+- [x] Implement `startExplorationActivity(state, activityId)`
+- [x] Implement `cancelExploration(state)`
+- [x] Implement `applyExplorationResults(state, result)`
 
 ### Task 4.2: Write Tests (`src/game/state/actions/exploration.test.ts`)
 
-- [ ] Test state action handlers
+- [x] Test state action handlers
 
 ---
 

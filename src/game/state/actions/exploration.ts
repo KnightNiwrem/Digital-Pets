@@ -4,13 +4,18 @@
  */
 
 import {
+  applySkillXpGains,
+  type CompleteExplorationResult,
   cancelExploration as cancelExplorationCore,
   canStartExplorationActivity,
   startExplorationActivity,
 } from "@/game/core/exploration/exploration";
+import { addItem } from "@/game/core/inventory";
+import { updateQuestProgress } from "@/game/core/quests/quests";
 import type { ExplorationDrop } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
+import { ObjectiveType } from "@/game/types/quest";
 
 /**
  * Result of an exploration action.
@@ -132,5 +137,110 @@ export function cancelExploration(state: GameState): ExplorationActionResult {
       pet: result.pet,
     },
     message: result.message,
+  };
+}
+
+/**
+ * Result of applying exploration results to game state.
+ */
+export interface ApplyExplorationResultsResult {
+  success: boolean;
+  state: GameState;
+  message: string;
+  itemsFound?: ExplorationDrop[];
+  skillXpGains?: Record<string, number>;
+  skillLevelUps?: Record<string, boolean>;
+}
+
+/**
+ * Apply exploration completion results to game state.
+ * This updates:
+ * - Pet state (from completion result)
+ * - Skill XP gains
+ * - Inventory (adding found items)
+ * - Quest progress (for Explore and Collect objectives)
+ */
+export function applyExplorationResults(
+  state: GameState,
+  result: CompleteExplorationResult,
+  activityId: string,
+): ApplyExplorationResultsResult {
+  if (!state.pet) {
+    return {
+      success: false,
+      state,
+      message: "No pet.",
+    };
+  }
+
+  if (!result.success) {
+    return {
+      success: false,
+      state: {
+        ...state,
+        pet: result.pet,
+      },
+      message: result.message,
+    };
+  }
+
+  // Start with updated pet state from completion result
+  let updatedState: GameState = {
+    ...state,
+    pet: result.pet,
+  };
+
+  // Apply skill XP gains
+  const { skills: updatedSkills, levelUps } = applySkillXpGains(
+    updatedState.player.skills,
+    result.skillXpGains,
+  );
+
+  updatedState = {
+    ...updatedState,
+    player: {
+      ...updatedState.player,
+      skills: updatedSkills,
+    },
+  };
+
+  // Add found items to inventory
+  let currentInventory = updatedState.player.inventory;
+  for (const drop of result.itemsFound) {
+    currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
+  }
+
+  updatedState = {
+    ...updatedState,
+    player: {
+      ...updatedState.player,
+      inventory: currentInventory,
+    },
+  };
+
+  // Update quest progress for Explore objectives
+  updatedState = updateQuestProgress(
+    updatedState,
+    ObjectiveType.Explore,
+    activityId,
+  );
+
+  // Update quest progress for Collect objectives for each item found
+  for (const drop of result.itemsFound) {
+    updatedState = updateQuestProgress(
+      updatedState,
+      ObjectiveType.Collect,
+      drop.itemId,
+      drop.quantity,
+    );
+  }
+
+  return {
+    success: true,
+    state: updatedState,
+    message: result.message,
+    itemsFound: result.itemsFound,
+    skillXpGains: result.skillXpGains,
+    skillLevelUps: levelUps,
   };
 }
