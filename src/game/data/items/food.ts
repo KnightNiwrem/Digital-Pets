@@ -5,6 +5,7 @@
 import { toMicro } from "@/game/types/common";
 import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { FoodItem } from "@/game/types/item";
+import { MAX_STACK_BY_RARITY, POOP_ACCELERATION } from "./constants";
 
 /**
  * Basic food items available from the start.
@@ -24,11 +25,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: 99,
+    maxStack: MAX_STACK_BY_RARITY.common,
     sellValue: 5,
     icon: "🥣",
     satietyRestore: toMicro(15),
-    poopAcceleration: 60, // Light meal: 15 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.LIGHT,
   },
   APPLE: {
     id: "food_apple",
@@ -37,11 +38,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: 99,
+    maxStack: MAX_STACK_BY_RARITY.common,
     sellValue: 8,
     icon: "🍎",
     satietyRestore: toMicro(20),
-    poopAcceleration: 120, // Standard meal: 30 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.STANDARD,
   },
   MEAT: {
     id: "food_meat",
@@ -50,11 +51,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: 50,
+    maxStack: MAX_STACK_BY_RARITY.uncommon,
     sellValue: 15,
     icon: "🍖",
     satietyRestore: toMicro(35),
-    poopAcceleration: 180, // Heavy meal: 45 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.HEAVY,
   },
   FISH: {
     id: "food_fish",
@@ -63,11 +64,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: 50,
+    maxStack: MAX_STACK_BY_RARITY.uncommon,
     sellValue: 18,
     icon: "🐟",
     satietyRestore: toMicro(30),
-    poopAcceleration: 120, // Standard meal: 30 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.STANDARD,
   },
   CAKE: {
     id: "food_cake",
@@ -76,11 +77,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: 20,
+    maxStack: MAX_STACK_BY_RARITY.rare,
     sellValue: 25,
     icon: "🍰",
     satietyRestore: toMicro(50),
-    poopAcceleration: 240, // Indulgent meal: 60 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.INDULGENT,
   },
   BERRIES: {
     id: "food_berries",
@@ -89,11 +90,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: 99,
+    maxStack: MAX_STACK_BY_RARITY.common,
     sellValue: 6,
     icon: "🫐",
     satietyRestore: toMicro(12),
-    poopAcceleration: 40, // Very light: 10 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.VERY_LIGHT,
   },
   MUSHROOM: {
     id: "food_mushroom",
@@ -102,11 +103,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: 50,
+    maxStack: MAX_STACK_BY_RARITY.uncommon,
     sellValue: 12,
     icon: "🍄",
     satietyRestore: toMicro(25),
-    poopAcceleration: 90, // Light meal: 22.5 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.LIGHT_MEDIUM,
   },
   STEAK: {
     id: "food_steak",
@@ -115,11 +116,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: 20,
+    maxStack: MAX_STACK_BY_RARITY.rare,
     sellValue: 40,
     icon: "🥩",
     satietyRestore: toMicro(60),
-    poopAcceleration: 200, // Heavy meal: 50 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.VERY_HEAVY,
   },
   HONEY: {
     id: "food_honey",
@@ -128,11 +129,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: 50,
+    maxStack: MAX_STACK_BY_RARITY.uncommon,
     sellValue: 20,
     icon: "🍯",
     satietyRestore: toMicro(18),
-    poopAcceleration: 60, // Light: 15 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.LIGHT,
   },
   FEAST: {
     id: "food_feast",
@@ -142,11 +143,11 @@ export const FOOD_ITEMS = {
     category: ItemCategory.Food,
     rarity: Rarity.Epic,
     stackable: true,
-    maxStack: 5,
+    maxStack: MAX_STACK_BY_RARITY.epic,
     sellValue: 100,
     icon: "🍱",
     satietyRestore: toMicro(100),
-    poopAcceleration: 360, // Massive meal: 90 minutes (micro-units)
+    poopAcceleration: POOP_ACCELERATION.MASSIVE,
   },
 } as const satisfies Record<string, FoodItem>;
 

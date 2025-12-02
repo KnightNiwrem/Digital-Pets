@@ -2,6 +2,7 @@
  * Battle item definitions that provide temporary combat buffs.
  */
 
+import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { BattleItem } from "@/game/types/item";
 
 /**
@@ -14,8 +15,8 @@ export const BATTLE_ITEMS = {
     id: "battle_attack_boost",
     name: "Attack Boost",
     description: "Temporarily increases attack power during battle.",
-    category: "battle",
-    rarity: "uncommon",
+    category: ItemCategory.Battle,
+    rarity: Rarity.Uncommon,
     stackable: true,
     maxStack: 20,
     sellValue: 40,
@@ -28,8 +29,8 @@ export const BATTLE_ITEMS = {
     id: "battle_defense_boost",
     name: "Defense Boost",
     description: "Temporarily increases defense during battle.",
-    category: "battle",
-    rarity: "uncommon",
+    category: ItemCategory.Battle,
+    rarity: Rarity.Uncommon,
     stackable: true,
     maxStack: 20,
     sellValue: 40,
@@ -42,8 +43,8 @@ export const BATTLE_ITEMS = {
     id: "battle_speed_boost",
     name: "Speed Boost",
     description: "Temporarily increases speed during battle.",
-    category: "battle",
-    rarity: "uncommon",
+    category: ItemCategory.Battle,
+    rarity: Rarity.Uncommon,
     stackable: true,
     maxStack: 20,
     sellValue: 40,
@@ -56,8 +57,8 @@ export const BATTLE_ITEMS = {
     id: "battle_precision_boost",
     name: "Focus Lens",
     description: "Temporarily increases precision for critical hits.",
-    category: "battle",
-    rarity: "rare",
+    category: ItemCategory.Battle,
+    rarity: Rarity.Rare,
     stackable: true,
     maxStack: 15,
     sellValue: 60,
@@ -70,8 +71,8 @@ export const BATTLE_ITEMS = {
     id: "battle_iron_skin",
     name: "Iron Skin Elixir",
     description: "Greatly increases fortitude for a short time.",
-    category: "battle",
-    rarity: "rare",
+    category: ItemCategory.Battle,
+    rarity: Rarity.Rare,
     stackable: true,
     maxStack: 10,
     sellValue: 80,
@@ -84,8 +85,8 @@ export const BATTLE_ITEMS = {
     id: "battle_cunning_essence",
     name: "Cunning Essence",
     description: "Enhances cunning for evasion and status effects.",
-    category: "battle",
-    rarity: "rare",
+    category: ItemCategory.Battle,
+    rarity: Rarity.Rare,
     stackable: true,
     maxStack: 10,
     sellValue: 70,

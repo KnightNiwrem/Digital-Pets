@@ -8,8 +8,8 @@ import {
   type TrainingSession,
   TrainingSessionType,
 } from "@/game/types/activity";
-import { TICKS_PER_HOUR } from "@/game/types/common";
 import { GrowthStage } from "@/game/types/constants";
+import { TRAINING_SESSION_CONFIG } from "./constants";
 
 /**
  * Basic training session available at all facilities.
@@ -18,10 +18,10 @@ const basicSession: TrainingSession = {
   type: TrainingSessionType.Basic,
   name: "Basic Training",
   description: "A light training session for beginners.",
-  durationTicks: TICKS_PER_HOUR, // 1 hour
-  energyCost: 10,
-  primaryStatGain: 1,
-  secondaryStatGain: 0,
+  durationTicks: TRAINING_SESSION_CONFIG.BASIC.DURATION_TICKS,
+  energyCost: TRAINING_SESSION_CONFIG.BASIC.ENERGY_COST,
+  primaryStatGain: TRAINING_SESSION_CONFIG.BASIC.PRIMARY_STAT_GAIN,
+  secondaryStatGain: TRAINING_SESSION_CONFIG.BASIC.SECONDARY_STAT_GAIN,
 };
 
 /**
@@ -31,10 +31,10 @@ const intensiveSession: TrainingSession = {
   type: TrainingSessionType.Intensive,
   name: "Intensive Training",
   description: "A challenging session that pushes your pet harder.",
-  durationTicks: TICKS_PER_HOUR * 2, // 2 hours
-  energyCost: 25,
-  primaryStatGain: 3,
-  secondaryStatGain: 1,
+  durationTicks: TRAINING_SESSION_CONFIG.INTENSIVE.DURATION_TICKS,
+  energyCost: TRAINING_SESSION_CONFIG.INTENSIVE.ENERGY_COST,
+  primaryStatGain: TRAINING_SESSION_CONFIG.INTENSIVE.PRIMARY_STAT_GAIN,
+  secondaryStatGain: TRAINING_SESSION_CONFIG.INTENSIVE.SECONDARY_STAT_GAIN,
   minStage: GrowthStage.Child,
 };
 
@@ -45,10 +45,10 @@ const advancedSession: TrainingSession = {
   type: TrainingSessionType.Advanced,
   name: "Advanced Training",
   description: "An elite training regimen for serious growth.",
-  durationTicks: TICKS_PER_HOUR * 4, // 4 hours
-  energyCost: 50,
-  primaryStatGain: 6,
-  secondaryStatGain: 2,
+  durationTicks: TRAINING_SESSION_CONFIG.ADVANCED.DURATION_TICKS,
+  energyCost: TRAINING_SESSION_CONFIG.ADVANCED.ENERGY_COST,
+  primaryStatGain: TRAINING_SESSION_CONFIG.ADVANCED.PRIMARY_STAT_GAIN,
+  secondaryStatGain: TRAINING_SESSION_CONFIG.ADVANCED.SECONDARY_STAT_GAIN,
   minStage: GrowthStage.Teen,
 };
 

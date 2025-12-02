@@ -2,6 +2,7 @@
  * Cleaning item definitions that remove poop.
  */
 
+import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { CleaningItem } from "@/game/types/item";
 
 /**
@@ -14,8 +15,8 @@ export const CLEANING_ITEMS = {
     id: "cleaning_tissue",
     name: "Tissue Pack",
     description: "Basic disposable tissues. Removes a small amount of poop.",
-    category: "cleaning",
-    rarity: "common",
+    category: ItemCategory.Cleaning,
+    rarity: Rarity.Common,
     stackable: true,
     maxStack: 99,
     sellValue: 3,
@@ -26,8 +27,8 @@ export const CLEANING_ITEMS = {
     id: "cleaning_wipes",
     name: "Wet Wipes",
     description: "Moist cleaning wipes. More effective than tissues.",
-    category: "cleaning",
-    rarity: "common",
+    category: ItemCategory.Cleaning,
+    rarity: Rarity.Common,
     stackable: true,
     maxStack: 50,
     sellValue: 8,
@@ -38,8 +39,8 @@ export const CLEANING_ITEMS = {
     id: "cleaning_sponge",
     name: "Cleaning Sponge",
     description: "A sturdy sponge for thorough cleaning.",
-    category: "cleaning",
-    rarity: "uncommon",
+    category: ItemCategory.Cleaning,
+    rarity: Rarity.Uncommon,
     stackable: true,
     maxStack: 30,
     sellValue: 15,
@@ -50,8 +51,8 @@ export const CLEANING_ITEMS = {
     id: "cleaning_vacuum",
     name: "Mini Vacuum",
     description: "A portable vacuum cleaner. Cleans up large messes quickly!",
-    category: "cleaning",
-    rarity: "rare",
+    category: ItemCategory.Cleaning,
+    rarity: Rarity.Rare,
     stackable: true,
     maxStack: 10,
     sellValue: 50,
@@ -62,8 +63,8 @@ export const CLEANING_ITEMS = {
     id: "cleaning_brush",
     name: "Cleaning Brush",
     description: "A sturdy brush for scrubbing away messes.",
-    category: "cleaning",
-    rarity: "uncommon",
+    category: ItemCategory.Cleaning,
+    rarity: Rarity.Uncommon,
     stackable: true,
     maxStack: 30,
     sellValue: 12,
@@ -74,8 +75,8 @@ export const CLEANING_ITEMS = {
     id: "cleaning_spray",
     name: "Cleaning Spray",
     description: "A powerful cleaning spray. Very effective!",
-    category: "cleaning",
-    rarity: "rare",
+    category: ItemCategory.Cleaning,
+    rarity: Rarity.Rare,
     stackable: true,
     maxStack: 20,
     sellValue: 35,
