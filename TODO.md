@@ -280,19 +280,19 @@ Create the data definitions for activities and drop tables.
 
 ### Task 2.1: Create Activity Definitions (`src/game/data/exploration/activities.ts`)
 
-- [ ] Define activities like Foraging, Mining, Deep Exploration per spec examples
+- [x] Define activities like Foraging, Mining, Deep Exploration per spec examples
 
 ### Task 2.2: Create Drop Tables (`src/game/data/exploration/dropTables.ts`)
 
-- [ ] Create roll-based drop tables for each location-activity combination
+- [x] Create roll-based drop tables for each location-activity combination
 
 ### Task 2.3: Update Location Data (`src/game/data/locations/wild.ts`)
 
-- [ ] Add `dropTableIds` mappings to each wild location
+- [x] Add `dropTableIds` mappings to each wild location
 
 ### Task 2.4: Update Encounter Tables (`src/game/data/tables/encounters.ts`)
 
-- [ ] Add `activityIds` field to filter encounters by activity
+- [x] Add `activityIds` field to filter encounters by activity
 
 ---
 
