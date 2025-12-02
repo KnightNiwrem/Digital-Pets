@@ -2,6 +2,7 @@
  * Encounter table definitions for wild areas.
  */
 
+import { ActivityId } from "@/game/data/exploration/activities";
 import { SPECIES } from "@/game/data/species";
 import { GrowthStage } from "@/game/types/constants";
 
@@ -10,6 +11,9 @@ import { GrowthStage } from "@/game/types/constants";
  */
 export const EncounterType = {
   WildBattle: "wildBattle",
+  NPC: "npc",
+  Discovery: "discovery",
+  Event: "event",
 } as const;
 
 export type EncounterType = (typeof EncounterType)[keyof typeof EncounterType];
@@ -22,12 +26,14 @@ export interface EncounterEntry {
   encounterType: EncounterType;
   /** Base probability of this encounter (0-1) */
   probability: number;
-  /** Possible species that can appear */
-  speciesIds: string[];
+  /** Possible species that can appear (for wild battles) */
+  speciesIds?: string[];
   /** Level offset range from area base level [min, max] */
-  levelOffset: [number, number];
+  levelOffset?: [number, number];
   /** Minimum growth stage required for this encounter */
   minStage?: GrowthStage;
+  /** List of activity IDs that can trigger this encounter. If undefined, all activities can trigger it. */
+  activityIds?: string[];
 }
 
 /**
@@ -166,12 +172,15 @@ export const depthsEncounters: EncounterTable = {
       probability: 0.4,
       speciesIds: [SPECIES.SHADOWMOTH.id, SPECIES.ROCKPUP.id],
       levelOffset: [0, 6],
+      // Available during foraging and mining
+      activityIds: [ActivityId.Foraging, ActivityId.Mining],
     },
     {
       encounterType: EncounterType.WildBattle,
       probability: 0.4,
       speciesIds: [SPECIES.SHADOWMOTH.id, SPECIES.EMBERFOX.id],
       levelOffset: [3, 8],
+      // Available during any activity
     },
     {
       encounterType: EncounterType.WildBattle,
@@ -179,6 +188,8 @@ export const depthsEncounters: EncounterTable = {
       speciesIds: [SPECIES.SHADOWMOTH.id],
       levelOffset: [5, 10],
       minStage: GrowthStage.YoungAdult,
+      // Only during deep exploration - tougher encounter
+      activityIds: [ActivityId.DeepExploration],
     },
   ],
 };
@@ -391,6 +402,7 @@ export const spireEncounters: EncounterTable = {
       probability: 0.35,
       speciesIds: [SPECIES.SHADOWMOTH.id, SPECIES.EMBERFOX.id],
       levelOffset: [0, 8],
+      // Basic encounters for any activity
     },
     {
       encounterType: EncounterType.WildBattle,
@@ -401,6 +413,8 @@ export const spireEncounters: EncounterTable = {
         SPECIES.ROCKPUP.id,
       ],
       levelOffset: [5, 12],
+      // Mining-specific encounter - creatures disturbed by mining
+      activityIds: [ActivityId.Mining, ActivityId.DeepExploration],
     },
     {
       encounterType: EncounterType.WildBattle,
@@ -408,6 +422,8 @@ export const spireEncounters: EncounterTable = {
       speciesIds: [SPECIES.SHADOWMOTH.id, SPECIES.EMBERFOX.id],
       levelOffset: [8, 15],
       minStage: GrowthStage.Adult,
+      // Deep exploration only - elite encounters
+      activityIds: [ActivityId.DeepExploration],
     },
   ],
 };

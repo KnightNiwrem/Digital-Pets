@@ -101,6 +101,11 @@ function generateEncounter(
   pet: Pet,
 ): EncounterResult {
   if (entry.encounterType === EncounterType.WildBattle) {
+    // Wild battles require speciesIds and levelOffset
+    if (!entry.speciesIds || !entry.levelOffset) {
+      return { hasEncounter: false };
+    }
+
     const playerLevel = getApproximatePetLevel(pet);
     const wildLevel = calculateWildLevel(locationId, playerLevel);
 
