@@ -527,7 +527,7 @@ test("startTimedQuest successfully starts a timed quest with expiration", () => 
     const result = startTimedQuest(state, "timed_available_quest", currentTime);
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe("Started quest: Test Timed Quest");
+    expect(result.message).toBe("Started quest: Test Timed Quest.");
 
     const progress = result.state.quests.find(
       (q) => q.questId === "timed_available_quest",
@@ -733,7 +733,7 @@ test("startQuest fails when not at required start location", () => {
     const result = startQuest(state, "location_start_quest");
 
     expect(result.success).toBe(false);
-    expect(result.message).toBe("Go to start location");
+    expect(result.message).toBe("Go to start location.");
   } finally {
     delete quests.location_start_quest;
   }
@@ -754,7 +754,7 @@ test("startQuest succeeds when at required start location", () => {
     const result = startQuest(state, "location_start_quest");
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe("Started quest: Location Start Quest");
+    expect(result.message).toBe("Started quest: Location Start Quest.");
   } finally {
     delete quests.location_start_quest;
   }
@@ -789,7 +789,7 @@ test("completeQuest fails when not at required complete location", () => {
     const result = completeQuest(state, "location_complete_quest");
 
     expect(result.success).toBe(false);
-    expect(result.message).toBe("Go to turn-in location");
+    expect(result.message).toBe("Go to turn-in location.");
   } finally {
     delete quests.location_complete_quest;
   }
@@ -818,7 +818,7 @@ test("completeQuest succeeds when at required complete location", () => {
     const result = completeQuest(state, "location_complete_quest");
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe("Completed quest: Location Complete Quest");
+    expect(result.message).toBe("Completed quest: Location Complete Quest.");
   } finally {
     delete quests.location_complete_quest;
   }
@@ -847,7 +847,7 @@ test("quest with different start and complete locations works correctly", () => 
       "different_locations_quest",
     );
     expect(failCompleteResult.success).toBe(false);
-    expect(failCompleteResult.message).toBe("Go to turn-in location");
+    expect(failCompleteResult.message).toBe("Go to turn-in location.");
 
     // Move to guild_hall and complete
     const movedState = {
@@ -879,7 +879,7 @@ test("startTimedQuest fails when not at required start location", () => {
     const result = startTimedQuest(state, "timed_location_quest");
 
     expect(result.success).toBe(false);
-    expect(result.message).toBe("Go to start location");
+    expect(result.message).toBe("Go to start location.");
   } finally {
     delete quests.timed_location_quest;
   }
@@ -900,7 +900,7 @@ test("startTimedQuest succeeds when at required start location", () => {
     const result = startTimedQuest(state, "timed_location_quest");
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe("Started quest: Timed Location Quest");
+    expect(result.message).toBe("Started quest: Timed Location Quest.");
   } finally {
     delete quests.timed_location_quest;
   }
