@@ -7,6 +7,7 @@ import {
   MAX_SKILL_LEVEL,
   type PlayerSkills,
   SKILL_EFFECT_BONUS_PER_LEVEL,
+  SKILL_TIER_DISPLAY_NAMES,
   SKILL_TIER_THRESHOLDS,
   type Skill,
   type SkillTier,
@@ -56,14 +57,7 @@ export function getSkillTier(level: number): SkillTier {
  * Get display name for a skill tier.
  */
 export function getSkillTierDisplayName(tier: SkillTier): string {
-  const names: Record<SkillTier, string> = {
-    [SkillTierValues.Novice]: "Novice",
-    [SkillTierValues.Apprentice]: "Apprentice",
-    [SkillTierValues.Journeyman]: "Journeyman",
-    [SkillTierValues.Expert]: "Expert",
-    [SkillTierValues.Master]: "Master",
-  };
-  return names[tier];
+  return SKILL_TIER_DISPLAY_NAMES[tier];
 }
 
 /**

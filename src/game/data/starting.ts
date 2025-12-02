@@ -115,21 +115,64 @@ export function createDefaultStarterPet(): Pet {
 }
 
 /**
+ * Starting inventory item quantities.
+ * Provides a balanced starter kit for new players.
+ */
+export const STARTING_INVENTORY_COUNTS = {
+  KIBBLE: 5,
+  APPLE: 3,
+  WATER: 5,
+  JUICE: 3,
+  TISSUE: 5,
+  WIPES: 2,
+  BALL: 1,
+  BALL_DURABILITY: 10,
+} as const;
+
+/**
  * Starting inventory items for new players.
  * Provides basic care items to get started.
  */
 export const STARTING_INVENTORY: readonly InventoryItem[] = [
   // Food items
-  { itemId: FOOD_ITEMS.KIBBLE.id, quantity: 5, currentDurability: null },
-  { itemId: FOOD_ITEMS.APPLE.id, quantity: 3, currentDurability: null },
+  {
+    itemId: FOOD_ITEMS.KIBBLE.id,
+    quantity: STARTING_INVENTORY_COUNTS.KIBBLE,
+    currentDurability: null,
+  },
+  {
+    itemId: FOOD_ITEMS.APPLE.id,
+    quantity: STARTING_INVENTORY_COUNTS.APPLE,
+    currentDurability: null,
+  },
   // Drink items
-  { itemId: DRINK_ITEMS.WATER.id, quantity: 5, currentDurability: null },
-  { itemId: DRINK_ITEMS.JUICE.id, quantity: 3, currentDurability: null },
+  {
+    itemId: DRINK_ITEMS.WATER.id,
+    quantity: STARTING_INVENTORY_COUNTS.WATER,
+    currentDurability: null,
+  },
+  {
+    itemId: DRINK_ITEMS.JUICE.id,
+    quantity: STARTING_INVENTORY_COUNTS.JUICE,
+    currentDurability: null,
+  },
   // Cleaning items
-  { itemId: CLEANING_ITEMS.TISSUE.id, quantity: 5, currentDurability: null },
-  { itemId: CLEANING_ITEMS.WIPES.id, quantity: 2, currentDurability: null },
+  {
+    itemId: CLEANING_ITEMS.TISSUE.id,
+    quantity: STARTING_INVENTORY_COUNTS.TISSUE,
+    currentDurability: null,
+  },
+  {
+    itemId: CLEANING_ITEMS.WIPES.id,
+    quantity: STARTING_INVENTORY_COUNTS.WIPES,
+    currentDurability: null,
+  },
   // Toy (with durability)
-  { itemId: TOY_ITEMS.BALL.id, quantity: 1, currentDurability: 10 },
+  {
+    itemId: TOY_ITEMS.BALL.id,
+    quantity: STARTING_INVENTORY_COUNTS.BALL,
+    currentDurability: STARTING_INVENTORY_COUNTS.BALL_DURABILITY,
+  },
 ] as const;
 
 /**

@@ -50,9 +50,9 @@ The codebase already has good constant extraction in several areas:
 
 ### Growth Stage Progress (`src/game/data/growthStages.ts`)
 
-- [ ] **Lines 117, 121**: `100` as percentage max - Already used as convention but could be extracted
+- [x] **Lines 117, 121**: `100` as percentage max - Extracted as `PERCENTAGE_MAX` in common.ts
   ```typescript
-  return Math.min(100, Math.floor((timeInStage / stageDuration) * 100));
+  return Math.min(PERCENTAGE_MAX, Math.floor((timeInStage / stageDuration) * PERCENTAGE_MAX));
   ```
 
 ### Training Facilities (`src/game/data/facilities.ts`)
@@ -80,10 +80,10 @@ The codebase already has good constant extraction in several areas:
 
 ### Starting Data (`src/game/data/starting.ts`)
 
-- [ ] **Lines 123-133**: Starting inventory quantities (5, 3, 5, 3, 5, 2, 1, 10) - Consider extracting as STARTING_INVENTORY_COUNTS
+- [x] **Lines 123-133**: Starting inventory quantities - Extracted as `STARTING_INVENTORY_COUNTS` constant object
   ```typescript
-  { itemId: FOOD_ITEMS.KIBBLE.id, quantity: 5, ... },
-  { itemId: FOOD_ITEMS.APPLE.id, quantity: 3, ... },
+  { itemId: FOOD_ITEMS.KIBBLE.id, quantity: STARTING_INVENTORY_COUNTS.KIBBLE, ... },
+  { itemId: FOOD_ITEMS.APPLE.id, quantity: STARTING_INVENTORY_COUNTS.APPLE, ... },
   // etc.
   ```
 
@@ -138,19 +138,18 @@ The codebase already has good constant extraction in several areas:
 
 ### Location IDs
 
-- [ ] **`src/game/types/gameState.ts` Line 129**: Default starting location
+- [x] **`src/game/types/gameState.ts` Line 129**: Default starting location - Extracted as `DEFAULT_LOCATION_ID` in common.ts
   ```typescript
-  currentLocationId: "home"
+  currentLocationId: DEFAULT_LOCATION_ID
   ```
-  Consider DEFAULT_LOCATION_ID constant.
 
 ### Tier Display Names (`src/game/core/skills.ts`)
 
-- [ ] **Lines 62-68**: Skill tier display names - Already well structured but could be moved to types file
+- [x] **Lines 62-68**: Skill tier display names - Moved to `SKILL_TIER_DISPLAY_NAMES` in types/skill.ts
   ```typescript
-  const names: Record<SkillTier, string> = {
-    [SkillTierValues.Novice]: "Novice",
-    [SkillTierValues.Apprentice]: "Apprentice",
+  export const SKILL_TIER_DISPLAY_NAMES: Record<SkillTier, string> = {
+    [SkillTier.Novice]: "Novice",
+    [SkillTier.Apprentice]: "Apprentice",
     // etc.
   };
   ```
@@ -173,10 +172,10 @@ The codebase already has good constant extraction in several areas:
 5. [x] Extract MAX_OFFLINE_DAYS = 30 constant
 
 ### Low Priority
-1. [ ] Extract starting inventory quantity constants
+1. [x] Extract starting inventory quantity constants - `STARTING_INVENTORY_COUNTS` in starting.ts
 2. [x] Consider extracting formula constants (100 in endurance mitigation)
 3. [x] Move skill effect multiplier (0.05) to constants
-4. [ ] Consolidate all percentage thresholds (100, 75, 50, 25, 0) into shared constants
+4. [x] Consolidate percentage threshold (100) into shared constant - `PERCENTAGE_MAX` in common.ts
 
 ---
 
