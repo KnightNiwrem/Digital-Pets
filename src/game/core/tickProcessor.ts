@@ -3,10 +3,6 @@
  */
 
 import { emitEvents } from "@/game/core/events";
-import {
-  applyExplorationCompletion,
-  processExplorationTick,
-} from "@/game/core/exploration/forage";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import {
   processTimedQuestExpiration,
@@ -26,7 +22,11 @@ import { completeTraining } from "@/game/core/training";
 import { getFacility } from "@/game/data/facilities";
 import { getLocation } from "@/game/data/locations";
 import { applyExplorationResults } from "@/game/state/actions/exploration";
-import type { TrainingResult } from "@/game/types/activity";
+import type {
+  ActiveExploration,
+  ExplorationResult,
+  TrainingResult,
+} from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
 import { ActivityState, type GrowthStage } from "@/game/types/constants";
@@ -45,8 +45,58 @@ import type {
   OfflineReport,
   OfflineTrainingResult,
 } from "@/game/types/offline";
+import type { Pet } from "@/game/types/pet";
 import { ObjectiveType } from "@/game/types/quest";
 import { SkillType } from "@/game/types/skill";
+
+/**
+ * Process one tick of exploration progress.
+ * Returns updated ActiveExploration or null if exploration completed.
+ * TODO: Move to new exploration module in Phase 3
+ */
+function processExplorationTick(
+  exploration: ActiveExploration,
+): ActiveExploration | null {
+  const newTicksRemaining = exploration.ticksRemaining - 1;
+
+  if (newTicksRemaining <= 0) {
+    return null; // Exploration completed
+  }
+
+  return {
+    ...exploration,
+    ticksRemaining: newTicksRemaining,
+  };
+}
+
+/**
+ * Apply exploration completion to pet state.
+ * Returns the updated pet with exploration cleared.
+ * TODO: Implement proper drop calculation in Phase 3
+ */
+function applyExplorationCompletion(
+  pet: Pet,
+  _foragingSkillLevel = 1,
+): {
+  pet: Pet;
+  result: ExplorationResult;
+} {
+  // TODO: Implement proper drop calculation with new drop table system
+  const result: ExplorationResult = {
+    success: true,
+    message: "Exploration complete! (Drop system being upgraded)",
+    itemsFound: [],
+  };
+
+  return {
+    pet: {
+      ...pet,
+      activityState: ActivityState.Idle,
+      activeExploration: undefined,
+    },
+    result,
+  };
+}
 
 /**
  * Apply daily reset if needed.

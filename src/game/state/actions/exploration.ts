@@ -1,14 +1,12 @@
 /**
  * Exploration state actions.
+ * TODO: Implement with new exploration system
  */
 
-import {
-  cancelExploration as cancelExplorationCore,
-  startForaging as startForagingCore,
-} from "@/game/core/exploration/forage";
 import { addItem } from "@/game/core/inventory";
 import { addXpToPlayerSkill } from "@/game/core/skills";
 import type { ExplorationDrop, ExplorationResult } from "@/game/types/activity";
+import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import { SkillType } from "@/game/types/skill";
 
@@ -36,34 +34,20 @@ export interface ExplorationActionResult {
 
 /**
  * Start a foraging session at the current location.
+ * TODO: Implement with new exploration system
  */
 export function startForaging(state: GameState): ExplorationActionResult {
-  if (!state.pet) {
-    return {
-      success: false,
-      state,
-      message: "No pet to explore with.",
-    };
-  }
-
-  const result = startForagingCore(
-    state.pet,
-    state.player.currentLocationId,
-    state.totalTicks,
-  );
-
+  // TODO: Implement with new exploration system
   return {
-    success: result.success,
-    state: {
-      ...state,
-      pet: result.pet,
-    },
-    message: result.message,
+    success: false,
+    state,
+    message: "Exploration system is being upgraded. Please try again later.",
   };
 }
 
 /**
  * Cancel the current exploration session.
+ * TODO: Implement with new exploration system
  */
 export function cancelExploration(state: GameState): ExplorationActionResult {
   if (!state.pet) {
@@ -74,15 +58,31 @@ export function cancelExploration(state: GameState): ExplorationActionResult {
     };
   }
 
-  const result = cancelExplorationCore(state.pet);
+  if (!state.pet.activeExploration) {
+    return {
+      success: false,
+      state,
+      message: "No exploration to cancel.",
+    };
+  }
+
+  // Refund energy and clear exploration state
+  const energyRefunded = state.pet.activeExploration.energyCost;
 
   return {
-    success: result.success,
+    success: true,
     state: {
       ...state,
-      pet: result.pet,
+      pet: {
+        ...state.pet,
+        activityState: ActivityState.Idle,
+        activeExploration: undefined,
+        energyStats: {
+          energy: state.pet.energyStats.energy + energyRefunded,
+        },
+      },
     },
-    message: result.message,
+    message: "Exploration cancelled. Energy has been refunded.",
   };
 }
 

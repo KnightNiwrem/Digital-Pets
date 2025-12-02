@@ -84,8 +84,8 @@ export interface Location {
   requirements?: LocationRequirement;
   /** Facilities available at this location */
   facilities: FacilityType[];
-  /** Reference to forage table ID (for wild areas) */
-  forageTableId?: string;
+  /** Drop table IDs for each activity at this location (activity ID → drop table IDs) */
+  dropTableIds?: Record<string, string[]>;
   /** Reference to encounter table ID (for wild/dungeon) */
   encounterTableId?: string;
   /** NPC IDs present at this location */

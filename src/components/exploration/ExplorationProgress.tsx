@@ -1,10 +1,10 @@
 /**
  * Exploration progress indicator component.
+ * TODO: Implement with new exploration system
  */
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getExplorationProgress } from "@/game/core/exploration/forage";
 import { getLocation } from "@/game/data/locations";
 import type { ActiveExploration } from "@/game/types/activity";
 import { formatTicksAsTime } from "@/game/types/common";
@@ -15,7 +15,20 @@ interface ExplorationProgressProps {
 }
 
 /**
+ * Get exploration progress as a percentage.
+ * TODO: Move to new exploration module in Phase 3
+ */
+function getExplorationProgress(exploration: ActiveExploration): number {
+  if (exploration.durationTicks === 0) {
+    return 100; // Instant completion
+  }
+  const elapsed = exploration.durationTicks - exploration.ticksRemaining;
+  return Math.round((elapsed / exploration.durationTicks) * 100);
+}
+
+/**
  * Active exploration progress display.
+ * TODO: Update to use new activity-based exploration system
  */
 export function ExplorationProgress({
   exploration,
@@ -25,8 +38,10 @@ export function ExplorationProgress({
   const progress = getExplorationProgress(exploration);
   const timeRemaining = formatTicksAsTime(exploration.ticksRemaining);
 
+  // Use activity ID to determine the activity name
+  // TODO: Look up activity name from activity data in Phase 2+
   const activityName =
-    exploration.activityType === "forage" ? "Foraging" : "Exploring";
+    exploration.activityId === "forage" ? "Foraging" : "Exploring";
 
   return (
     <Card className="border-green-500/50">

@@ -1,5 +1,6 @@
 /**
  * Exploration screen for foraging and exploring wild areas.
+ * TODO: Implement with new exploration system
  */
 
 import { ActivitySelect, ExplorationProgress } from "@/components/exploration";
@@ -10,10 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { forceEncounter } from "@/game/core/exploration/encounter";
-import {
-  canStartForaging,
-  getLocationForageInfo,
-} from "@/game/core/exploration/forage";
 import { getLocation } from "@/game/data/locations";
 import { useGameState } from "@/game/hooks/useGameState";
 import {
@@ -27,6 +24,7 @@ import { FacilityType, LocationType } from "@/game/types/location";
 
 /**
  * Main exploration screen component.
+ * TODO: Update to use new activity-based exploration system
  */
 export function ExplorationScreen({
   onStartBattle,
@@ -59,7 +57,6 @@ export function ExplorationScreen({
   const isBlocked = pet.activityState !== ActivityState.Idle;
   const blockingInfo = getActivityBlockingInfo(pet, "explore");
   const currentLocation = getLocation(currentLocationId);
-  const forageInfo = getLocationForageInfo(currentLocationId);
 
   // Check if current location is a wild area
   const isWildArea = currentLocation?.type === LocationType.Wild;
@@ -69,11 +66,13 @@ export function ExplorationScreen({
     FacilityType.BattleArea,
   );
 
-  // Get foraging availability
-  const forageCheck = canStartForaging(pet, currentLocationId);
+  // TODO: Get activity availability from new exploration system
+  // For now, exploration is disabled while the system is being upgraded
+  const canStartActivity = false;
+  const activityMessage = "Exploration system is being upgraded";
 
-  // Handle starting foraging
-  const handleStartForage = () => {
+  // Handle starting exploration (currently disabled)
+  const handleStartActivity = () => {
     const result = startForaging(state);
     if (result.success) {
       actions.updateState(() => result.state);
@@ -150,11 +149,11 @@ export function ExplorationScreen({
         <>
           <h2 className="text-lg font-semibold px-1">Activities</h2>
           <ActivitySelect
-            forageInfo={forageInfo}
+            activityInfo={undefined}
             currentEnergy={currentEnergy}
-            canForage={forageCheck.canForage}
-            forageMessage={forageCheck.message}
-            onStartForage={handleStartForage}
+            canStartActivity={canStartActivity}
+            activityMessage={activityMessage}
+            onStartActivity={handleStartActivity}
           />
 
           {/* Battle Option */}

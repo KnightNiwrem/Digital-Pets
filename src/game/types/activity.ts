@@ -113,16 +113,6 @@ export interface TrainingResult {
 }
 
 /**
- * Exploration activity types.
- */
-export const ExplorationActivityType = {
-  Forage: "forage",
-} as const;
-
-export type ExplorationActivityType =
-  (typeof ExplorationActivityType)[keyof typeof ExplorationActivityType];
-
-/**
  * A single item drop from exploration.
  */
 export interface ExplorationDrop {
@@ -136,12 +126,10 @@ export interface ExplorationDrop {
  * Active exploration state stored on the pet.
  */
 export interface ActiveExploration {
-  /** Activity type being performed */
-  activityType: ExplorationActivityType;
+  /** Activity ID being performed */
+  activityId: string;
   /** Location ID where exploration is occurring */
   locationId: string;
-  /** Forage table ID being used */
-  forageTableId: string;
   /** Tick when exploration started */
   startTick: Tick;
   /** Total ticks required */

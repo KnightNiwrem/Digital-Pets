@@ -1,55 +1,66 @@
 /**
  * Activity selection component for exploration options.
+ * TODO: Implement with new exploration system
  */
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ForageTable } from "@/game/data/tables/forage";
 import { formatTicksAsTime } from "@/game/types/common";
 
+/**
+ * Temporary placeholder for activity info until new exploration system is implemented.
+ */
+interface ActivityInfo {
+  name: string;
+  description: string;
+  energyCost: number;
+  durationTicks: number;
+}
+
 interface ActivitySelectProps {
-  forageInfo: ForageTable | undefined;
+  activityInfo: ActivityInfo | undefined;
   currentEnergy: number;
-  canForage: boolean;
-  forageMessage: string;
-  onStartForage: () => void;
+  canStartActivity: boolean;
+  activityMessage: string;
+  onStartActivity: () => void;
 }
 
 /**
  * Display exploration activity options.
+ * TODO: Update to use new activity-based exploration system
  */
 export function ActivitySelect({
-  forageInfo,
+  activityInfo,
   currentEnergy,
-  canForage,
-  forageMessage,
-  onStartForage,
+  canStartActivity,
+  activityMessage,
+  onStartActivity,
 }: ActivitySelectProps) {
-  if (!forageInfo) {
+  if (!activityInfo) {
     return (
       <Card>
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground text-center">
-            No exploration activities available at this location.
+            Exploration system is being upgraded. Please check back later.
           </p>
         </CardContent>
       </Card>
     );
   }
 
-  const hasEnoughEnergy = currentEnergy >= forageInfo.baseEnergyCost;
+  const hasEnoughEnergy = currentEnergy >= activityInfo.energyCost;
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <span>🌿</span>
-          <span>Forage</span>
+          <span>{activityInfo.name}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Search the area for useful items. Duration depends on the location.
+          {activityInfo.description}
         </p>
 
         <div className="flex items-center justify-between text-sm">
@@ -61,21 +72,21 @@ export function ActivitySelect({
                 : "text-red-600 dark:text-red-400"
             }
           >
-            ⚡ {forageInfo.baseEnergyCost}
+            ⚡ {activityInfo.energyCost}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Duration:</span>
-          <span>{formatTicksAsTime(forageInfo.baseDurationTicks)}</span>
+          <span>{formatTicksAsTime(activityInfo.durationTicks)}</span>
         </div>
 
         <Button
           className="w-full"
-          onClick={onStartForage}
-          disabled={!canForage}
+          onClick={onStartActivity}
+          disabled={!canStartActivity}
         >
-          {canForage ? "Start Foraging" : forageMessage}
+          {canStartActivity ? `Start ${activityInfo.name}` : activityMessage}
         </Button>
       </CardContent>
     </Card>

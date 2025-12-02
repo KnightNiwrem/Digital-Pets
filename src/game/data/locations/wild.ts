@@ -36,7 +36,7 @@ export const sunnyMeadow: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "meadow_forage",
+  dropTableIds: {},
   encounterTableId: "meadow_encounters",
   emoji: "🌻",
 };
@@ -70,7 +70,7 @@ export const mistyWoods: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "woods_forage",
+  dropTableIds: {},
   encounterTableId: "woods_encounters",
   emoji: "🌲",
 };
@@ -101,7 +101,7 @@ export const whisperingCoast: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "coast_forage",
+  dropTableIds: {},
   encounterTableId: "coast_encounters",
   emoji: "🏖️",
 };
@@ -133,7 +133,7 @@ export const scorchedHighlands: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "highlands_forage",
+  dropTableIds: {},
   encounterTableId: "highlands_encounters",
   emoji: "🌋",
 };
@@ -166,7 +166,7 @@ export const crystalCaves: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "caves_forage",
+  dropTableIds: {},
   encounterTableId: "caves_encounters",
   emoji: "💎",
 };
@@ -192,7 +192,7 @@ export const shadowDepths: Location = {
     questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
-  forageTableId: "depths_forage",
+  dropTableIds: {},
   encounterTableId: "depths_encounters",
   emoji: "🕳️",
 };
@@ -222,7 +222,7 @@ export const ancientGrove: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "grove_forage",
+  dropTableIds: {},
   encounterTableId: "grove_encounters",
   emoji: "🌳",
 };
@@ -253,7 +253,7 @@ export const mushroomHollow: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "hollow_forage",
+  dropTableIds: {},
   encounterTableId: "hollow_encounters",
   emoji: "🍄",
 };
@@ -284,7 +284,7 @@ export const coralReef: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "reef_forage",
+  dropTableIds: {},
   encounterTableId: "reef_encounters",
   emoji: "🪸",
 };
@@ -315,7 +315,7 @@ export const frozenPeaks: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "peaks_forage",
+  dropTableIds: {},
   encounterTableId: "peaks_encounters",
   emoji: "🏔️",
 };
@@ -340,7 +340,7 @@ export const volcanicCaldera: Location = {
     questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
-  forageTableId: "caldera_forage",
+  dropTableIds: {},
   encounterTableId: "caldera_encounters",
   emoji: "🔥",
 };
@@ -370,7 +370,7 @@ export const sunkenTemple: Location = {
     FacilityType.ForageZone,
     FacilityType.BattleArea,
   ],
-  forageTableId: "temple_forage",
+  dropTableIds: {},
   encounterTableId: "temple_encounters",
   emoji: "🏛️",
 };
@@ -396,7 +396,7 @@ export const glacialCavern: Location = {
     questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
-  forageTableId: "glacial_forage",
+  dropTableIds: {},
   encounterTableId: "glacial_encounters",
   emoji: "🧊",
 };
@@ -422,7 +422,7 @@ export const celestialSpire: Location = {
     questId: "tutorial_training",
   },
   facilities: [FacilityType.ForageZone, FacilityType.BattleArea],
-  forageTableId: "spire_forage",
+  dropTableIds: {},
   encounterTableId: "spire_encounters",
   emoji: "🌟",
 };
