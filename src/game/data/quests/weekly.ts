@@ -69,7 +69,7 @@ export const weeklyExplorer: Quest = {
       id: "forage_weekly",
       type: ObjectiveType.Explore,
       description: "Complete foraging sessions",
-      target: "forage",
+      target: "foraging",
       quantity: 15,
     },
   ],
