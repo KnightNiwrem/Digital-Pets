@@ -524,7 +524,7 @@ export function startTimedQuest(
       message:
         currentState === QuestState.Locked
           ? QuestMessages.questLocked
-          : QuestMessages.questExpired,
+          : QuestMessages.timedQuestNotAvailable,
     };
   }
 

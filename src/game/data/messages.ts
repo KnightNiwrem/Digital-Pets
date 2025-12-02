@@ -222,8 +222,9 @@ export const QuestMessages = {
   notTimedQuest: "Quest is not a timed quest.",
   /** When timed quest has no duration configured */
   noDurationConfigured: "Timed quest has no duration configured.",
-  /** When timed quest is expired */
-  questExpired: "Quest is already in progress, completed, or expired.",
+  /** When timed quest is not available (in progress, completed, or expired) */
+  timedQuestNotAvailable:
+    "Quest is already in progress, completed, or expired.",
   /** When should use startTimedQuest instead */
   useStartTimedQuest: "Use startTimedQuest for timed quests.",
   /**
@@ -262,31 +263,31 @@ export const ExplorationMessages = {
    * @param activityId - The unknown activity ID
    */
   unknownActivityId: (activityId: string): string =>
-    `Unknown activity: ${activityId}`,
+    `Unknown activity: ${activityId}.`,
   /**
    * Generate a message for unknown location.
    * @param locationId - The unknown location ID
    */
   unknownLocation: (locationId: string): string =>
-    `Unknown location: ${locationId}`,
+    `Unknown location: ${locationId}.`,
   /**
    * Generate a message for activity not available at location.
    * @param activityName - The activity name
    */
   activityNotAvailable: (activityName: string): string =>
-    `${activityName} is not available at this location`,
+    `${activityName} is not available at this location.`,
   /**
    * Generate a message for insufficient energy.
    * @param energyCost - Required energy cost
    */
   notEnoughEnergy: (energyCost: number): string =>
-    `Not enough energy (need ${energyCost})`,
+    `Not enough energy (need ${energyCost}).`,
   /**
    * Generate a message for activity on cooldown.
    * @param ticksRemaining - Ticks remaining on cooldown
    */
   onCooldown: (ticksRemaining: number): string =>
-    `Activity on cooldown (${ticksRemaining} ticks remaining)`,
+    `Activity on cooldown (${ticksRemaining} ticks remaining).`,
   /**
    * Generate a message for exploration completion with items found.
    * @param itemCount - Number of items found
