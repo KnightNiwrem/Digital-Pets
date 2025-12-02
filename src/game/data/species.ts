@@ -1944,7 +1944,7 @@ export function getSpeciesById(id: string): Species | undefined {
  * Get all starter species.
  */
 export function getStarterSpecies(): Species[] {
-  return SPECIES_LIST.filter((s) => s.unlockMethod === "starting");
+  return SPECIES_LIST.filter((s) => s.unlockMethod === UnlockMethod.Starting);
 }
 
 /**

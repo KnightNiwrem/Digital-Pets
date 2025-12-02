@@ -8,7 +8,7 @@ import {
   calculateTotalBattleStats,
   createDefaultBonusMaxStats,
 } from "@/game/core/petStats";
-import { createPetId, type GrowthStage, type Pet } from "@/game/types";
+import { createPetId, GrowthStage, type Pet } from "@/game/types";
 import type { InventoryItem } from "@/game/types/gameState";
 import { getSpeciesStageStats } from "./growthStages";
 import { CLEANING_ITEMS, DRINK_ITEMS, FOOD_ITEMS, TOY_ITEMS } from "./items";
@@ -22,7 +22,7 @@ export const DEFAULT_STARTING_SPECIES = SPECIES.FLORABIT.id;
 /**
  * Default starting growth stage.
  */
-export const DEFAULT_STARTING_STAGE: GrowthStage = "baby";
+export const DEFAULT_STARTING_STAGE: GrowthStage = GrowthStage.Baby;
 
 /**
  * Create a new pet with the given name and species.

@@ -204,6 +204,7 @@ export const UnlockMethod = {
   Starting: "starting",
   Quest: "quest",
   Discovery: "discovery",
+  Achievement: "achievement",
 } as const;
 
 export type UnlockMethod = (typeof UnlockMethod)[keyof typeof UnlockMethod];
