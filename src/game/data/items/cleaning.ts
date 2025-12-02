@@ -4,7 +4,6 @@
 
 import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { CleaningItem } from "@/game/types/item";
-import { MAX_STACK_BY_RARITY } from "./constants";
 
 /**
  * Cleaning items for removing poop.
@@ -19,7 +18,7 @@ export const CLEANING_ITEMS = {
     category: ItemCategory.Cleaning,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.common,
+    maxStack: 99,
     sellValue: 3,
     icon: "🧻",
     poopRemoved: 1,
@@ -31,7 +30,7 @@ export const CLEANING_ITEMS = {
     category: ItemCategory.Cleaning,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.uncommon,
+    maxStack: 50,
     sellValue: 8,
     icon: "🧴",
     poopRemoved: 2,
@@ -43,7 +42,7 @@ export const CLEANING_ITEMS = {
     category: ItemCategory.Cleaning,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 30,
     sellValue: 15,
     icon: "🧽",
     poopRemoved: 3,
@@ -55,7 +54,7 @@ export const CLEANING_ITEMS = {
     category: ItemCategory.Cleaning,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.epic + 5,
+    maxStack: 10,
     sellValue: 50,
     icon: "🔌",
     poopRemoved: 5,
@@ -67,7 +66,7 @@ export const CLEANING_ITEMS = {
     category: ItemCategory.Cleaning,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 30,
     sellValue: 12,
     icon: "🧹",
     poopRemoved: 2,
@@ -79,7 +78,7 @@ export const CLEANING_ITEMS = {
     category: ItemCategory.Cleaning,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 35,
     icon: "🧴",
     poopRemoved: 4,

@@ -98,11 +98,13 @@ The codebase already has good constant extraction in several areas:
   // HEAVY = 180, VERY_HEAVY = 200, INDULGENT = 240, MASSIVE = 360
   ```
 
-- [x] **Lines 30, 43, etc.**: Satiety restore values and max stack sizes (99, 50, 20, 5) - Extracted as `MAX_STACK_BY_RARITY`
+- [x] **Lines 30, 43, etc.**: Max stack sizes - Food items use `MAX_STACK_BY_RARITY` constants since their stacks align with rarity tiers
   ```typescript
   // MAX_STACK_BY_RARITY object:
   // common: 99, uncommon: 50, rare: 20, epic: 5, legendary: 1
   ```
+  
+  **Note:** Other item categories (battle, medicine, cleaning, drinks, materials) have intentional per-item stack variations that don't strictly follow rarity tiers, so they retain explicit numeric values to preserve game balance decisions.
 
 ### Persistence (`src/game/state/persistence.ts`)
 
@@ -164,7 +166,7 @@ The codebase already has good constant extraction in several areas:
 4. [x] Define MIN_HIT_CHANCE and MAX_HIT_CHANCE in battle constants
 
 ### Medium Priority
-1. [x] Extract stack size constants (COMMON_MAX_STACK = 99, UNCOMMON_MAX_STACK = 50, etc.)
+1. [x] Extract stack size constants for food items (other item categories retain explicit values for balance)
 2. [x] Create POOP_ACCELERATION tier constants for food items
 3. [x] Refactor DEFAULT_MIN_SLEEP_TICKS to use TICKS_PER_HOUR for clarity
 4. [x] Move BASE_XP to skill types file with other skill constants

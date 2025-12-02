@@ -4,7 +4,6 @@
 
 import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { BattleItem } from "@/game/types/item";
-import { MAX_STACK_BY_RARITY } from "./constants";
 
 /**
  * Battle consumable items for use during combat.
@@ -19,7 +18,7 @@ export const BATTLE_ITEMS = {
     category: ItemCategory.Battle,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 40,
     icon: "⚔️",
     statModifier: "strength",
@@ -33,7 +32,7 @@ export const BATTLE_ITEMS = {
     category: ItemCategory.Battle,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 40,
     icon: "🛡️",
     statModifier: "endurance",
@@ -47,7 +46,7 @@ export const BATTLE_ITEMS = {
     category: ItemCategory.Battle,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 40,
     icon: "💨",
     statModifier: "agility",
@@ -61,7 +60,7 @@ export const BATTLE_ITEMS = {
     category: ItemCategory.Battle,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare - 5,
+    maxStack: 15,
     sellValue: 60,
     icon: "🎯",
     statModifier: "precision",
@@ -75,7 +74,7 @@ export const BATTLE_ITEMS = {
     category: ItemCategory.Battle,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.epic + 5,
+    maxStack: 10,
     sellValue: 80,
     icon: "🏋️",
     statModifier: "fortitude",
@@ -89,7 +88,7 @@ export const BATTLE_ITEMS = {
     category: ItemCategory.Battle,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.epic + 5,
+    maxStack: 10,
     sellValue: 70,
     icon: "🦊",
     statModifier: "cunning",

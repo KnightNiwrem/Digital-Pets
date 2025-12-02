@@ -5,7 +5,6 @@
 import { toMicro } from "@/game/types/common";
 import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { DrinkItem } from "@/game/types/item";
-import { MAX_STACK_BY_RARITY } from "./constants";
 
 /**
  * Basic drink items available from the start.
@@ -20,7 +19,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.common,
+    maxStack: 99,
     sellValue: 3,
     icon: "💧",
     hydrationRestore: toMicro(20),
@@ -32,7 +31,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.common,
+    maxStack: 99,
     sellValue: 8,
     icon: "🧃",
     hydrationRestore: toMicro(25),
@@ -44,7 +43,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.uncommon,
+    maxStack: 50,
     sellValue: 10,
     icon: "🥛",
     hydrationRestore: toMicro(30),
@@ -56,7 +55,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.uncommon,
+    maxStack: 50,
     sellValue: 15,
     icon: "🍵",
     hydrationRestore: toMicro(35),
@@ -68,7 +67,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 30,
     icon: "⚡",
     hydrationRestore: toMicro(25),
@@ -81,7 +80,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.uncommon,
+    maxStack: 50,
     sellValue: 12,
     icon: "🥥",
     hydrationRestore: toMicro(28),
@@ -93,7 +92,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 30,
     sellValue: 20,
     icon: "🍹",
     hydrationRestore: toMicro(40),
@@ -105,7 +104,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 30,
     sellValue: 25,
     icon: "💦",
     hydrationRestore: toMicro(45),
@@ -118,7 +117,7 @@ export const DRINK_ITEMS = {
     category: ItemCategory.Drink,
     rarity: Rarity.Epic,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.epic + 5,
+    maxStack: 10,
     sellValue: 60,
     icon: "🌸",
     hydrationRestore: toMicro(50),

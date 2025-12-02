@@ -46,7 +46,7 @@ export {
   TOY_ITEMS,
 };
 
-// Re-export item constants
+// Re-export item constants (used by food.ts for rarity-based stacks and poop acceleration)
 export { MAX_STACK_BY_RARITY, POOP_ACCELERATION };
 
 // Re-export item arrays for iteration

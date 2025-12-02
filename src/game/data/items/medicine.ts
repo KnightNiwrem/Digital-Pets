@@ -4,7 +4,6 @@
 
 import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { MedicineItem } from "@/game/types/item";
-import { MAX_STACK_BY_RARITY } from "./constants";
 
 /**
  * Medicine items for healing and curing status effects.
@@ -20,7 +19,7 @@ export const MEDICINE_ITEMS = {
     category: ItemCategory.Medicine,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare + 10,
+    maxStack: 30,
     sellValue: 10,
     icon: "🩹",
     healAmount: 20,
@@ -32,7 +31,7 @@ export const MEDICINE_ITEMS = {
     category: ItemCategory.Medicine,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 25,
     icon: "🧪",
     healAmount: 50,
@@ -44,7 +43,7 @@ export const MEDICINE_ITEMS = {
     category: ItemCategory.Medicine,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 30,
     icon: "💊",
     cureStatus: ["poison"],
@@ -56,7 +55,7 @@ export const MEDICINE_ITEMS = {
     category: ItemCategory.Medicine,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 35,
     icon: "🧂",
     cureStatus: ["sleep", "stun"],
@@ -68,7 +67,7 @@ export const MEDICINE_ITEMS = {
     category: ItemCategory.Medicine,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare - 5,
+    maxStack: 15,
     sellValue: 75,
     icon: "⚗️",
     healAmount: 100,
@@ -81,7 +80,7 @@ export const MEDICINE_ITEMS = {
     category: ItemCategory.Medicine,
     rarity: Rarity.Epic,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.epic,
+    maxStack: 5,
     sellValue: 200,
     icon: "✨",
     isFullRestore: true,

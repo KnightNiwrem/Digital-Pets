@@ -4,7 +4,6 @@
 
 import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { MaterialItem } from "@/game/types/item";
-import { MAX_STACK_BY_RARITY } from "./constants";
 
 /**
  * Material items used for crafting.
@@ -19,7 +18,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.common,
+    maxStack: 99,
     sellValue: 2,
     icon: "🪵",
     craftingTags: ["wood", "organic", "basic"],
@@ -31,7 +30,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.common,
+    maxStack: 99,
     sellValue: 2,
     icon: "🪨",
     craftingTags: ["stone", "mineral", "basic"],
@@ -43,7 +42,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.common,
+    maxStack: 99,
     sellValue: 5,
     icon: "🌿",
     craftingTags: ["herb", "organic", "medicinal"],
@@ -55,7 +54,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Common,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.common,
+    maxStack: 99,
     sellValue: 3,
     icon: "🧵",
     craftingTags: ["fiber", "organic", "basic"],
@@ -67,7 +66,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.uncommon,
+    maxStack: 50,
     sellValue: 15,
     icon: "⛏️",
     craftingTags: ["ore", "metal", "mineral"],
@@ -79,7 +78,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Rare,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare + 10,
+    maxStack: 30,
     sellValue: 50,
     icon: "💎",
     craftingTags: ["crystal", "magic", "rare"],
@@ -92,7 +91,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Uncommon,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.uncommon,
+    maxStack: 50,
     sellValue: 20,
     icon: "🦷",
     craftingTags: ["monster", "bone", "battle"],
@@ -104,7 +103,7 @@ export const MATERIAL_ITEMS = {
     category: ItemCategory.Material,
     rarity: Rarity.Epic,
     stackable: true,
-    maxStack: MAX_STACK_BY_RARITY.rare,
+    maxStack: 20,
     sellValue: 100,
     icon: "✨",
     craftingTags: ["essence", "magic", "rare"],
