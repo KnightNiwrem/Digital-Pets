@@ -129,11 +129,11 @@ The codebase already has good constant extraction in several areas:
 
 ### Quest Messages (`src/game/core/quests/quests.ts`)
 
-- [ ] **Lines 41, 145-196, 204-278**: Quest action messages - `QuestMessages` defined in messages.ts but not yet applied to quests.ts
+- [x] **Lines 41, 145-196, 204-278**: Quest action messages - `QuestMessages` defined in messages.ts and applied to quests.ts
 
 ### Exploration Messages (`src/game/core/exploration/exploration.ts`)
 
-- [ ] **Lines 159, 169, 265, 438-440, 477**: Exploration messages - `ExplorationMessages` defined in messages.ts but not yet applied to exploration.ts
+- [x] **Lines 159, 169, 265, 438-440, 477**: Exploration messages - `ExplorationMessages` defined in messages.ts and applied to exploration.ts
 
 ### Location IDs
 

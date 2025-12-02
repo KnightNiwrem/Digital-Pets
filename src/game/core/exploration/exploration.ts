@@ -14,6 +14,7 @@ import { addXpToPlayerSkill } from "@/game/core/skills";
 import { getActivityById } from "@/game/data/exploration/activities";
 import { getDropTableById } from "@/game/data/exploration/dropTables";
 import { getLocation } from "@/game/data/locations";
+import { ExplorationMessages } from "@/game/data/messages";
 import type {
   ActiveExploration,
   ExplorationDrop,
@@ -152,7 +153,7 @@ export function canStartExplorationActivity(
   if (pet.activityState !== ActivityState.Idle) {
     return {
       canStart: false,
-      reason: `Pet is currently ${pet.activityState}`,
+      reason: ExplorationMessages.petBusy(pet.activityState),
     };
   }
 
@@ -161,7 +162,7 @@ export function canStartExplorationActivity(
   if (!activity) {
     return {
       canStart: false,
-      reason: `Unknown activity: ${activityId}`,
+      reason: ExplorationMessages.unknownActivityId(activityId),
     };
   }
 
@@ -170,7 +171,7 @@ export function canStartExplorationActivity(
   if (!location) {
     return {
       canStart: false,
-      reason: `Unknown location: ${locationId}`,
+      reason: ExplorationMessages.unknownLocation(locationId),
     };
   }
 
@@ -179,7 +180,7 @@ export function canStartExplorationActivity(
   if (!locationDropTables || locationDropTables.length === 0) {
     return {
       canStart: false,
-      reason: `${activity.name} is not available at this location`,
+      reason: ExplorationMessages.activityNotAvailable(activity.name),
     };
   }
 
@@ -203,7 +204,7 @@ export function canStartExplorationActivity(
   if (energyMicro < requiredEnergyMicro) {
     return {
       canStart: false,
-      reason: `Not enough energy (need ${activity.energyCost})`,
+      reason: ExplorationMessages.notEnoughEnergy(activity.energyCost),
     };
   }
 
@@ -217,7 +218,7 @@ export function canStartExplorationActivity(
   if (cooldownRemaining > 0) {
     return {
       canStart: false,
-      reason: `Activity on cooldown (${cooldownRemaining} ticks remaining)`,
+      reason: ExplorationMessages.onCooldown(cooldownRemaining),
     };
   }
 
@@ -258,7 +259,7 @@ export function startExplorationActivity(
     return {
       success: false,
       pet,
-      message: `Unknown activity: ${activityId}`,
+      message: ExplorationMessages.unknownActivityId(activityId),
     };
   }
 
@@ -369,7 +370,7 @@ export function completeExplorationActivity(
       pet,
       itemsFound: [],
       skillXpGains: {},
-      message: "No active exploration to complete",
+      message: ExplorationMessages.noActiveExploration,
     };
   }
 
@@ -384,7 +385,7 @@ export function completeExplorationActivity(
       },
       itemsFound: [],
       skillXpGains: {},
-      message: "Unknown activity",
+      message: ExplorationMessages.unknownActivity,
     };
   }
 
@@ -430,10 +431,10 @@ export function completeExplorationActivity(
   };
 
   const itemCount = itemsFound.reduce((sum, drop) => sum + drop.quantity, 0);
-  const message =
-    itemCount > 0
-      ? `Found ${itemCount} item${itemCount !== 1 ? "s" : ""} at ${locationName}!`
-      : `Exploration complete at ${locationName}, but nothing was found this time.`;
+  const message = ExplorationMessages.explorationComplete(
+    itemCount,
+    locationName,
+  );
 
   return {
     success: true,
@@ -454,7 +455,7 @@ export function cancelExploration(pet: Pet): {
   if (!pet.activeExploration) {
     return {
       pet,
-      message: "No active exploration to cancel",
+      message: ExplorationMessages.noExplorationToCancel,
     };
   }
 
@@ -470,7 +471,7 @@ export function cancelExploration(pet: Pet): {
         energy: pet.energyStats.energy + energyRefund,
       },
     },
-    message: "Exploration cancelled. Energy has been refunded.",
+    message: ExplorationMessages.explorationCancelled,
   };
 }
 

@@ -3,6 +3,7 @@
  */
 
 import { getNextDailyReset, getNextWeeklyReset } from "@/game/core/time";
+import { QuestMessages } from "@/game/data/messages";
 import { getDailyQuests, getQuest, getWeeklyQuests } from "@/game/data/quests";
 import type { GameState } from "@/game/types/gameState";
 import {
@@ -38,7 +39,7 @@ function validateStartLocation(
   if (quest.startLocationId && currentLocationId !== quest.startLocationId) {
     return {
       valid: false,
-      message: "Go to start location",
+      message: QuestMessages.goToStartLocation,
     };
   }
   return { valid: true };
@@ -57,7 +58,7 @@ function validateCompleteLocation(
   ) {
     return {
       valid: false,
-      message: "Go to turn-in location",
+      message: QuestMessages.goToTurnInLocation,
     };
   }
   return { valid: true };
@@ -145,7 +146,7 @@ export function startQuest(
     return {
       success: false,
       state,
-      message: "Quest not found.",
+      message: QuestMessages.questNotFound,
     };
   }
 
@@ -153,7 +154,7 @@ export function startQuest(
     return {
       success: false,
       state,
-      message: "Use startTimedQuest for timed quests.",
+      message: QuestMessages.useStartTimedQuest,
     };
   }
 
@@ -164,8 +165,8 @@ export function startQuest(
       state,
       message:
         currentState === QuestState.Locked
-          ? "Quest requirements not met."
-          : "Quest is already in progress or completed.",
+          ? QuestMessages.questLocked
+          : QuestMessages.questAlreadyStarted,
     };
   }
 
@@ -191,7 +192,7 @@ export function startQuest(
       ...state,
       quests: newQuests,
     },
-    message: `Started quest: ${quest.name}`,
+    message: QuestMessages.startedQuest(quest.name),
   };
 }
 
@@ -207,7 +208,7 @@ export function completeQuest(
     return {
       success: false,
       state,
-      message: "Quest not found.",
+      message: QuestMessages.questNotFound,
     };
   }
 
@@ -216,7 +217,7 @@ export function completeQuest(
     return {
       success: false,
       state,
-      message: "Quest not started.",
+      message: QuestMessages.questNotStarted,
     };
   }
 
@@ -225,7 +226,7 @@ export function completeQuest(
     return {
       success: false,
       state,
-      message: "Quest is not active.",
+      message: QuestMessages.questNotActive,
     };
   }
 
@@ -233,7 +234,7 @@ export function completeQuest(
     return {
       success: false,
       state,
-      message: "Not all objectives are complete.",
+      message: QuestMessages.objectivesIncomplete,
     };
   }
 
@@ -272,7 +273,7 @@ export function completeQuest(
       ...rewardResult.state,
       quests: newQuests,
     },
-    message: `Completed quest: ${quest.name}`,
+    message: QuestMessages.completedQuest(quest.name),
     rewardsSummary: rewardResult.rewardsSummary,
   };
 }
@@ -495,7 +496,7 @@ export function startTimedQuest(
     return {
       success: false,
       state,
-      message: "Quest not found.",
+      message: QuestMessages.questNotFound,
     };
   }
 
@@ -503,7 +504,7 @@ export function startTimedQuest(
     return {
       success: false,
       state,
-      message: "Quest is not a timed quest.",
+      message: QuestMessages.notTimedQuest,
     };
   }
 
@@ -511,7 +512,7 @@ export function startTimedQuest(
     return {
       success: false,
       state,
-      message: "Timed quest has no duration configured.",
+      message: QuestMessages.noDurationConfigured,
     };
   }
 
@@ -522,8 +523,8 @@ export function startTimedQuest(
       state,
       message:
         currentState === QuestState.Locked
-          ? "Quest requirements not met."
-          : "Quest is already in progress, completed, or expired.",
+          ? QuestMessages.questLocked
+          : QuestMessages.questExpired,
     };
   }
 
@@ -550,6 +551,6 @@ export function startTimedQuest(
       ...state,
       quests: newQuests,
     },
-    message: `Started quest: ${quest.name}`,
+    message: QuestMessages.startedQuest(quest.name),
   };
 }
