@@ -11,6 +11,7 @@ import {
 import { GROWTH_STAGE_ORDER, type GrowthStage } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import { type Combatant, createWildCombatant } from "../battle/battle";
+import { DEFAULT_ENCOUNTER_MAX_LEVEL } from "./constants";
 
 /**
  * Scaling divisor for wild pet level calculation.
@@ -46,7 +47,7 @@ export function calculateWildLevel(
   }
 
   const baseLevel = location.levelMin ?? 1;
-  const maxLevel = location.levelMax ?? 10;
+  const maxLevel = location.levelMax ?? DEFAULT_ENCOUNTER_MAX_LEVEL;
 
   // Add scaling factor based on player level
   const scalingFactor = Math.floor(playerPetLevel / LEVEL_SCALING_DIVISOR);

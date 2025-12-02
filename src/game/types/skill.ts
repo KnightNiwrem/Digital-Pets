@@ -73,6 +73,11 @@ export const BASE_SKILL_XP = 50;
 export const SKILL_EFFECT_BONUS_PER_LEVEL = 0.05;
 
 /**
+ * Maximum percentage value for progress calculations.
+ */
+export const MAX_SKILL_PERCENTAGE = 100;
+
+/**
  * A single skill's current state.
  */
 export interface Skill {

@@ -5,6 +5,7 @@
 import {
   BASE_SKILL_XP,
   MAX_SKILL_LEVEL,
+  MAX_SKILL_PERCENTAGE,
   type PlayerSkills,
   SKILL_EFFECT_BONUS_PER_LEVEL,
   SKILL_TIER_DISPLAY_NAMES,
@@ -144,10 +145,13 @@ export function addXpToPlayerSkill(
  * Calculate progress percentage to next level.
  */
 export function getSkillProgress(skill: Skill): number {
-  if (skill.level >= MAX_SKILL_LEVEL) return 100;
+  if (skill.level >= MAX_SKILL_LEVEL) return MAX_SKILL_PERCENTAGE;
   const xpNeeded = xpForNextLevel(skill.level);
-  if (xpNeeded <= 0) return 100;
-  return Math.min(100, Math.round((skill.currentXp / xpNeeded) * 100));
+  if (xpNeeded <= 0) return MAX_SKILL_PERCENTAGE;
+  return Math.min(
+    MAX_SKILL_PERCENTAGE,
+    Math.round((skill.currentXp / xpNeeded) * MAX_SKILL_PERCENTAGE),
+  );
 }
 
 /**

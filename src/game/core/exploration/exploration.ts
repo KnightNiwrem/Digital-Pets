@@ -9,7 +9,10 @@
  * - Skill XP rewards via skillFactors
  */
 
-import { BASE_EXPLORATION_XP } from "@/game/core/exploration/constants";
+import {
+  BASE_EXPLORATION_XP,
+  MAX_PERCENTAGE,
+} from "@/game/core/exploration/constants";
 import { addXpToPlayerSkill } from "@/game/core/skills";
 import { getActivityById } from "@/game/data/exploration/activities";
 import { getDropTableById } from "@/game/data/exploration/dropTables";
@@ -539,13 +542,13 @@ export function getExplorationProgress(
       locationId: exploration.locationId,
       totalTicks: exploration.durationTicks,
       ticksRemaining: exploration.ticksRemaining,
-      progressPercent: 100,
+      progressPercent: MAX_PERCENTAGE,
     };
   }
 
   const elapsed = exploration.durationTicks - exploration.ticksRemaining;
   const progressPercent = Math.round(
-    (elapsed / exploration.durationTicks) * 100,
+    (elapsed / exploration.durationTicks) * MAX_PERCENTAGE,
   );
 
   return {

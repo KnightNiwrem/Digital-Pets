@@ -12,3 +12,21 @@
  * the actual XP gained for each skill.
  */
 export const BASE_EXPLORATION_XP = 15;
+
+// =============================================================================
+// Encounter System
+// =============================================================================
+
+/**
+ * Default maximum level for wild encounters when location doesn't specify one.
+ */
+export const DEFAULT_ENCOUNTER_MAX_LEVEL = 10;
+
+// =============================================================================
+// Progress Display
+// =============================================================================
+
+/**
+ * Maximum percentage value for progress calculations.
+ */
+export const MAX_PERCENTAGE = 100;

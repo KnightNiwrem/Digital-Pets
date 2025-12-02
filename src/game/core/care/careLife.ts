@@ -16,6 +16,7 @@ import {
   CARE_LIFE_RECOVERY_THRESHOLD_50,
   CARE_LIFE_RECOVERY_THRESHOLD_75,
   CARE_LIFE_RECOVERY_THRESHOLD_100,
+  MAX_PERCENTAGE,
   POOP_CARE_LIFE_DRAIN_THRESHOLD,
 } from "./constants";
 
@@ -50,15 +51,15 @@ function getCareStatPercentages(
   const satietyPercent =
     maxCareStats.satiety === 0
       ? 0
-      : (pet.careStats.satiety / maxCareStats.satiety) * 100;
+      : (pet.careStats.satiety / maxCareStats.satiety) * MAX_PERCENTAGE;
   const hydrationPercent =
     maxCareStats.hydration === 0
       ? 0
-      : (pet.careStats.hydration / maxCareStats.hydration) * 100;
+      : (pet.careStats.hydration / maxCareStats.hydration) * MAX_PERCENTAGE;
   const happinessPercent =
     maxCareStats.happiness === 0
       ? 0
-      : (pet.careStats.happiness / maxCareStats.happiness) * 100;
+      : (pet.careStats.happiness / maxCareStats.happiness) * MAX_PERCENTAGE;
   return [satietyPercent, hydrationPercent, happinessPercent];
 }
 

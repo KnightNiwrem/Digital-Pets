@@ -22,6 +22,11 @@ import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
 
 /**
+ * Maximum percentage value for progress calculations.
+ */
+const MAX_PERCENTAGE = 100;
+
+/**
  * Check if a training session is available based on pet's growth stage.
  * Exported for UI components to use for displaying session availability.
  */
@@ -264,5 +269,5 @@ export function cancelTraining(pet: Pet): {
  */
 export function getTrainingProgress(training: ActiveTraining): number {
   const elapsed = training.durationTicks - training.ticksRemaining;
-  return Math.round((elapsed / training.durationTicks) * 100);
+  return Math.round((elapsed / training.durationTicks) * MAX_PERCENTAGE);
 }
