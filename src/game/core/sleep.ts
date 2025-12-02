@@ -6,7 +6,7 @@ import { checkActivityIdle } from "@/game/core/activityGating";
 import { SleepMessages } from "@/game/data/messages";
 import { getSpeciesGrowthStage } from "@/game/data/species";
 import type { Tick } from "@/game/types/common";
-import { now } from "@/game/types/common";
+import { now, TICKS_PER_HOUR } from "@/game/types/common";
 import { ActivityState, type GrowthStage } from "@/game/types/constants";
 import type { Pet, PetSleep } from "@/game/types/pet";
 
@@ -20,20 +20,26 @@ export interface SleepTransitionResult {
 }
 
 /**
+ * Default minimum sleep hours by growth stage.
+ */
+const DEFAULT_MIN_SLEEP_HOURS: Record<GrowthStage, number> = {
+  baby: 16,
+  child: 14,
+  teen: 12,
+  youngAdult: 10,
+  adult: 8,
+};
+
+/**
  * Default minimum sleep ticks by growth stage (fallback if species data unavailable).
- * Based on 120 ticks per hour:
- * - baby: 16 hours = 1920 ticks
- * - child: 14 hours = 1680 ticks
- * - teen: 12 hours = 1440 ticks
- * - youngAdult: 10 hours = 1200 ticks
- * - adult: 8 hours = 960 ticks
+ * Derived from DEFAULT_MIN_SLEEP_HOURS × TICKS_PER_HOUR.
  */
 const DEFAULT_MIN_SLEEP_TICKS: Record<GrowthStage, Tick> = {
-  baby: 1920,
-  child: 1680,
-  teen: 1440,
-  youngAdult: 1200,
-  adult: 960,
+  baby: DEFAULT_MIN_SLEEP_HOURS.baby * TICKS_PER_HOUR,
+  child: DEFAULT_MIN_SLEEP_HOURS.child * TICKS_PER_HOUR,
+  teen: DEFAULT_MIN_SLEEP_HOURS.teen * TICKS_PER_HOUR,
+  youngAdult: DEFAULT_MIN_SLEEP_HOURS.youngAdult * TICKS_PER_HOUR,
+  adult: DEFAULT_MIN_SLEEP_HOURS.adult * TICKS_PER_HOUR,
 };
 
 /**

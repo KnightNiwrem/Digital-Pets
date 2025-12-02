@@ -19,12 +19,18 @@ export const DAMAGE_CONSTANTS = {
   BASE_HIT_CHANCE: 85,
   /** Hit chance bonus per point of Precision */
   PRECISION_HIT_BONUS: 0.5,
+  /** Minimum hit chance (%) - attacks always have at least this chance to hit */
+  MIN_HIT_CHANCE: 5,
+  /** Maximum hit chance (%) - attacks cannot exceed this chance to hit */
+  MAX_HIT_CHANCE: 100,
   /** Minimum damage variance multiplier */
   MIN_VARIANCE: 0.85,
   /** Maximum damage variance multiplier */
   MAX_VARIANCE: 1.15,
   /** Maximum resistance percentage */
   MAX_RESISTANCE: 75,
+  /** Base value for endurance mitigation formula */
+  ENDURANCE_MITIGATION_BASE: 100,
 } as const;
 
 /**
@@ -69,21 +75,24 @@ export function calculateHitChance(
     attackerPrecision * DAMAGE_CONSTANTS.PRECISION_HIT_BONUS;
   const hitChance =
     baseChance + precisionBonus + moveAccuracyModifier - targetDodgeChance;
-  return Math.max(5, Math.min(100, hitChance)); // Clamp between 5% and 100%
+  return Math.max(
+    DAMAGE_CONSTANTS.MIN_HIT_CHANCE,
+    Math.min(DAMAGE_CONSTANTS.MAX_HIT_CHANCE, hitChance),
+  );
 }
 
 /**
  * Roll for whether an attack hits.
  */
 export function rollHit(hitChance: number): boolean {
-  return Math.random() * 100 <= hitChance;
+  return Math.random() * DAMAGE_CONSTANTS.MAX_HIT_CHANCE <= hitChance;
 }
 
 /**
  * Roll for whether an attack is a critical hit.
  */
 export function rollCritical(criticalChance: number): boolean {
-  return Math.random() * 100 <= criticalChance;
+  return Math.random() * DAMAGE_CONSTANTS.MAX_HIT_CHANCE <= criticalChance;
 }
 
 /**
@@ -97,14 +106,17 @@ export function calculateResistanceMultiplier(
     DAMAGE_CONSTANTS.MAX_RESISTANCE,
     resistances[damageType],
   );
-  return 1 - resistance / 100;
+  return 1 - resistance / DAMAGE_CONSTANTS.ENDURANCE_MITIGATION_BASE;
 }
 
 /**
  * Calculate endurance mitigation.
  */
 export function calculateEnduranceMitigation(targetEndurance: number): number {
-  return 100 / (100 + targetEndurance);
+  return (
+    DAMAGE_CONSTANTS.ENDURANCE_MITIGATION_BASE /
+    (DAMAGE_CONSTANTS.ENDURANCE_MITIGATION_BASE + targetEndurance)
+  );
 }
 
 /**

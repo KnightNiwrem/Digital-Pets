@@ -5,6 +5,7 @@
 import { checkActivityRequirements } from "@/game/core/activityGating";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import { getFacility, getSession } from "@/game/data/facilities";
+import { TrainingMessages } from "@/game/data/messages";
 import type {
   ActiveTraining,
   TrainingResult,
@@ -45,12 +46,12 @@ export function canStartTraining(
   // Get facility and session first (needed for energy cost check)
   const facility = getFacility(facilityId);
   if (!facility) {
-    return { canTrain: false, message: "Training facility not found." };
+    return { canTrain: false, message: TrainingMessages.facilityNotFound };
   }
 
   const session = getSession(facilityId, sessionType);
   if (!session) {
-    return { canTrain: false, message: "Training session not available." };
+    return { canTrain: false, message: TrainingMessages.sessionNotAvailable };
   }
 
   // Check activity state and energy requirements
@@ -68,11 +69,11 @@ export function canStartTraining(
   if (!isSessionAvailable(session, pet.growth.stage)) {
     return {
       canTrain: false,
-      message: `Requires ${session.minStage} stage or higher.`,
+      message: TrainingMessages.requiresStage(session.minStage ?? "unknown"),
     };
   }
 
-  return { canTrain: true, message: "Ready to train!" };
+  return { canTrain: true, message: TrainingMessages.readyToTrain };
 }
 
 /**
@@ -92,7 +93,7 @@ export function startTraining(
 
   const session = getSession(facilityId, sessionType);
   if (!session) {
-    return { success: false, pet, message: "Session not found." };
+    return { success: false, pet, message: TrainingMessages.sessionNotFound };
   }
 
   const activeTraining: ActiveTraining = {
@@ -116,7 +117,10 @@ export function startTraining(
         energy: Math.max(0, newEnergy),
       },
     },
-    message: `Started ${session.name} at ${getFacility(facilityId)?.name ?? "facility"}!`,
+    message: TrainingMessages.startedTraining(
+      session.name,
+      getFacility(facilityId)?.name ?? "facility",
+    ),
   };
 }
 
@@ -146,7 +150,7 @@ export function completeTraining(pet: Pet): TrainingResult {
   if (!pet.activeTraining) {
     return {
       success: false,
-      message: "No active training to complete.",
+      message: TrainingMessages.noActiveTraining,
     };
   }
 
@@ -157,7 +161,7 @@ export function completeTraining(pet: Pet): TrainingResult {
   if (!facility || !session) {
     return {
       success: false,
-      message: "Training data not found.",
+      message: TrainingMessages.trainingDataNotFound,
     };
   }
 
@@ -168,11 +172,12 @@ export function completeTraining(pet: Pet): TrainingResult {
 
   return {
     success: true,
-    message: `Training complete! Gained +${session.primaryStatGain} ${facility.primaryStat}${
-      session.secondaryStatGain > 0
-        ? ` and +${session.secondaryStatGain} ${facility.secondaryStat}`
-        : ""
-    }.`,
+    message: TrainingMessages.trainingComplete(
+      session.primaryStatGain,
+      facility.primaryStat,
+      session.secondaryStatGain,
+      facility.secondaryStat,
+    ),
     statsGained,
   };
 }
@@ -230,7 +235,7 @@ export function cancelTraining(pet: Pet): {
     return {
       success: false,
       pet,
-      message: "No training session to cancel.",
+      message: TrainingMessages.noTrainingToCancel,
       energyRefunded: 0,
     };
   }
@@ -249,7 +254,7 @@ export function cancelTraining(pet: Pet): {
         energy: Math.min(pet.energyStats.energy + energyRefunded, maxEnergy),
       },
     },
-    message: "Training cancelled. Energy has been refunded.",
+    message: TrainingMessages.trainingCancelled,
     energyRefunded,
   };
 }

@@ -5,6 +5,7 @@
 import { checkActivityIdle, checkEnergy } from "@/game/core/activityGating";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { areLocationsConnected, getLocation } from "@/game/data/locations";
+import { TravelMessages } from "@/game/data/messages";
 import { toMicro } from "@/game/types/common";
 import {
   GROWTH_STAGE_DISPLAY_NAMES,
@@ -47,13 +48,15 @@ export function checkLocationRequirements(
     if (!state.pet) {
       return {
         met: false,
-        reason: "Pet required",
+        reason: TravelMessages.petRequired,
       };
     }
     if (!meetsStageRequirement(state.pet.growth.stage, requirements.stage)) {
       return {
         met: false,
-        reason: `Requires ${GROWTH_STAGE_DISPLAY_NAMES[requirements.stage]} stage`,
+        reason: TravelMessages.requiresStage(
+          GROWTH_STAGE_DISPLAY_NAMES[requirements.stage],
+        ),
       };
     }
   }
@@ -106,7 +109,7 @@ export function canTravel(
 ): TravelResult {
   // Must have a pet
   if (!state.pet) {
-    return { success: false, message: "Pet required" };
+    return { success: false, message: TravelMessages.petRequired };
   }
 
   const currentLocationId = state.player.currentLocationId;
@@ -114,14 +117,14 @@ export function canTravel(
 
   // Check destination exists
   if (!destination) {
-    return { success: false, message: "Unknown destination." };
+    return { success: false, message: TravelMessages.unknownDestination };
   }
 
   // Check locations are connected
   if (!areLocationsConnected(currentLocationId, destinationId)) {
     return {
       success: false,
-      message: "Not connected",
+      message: TravelMessages.notConnected,
     };
   }
 
@@ -133,14 +136,14 @@ export function canTravel(
   if (!requirementCheck.met) {
     return {
       success: false,
-      message: requirementCheck.reason ?? "Requirements not met.",
+      message: requirementCheck.reason ?? TravelMessages.requirementsNotMet,
     };
   }
 
   // Check energy cost
   const energyCost = calculateTravelCost(currentLocationId, destinationId);
   if (energyCost === null) {
-    return { success: false, message: "Cannot calculate travel cost." };
+    return { success: false, message: TravelMessages.cannotCalculateCost };
   }
 
   // Check activity state (after calculating energy cost so it's included in response)
@@ -158,7 +161,7 @@ export function canTravel(
     };
   }
 
-  return { success: true, message: "Ready to travel.", energyCost };
+  return { success: true, message: TravelMessages.readyToTravel, energyCost };
 }
 
 /**
@@ -175,7 +178,7 @@ export function travel(
   }
 
   if (!state.pet || canTravelResult.energyCost === undefined) {
-    return { success: false, state, message: "Invalid state." };
+    return { success: false, state, message: TravelMessages.invalidState };
   }
 
   const energyCostMicro = toMicro(canTravelResult.energyCost);
@@ -207,6 +210,6 @@ export function travel(
   return {
     success: true,
     state: stateWithQuestProgress,
-    message: `Traveled to ${destination?.name ?? destinationId}!`,
+    message: TravelMessages.traveledTo(destination?.name ?? destinationId),
   };
 }

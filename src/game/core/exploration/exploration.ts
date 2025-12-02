@@ -9,6 +9,7 @@
  * - Skill XP rewards via skillFactors
  */
 
+import { BASE_EXPLORATION_XP } from "@/game/core/exploration/constants";
 import { addXpToPlayerSkill } from "@/game/core/skills";
 import { getActivityById } from "@/game/data/exploration/activities";
 import { getDropTableById } from "@/game/data/exploration/dropTables";
@@ -24,11 +25,6 @@ import { ActivityState, GROWTH_STAGE_ORDER } from "@/game/types/constants";
 import type { ExplorationActivity } from "@/game/types/exploration";
 import type { Pet } from "@/game/types/pet";
 import type { PlayerSkills } from "@/game/types/skill";
-
-/**
- * Base XP granted per exploration completion.
- */
-const BASE_EXPLORATION_XP = 15;
 
 /**
  * Result of checking if exploration can start.

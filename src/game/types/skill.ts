@@ -47,6 +47,21 @@ export const SKILL_TIER_THRESHOLDS: Record<SkillTier, { min: number }> = {
 export const MAX_SKILL_LEVEL = 99;
 
 /**
+ * Base XP constant for level calculation.
+ * Used in formula: baseXP × n × (n + 1) / 2
+ */
+export const BASE_SKILL_XP = 50;
+
+/**
+ * Skill effect bonus per level above 1.
+ * At level 1: multiplier is 1.0
+ * At level 2: multiplier is 1.05
+ * At level 3: multiplier is 1.10
+ * etc.
+ */
+export const SKILL_EFFECT_BONUS_PER_LEVEL = 0.05;
+
+/**
  * A single skill's current state.
  */
 export interface Skill {

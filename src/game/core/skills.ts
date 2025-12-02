@@ -3,19 +3,16 @@
  */
 
 import {
+  BASE_SKILL_XP,
   MAX_SKILL_LEVEL,
   type PlayerSkills,
+  SKILL_EFFECT_BONUS_PER_LEVEL,
   SKILL_TIER_THRESHOLDS,
   type Skill,
   type SkillTier,
   SkillTier as SkillTierValues,
   type SkillType,
 } from "@/game/types/skill";
-
-/**
- * Base XP constant for level calculation.
- */
-const BASE_XP = 50;
 
 /**
  * Total XP required to reach level n from level 1.
@@ -25,7 +22,7 @@ const BASE_XP = 50;
  */
 export function xpToLevel(level: number): number {
   if (level <= 1) return 0;
-  return Math.floor((BASE_XP * level * (level + 1)) / 2);
+  return Math.floor((BASE_SKILL_XP * level * (level + 1)) / 2);
 }
 
 /**
@@ -164,8 +161,7 @@ export function getSkillProgress(skill: Skill): number {
  * Returns a multiplier (e.g., 1.0 at level 1, 1.05 at level 2, 1.10 at level 3).
  */
 export function getSkillEffectMultiplier(level: number): number {
-  // 5% bonus per level above 1
-  return 1 + (level - 1) * 0.05;
+  return 1 + (level - 1) * SKILL_EFFECT_BONUS_PER_LEVEL;
 }
 
 /**

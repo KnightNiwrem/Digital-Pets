@@ -4,6 +4,7 @@
 
 import { addItem, hasItem, removeItem } from "@/game/core/inventory";
 import { getItemById } from "@/game/data/items";
+import { ShopMessages } from "@/game/data/messages";
 import { getShop } from "@/game/data/shops";
 import type { GameState } from "@/game/types/gameState";
 import type { BuyResult, SellResult, Shop, ShopItem } from "@/game/types/shop";
@@ -59,7 +60,7 @@ export function buyItem(
   const normalizedQuantity = normalizeQuantity(quantity);
   if (normalizedQuantity === null) {
     return {
-      result: { success: false, message: "Quantity must be at least 1." },
+      result: { success: false, message: ShopMessages.invalidQuantity },
       state,
     };
   }
@@ -67,7 +68,7 @@ export function buyItem(
   const shop = getShop(shopId);
   if (!shop) {
     return {
-      result: { success: false, message: "Shop not found." },
+      result: { success: false, message: ShopMessages.shopNotFound },
       state,
     };
   }
@@ -75,7 +76,7 @@ export function buyItem(
   const shopItem = getShopItem(shop, itemId);
   if (!shopItem) {
     return {
-      result: { success: false, message: "Item not available in this shop." },
+      result: { success: false, message: ShopMessages.itemNotInShop },
       state,
     };
   }
@@ -83,7 +84,7 @@ export function buyItem(
   const itemDef = getItemById(itemId);
   if (!itemDef) {
     return {
-      result: { success: false, message: "Item not found." },
+      result: { success: false, message: ShopMessages.itemNotFound },
       state,
     };
   }
@@ -94,7 +95,7 @@ export function buyItem(
     return {
       result: {
         success: false,
-        message: `Not enough coins. Need ${totalCost} coins.`,
+        message: ShopMessages.notEnoughCoins(totalCost),
       },
       state,
     };
@@ -121,7 +122,11 @@ export function buyItem(
   return {
     result: {
       success: true,
-      message: `Purchased ${normalizedQuantity}x ${itemDef.name} for ${totalCost} coins.`,
+      message: ShopMessages.purchaseSuccess(
+        normalizedQuantity,
+        itemDef.name,
+        totalCost,
+      ),
     },
     state: newState,
   };
@@ -140,7 +145,7 @@ export function sellItem(
   const normalizedQuantity = normalizeQuantity(quantity);
   if (normalizedQuantity === null) {
     return {
-      result: { success: false, message: "Quantity must be at least 1." },
+      result: { success: false, message: ShopMessages.invalidQuantity },
       state,
     };
   }
@@ -148,7 +153,7 @@ export function sellItem(
   const shop = getShop(shopId);
   if (!shop) {
     return {
-      result: { success: false, message: "Shop not found." },
+      result: { success: false, message: ShopMessages.shopNotFound },
       state,
     };
   }
@@ -156,14 +161,14 @@ export function sellItem(
   const itemDef = getItemById(itemId);
   if (!itemDef) {
     return {
-      result: { success: false, message: "Item not found." },
+      result: { success: false, message: ShopMessages.itemNotFound },
       state,
     };
   }
 
   if (!hasItem(state.player.inventory, itemId, normalizedQuantity)) {
     return {
-      result: { success: false, message: "Not enough items to sell." },
+      result: { success: false, message: ShopMessages.notEnoughItems },
       state,
     };
   }
@@ -173,7 +178,7 @@ export function sellItem(
 
   if (totalEarned === 0) {
     return {
-      result: { success: false, message: "This item cannot be sold." },
+      result: { success: false, message: ShopMessages.cannotSellItem },
       state,
     };
   }
@@ -199,7 +204,11 @@ export function sellItem(
   return {
     result: {
       success: true,
-      message: `Sold ${normalizedQuantity}x ${itemDef.name} for ${totalEarned} coins.`,
+      message: ShopMessages.saleSuccess(
+        normalizedQuantity,
+        itemDef.name,
+        totalEarned,
+      ),
       coinsReceived: totalEarned,
     },
     state: newState,
