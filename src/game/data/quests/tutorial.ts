@@ -76,7 +76,7 @@ export const tutorialExploration: Quest = {
       id: "forage_once",
       type: ObjectiveType.Explore,
       description: "Complete a foraging session",
-      target: "forage",
+      target: "foraging",
       quantity: 1,
     },
   ],

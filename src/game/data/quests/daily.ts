@@ -62,7 +62,7 @@ export const dailyForager: Quest = {
       id: "forage_once",
       type: ObjectiveType.Explore,
       description: "Complete foraging sessions",
-      target: "forage",
+      target: "foraging",
       quantity: 3,
     },
   ],

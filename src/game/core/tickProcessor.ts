@@ -218,7 +218,7 @@ export function processGameTick(
         updatedState = updateQuestProgress(
           updatedState,
           ObjectiveType.Explore,
-          "forage",
+          "foraging",
         );
 
         // Update quest progress for Collect objectives for each item found
