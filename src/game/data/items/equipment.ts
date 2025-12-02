@@ -2,6 +2,7 @@
  * Equipment item definitions that provide passive bonuses.
  */
 
+import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { EquipmentItem } from "@/game/types/item";
 
 /**
@@ -14,8 +15,8 @@ export const EQUIPMENT_ITEMS = {
     id: "equip_training_collar",
     name: "Training Collar",
     description: "A lightweight collar that improves training efficiency.",
-    category: "equipment",
-    rarity: "uncommon",
+    category: ItemCategory.Equipment,
+    rarity: Rarity.Uncommon,
     stackable: false,
     maxStack: 1,
     sellValue: 100,
@@ -31,8 +32,8 @@ export const EQUIPMENT_ITEMS = {
     id: "equip_lucky_charm",
     name: "Lucky Charm",
     description: "A small charm that brings good fortune in exploration.",
-    category: "equipment",
-    rarity: "uncommon",
+    category: ItemCategory.Equipment,
+    rarity: Rarity.Uncommon,
     stackable: false,
     maxStack: 1,
     sellValue: 80,
@@ -48,8 +49,8 @@ export const EQUIPMENT_ITEMS = {
     id: "equip_iron_bangle",
     name: "Iron Bangle",
     description: "A sturdy iron bangle that increases strength.",
-    category: "equipment",
-    rarity: "uncommon",
+    category: ItemCategory.Equipment,
+    rarity: Rarity.Uncommon,
     stackable: false,
     maxStack: 1,
     sellValue: 120,
@@ -64,8 +65,8 @@ export const EQUIPMENT_ITEMS = {
     id: "equip_swift_anklet",
     name: "Swift Anklet",
     description: "A featherweight anklet that enhances agility.",
-    category: "equipment",
-    rarity: "rare",
+    category: ItemCategory.Equipment,
+    rarity: Rarity.Rare,
     stackable: false,
     maxStack: 1,
     sellValue: 180,
@@ -80,8 +81,8 @@ export const EQUIPMENT_ITEMS = {
     id: "equip_guardians_pendant",
     name: "Guardian's Pendant",
     description: "A protective pendant that boosts endurance and fortitude.",
-    category: "equipment",
-    rarity: "rare",
+    category: ItemCategory.Equipment,
+    rarity: Rarity.Rare,
     stackable: false,
     maxStack: 1,
     sellValue: 200,
@@ -96,8 +97,8 @@ export const EQUIPMENT_ITEMS = {
     id: "equip_hunters_eye",
     name: "Hunter's Eye",
     description: "A crystalline lens that enhances precision.",
-    category: "equipment",
-    rarity: "epic",
+    category: ItemCategory.Equipment,
+    rarity: Rarity.Epic,
     stackable: false,
     maxStack: 1,
     sellValue: 350,
