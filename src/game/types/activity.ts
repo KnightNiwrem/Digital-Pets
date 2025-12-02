@@ -7,6 +7,18 @@ import type { GrowthStage } from "./constants";
 import type { BattleStats } from "./stats";
 
 /**
+ * Requirements for exploration activities and drop entries.
+ */
+export interface ExplorationRequirements {
+  /** Map of skill IDs to minimum required levels */
+  minSkillLevels?: Record<string, number>;
+  /** Minimum growth stage required */
+  minPetStage?: GrowthStage;
+  /** Quest IDs that must be completed */
+  questCompleted?: string[];
+}
+
+/**
  * Training session types with increasing intensity.
  */
 export const TrainingSessionType = {

@@ -113,6 +113,8 @@ export interface Pet {
   activeTraining?: ActiveTraining;
   /** Active exploration session (if exploring) */
   activeExploration?: ActiveExploration;
+  /** Activity cooldowns: locationId → activityId → cooldown end tick */
+  activityCooldowns?: Record<string, Record<string, Tick>>;
   /** Bonus max stats from items, quests, events */
   bonusMaxStats: BonusMaxStats;
 }

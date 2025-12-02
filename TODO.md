@@ -166,7 +166,7 @@ After cleanup, define the new types from scratch.
 
 ### Task 1.1: Define Activity Types (`src/game/types/activity.ts`)
 
-- [ ] Add `ExplorationRequirements` interface
+- [x] Add `ExplorationRequirements` interface
 
 Add new exploration types:
 ```typescript
@@ -203,7 +203,7 @@ export interface ActiveExploration {
 
 ### Task 1.2: Define Activity Data Type (`src/game/types/exploration.ts`)
 
-- [ ] Create `src/game/types/exploration.ts` with new activity and drop table types
+- [x] Create `src/game/types/exploration.ts` with new activity and drop table types
 
 Create new file with activity definition types:
 ```typescript
@@ -246,7 +246,7 @@ export interface DropTable {
 
 ### Task 1.3: Update Location Type (`src/game/types/location.ts`)
 
-- [ ] Ensure Location has `dropTableIds` and `encounterTableId` fields
+- [x] Ensure Location has `dropTableIds` and `encounterTableId` fields
 
 Ensure Location has:
 ```typescript
@@ -261,7 +261,7 @@ export interface Location {
 
 ### Task 1.4: Add Cooldown Tracking to Pet Type
 
-- [ ] Add `activityCooldowns` field to Pet type
+- [x] Add `activityCooldowns` field to Pet type
 
 In `src/game/types/pet.ts`:
 ```typescript
