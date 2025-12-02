@@ -49,13 +49,13 @@ Before implementing the new system, delete all legacy exploration code to start 
 
 ### Task 0.1: Delete Legacy Test File
 
-Delete `src/game/core/exploration/forage.test.ts`
+- [x] Delete `src/game/core/exploration/forage.test.ts`
 
 This file tests the old forage-specific system and will be replaced with tests for the new activity-based system.
 
 ### Task 0.2: Delete Legacy Forage Logic
 
-Delete `src/game/core/exploration/forage.ts`
+- [x] Delete `src/game/core/exploration/forage.ts`
 
 This file contains:
 - `canStartForaging()` - Will be replaced by `canStartActivity()`
@@ -70,11 +70,14 @@ This file contains:
 
 ### Task 0.3: Delete Legacy Forage Data
 
-Delete `src/game/data/tables/forage.ts`
+- [x] Delete `src/game/data/tables/forage.ts`
 
 This file contains the old `ForageTable` and `ForageEntry` types plus all location-specific forage tables. Will be replaced by the new drop table system.
 
 ### Task 0.4: Clean Up Legacy Types in `src/game/types/activity.ts`
+
+- [x] Remove `ExplorationActivityType` enum
+- [x] Update `ActiveExploration` interface (replace `activityType` with `activityId`, remove `forageTableId`)
 
 Remove:
 ```typescript
@@ -112,12 +115,18 @@ export interface ActiveExploration {
 
 ### Task 0.5: Update Location Type
 
+- [x] Remove `forageTableId?: string` from Location interface
+- [x] Add `dropTableIds?: Record<string, string[]>` to Location interface
+
 In `src/game/types/location.ts`, update the `Location` interface:
 - Remove `forageTableId?: string`
 - Add `dropTableIds?: Record<string, string[]>` (activity ID → drop table IDs)
-- Add `encounterTableId?: string`
+- (encounterTableId already exists)
 
 ### Task 0.6: Update Location Data Files
+
+- [x] Remove `forageTableId` field from all locations
+- [x] Add empty `dropTableIds: {}` placeholder to all locations
 
 For each location in `src/game/data/locations/wild.ts`:
 - Remove `forageTableId` field
@@ -127,11 +136,12 @@ For each location in `src/game/data/locations/wild.ts`:
 ### Task 0.7: Stub Out Broken Imports
 
 After deleting the legacy files, the following files will have broken imports:
-- `src/game/state/actions/exploration.ts`
-- `src/game/core/tickProcessor.ts`
-- `src/components/exploration/ActivitySelect.tsx`
-- `src/components/exploration/ExplorationProgress.tsx`
-- `src/components/screens/ExplorationScreen.tsx`
+
+- [x] `src/game/state/actions/exploration.ts` - Stub exploration actions
+- [x] `src/game/core/tickProcessor.ts` - Stub exploration completion logic
+- [x] `src/components/exploration/ActivitySelect.tsx` - Stub component
+- [x] `src/components/exploration/ExplorationProgress.tsx` - Stub component
+- [x] `src/components/screens/ExplorationScreen.tsx` - Stub screen
 
 For each file:
 1. Remove/comment out broken imports
@@ -140,6 +150,8 @@ For each file:
 4. Ensure the code compiles (typecheck passes)
 
 ### Task 0.8: Verify Clean State
+
+- [x] Run `bun check && bun typecheck && bun test` to ensure all passes
 
 Run `bun check && bun typecheck && bun test` to ensure:
 - No type errors
@@ -153,6 +165,8 @@ Run `bun check && bun typecheck && bun test` to ensure:
 After cleanup, define the new types from scratch.
 
 ### Task 1.1: Define Activity Types (`src/game/types/activity.ts`)
+
+- [x] Add `ExplorationRequirements` interface
 
 Add new exploration types:
 ```typescript
@@ -188,6 +202,8 @@ export interface ActiveExploration {
 ```
 
 ### Task 1.2: Define Activity Data Type (`src/game/types/exploration.ts`)
+
+- [x] Create `src/game/types/exploration.ts` with new activity and drop table types
 
 Create new file with activity definition types:
 ```typescript
@@ -230,6 +246,8 @@ export interface DropTable {
 
 ### Task 1.3: Update Location Type (`src/game/types/location.ts`)
 
+- [x] Ensure Location has `dropTableIds` and `encounterTableId` fields
+
 Ensure Location has:
 ```typescript
 export interface Location {
@@ -242,6 +260,8 @@ export interface Location {
 ```
 
 ### Task 1.4: Add Cooldown Tracking to Pet Type
+
+- [x] Add `activityCooldowns` field to Pet type
 
 In `src/game/types/pet.ts`:
 ```typescript
@@ -260,19 +280,19 @@ Create the data definitions for activities and drop tables.
 
 ### Task 2.1: Create Activity Definitions (`src/game/data/exploration/activities.ts`)
 
-Define activities like Foraging, Mining, Deep Exploration per spec examples.
+- [x] Define activities like Foraging, Mining, Deep Exploration per spec examples
 
 ### Task 2.2: Create Drop Tables (`src/game/data/exploration/dropTables.ts`)
 
-Create roll-based drop tables for each location-activity combination.
+- [x] Create roll-based drop tables for each location-activity combination
 
 ### Task 2.3: Update Location Data (`src/game/data/locations/wild.ts`)
 
-Add `dropTableIds` mappings to each wild location.
+- [x] Add `dropTableIds` mappings to each wild location
 
 ### Task 2.4: Update Encounter Tables (`src/game/data/tables/encounters.ts`)
 
-Add `activityIds` field to filter encounters by activity.
+- [x] Add `activityIds` field to filter encounters by activity
 
 ---
 
@@ -282,30 +302,30 @@ Implement the new exploration system logic.
 
 ### Task 3.1: Create Exploration Module (`src/game/core/exploration/exploration.ts`)
 
-Implement:
-- `canStartExplorationActivity(pet, locationId, activityId)`
-- `startExplorationActivity(pet, locationId, activityId, currentTick)`
-- `processExplorationTick(exploration)`
-- `completeExplorationActivity(pet, player)`
-- `cancelExploration(pet)`
-- `calculateExplorationDrops(dropTables, pet, roll)`
-- `getExplorationProgress(exploration)`
-- `getActivityCooldownRemaining(pet, locationId, activityId, currentTick)`
+- [x] Implement exploration module functions:
+  - `canStartExplorationActivity(pet, locationId, activityId)`
+  - `startExplorationActivity(pet, locationId, activityId, currentTick)`
+  - `processExplorationTick(exploration)`
+  - `completeExplorationActivity(pet, player)`
+  - `cancelExploration(pet)`
+  - `calculateExplorationDrops(dropTables, pet, roll)`
+  - `getExplorationProgress(exploration)`
+  - `getActivityCooldownRemaining(pet, locationId, activityId, currentTick)`
 
 ### Task 3.2: Update Encounter System (`src/game/core/exploration/encounter.ts`)
 
-- Filter encounters by activityIds
-- Implement level calculation per spec
+- [x] Filter encounters by activityIds
+- [x] Implement level calculation per spec
 
 ### Task 3.3: Update Tick Processor (`src/game/core/tickProcessor.ts`)
 
-- Use new exploration functions
-- Award skill XP via activity's skillFactors
-- Apply cooldowns on completion
+- [x] Use new exploration functions
+- [x] Award skill XP via activity's skillFactors
+- [x] Apply cooldowns on completion
 
 ### Task 3.4: Write Tests (`src/game/core/exploration/exploration.test.ts`)
 
-Test all new functions with the new type system.
+- [x] Test all new functions with the new type system
 
 ---
 
@@ -315,13 +335,13 @@ Wire up the exploration system to game state.
 
 ### Task 4.1: Update Exploration Actions (`src/game/state/actions/exploration.ts`)
 
-- `startExplorationActivity(state, activityId)`
-- `cancelExploration(state)` 
-- `applyExplorationResults(state, result)`
+- [x] Implement `startExplorationActivity(state, activityId)`
+- [x] Implement `cancelExploration(state)`
+- [x] Implement `applyExplorationResults(state, result)`
 
 ### Task 4.2: Write Tests (`src/game/state/actions/exploration.test.ts`)
 
-Test state action handlers.
+- [x] Test state action handlers
 
 ---
 
@@ -331,20 +351,20 @@ Update UI components to use the new system.
 
 ### Task 5.1: Update ActivitySelect Component
 
-- Accept list of activities from data
-- Show requirements and costs
-- Indicate cooldown status
+- [x] Accept list of activities from data
+- [x] Show requirements and costs
+- [x] Indicate cooldown status
 
 ### Task 5.2: Update ExplorationProgress Component
 
-- Display activity name from activity data
-- Remove hardcoded "Foraging"
+- [x] Display activity name from activity data
+- [x] Remove hardcoded "Foraging"
 
 ### Task 5.3: Update ExplorationScreen Component
 
-- Fetch available activities for location
-- Filter by requirements
-- Handle activity selection
+- [x] Fetch available activities for location
+- [x] Filter by requirements
+- [x] Handle activity selection
 
 ---
 

@@ -4,9 +4,11 @@
 
 import { emitEvents } from "@/game/core/events";
 import {
-  applyExplorationCompletion,
+  applySkillXpGains,
+  completeExplorationActivity,
   processExplorationTick,
-} from "@/game/core/exploration/forage";
+} from "@/game/core/exploration/exploration";
+import { addItem } from "@/game/core/inventory";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import {
   processTimedQuestExpiration,
@@ -25,7 +27,6 @@ import {
 import { completeTraining } from "@/game/core/training";
 import { getFacility } from "@/game/data/facilities";
 import { getLocation } from "@/game/data/locations";
-import { applyExplorationResults } from "@/game/state/actions/exploration";
 import type { TrainingResult } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
@@ -45,8 +46,7 @@ import type {
   OfflineReport,
   OfflineTrainingResult,
 } from "@/game/types/offline";
-import { ObjectiveType } from "@/game/types/quest";
-import { SkillType } from "@/game/types/skill";
+import { ObjectiveType, QuestState } from "@/game/types/quest";
 
 /**
  * Apply daily reset if needed.
@@ -189,7 +189,7 @@ export function processGameTick(
     lastSaveTime: currentTime,
   };
 
-  // Process exploration at game state level (needs access to inventory)
+  // Process exploration at game state level (needs access to inventory and skills)
   if (
     updatedPet.activityState === ActivityState.Exploring &&
     updatedPet.activeExploration
@@ -197,34 +197,75 @@ export function processGameTick(
     const newExploration = processExplorationTick(updatedPet.activeExploration);
 
     if (newExploration === null) {
-      // Exploration completed - apply item drops to inventory
+      // Exploration completed - use new exploration system
       const locationId = updatedPet.activeExploration.locationId;
+      const activityId = updatedPet.activeExploration.activityId;
       const location = getLocation(locationId);
       const locationName = location?.name ?? "Unknown Location";
-      const foragingLevel =
-        updatedState.player.skills?.[SkillType.Foraging]?.level ?? 1;
-      const { pet: completedPet, result } = applyExplorationCompletion(
-        updatedPet,
-        foragingLevel,
-      );
-      const explorationResult = applyExplorationResults(
-        { ...updatedState, pet: completedPet },
-        result,
-      );
-      updatedState = explorationResult.state;
 
-      // Update quest progress for Explore objectives (foraging)
-      if (result.success) {
-        updatedState = updateQuestProgress(
-          updatedState,
+      // Get completed quest IDs for requirement checking
+      const completedQuestIds = updatedState.quests
+        .filter((q) => q.state === QuestState.Completed)
+        .map((q) => q.questId);
+
+      // Complete exploration with the new system
+      const completionResult = completeExplorationActivity(
+        updatedPet,
+        updatedState.player.skills,
+        completedQuestIds,
+        updatedState.totalTicks,
+      );
+
+      // Update pet state
+      let updatedStateWithPet: GameState = {
+        ...updatedState,
+        pet: completionResult.pet,
+      };
+
+      if (completionResult.success) {
+        // Apply skill XP gains
+        const { skills: updatedSkills } = applySkillXpGains(
+          updatedStateWithPet.player.skills,
+          completionResult.skillXpGains,
+        );
+
+        updatedStateWithPet = {
+          ...updatedStateWithPet,
+          player: {
+            ...updatedStateWithPet.player,
+            skills: updatedSkills,
+          },
+        };
+
+        // Add found items to inventory
+        let currentInventory = updatedStateWithPet.player.inventory;
+        for (const drop of completionResult.itemsFound) {
+          currentInventory = addItem(
+            currentInventory,
+            drop.itemId,
+            drop.quantity,
+          );
+        }
+
+        updatedStateWithPet = {
+          ...updatedStateWithPet,
+          player: {
+            ...updatedStateWithPet.player,
+            inventory: currentInventory,
+          },
+        };
+
+        // Update quest progress for Explore objectives
+        updatedStateWithPet = updateQuestProgress(
+          updatedStateWithPet,
           ObjectiveType.Explore,
-          "foraging",
+          activityId,
         );
 
         // Update quest progress for Collect objectives for each item found
-        for (const drop of result.itemsFound) {
-          updatedState = updateQuestProgress(
-            updatedState,
+        for (const drop of completionResult.itemsFound) {
+          updatedStateWithPet = updateQuestProgress(
+            updatedStateWithPet,
             ObjectiveType.Collect,
             drop.itemId,
             drop.quantity,
@@ -232,14 +273,16 @@ export function processGameTick(
         }
       }
 
+      updatedState = updatedStateWithPet;
+
       // Emit exploration complete event
       tickEvents.push(
         createEvent<ExplorationCompleteEvent>(
           {
             type: "explorationComplete",
             locationName,
-            itemsFound: result.itemsFound,
-            message: result.message,
+            itemsFound: completionResult.itemsFound,
+            message: completionResult.message,
             petName,
           },
           currentTime,

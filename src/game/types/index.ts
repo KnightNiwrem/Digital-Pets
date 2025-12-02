@@ -6,6 +6,7 @@ export * from "./activity";
 export * from "./common";
 export * from "./constants";
 export * from "./event";
+export * from "./exploration";
 export * from "./gameState";
 export * from "./item";
 export * from "./location";

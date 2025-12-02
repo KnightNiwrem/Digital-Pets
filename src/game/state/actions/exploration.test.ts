@@ -2,127 +2,334 @@
  * Tests for exploration state actions.
  */
 
-import { expect, test } from "bun:test";
-import { FOOD_ITEMS } from "@/game/data/items";
-import { applyExplorationResults } from "@/game/state/actions/exploration";
-import type { ExplorationResult } from "@/game/types/activity";
+import { describe, expect, test } from "bun:test";
+import type { CompleteExplorationResult } from "@/game/core/exploration/exploration";
+import { ActivityId } from "@/game/data/exploration/activities";
+import { FOOD_ITEMS } from "@/game/data/items/food";
+import {
+  applyExplorationResults,
+  cancelExploration,
+  canStartExploration,
+  startExploration,
+} from "@/game/state/actions/exploration";
+import { createTestPet } from "@/game/testing/createTestPet";
+import type { ActiveExploration } from "@/game/types/activity";
+import { type Tick, toMicro } from "@/game/types/common";
+import { ActivityState } from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
+import type { Pet } from "@/game/types/pet";
 import { SkillType } from "@/game/types/skill";
 
-function createTestState(): GameState {
+function createTestState(petOverrides?: Partial<Pet>): GameState {
+  const pet = createTestPet({
+    energyStats: { energy: toMicro(100) },
+    ...petOverrides,
+  });
   return {
     ...createInitialGameState(),
+    pet,
     isInitialized: true,
   };
 }
 
-// applyExplorationResults tests
-test("applyExplorationResults grants foraging XP for completed exploration", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [],
-  };
+describe("canStartExploration", () => {
+  test("returns false when no pet", () => {
+    const state = { ...createInitialGameState(), pet: null };
+    const result = canStartExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.canStart).toBe(false);
+    expect(result.reason).toContain("No pet");
+  });
 
-  const { xpGained, leveledUp } = applyExplorationResults(state, result);
+  test("returns true when conditions met", () => {
+    const state = createTestState();
+    const result = canStartExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.canStart).toBe(true);
+  });
 
-  // Base XP of 15 with 0 items
-  expect(xpGained).toBe(15);
-  expect(leveledUp).toBe(false);
+  test("returns false when pet not idle", () => {
+    const state = createTestState({ activityState: ActivityState.Training });
+    const result = canStartExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.canStart).toBe(false);
+  });
 });
 
-test("applyExplorationResults grants bonus XP for items found", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [
-      { itemId: FOOD_ITEMS.APPLE.id, quantity: 2 },
-      { itemId: FOOD_ITEMS.MEAT.id, quantity: 3 },
-    ],
-  };
+describe("startExploration", () => {
+  test("returns failure when no pet", () => {
+    const state = { ...createInitialGameState(), pet: null };
+    const result = startExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("No pet");
+  });
 
-  const { xpGained } = applyExplorationResults(state, result);
+  test("starts exploration successfully", () => {
+    const state = createTestState();
+    const result = startExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      10 as Tick,
+    );
 
-  // Base XP 15 + (5 items * 5 XP per item) = 40
-  expect(xpGained).toBe(40);
+    expect(result.success).toBe(true);
+    expect(result.state.pet?.activityState).toBe(ActivityState.Exploring);
+    expect(result.state.pet?.activeExploration).toBeDefined();
+    expect(result.state.pet?.activeExploration?.activityId).toBe(
+      ActivityId.Foraging,
+    );
+  });
+
+  test("deducts energy when starting exploration", () => {
+    const initialEnergy = toMicro(100);
+    const state = createTestState({ energyStats: { energy: initialEnergy } });
+    const result = startExploration(
+      state,
+      "meadow",
+      ActivityId.Foraging,
+      0 as Tick,
+    );
+
+    expect(result.success).toBe(true);
+    // Foraging costs 15 energy
+    expect(result.state.pet?.energyStats.energy).toBe(
+      initialEnergy - toMicro(15),
+    );
+  });
 });
 
-test("applyExplorationResults updates skills in game state", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 1 }],
-  };
+describe("cancelExploration", () => {
+  test("returns failure when no pet", () => {
+    const state = { ...createInitialGameState(), pet: null };
+    const result = cancelExploration(state);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("No pet");
+  });
 
-  const { state: newState, xpGained } = applyExplorationResults(state, result);
+  test("returns failure when no active exploration", () => {
+    const state = createTestState();
+    const result = cancelExploration(state);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("No exploration");
+  });
 
-  expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(xpGained);
+  test("refunds energy on cancel", () => {
+    const initialEnergy = toMicro(50);
+    const energyCost = toMicro(15);
+    const exploration: ActiveExploration = {
+      activityId: ActivityId.Foraging,
+      locationId: "meadow",
+      startTick: 0 as Tick,
+      durationTicks: 10 as Tick,
+      ticksRemaining: 5 as Tick,
+      energyCost,
+    };
+
+    const state = createTestState({
+      activityState: ActivityState.Exploring,
+      energyStats: { energy: initialEnergy },
+      activeExploration: exploration,
+    });
+
+    const result = cancelExploration(state);
+
+    expect(result.success).toBe(true);
+    expect(result.state.pet?.activityState).toBe(ActivityState.Idle);
+    expect(result.state.pet?.activeExploration).toBeUndefined();
+    expect(result.state.pet?.energyStats.energy).toBe(
+      initialEnergy + energyCost,
+    );
+    expect(result.message).toContain("refunded");
+  });
 });
 
-test("applyExplorationResults adds items to inventory", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 3 }],
-  };
+describe("applyExplorationResults", () => {
+  function createCompletionResult(
+    pet: Pet,
+    overrides?: Partial<CompleteExplorationResult>,
+  ): CompleteExplorationResult {
+    return {
+      success: true,
+      pet: {
+        ...pet,
+        activityState: ActivityState.Idle,
+        activeExploration: undefined,
+      },
+      itemsFound: [],
+      skillXpGains: {},
+      message: "Exploration complete",
+      ...overrides,
+    };
+  }
 
-  const { state: newState } = applyExplorationResults(state, result);
+  function getPet(state: GameState): Pet {
+    if (!state.pet) {
+      throw new Error("Test state must have a pet");
+    }
+    return state.pet;
+  }
 
-  const appleItem = newState.player.inventory.items.find(
-    (item) => item.itemId === FOOD_ITEMS.APPLE.id,
-  );
-  expect(appleItem).toBeDefined();
-  expect(appleItem?.quantity).toBe(3);
-});
+  test("returns failure when no pet", () => {
+    const state = { ...createInitialGameState(), pet: null };
+    const pet = createTestPet();
+    const completionResult = createCompletionResult(pet);
 
-test("applyExplorationResults returns leveledUp true when skill levels up", () => {
-  const state = createTestState();
-  // Give enough XP to level up (need 150 XP for level 2)
-  // Simulate getting lots of items
-  const result: ExplorationResult = {
-    success: true,
-    message: "Found items",
-    itemsFound: [{ itemId: FOOD_ITEMS.APPLE.id, quantity: 30 }], // 15 + 30*5 = 165 XP
-  };
+    const result = applyExplorationResults(
+      state,
+      completionResult,
+      ActivityId.Foraging,
+    );
 
-  const { leveledUp } = applyExplorationResults(state, result);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("No pet");
+  });
 
-  expect(leveledUp).toBe(true);
-});
+  test("returns failure when completion result is unsuccessful", () => {
+    const state = createTestState();
+    const pet = getPet(state);
+    const completionResult = createCompletionResult(pet, {
+      success: false,
+      message: "No active exploration",
+    });
 
-test("applyExplorationResults still grants XP when no items found", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: true,
-    message: "Nothing found",
-    itemsFound: [],
-  };
+    const result = applyExplorationResults(
+      state,
+      completionResult,
+      ActivityId.Foraging,
+    );
 
-  const { xpGained, state: newState } = applyExplorationResults(state, result);
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("No active exploration");
+  });
 
-  expect(xpGained).toBe(15); // Base XP only
-  expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(15);
-});
+  test("updates pet state from completion result", () => {
+    const state = createTestState({
+      activityState: ActivityState.Exploring,
+    });
+    const pet = getPet(state);
+    const completionResult = createCompletionResult(pet);
 
-test("applyExplorationResults does not grant XP when exploration fails", () => {
-  const state = createTestState();
-  const result: ExplorationResult = {
-    success: false,
-    message: "Exploration failed",
-    itemsFound: [],
-  };
+    const result = applyExplorationResults(
+      state,
+      completionResult,
+      ActivityId.Foraging,
+    );
 
-  const {
-    xpGained,
-    leveledUp,
-    state: newState,
-  } = applyExplorationResults(state, result);
+    expect(result.success).toBe(true);
+    expect(result.state.pet?.activityState).toBe(ActivityState.Idle);
+    expect(result.state.pet?.activeExploration).toBeUndefined();
+  });
 
-  expect(xpGained).toBe(0);
-  expect(leveledUp).toBe(false);
-  expect(newState.player.skills[SkillType.Foraging].currentXp).toBe(0);
+  test("adds found items to inventory", () => {
+    const state = createTestState();
+    const pet = getPet(state);
+    const completionResult = createCompletionResult(pet, {
+      itemsFound: [
+        { itemId: FOOD_ITEMS.APPLE.id, quantity: 3 },
+        { itemId: FOOD_ITEMS.BERRIES.id, quantity: 1 },
+      ],
+    });
+
+    const result = applyExplorationResults(
+      state,
+      completionResult,
+      ActivityId.Foraging,
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.itemsFound).toEqual([
+      { itemId: FOOD_ITEMS.APPLE.id, quantity: 3 },
+      { itemId: FOOD_ITEMS.BERRIES.id, quantity: 1 },
+    ]);
+
+    // Check inventory was updated
+    const appleItem = result.state.player.inventory.items.find(
+      (item) => item.itemId === FOOD_ITEMS.APPLE.id,
+    );
+    const berriesItem = result.state.player.inventory.items.find(
+      (item) => item.itemId === FOOD_ITEMS.BERRIES.id,
+    );
+    expect(appleItem?.quantity).toBe(3);
+    expect(berriesItem?.quantity).toBe(1);
+  });
+
+  test("applies skill XP gains", () => {
+    const state = createTestState();
+    const pet = getPet(state);
+    const initialForagingXp = state.player.skills[SkillType.Foraging].currentXp;
+    const completionResult = createCompletionResult(pet, {
+      skillXpGains: { [SkillType.Foraging]: 15 },
+    });
+
+    const result = applyExplorationResults(
+      state,
+      completionResult,
+      ActivityId.Foraging,
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.skillXpGains).toEqual({ [SkillType.Foraging]: 15 });
+    expect(result.state.player.skills[SkillType.Foraging].currentXp).toBe(
+      initialForagingXp + 15,
+    );
+  });
+
+  test("returns skill level ups", () => {
+    const state = createTestState();
+    const pet = getPet(state);
+    // Large XP gain to trigger level up
+    const completionResult = createCompletionResult(pet, {
+      skillXpGains: { [SkillType.Foraging]: 1000 },
+    });
+
+    const result = applyExplorationResults(
+      state,
+      completionResult,
+      ActivityId.Foraging,
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.skillLevelUps?.[SkillType.Foraging]).toBe(true);
+    expect(
+      result.state.player.skills[SkillType.Foraging].level,
+    ).toBeGreaterThan(1);
+  });
+
+  test("handles successful completion with no items found", () => {
+    const state = createTestState();
+    const pet = getPet(state);
+    const completionResult = createCompletionResult(pet, {
+      itemsFound: [],
+      skillXpGains: { [SkillType.Foraging]: 15 },
+      message: "Nothing found this time",
+    });
+
+    const result = applyExplorationResults(
+      state,
+      completionResult,
+      ActivityId.Foraging,
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.itemsFound).toEqual([]);
+    expect(result.message).toBe("Nothing found this time");
+  });
 });

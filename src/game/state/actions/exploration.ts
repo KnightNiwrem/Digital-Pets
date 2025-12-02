@@ -1,26 +1,21 @@
 /**
  * Exploration state actions.
+ * Provides high-level state action handlers for the exploration system.
  */
 
 import {
+  applySkillXpGains,
+  type CompleteExplorationResult,
   cancelExploration as cancelExplorationCore,
-  startForaging as startForagingCore,
-} from "@/game/core/exploration/forage";
+  canStartExplorationActivity,
+  startExplorationActivity,
+} from "@/game/core/exploration/exploration";
 import { addItem } from "@/game/core/inventory";
-import { addXpToPlayerSkill } from "@/game/core/skills";
-import type { ExplorationDrop, ExplorationResult } from "@/game/types/activity";
+import { updateQuestProgress } from "@/game/core/quests/quests";
+import type { ExplorationDrop } from "@/game/types/activity";
+import type { Tick } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
-import { SkillType } from "@/game/types/skill";
-
-/**
- * Base XP for completing a foraging session.
- */
-const FORAGING_BASE_XP = 15;
-
-/**
- * Bonus XP per item found.
- */
-const FORAGING_XP_PER_ITEM = 5;
+import { ObjectiveType } from "@/game/types/quest";
 
 /**
  * Result of an exploration action.
@@ -35,35 +30,86 @@ export interface ExplorationActionResult {
 }
 
 /**
- * Start a foraging session at the current location.
+ * Start an exploration activity at the specified location.
  */
-export function startForaging(state: GameState): ExplorationActionResult {
+export function startExploration(
+  state: GameState,
+  locationId: string,
+  activityId: string,
+  currentTick: Tick,
+): ExplorationActionResult {
   if (!state.pet) {
     return {
       success: false,
       state,
-      message: "No pet to explore with.",
+      message: "No pet.",
     };
   }
 
-  const result = startForagingCore(
+  // Get completed quest IDs for requirement checking
+  const completedQuestIds = state.quests
+    .filter((q) => q.state === "completed")
+    .map((q) => q.questId);
+
+  // Attempt to start the exploration
+  const result = startExplorationActivity(
     state.pet,
-    state.player.currentLocationId,
-    state.totalTicks,
+    state.player.skills,
+    completedQuestIds,
+    locationId,
+    activityId,
+    currentTick,
   );
 
+  if (!result.success) {
+    return {
+      success: false,
+      state,
+      message: result.message ?? "Failed to start exploration.",
+    };
+  }
+
   return {
-    success: result.success,
+    success: true,
     state: {
       ...state,
       pet: result.pet,
     },
-    message: result.message,
+    message: `Started exploration at ${locationId}.`,
   };
 }
 
 /**
+ * Check if an exploration activity can be started.
+ */
+export function canStartExploration(
+  state: GameState,
+  locationId: string,
+  activityId: string,
+  currentTick: Tick,
+): { canStart: boolean; reason?: string } {
+  if (!state.pet) {
+    return { canStart: false, reason: "No pet." };
+  }
+
+  // Get completed quest IDs for requirement checking
+  const completedQuestIds = state.quests
+    .filter((q) => q.state === "completed")
+    .map((q) => q.questId);
+
+  return canStartExplorationActivity(
+    state.pet,
+    state.player.skills,
+    completedQuestIds,
+    locationId,
+    activityId,
+    currentTick,
+  );
+}
+
+/**
  * Cancel the current exploration session.
+ * Energy is fully refunded as per the spec.
  */
 export function cancelExploration(state: GameState): ExplorationActionResult {
   if (!state.pet) {
@@ -74,10 +120,18 @@ export function cancelExploration(state: GameState): ExplorationActionResult {
     };
   }
 
+  if (!state.pet.activeExploration) {
+    return {
+      success: false,
+      state,
+      message: "No exploration to cancel.",
+    };
+  }
+
   const result = cancelExplorationCore(state.pet);
 
   return {
-    success: result.success,
+    success: true,
     state: {
       ...state,
       pet: result.pet,
@@ -87,65 +141,106 @@ export function cancelExploration(state: GameState): ExplorationActionResult {
 }
 
 /**
- * Apply exploration results to game state (called when exploration completes).
- * Adds found items to inventory and grants foraging XP.
- * XP is only granted for successful explorations.
+ * Result of applying exploration results to game state.
+ */
+export interface ApplyExplorationResultsResult {
+  success: boolean;
+  state: GameState;
+  message: string;
+  itemsFound?: ExplorationDrop[];
+  skillXpGains?: Record<string, number>;
+  skillLevelUps?: Record<string, boolean>;
+}
+
+/**
+ * Apply exploration completion results to game state.
+ * This updates:
+ * - Pet state (from completion result)
+ * - Skill XP gains
+ * - Inventory (adding found items)
+ * - Quest progress (for Explore and Collect objectives)
  */
 export function applyExplorationResults(
   state: GameState,
-  result: ExplorationResult,
-): { state: GameState; xpGained: number; leveledUp: boolean } {
-  // Do not grant XP for failed explorations
-  if (!result.success) {
+  result: CompleteExplorationResult,
+  activityId: string,
+): ApplyExplorationResultsResult {
+  if (!state.pet) {
     return {
+      success: false,
       state,
-      xpGained: 0,
-      leveledUp: false,
+      message: "No pet.",
     };
   }
 
-  // Calculate XP: base + bonus per item found
-  const itemCount = result.itemsFound.reduce(
-    (sum, drop) => sum + drop.quantity,
-    0,
-  );
-  const xpGained = FORAGING_BASE_XP + itemCount * FORAGING_XP_PER_ITEM;
+  if (!result.success) {
+    return {
+      success: false,
+      state: {
+        ...state,
+        pet: result.pet,
+      },
+      message: result.message,
+    };
+  }
 
-  // Grant foraging XP
-  const { skills, result: xpResult } = addXpToPlayerSkill(
-    state.player.skills,
-    SkillType.Foraging,
-    xpGained,
-  );
-
+  // Start with updated pet state from completion result
   let updatedState: GameState = {
     ...state,
+    pet: result.pet,
+  };
+
+  // Apply skill XP gains
+  const { skills: updatedSkills, levelUps } = applySkillXpGains(
+    updatedState.player.skills,
+    result.skillXpGains,
+  );
+
+  updatedState = {
+    ...updatedState,
     player: {
-      ...state.player,
-      skills,
+      ...updatedState.player,
+      skills: updatedSkills,
     },
   };
 
-  // Add each found item to inventory
-  if (result.itemsFound.length > 0) {
-    let currentInventory = updatedState.player.inventory;
+  // Add found items to inventory
+  let currentInventory = updatedState.player.inventory;
+  for (const drop of result.itemsFound) {
+    currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
+  }
 
-    for (const drop of result.itemsFound) {
-      currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
-    }
+  updatedState = {
+    ...updatedState,
+    player: {
+      ...updatedState.player,
+      inventory: currentInventory,
+    },
+  };
 
-    updatedState = {
-      ...updatedState,
-      player: {
-        ...updatedState.player,
-        inventory: currentInventory,
-      },
-    };
+  // Update quest progress for Explore objectives
+  updatedState = updateQuestProgress(
+    updatedState,
+    ObjectiveType.Explore,
+    activityId,
+  );
+
+  // Update quest progress for Collect objectives for each item found
+  for (const drop of result.itemsFound) {
+    updatedState = updateQuestProgress(
+      updatedState,
+      ObjectiveType.Collect,
+      drop.itemId,
+      drop.quantity,
+    );
   }
 
   return {
+    success: true,
     state: updatedState,
-    xpGained: xpResult.xpGained,
-    leveledUp: xpResult.leveledUp,
+    message: result.message,
+    itemsFound: result.itemsFound,
+    skillXpGains: result.skillXpGains,
+    skillLevelUps: levelUps,
   };
 }

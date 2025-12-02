@@ -7,6 +7,18 @@ import type { GrowthStage } from "./constants";
 import type { BattleStats } from "./stats";
 
 /**
+ * Requirements for exploration activities and drop entries.
+ */
+export interface ExplorationRequirements {
+  /** Map of skill IDs to minimum required levels */
+  minSkillLevels?: Record<string, number>;
+  /** Minimum growth stage required */
+  minPetStage?: GrowthStage;
+  /** Quest IDs that must be completed */
+  questCompleted?: string[];
+}
+
+/**
  * Training session types with increasing intensity.
  */
 export const TrainingSessionType = {
@@ -113,16 +125,6 @@ export interface TrainingResult {
 }
 
 /**
- * Exploration activity types.
- */
-export const ExplorationActivityType = {
-  Forage: "forage",
-} as const;
-
-export type ExplorationActivityType =
-  (typeof ExplorationActivityType)[keyof typeof ExplorationActivityType];
-
-/**
  * A single item drop from exploration.
  */
 export interface ExplorationDrop {
@@ -136,12 +138,10 @@ export interface ExplorationDrop {
  * Active exploration state stored on the pet.
  */
 export interface ActiveExploration {
-  /** Activity type being performed */
-  activityType: ExplorationActivityType;
+  /** Activity ID being performed */
+  activityId: string;
   /** Location ID where exploration is occurring */
   locationId: string;
-  /** Forage table ID being used */
-  forageTableId: string;
   /** Tick when exploration started */
   startTick: Tick;
   /** Total ticks required */

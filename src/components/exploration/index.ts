@@ -2,5 +2,5 @@
  * Exploration components index.
  */
 
-export { ActivitySelect } from "./ActivitySelect";
+export { ActivitySelect, type ActivityStatus } from "./ActivitySelect";
 export { ExplorationProgress } from "./ExplorationProgress";

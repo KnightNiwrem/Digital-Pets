@@ -1,10 +1,11 @@
 /**
  * Exploration progress indicator component.
+ * Displays the current progress of an active exploration session.
  */
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getExplorationProgress } from "@/game/core/exploration/forage";
+import { getActivityById } from "@/game/data/exploration/activities";
 import { getLocation } from "@/game/data/locations";
 import type { ActiveExploration } from "@/game/types/activity";
 import { formatTicksAsTime } from "@/game/types/common";
@@ -15,6 +16,35 @@ interface ExplorationProgressProps {
 }
 
 /**
+ * Get exploration progress as a percentage.
+ */
+function getExplorationProgress(exploration: ActiveExploration): number {
+  if (exploration.durationTicks === 0) {
+    return 100; // Instant completion
+  }
+  const elapsed = exploration.durationTicks - exploration.ticksRemaining;
+  return Math.round((elapsed / exploration.durationTicks) * 100);
+}
+
+/**
+ * Get an emoji icon for an activity based on its ID.
+ */
+function getActivityIcon(activityId: string): string {
+  switch (activityId) {
+    case "foraging":
+      return "🌿";
+    case "mining":
+      return "⛏️";
+    case "fishing":
+      return "🎣";
+    case "deep_exploration":
+      return "🗺️";
+    default:
+      return "🔍";
+  }
+}
+
+/**
  * Active exploration progress display.
  */
 export function ExplorationProgress({
@@ -22,18 +52,20 @@ export function ExplorationProgress({
   onCancel,
 }: ExplorationProgressProps) {
   const location = getLocation(exploration.locationId);
+  const activity = getActivityById(exploration.activityId);
   const progress = getExplorationProgress(exploration);
   const timeRemaining = formatTicksAsTime(exploration.ticksRemaining);
 
-  const activityName =
-    exploration.activityType === "forage" ? "Foraging" : "Exploring";
+  // Get activity name from activity data
+  const activityName = activity?.name ?? "Exploring";
+  const activityIcon = getActivityIcon(exploration.activityId);
 
   return (
     <Card className="border-green-500/50">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🌿</span>
+            <span className="text-2xl">{activityIcon}</span>
             <div>
               <CardTitle className="text-base">{activityName}...</CardTitle>
               <p className="text-sm text-muted-foreground">

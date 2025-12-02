@@ -1,8 +1,13 @@
 /**
- * Exploration screen for foraging and exploring wild areas.
+ * Exploration screen for exploring wild areas and gathering resources.
+ * Uses the activity-based exploration system with requirements, cooldowns, and drop tables.
  */
 
-import { ActivitySelect, ExplorationProgress } from "@/components/exploration";
+import {
+  ActivitySelect,
+  type ActivityStatus,
+  ExplorationProgress,
+} from "@/components/exploration";
 import {
   ActivityBlockedCard,
   getActivityBlockingInfo,
@@ -11,16 +16,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { forceEncounter } from "@/game/core/exploration/encounter";
 import {
-  canStartForaging,
-  getLocationForageInfo,
-} from "@/game/core/exploration/forage";
+  canStartExplorationActivity,
+  getActivityCooldownRemaining,
+  getAvailableActivities,
+} from "@/game/core/exploration/exploration";
 import { getLocation } from "@/game/data/locations";
 import { useGameState } from "@/game/hooks/useGameState";
 import {
   cancelExploration,
-  startForaging,
+  startExploration,
 } from "@/game/state/actions/exploration";
-import { selectCurrentLocationId, selectPet } from "@/game/state/selectors";
+import {
+  selectCurrentLocationId,
+  selectPet,
+  selectSkills,
+  selectTotalTicks,
+} from "@/game/state/selectors";
 import { toDisplay } from "@/game/types/common";
 import { ActivityState } from "@/game/types/constants";
 import { FacilityType, LocationType } from "@/game/types/location";
@@ -54,12 +65,13 @@ export function ExplorationScreen({
   }
 
   const currentLocationId = selectCurrentLocationId(state);
+  const currentTick = selectTotalTicks(state);
+  const skills = selectSkills(state);
   const currentEnergy = toDisplay(pet.energyStats.energy);
   const isExploring = pet.activityState === ActivityState.Exploring;
   const isBlocked = pet.activityState !== ActivityState.Idle;
   const blockingInfo = getActivityBlockingInfo(pet, "explore");
   const currentLocation = getLocation(currentLocationId);
-  const forageInfo = getLocationForageInfo(currentLocationId);
 
   // Check if current location is a wild area
   const isWildArea = currentLocation?.type === LocationType.Wild;
@@ -69,12 +81,45 @@ export function ExplorationScreen({
     FacilityType.BattleArea,
   );
 
-  // Get foraging availability
-  const forageCheck = canStartForaging(pet, currentLocationId);
+  // Get completed quest IDs for requirement checking
+  const completedQuestIds = state.quests
+    .filter((q) => q.state === "completed")
+    .map((q) => q.questId);
 
-  // Handle starting foraging
-  const handleStartForage = () => {
-    const result = startForaging(state);
+  // Get available activities for this location with their status
+  const availableActivities = getAvailableActivities(currentLocationId);
+  const activityStatuses: ActivityStatus[] = availableActivities.map(
+    (activity) => {
+      const canStart = canStartExplorationActivity(
+        pet,
+        skills,
+        completedQuestIds,
+        currentLocationId,
+        activity.id,
+        currentTick,
+      );
+      const cooldownRemaining = getActivityCooldownRemaining(
+        pet,
+        currentLocationId,
+        activity.id,
+        currentTick,
+      );
+      return {
+        activity,
+        canStart,
+        cooldownRemaining,
+      };
+    },
+  );
+
+  // Handle starting exploration
+  const handleStartActivity = (activityId: string) => {
+    const result = startExploration(
+      state,
+      currentLocationId,
+      activityId,
+      currentTick,
+    );
     if (result.success) {
       actions.updateState(() => result.state);
     }
@@ -150,11 +195,9 @@ export function ExplorationScreen({
         <>
           <h2 className="text-lg font-semibold px-1">Activities</h2>
           <ActivitySelect
-            forageInfo={forageInfo}
+            activities={activityStatuses}
             currentEnergy={currentEnergy}
-            canForage={forageCheck.canForage}
-            forageMessage={forageCheck.message}
-            onStartForage={handleStartForage}
+            onStartActivity={handleStartActivity}
           />
 
           {/* Battle Option */}
