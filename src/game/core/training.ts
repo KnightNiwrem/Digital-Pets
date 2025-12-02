@@ -12,7 +12,7 @@ import type {
   TrainingSession,
   TrainingSessionType,
 } from "@/game/types/activity";
-import { type Tick, toMicro } from "@/game/types/common";
+import { PERCENTAGE_MAX, type Tick, toMicro } from "@/game/types/common";
 import {
   ActivityState,
   GROWTH_STAGE_ORDER,
@@ -20,11 +20,6 @@ import {
 } from "@/game/types/constants";
 import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
-
-/**
- * Maximum percentage value for progress calculations.
- */
-const MAX_PERCENTAGE = 100;
 
 /**
  * Check if a training session is available based on pet's growth stage.
@@ -269,5 +264,5 @@ export function cancelTraining(pet: Pet): {
  */
 export function getTrainingProgress(training: ActiveTraining): number {
   const elapsed = training.durationTicks - training.ticksRemaining;
-  return Math.round((elapsed / training.durationTicks) * MAX_PERCENTAGE);
+  return Math.round((elapsed / training.durationTicks) * PERCENTAGE_MAX);
 }

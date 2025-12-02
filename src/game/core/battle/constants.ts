@@ -11,11 +11,3 @@ export const BATTLE_REWARD_CONSTANTS = {
   /** Experience reward scaling per point of enemy power */
   EXPERIENCE_POWER_SCALING: 0.3,
 } as const;
-
-/**
- * Status effect constants.
- */
-export const STATUS_CONSTANTS = {
-  /** Percentage scale for resist chance and modifier calculations */
-  PERCENTAGE_SCALE: 100,
-} as const;

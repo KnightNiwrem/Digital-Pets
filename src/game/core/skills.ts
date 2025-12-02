@@ -2,10 +2,10 @@
  * Skills logic for XP gain and level ups.
  */
 
+import { PERCENTAGE_MAX } from "@/game/types/common";
 import {
   BASE_SKILL_XP,
   MAX_SKILL_LEVEL,
-  MAX_SKILL_PERCENTAGE,
   type PlayerSkills,
   SKILL_EFFECT_BONUS_PER_LEVEL,
   SKILL_TIER_DISPLAY_NAMES,
@@ -145,12 +145,12 @@ export function addXpToPlayerSkill(
  * Calculate progress percentage to next level.
  */
 export function getSkillProgress(skill: Skill): number {
-  if (skill.level >= MAX_SKILL_LEVEL) return MAX_SKILL_PERCENTAGE;
+  if (skill.level >= MAX_SKILL_LEVEL) return PERCENTAGE_MAX;
   const xpNeeded = xpForNextLevel(skill.level);
-  if (xpNeeded <= 0) return MAX_SKILL_PERCENTAGE;
+  if (xpNeeded <= 0) return PERCENTAGE_MAX;
   return Math.min(
-    MAX_SKILL_PERCENTAGE,
-    Math.round((skill.currentXp / xpNeeded) * MAX_SKILL_PERCENTAGE),
+    PERCENTAGE_MAX,
+    Math.round((skill.currentXp / xpNeeded) * PERCENTAGE_MAX),
   );
 }
 

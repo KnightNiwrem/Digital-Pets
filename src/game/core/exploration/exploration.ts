@@ -9,10 +9,7 @@
  * - Skill XP rewards via skillFactors
  */
 
-import {
-  BASE_EXPLORATION_XP,
-  MAX_PERCENTAGE,
-} from "@/game/core/exploration/constants";
+import { BASE_EXPLORATION_XP } from "@/game/core/exploration/constants";
 import { addXpToPlayerSkill } from "@/game/core/skills";
 import { getActivityById } from "@/game/data/exploration/activities";
 import { getDropTableById } from "@/game/data/exploration/dropTables";
@@ -24,7 +21,7 @@ import type {
   ExplorationRequirements,
 } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
-import { toMicro } from "@/game/types/common";
+import { PERCENTAGE_MAX, toMicro } from "@/game/types/common";
 import { ActivityState, GROWTH_STAGE_ORDER } from "@/game/types/constants";
 import type { ExplorationActivity } from "@/game/types/exploration";
 import type { Pet } from "@/game/types/pet";
@@ -542,13 +539,13 @@ export function getExplorationProgress(
       locationId: exploration.locationId,
       totalTicks: exploration.durationTicks,
       ticksRemaining: exploration.ticksRemaining,
-      progressPercent: MAX_PERCENTAGE,
+      progressPercent: PERCENTAGE_MAX,
     };
   }
 
   const elapsed = exploration.durationTicks - exploration.ticksRemaining;
   const progressPercent = Math.round(
-    (elapsed / exploration.durationTicks) * MAX_PERCENTAGE,
+    (elapsed / exploration.durationTicks) * PERCENTAGE_MAX,
   );
 
   return {

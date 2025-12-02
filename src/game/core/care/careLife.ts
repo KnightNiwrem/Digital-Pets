@@ -3,7 +3,7 @@
  */
 
 import type { MicroValue } from "@/game/types/common";
-import { toDisplayCare } from "@/game/types/common";
+import { PERCENTAGE_MAX, toDisplayCare } from "@/game/types/common";
 import type { Pet } from "@/game/types/pet";
 import {
   CARE_LIFE_DRAIN_1_STAT,
@@ -16,7 +16,6 @@ import {
   CARE_LIFE_RECOVERY_THRESHOLD_50,
   CARE_LIFE_RECOVERY_THRESHOLD_75,
   CARE_LIFE_RECOVERY_THRESHOLD_100,
-  MAX_PERCENTAGE,
   POOP_CARE_LIFE_DRAIN_THRESHOLD,
 } from "./constants";
 
@@ -51,15 +50,15 @@ function getCareStatPercentages(
   const satietyPercent =
     maxCareStats.satiety === 0
       ? 0
-      : (pet.careStats.satiety / maxCareStats.satiety) * MAX_PERCENTAGE;
+      : (pet.careStats.satiety / maxCareStats.satiety) * PERCENTAGE_MAX;
   const hydrationPercent =
     maxCareStats.hydration === 0
       ? 0
-      : (pet.careStats.hydration / maxCareStats.hydration) * MAX_PERCENTAGE;
+      : (pet.careStats.hydration / maxCareStats.hydration) * PERCENTAGE_MAX;
   const happinessPercent =
     maxCareStats.happiness === 0
       ? 0
-      : (pet.careStats.happiness / maxCareStats.happiness) * MAX_PERCENTAGE;
+      : (pet.careStats.happiness / maxCareStats.happiness) * PERCENTAGE_MAX;
   return [satietyPercent, hydrationPercent, happinessPercent];
 }
 
