@@ -41,4 +41,4 @@
 
 - [x] Review usage of `100` across the codebase to ensure it refers to "Percentage" and not some other unit (like "Max Stat Value" if stats cap at 100).
   - All usages verified to be percentage-related calculations.
-  - All now use the centralized `PERCENTAGE_MAX` constant from `@/game/types/common`.
+  - All percentage calculations now use named constants (`PERCENTAGE_MAX` where shared, or existing battle-specific constants like `DAMAGE_CONSTANTS.PERCENTAGE_SCALE`).
