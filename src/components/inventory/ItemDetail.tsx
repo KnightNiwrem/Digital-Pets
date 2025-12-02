@@ -7,6 +7,7 @@ import { formatTicksAsTime, toDisplay } from "@/game/types/common";
 import { ItemCategory, Rarity } from "@/game/types/constants";
 import type { InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
+import { isToyItem } from "@/game/types/item";
 
 interface ItemDetailProps {
   inventoryItem: InventoryItem;
@@ -117,8 +118,7 @@ function getItemStats(itemDef: Item): { label: string; value: string }[] {
  */
 export function ItemDetail({ inventoryItem, itemDef }: ItemDetailProps) {
   const durability = inventoryItem.currentDurability;
-  const maxDurability =
-    itemDef.category === ItemCategory.Toy ? itemDef.maxDurability : undefined;
+  const maxDurability = isToyItem(itemDef) ? itemDef.maxDurability : undefined;
   const stats = getItemStats(itemDef);
 
   return (

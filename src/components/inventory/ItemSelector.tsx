@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import { getInventoryItemsByCategory } from "@/game/core/inventory";
 import { getItemById } from "@/game/data/items";
-import { ItemCategory } from "@/game/types/constants";
 import type { Inventory, InventoryItem } from "@/game/types/gameState";
 import type { Item } from "@/game/types/item";
+import { isToyItem } from "@/game/types/item";
 
 interface ItemSelectorProps {
   open: boolean;
@@ -34,9 +34,7 @@ interface ItemButtonProps {
 
 function ItemButton({ inventoryItem, itemDef, onSelect }: ItemButtonProps) {
   const durability = inventoryItem.currentDurability;
-  // TypeScript narrows itemDef to ToyItem when category === ItemCategory.Toy
-  const maxDurability =
-    itemDef.category === ItemCategory.Toy ? itemDef.maxDurability : undefined;
+  const maxDurability = isToyItem(itemDef) ? itemDef.maxDurability : undefined;
 
   return (
     <Button
