@@ -80,11 +80,13 @@ The codebase already has good constant extraction in several areas:
 
 ### Starting Data (`src/game/data/starting.ts`)
 
-- [x] **Lines 123-133**: Starting inventory quantities - Extracted as `STARTING_INVENTORY_COUNTS` constant object
+- [x] **Lines 123-133**: Starting inventory quantities - Extracted as `STARTING_INVENTORY_DEFAULTS` nested object with quantity and durability grouped per item
   ```typescript
-  { itemId: FOOD_ITEMS.KIBBLE.id, quantity: STARTING_INVENTORY_COUNTS.KIBBLE, ... },
-  { itemId: FOOD_ITEMS.APPLE.id, quantity: STARTING_INVENTORY_COUNTS.APPLE, ... },
-  // etc.
+  STARTING_INVENTORY_DEFAULTS = {
+    KIBBLE: { quantity: 5 },
+    BALL: { quantity: 1, durability: 10 },
+    // etc.
+  }
   ```
 
 - [x] **Line 138**: `STARTING_COINS = 100` - Already a named constant ✓
@@ -172,7 +174,7 @@ The codebase already has good constant extraction in several areas:
 5. [x] Extract MAX_OFFLINE_DAYS = 30 constant
 
 ### Low Priority
-1. [x] Extract starting inventory quantity constants - `STARTING_INVENTORY_COUNTS` in starting.ts
+1. [x] Extract starting inventory quantity constants - `STARTING_INVENTORY_DEFAULTS` in starting.ts
 2. [x] Consider extracting formula constants (100 in endurance mitigation)
 3. [x] Move skill effect multiplier (0.05) to constants
 4. [x] Consolidate percentage threshold (100) into shared constant - `PERCENTAGE_MAX` in common.ts
