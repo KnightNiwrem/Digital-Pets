@@ -46,7 +46,7 @@ import type {
   OfflineReport,
   OfflineTrainingResult,
 } from "@/game/types/offline";
-import { ObjectiveType } from "@/game/types/quest";
+import { ObjectiveType, QuestState } from "@/game/types/quest";
 
 /**
  * Apply daily reset if needed.
@@ -205,7 +205,7 @@ export function processGameTick(
 
       // Get completed quest IDs for requirement checking
       const completedQuestIds = updatedState.quests
-        .filter((q) => q.state === "completed")
+        .filter((q) => q.state === QuestState.Completed)
         .map((q) => q.questId);
 
       // Complete exploration with the new system

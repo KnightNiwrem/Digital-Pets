@@ -511,7 +511,7 @@ test("processOfflineCatchup collects exploration result when exploration complet
     activityState: ActivityState.Exploring,
     activeExploration: {
       locationId: "meadow",
-      activityId: "forage",
+      activityId: "foraging",
       ticksRemaining: 3, // Will complete on tick 3
       durationTicks: 10,
       startTick: 0,
@@ -558,7 +558,7 @@ test("processOfflineCatchup collects exploration result for in-progress explorat
     activityState: ActivityState.Exploring,
     activeExploration: {
       locationId: "meadow",
-      activityId: "forage",
+      activityId: "foraging",
       ticksRemaining: 2,
       durationTicks: 100, // Long duration, but only 2 ticks left
       startTick: 0,

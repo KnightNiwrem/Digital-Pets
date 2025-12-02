@@ -347,7 +347,10 @@ describe("calculateExplorationDrops", () => {
     // Check that items are aggregated
     const itemCounts = new Map<string, number>();
     for (const drop of result) {
-      itemCounts.set(drop.itemId, drop.quantity);
+      itemCounts.set(
+        drop.itemId,
+        (itemCounts.get(drop.itemId) ?? 0) + drop.quantity,
+      );
     }
     // With a high roll and skill, we should get multiple herbs (item ID is "material_herb")
     const herbCount = itemCounts.get("material_herb") ?? 0;

@@ -534,6 +534,18 @@ export function getExplorationProgress(
   const activity = getActivityById(exploration.activityId);
   const activityName = activity?.name ?? "Unknown";
 
+  // Guard against division by zero for instant-completion activities
+  if (exploration.durationTicks === 0) {
+    return {
+      activityId: exploration.activityId,
+      activityName,
+      locationId: exploration.locationId,
+      totalTicks: exploration.durationTicks,
+      ticksRemaining: exploration.ticksRemaining,
+      progressPercent: 100,
+    };
+  }
+
   const elapsed = exploration.durationTicks - exploration.ticksRemaining;
   const progressPercent = Math.round(
     (elapsed / exploration.durationTicks) * 100,
