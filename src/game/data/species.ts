@@ -5,13 +5,19 @@
  * Use SPECIES.FLORABIT.id to get the species ID "florabit".
  */
 
+import {
+  DamageType,
+  GrowthStage,
+  SpeciesArchetype,
+  UnlockMethod,
+} from "@/game/types/constants";
 import type { Species, SpeciesGrowthStageStats } from "@/game/types/species";
 
 /**
  * Helper to create a growth stage stats object.
  */
 function createGrowthStage(
-  stage: string,
+  stage: GrowthStage,
   subStage: string,
   name: string,
   minAgeTicks: number,
@@ -50,7 +56,7 @@ function createGrowthStage(
 const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   // Baby stages (0-2 months)
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "1",
     "Baby 1",
     0,
@@ -68,7 +74,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "2",
     "Baby 2",
     57_600,
@@ -86,7 +92,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "3",
     "Baby 3",
     115_200,
@@ -105,7 +111,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Child stages (2-5 months)
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "1",
     "Child 1",
     172_800,
@@ -123,7 +129,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "2",
     "Child 2",
     259_200,
@@ -141,7 +147,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "3",
     "Child 3",
     345_600,
@@ -160,7 +166,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Teen stages (5-8 months)
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "1",
     "Teen 1",
     432_000,
@@ -178,7 +184,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "2",
     "Teen 2",
     518_400,
@@ -196,7 +202,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "3",
     "Teen 3",
     604_800,
@@ -215,7 +221,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Young Adult stages (8-12 months)
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "1",
     "Young Adult 1",
     691_200,
@@ -233,7 +239,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "2",
     "Young Adult 2",
     806_400,
@@ -251,7 +257,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "3",
     "Young Adult 3",
     921_600,
@@ -270,7 +276,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Adult stages (12+ months)
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "1",
     "Adult 1",
     1_036_800,
@@ -288,7 +294,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "2",
     "Adult 2",
     1_123_200,
@@ -306,7 +312,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "3",
     "Adult 3",
     1_209_600,
@@ -332,7 +338,7 @@ const FLORABIT_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
 const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   // Baby stages (2 substages - Fast Grower)
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "1",
     "Baby 1",
     0,
@@ -350,7 +356,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "2",
     "Baby 2",
     86_400,
@@ -369,7 +375,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Child stages
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "1",
     "Child 1",
     172_800,
@@ -387,7 +393,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "2",
     "Child 2",
     259_200,
@@ -405,7 +411,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "3",
     "Child 3",
     345_600,
@@ -424,7 +430,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Teen stages
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "1",
     "Teen 1",
     432_000,
@@ -442,7 +448,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "2",
     "Teen 2",
     518_400,
@@ -460,7 +466,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "3",
     "Teen 3",
     604_800,
@@ -479,7 +485,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Young Adult stages
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "1",
     "Young Adult 1",
     691_200,
@@ -497,7 +503,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "2",
     "Young Adult 2",
     806_400,
@@ -515,7 +521,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "3",
     "Young Adult 3",
     921_600,
@@ -534,7 +540,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Adult stages
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "1",
     "Adult 1",
     1_036_800,
@@ -552,7 +558,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "2",
     "Adult 2",
     1_123_200,
@@ -570,7 +576,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "3",
     "Adult 3",
     1_209_600,
@@ -596,7 +602,7 @@ const SPARKFIN_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
 const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   // Baby stages
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "1",
     "Baby 1",
     0,
@@ -614,7 +620,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "2",
     "Baby 2",
     57_600,
@@ -632,7 +638,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "3",
     "Baby 3",
     115_200,
@@ -651,7 +657,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Child stages
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "1",
     "Child 1",
     172_800,
@@ -669,7 +675,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "2",
     "Child 2",
     259_200,
@@ -687,7 +693,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "3",
     "Child 3",
     345_600,
@@ -706,7 +712,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Teen stages
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "1",
     "Teen 1",
     432_000,
@@ -724,7 +730,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "2",
     "Teen 2",
     518_400,
@@ -742,7 +748,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "3",
     "Teen 3",
     604_800,
@@ -760,7 +766,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "4",
     "Teen 4",
     648_000,
@@ -779,7 +785,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Young Adult stages
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "1",
     "Young Adult 1",
     691_200,
@@ -797,7 +803,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "2",
     "Young Adult 2",
     806_400,
@@ -815,7 +821,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "3",
     "Young Adult 3",
     921_600,
@@ -834,7 +840,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Adult stages
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "1",
     "Adult 1",
     1_036_800,
@@ -852,7 +858,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "2",
     "Adult 2",
     1_123_200,
@@ -870,7 +876,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "3",
     "Adult 3",
     1_209_600,
@@ -896,7 +902,7 @@ const ROCKPUP_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
 const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   // Baby stages
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "1",
     "Baby 1",
     0,
@@ -914,7 +920,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "2",
     "Baby 2",
     57_600,
@@ -932,7 +938,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "3",
     "Baby 3",
     115_200,
@@ -951,7 +957,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Child stages
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "1",
     "Child 1",
     172_800,
@@ -969,7 +975,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "2",
     "Child 2",
     259_200,
@@ -987,7 +993,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "3",
     "Child 3",
     345_600,
@@ -1006,7 +1012,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Teen stages
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "1",
     "Teen 1",
     432_000,
@@ -1024,7 +1030,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "2",
     "Teen 2",
     518_400,
@@ -1042,7 +1048,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "3",
     "Teen 3",
     604_800,
@@ -1061,7 +1067,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Young Adult stages
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "1",
     "Young Adult 1",
     691_200,
@@ -1079,7 +1085,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "2",
     "Young Adult 2",
     806_400,
@@ -1097,7 +1103,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "3",
     "Young Adult 3",
     921_600,
@@ -1116,7 +1122,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Adult stages
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "1",
     "Adult 1",
     1_036_800,
@@ -1134,7 +1140,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "2",
     "Adult 2",
     1_123_200,
@@ -1152,7 +1158,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "3",
     "Adult 3",
     1_209_600,
@@ -1179,7 +1185,7 @@ const CORALITE_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
 const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   // Baby stages
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "1",
     "Baby 1",
     0,
@@ -1197,7 +1203,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "2",
     "Baby 2",
     57_600,
@@ -1215,7 +1221,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "3",
     "Baby 3",
     115_200,
@@ -1234,7 +1240,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Child stages (4 substages - unique to Emberfox)
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "1",
     "Child 1",
     172_800,
@@ -1252,7 +1258,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "2",
     "Child 2",
     237_600,
@@ -1270,7 +1276,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "3",
     "Child 3",
     302_400,
@@ -1288,7 +1294,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "4",
     "Child 4",
     367_200,
@@ -1307,7 +1313,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Teen stages
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "1",
     "Teen 1",
     432_000,
@@ -1325,7 +1331,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "2",
     "Teen 2",
     518_400,
@@ -1343,7 +1349,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "3",
     "Teen 3",
     604_800,
@@ -1362,7 +1368,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Young Adult stages
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "1",
     "Young Adult 1",
     691_200,
@@ -1380,7 +1386,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "2",
     "Young Adult 2",
     806_400,
@@ -1398,7 +1404,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "3",
     "Young Adult 3",
     921_600,
@@ -1417,7 +1423,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Adult stages
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "1",
     "Adult 1",
     1_036_800,
@@ -1435,7 +1441,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "2",
     "Adult 2",
     1_123_200,
@@ -1453,7 +1459,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "3",
     "Adult 3",
     1_209_600,
@@ -1479,7 +1485,7 @@ const EMBERFOX_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
 const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   // Baby stages
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "1",
     "Baby 1",
     0,
@@ -1497,7 +1503,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "2",
     "Baby 2",
     57_600,
@@ -1515,7 +1521,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1920,
   ),
   createGrowthStage(
-    "baby",
+    GrowthStage.Baby,
     "3",
     "Baby 3",
     115_200,
@@ -1534,7 +1540,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Child stages
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "1",
     "Child 1",
     172_800,
@@ -1552,7 +1558,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "2",
     "Child 2",
     259_200,
@@ -1570,7 +1576,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1680,
   ),
   createGrowthStage(
-    "child",
+    GrowthStage.Child,
     "3",
     "Child 3",
     345_600,
@@ -1589,7 +1595,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Teen stages
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "1",
     "Teen 1",
     432_000,
@@ -1607,7 +1613,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "2",
     "Teen 2",
     518_400,
@@ -1625,7 +1631,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1440,
   ),
   createGrowthStage(
-    "teen",
+    GrowthStage.Teen,
     "3",
     "Teen 3",
     604_800,
@@ -1644,7 +1650,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Young Adult stages
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "1",
     "Young Adult 1",
     691_200,
@@ -1662,7 +1668,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "2",
     "Young Adult 2",
     806_400,
@@ -1680,7 +1686,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "3",
     "Young Adult 3",
     921_600,
@@ -1698,7 +1704,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     1200,
   ),
   createGrowthStage(
-    "youngAdult",
+    GrowthStage.YoungAdult,
     "4",
     "Young Adult 4",
     979_200,
@@ -1717,7 +1723,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
   ),
   // Adult stages
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "1",
     "Adult 1",
     1_036_800,
@@ -1735,7 +1741,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "2",
     "Adult 2",
     1_123_200,
@@ -1753,7 +1759,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "3",
     "Adult 3",
     1_209_600,
@@ -1771,7 +1777,7 @@ const SHADOWMOTH_GROWTH_STAGES: SpeciesGrowthStageStats[] = [
     960,
   ),
   createGrowthStage(
-    "adult",
+    GrowthStage.Adult,
     "4",
     "Adult 4",
     1_296_000,
@@ -1799,17 +1805,17 @@ export const SPECIES = {
     id: "florabit",
     name: "Florabit",
     description: "A gentle plant-like creature with balanced abilities.",
-    archetype: "balanced",
+    archetype: SpeciesArchetype.Balanced,
     emoji: "🌱",
     resistances: {
-      slashing: 5,
-      piercing: 0,
-      crushing: 5,
-      chemical: 10,
-      thermal: 0,
-      electric: 0,
+      [DamageType.Slashing]: 5,
+      [DamageType.Piercing]: 0,
+      [DamageType.Crushing]: 5,
+      [DamageType.Chemical]: 10,
+      [DamageType.Thermal]: 0,
+      [DamageType.Electric]: 0,
     },
-    unlockMethod: "starting",
+    unlockMethod: UnlockMethod.Starting,
     growthStages: FLORABIT_GROWTH_STAGES,
   },
 
@@ -1818,17 +1824,17 @@ export const SPECIES = {
     id: "sparkfin",
     name: "Sparkfin",
     description: "A swift aquatic creature that strikes with precision.",
-    archetype: "glassCannon",
+    archetype: SpeciesArchetype.GlassCannon,
     emoji: "⚡",
     resistances: {
-      slashing: 0,
-      piercing: 5,
-      crushing: 0,
-      chemical: 0,
-      thermal: 5,
-      electric: 15,
+      [DamageType.Slashing]: 0,
+      [DamageType.Piercing]: 5,
+      [DamageType.Crushing]: 0,
+      [DamageType.Chemical]: 0,
+      [DamageType.Thermal]: 5,
+      [DamageType.Electric]: 15,
     },
-    unlockMethod: "starting",
+    unlockMethod: UnlockMethod.Starting,
     growthStages: SPARKFIN_GROWTH_STAGES,
   },
 
@@ -1837,17 +1843,17 @@ export const SPECIES = {
     id: "rockpup",
     name: "Rockpup",
     description: "A sturdy rock-like creature with high endurance.",
-    archetype: "defender",
+    archetype: SpeciesArchetype.Defender,
     emoji: "🪨",
     resistances: {
-      slashing: 10,
-      piercing: 15,
-      crushing: 5,
-      chemical: 0,
-      thermal: 10,
-      electric: 0,
+      [DamageType.Slashing]: 10,
+      [DamageType.Piercing]: 15,
+      [DamageType.Crushing]: 5,
+      [DamageType.Chemical]: 0,
+      [DamageType.Thermal]: 10,
+      [DamageType.Electric]: 0,
     },
-    unlockMethod: "starting",
+    unlockMethod: UnlockMethod.Starting,
     growthStages: ROCKPUP_GROWTH_STAGES,
   },
 
@@ -1857,17 +1863,17 @@ export const SPECIES = {
     name: "Coralite",
     description:
       "A mysterious aquatic creature covered in beautiful coral. Elusive and tricky.",
-    archetype: "status",
+    archetype: SpeciesArchetype.Status,
     emoji: "🐚",
     resistances: {
-      slashing: 0,
-      piercing: 5,
-      crushing: 5,
-      chemical: 10,
-      thermal: 0,
-      electric: 15,
+      [DamageType.Slashing]: 0,
+      [DamageType.Piercing]: 5,
+      [DamageType.Crushing]: 5,
+      [DamageType.Chemical]: 10,
+      [DamageType.Thermal]: 0,
+      [DamageType.Electric]: 15,
     },
-    unlockMethod: "quest",
+    unlockMethod: UnlockMethod.Quest,
     growthStages: CORALITE_GROWTH_STAGES,
   },
 
@@ -1877,17 +1883,17 @@ export const SPECIES = {
     name: "Emberfox",
     description:
       "A fierce fox-like creature wreathed in flames. Its power is unmatched but requires careful handling.",
-    archetype: "powerTank",
+    archetype: SpeciesArchetype.PowerTank,
     emoji: "🔥",
     resistances: {
-      slashing: 0,
-      piercing: 0,
-      crushing: 0,
-      chemical: 5,
-      thermal: 25,
-      electric: 5,
+      [DamageType.Slashing]: 0,
+      [DamageType.Piercing]: 0,
+      [DamageType.Crushing]: 0,
+      [DamageType.Chemical]: 5,
+      [DamageType.Thermal]: 25,
+      [DamageType.Electric]: 5,
     },
-    unlockMethod: "discovery",
+    unlockMethod: UnlockMethod.Discovery,
     growthStages: EMBERFOX_GROWTH_STAGES,
   },
 
@@ -1897,17 +1903,17 @@ export const SPECIES = {
     name: "Shadowmoth",
     description:
       "A dark, ethereal moth-like creature that flits through shadows. Nearly impossible to catch.",
-    archetype: "evasion",
+    archetype: SpeciesArchetype.Evasion,
     emoji: "🦋",
     resistances: {
-      slashing: 5,
-      piercing: 0,
-      crushing: 0,
-      chemical: 15,
-      thermal: 0,
-      electric: 10,
+      [DamageType.Slashing]: 5,
+      [DamageType.Piercing]: 0,
+      [DamageType.Crushing]: 0,
+      [DamageType.Chemical]: 15,
+      [DamageType.Thermal]: 0,
+      [DamageType.Electric]: 10,
     },
-    unlockMethod: "discovery",
+    unlockMethod: UnlockMethod.Discovery,
     growthStages: SHADOWMOTH_GROWTH_STAGES,
   },
 } as const satisfies Record<string, Species>;
@@ -1938,7 +1944,7 @@ export function getSpeciesById(id: string): Species | undefined {
  * Get all starter species.
  */
 export function getStarterSpecies(): Species[] {
-  return SPECIES_LIST.filter((s) => s.unlockMethod === "starting");
+  return SPECIES_LIST.filter((s) => s.unlockMethod === UnlockMethod.Starting);
 }
 
 /**
@@ -1973,7 +1979,7 @@ export function getSpeciesGrowthStage(
  */
 export function getSpeciesGrowthStageByName(
   species: Species,
-  stageName: string,
+  stageName: GrowthStage,
   subStage: string,
 ): SpeciesGrowthStageStats | undefined {
   return species.growthStages.find(

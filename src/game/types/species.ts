@@ -3,23 +3,8 @@
  */
 
 import type { MicroValue } from "./common";
+import type { GrowthStage, SpeciesArchetype, UnlockMethod } from "./constants";
 import type { BattleStats, DamageResistances } from "./stats";
-
-/**
- * Species archetype for categorization.
- */
-export type SpeciesArchetype =
-  | "balanced"
-  | "glassCannon"
-  | "powerTank"
-  | "evasion"
-  | "defender"
-  | "status";
-
-/**
- * Method by which a species can be unlocked.
- */
-export type UnlockMethod = "starting" | "quest" | "discovery" | "achievement";
 
 /**
  * Max stats for care stats at a specific growth stage.
@@ -40,7 +25,7 @@ export interface GrowthStageCareMaxStats {
  */
 export interface SpeciesGrowthStageStats {
   /** Stage identifier (e.g., "baby", "child") */
-  stage: string;
+  stage: GrowthStage;
   /** Substage identifier (e.g., "1", "2", "3") */
   subStage: string;
   /** Display name for this stage */

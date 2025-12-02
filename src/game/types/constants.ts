@@ -181,3 +181,44 @@ export function getCareThreshold(percentage: number): CareThreshold {
   if (percentage <= 75) return CareThreshold.Okay;
   return CareThreshold.Content;
 }
+
+/**
+ * Species archetypes defining general stat distribution and playstyle.
+ */
+export const SpeciesArchetype = {
+  Balanced: "balanced",
+  GlassCannon: "glassCannon",
+  Defender: "defender",
+  Status: "status",
+  PowerTank: "powerTank",
+  Evasion: "evasion",
+} as const;
+
+export type SpeciesArchetype =
+  (typeof SpeciesArchetype)[keyof typeof SpeciesArchetype];
+
+/**
+ * Methods by which new species can be unlocked.
+ */
+export const UnlockMethod = {
+  Starting: "starting",
+  Quest: "quest",
+  Discovery: "discovery",
+  Achievement: "achievement",
+} as const;
+
+export type UnlockMethod = (typeof UnlockMethod)[keyof typeof UnlockMethod];
+
+/**
+ * Core pet stats used in battle and training.
+ */
+export const PetStat = {
+  Strength: "strength",
+  Endurance: "endurance",
+  Agility: "agility",
+  Precision: "precision",
+  Fortitude: "fortitude",
+  Cunning: "cunning",
+} as const;
+
+export type PetStat = (typeof PetStat)[keyof typeof PetStat];

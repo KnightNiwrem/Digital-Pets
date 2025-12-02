@@ -2,7 +2,7 @@
  * Move definitions for the battle system.
  */
 
-import { DamageType } from "@/game/types/constants";
+import { DamageType, PetStat } from "@/game/types/constants";
 import { type Move, MoveTarget, StatusEffectType } from "@/game/types/move";
 
 /**
@@ -148,7 +148,7 @@ export const harden: Move = {
     {
       type: StatusEffectType.StatBuff,
       name: "Hardened",
-      stat: "endurance",
+      stat: PetStat.Endurance,
       value: 30, // 30% increase
       duration: 3,
       applyChance: 1.0,
@@ -175,7 +175,7 @@ export const intimidate: Move = {
     {
       type: StatusEffectType.StatDebuff,
       name: "Intimidated",
-      stat: "strength",
+      stat: PetStat.Strength,
       value: 25, // 25% decrease
       duration: 2,
       applyChance: 0.8,
