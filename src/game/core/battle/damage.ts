@@ -23,6 +23,8 @@ export const DAMAGE_CONSTANTS = {
   MIN_HIT_CHANCE: 5,
   /** Maximum hit chance (%) - attacks cannot exceed this chance to hit */
   MAX_HIT_CHANCE: 100,
+  /** Percentage scale for random roll calculations (100 = 100%) */
+  PERCENTAGE_SCALE: 100,
   /** Minimum damage variance multiplier */
   MIN_VARIANCE: 0.85,
   /** Maximum damage variance multiplier */
@@ -85,14 +87,14 @@ export function calculateHitChance(
  * Roll for whether an attack hits.
  */
 export function rollHit(hitChance: number): boolean {
-  return Math.random() * DAMAGE_CONSTANTS.MAX_HIT_CHANCE <= hitChance;
+  return Math.random() * DAMAGE_CONSTANTS.PERCENTAGE_SCALE <= hitChance;
 }
 
 /**
  * Roll for whether an attack is a critical hit.
  */
 export function rollCritical(criticalChance: number): boolean {
-  return Math.random() * DAMAGE_CONSTANTS.MAX_HIT_CHANCE <= criticalChance;
+  return Math.random() * DAMAGE_CONSTANTS.PERCENTAGE_SCALE <= criticalChance;
 }
 
 /**
@@ -106,7 +108,7 @@ export function calculateResistanceMultiplier(
     DAMAGE_CONSTANTS.MAX_RESISTANCE,
     resistances[damageType],
   );
-  return 1 - resistance / DAMAGE_CONSTANTS.ENDURANCE_MITIGATION_BASE;
+  return 1 - resistance / DAMAGE_CONSTANTS.PERCENTAGE_SCALE;
 }
 
 /**

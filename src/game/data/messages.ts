@@ -172,11 +172,11 @@ export const ShopMessages = {
  */
 export const TravelMessages = {
   /** When pet is required but not present */
-  petRequired: "Pet required",
+  petRequired: "A pet is required to travel.",
   /** When destination is unknown */
   unknownDestination: "Unknown destination.",
   /** When locations are not connected */
-  notConnected: "Not connected",
+  notConnected: "You cannot travel to this location from here.",
   /** When requirements are not met */
   requirementsNotMet: "Requirements not met.",
   /** When travel cost cannot be calculated */
@@ -195,7 +195,7 @@ export const TravelMessages = {
    * Generate a message for stage requirement.
    * @param stageName - The required stage display name
    */
-  requiresStage: (stageName: string): string => `Requires ${stageName} stage`,
+  requiresStage: (stageName: string): string => `Requires ${stageName} stage.`,
 } as const;
 
 /**
@@ -215,9 +215,9 @@ export const QuestMessages = {
   /** When not all objectives are complete */
   objectivesIncomplete: "Not all objectives are complete.",
   /** When player needs to go to start location */
-  goToStartLocation: "Go to start location",
+  goToStartLocation: "Go to start location.",
   /** When player needs to go to turn-in location */
-  goToTurnInLocation: "Go to turn-in location",
+  goToTurnInLocation: "Go to turn-in location.",
   /** When quest is not a timed quest */
   notTimedQuest: "Quest is not a timed quest.",
   /** When timed quest has no duration configured */
@@ -230,13 +230,13 @@ export const QuestMessages = {
    * Generate a message for starting a quest.
    * @param questName - Name of the quest
    */
-  startedQuest: (questName: string): string => `Started quest: ${questName}`,
+  startedQuest: (questName: string): string => `Started quest: ${questName}.`,
   /**
    * Generate a message for completing a quest.
    * @param questName - Name of the quest
    */
   completedQuest: (questName: string): string =>
-    `Completed quest: ${questName}`,
+    `Completed quest: ${questName}.`,
 } as const;
 
 /**
@@ -244,19 +244,19 @@ export const QuestMessages = {
  */
 export const ExplorationMessages = {
   /** When there's no active exploration to complete */
-  noActiveExploration: "No active exploration to complete",
+  noActiveExploration: "No active exploration to complete.",
   /** When there's no active exploration to cancel */
-  noExplorationToCancel: "No active exploration to cancel",
+  noExplorationToCancel: "No active exploration to cancel.",
   /** When exploration is cancelled and energy refunded */
   explorationCancelled: "Exploration cancelled. Energy has been refunded.",
   /** When activity is unknown */
-  unknownActivity: "Unknown activity",
+  unknownActivity: "Unknown activity.",
   /**
    * Generate a message for pet being busy.
    * @param activityState - Current activity state
    */
   petBusy: (activityState: string): string =>
-    `Pet is currently ${activityState}`,
+    `Pet is currently ${activityState}.`,
   /**
    * Generate a message for unknown activity with ID.
    * @param activityId - The unknown activity ID
