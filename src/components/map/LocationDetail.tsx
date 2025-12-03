@@ -6,7 +6,12 @@ import { NPCDisplay } from "@/components/npc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getNpcsAtLocation } from "@/game/data/npcs";
-import { LocationUI } from "@/game/data/uiText";
+import {
+  FacilityDisplay,
+  FacilityDisplayFallback,
+  LocationTypeNames,
+  LocationUI,
+} from "@/game/data/uiText";
 import type { Location } from "@/game/types/location";
 import { FacilityType, LocationType } from "@/game/types/location";
 
@@ -21,47 +26,13 @@ interface LocationDetailProps {
 }
 
 /**
- * Display data for facility types.
+ * Styling colors for location types (kept local as they are styling, not text).
  */
-const FACILITY_DISPLAY: Record<FacilityType, { name: string; emoji: string }> =
-  {
-    [FacilityType.RestArea]: { name: "Rest Area", emoji: "🛏️" },
-    [FacilityType.FoodStation]: { name: "Food Station", emoji: "🍽️" },
-    [FacilityType.WaterStation]: { name: "Water Station", emoji: "💧" },
-    [FacilityType.PlayArea]: { name: "Play Area", emoji: "🎮" },
-    [FacilityType.Storage]: { name: "Storage", emoji: "📦" },
-    [FacilityType.Shop]: { name: "Shop", emoji: "🛒" },
-    [FacilityType.Trainer]: { name: "Trainer", emoji: "💪" },
-    [FacilityType.Inn]: { name: "Inn", emoji: "🏨" },
-    [FacilityType.QuestBoard]: { name: "Quest Board", emoji: "📋" },
-    [FacilityType.RestPoint]: { name: "Rest Point", emoji: "⛺" },
-    [FacilityType.ForageZone]: { name: "Forage Zone", emoji: "🌿" },
-    [FacilityType.BattleArea]: { name: "Battle Area", emoji: "⚔️" },
-  };
-
-/**
- * Display data for location types.
- */
-const LOCATION_TYPE_DISPLAY: Record<
-  LocationType,
-  { name: string; color: string }
-> = {
-  [LocationType.Home]: {
-    name: "Home",
-    color: "text-blue-600 dark:text-blue-400",
-  },
-  [LocationType.Town]: {
-    name: "Town",
-    color: "text-amber-600 dark:text-amber-400",
-  },
-  [LocationType.Wild]: {
-    name: "Wild Area",
-    color: "text-green-600 dark:text-green-400",
-  },
-  [LocationType.Dungeon]: {
-    name: "Dungeon",
-    color: "text-purple-600 dark:text-purple-400",
-  },
+const LOCATION_TYPE_COLORS: Record<LocationType, string> = {
+  [LocationType.Home]: "text-blue-600 dark:text-blue-400",
+  [LocationType.Town]: "text-amber-600 dark:text-amber-400",
+  [LocationType.Wild]: "text-green-600 dark:text-green-400",
+  [LocationType.Dungeon]: "text-purple-600 dark:text-purple-400",
 };
 
 /**
@@ -71,7 +42,7 @@ function getFacilityDisplay(facility: FacilityType): {
   name: string;
   emoji: string;
 } {
-  return FACILITY_DISPLAY[facility] ?? { name: facility, emoji: "❓" };
+  return FacilityDisplay[facility] ?? FacilityDisplayFallback;
 }
 
 /**
@@ -81,12 +52,10 @@ function getLocationTypeDisplay(type: LocationType): {
   name: string;
   color: string;
 } {
-  return (
-    LOCATION_TYPE_DISPLAY[type] ?? {
-      name: type,
-      color: "text-muted-foreground",
-    }
-  );
+  return {
+    name: LocationTypeNames[type] ?? type,
+    color: LOCATION_TYPE_COLORS[type] ?? "text-muted-foreground",
+  };
 }
 
 /**

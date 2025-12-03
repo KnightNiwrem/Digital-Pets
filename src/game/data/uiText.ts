@@ -14,6 +14,8 @@
  * - Single source of truth for UI text
  */
 
+import { FacilityType, LocationType } from "@/game/types/location";
+
 /**
  * Care action UI text and display data.
  */
@@ -58,6 +60,42 @@ export const LocationUI = {
   peopleHere: "People Here",
   travelHere: "Travel Here",
 } as const;
+
+/**
+ * Display data for facility types.
+ */
+export const FacilityDisplay: Record<
+  FacilityType,
+  { name: string; emoji: string }
+> = {
+  [FacilityType.RestArea]: { name: "Rest Area", emoji: "🛏️" },
+  [FacilityType.FoodStation]: { name: "Food Station", emoji: "🍽️" },
+  [FacilityType.WaterStation]: { name: "Water Station", emoji: "💧" },
+  [FacilityType.PlayArea]: { name: "Play Area", emoji: "🎮" },
+  [FacilityType.Storage]: { name: "Storage", emoji: "📦" },
+  [FacilityType.Shop]: { name: "Shop", emoji: "🛒" },
+  [FacilityType.Trainer]: { name: "Trainer", emoji: "💪" },
+  [FacilityType.Inn]: { name: "Inn", emoji: "🏨" },
+  [FacilityType.QuestBoard]: { name: "Quest Board", emoji: "📋" },
+  [FacilityType.RestPoint]: { name: "Rest Point", emoji: "⛺" },
+  [FacilityType.ForageZone]: { name: "Forage Zone", emoji: "🌿" },
+  [FacilityType.BattleArea]: { name: "Battle Area", emoji: "⚔️" },
+};
+
+/**
+ * Fallback display for unknown facility types.
+ */
+export const FacilityDisplayFallback = { name: "Unknown", emoji: "❓" };
+
+/**
+ * Display data for location types (names only, colors are styling).
+ */
+export const LocationTypeNames: Record<LocationType, string> = {
+  [LocationType.Home]: "Home",
+  [LocationType.Town]: "Town",
+  [LocationType.Wild]: "Wild Area",
+  [LocationType.Dungeon]: "Dungeon",
+};
 
 /**
  * Fallback display names for game entities.
