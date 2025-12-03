@@ -17,6 +17,13 @@ import {
 } from "@/game/types/skill";
 
 /**
+ * Divisor for the triangular number formula used in XP calculations.
+ * The formula n × (n + 1) / 2 produces the sequence 1, 3, 6, 10, 15, ...
+ * (the triangular numbers).
+ */
+const TRIANGULAR_DIVISOR = 2;
+
+/**
  * Total XP required to reach level n from level 1.
  * Formula: baseXP × n × (n + 1) / 2
  * This is a triangular number formula. Total cumulative XP grows quadratically,
@@ -24,7 +31,7 @@ import {
  */
 export function xpToLevel(level: number): number {
   if (level <= 1) return 0;
-  return Math.floor((BASE_SKILL_XP * level * (level + 1)) / 2);
+  return Math.floor((BASE_SKILL_XP * level * (level + 1)) / TRIANGULAR_DIVISOR);
 }
 
 /**
