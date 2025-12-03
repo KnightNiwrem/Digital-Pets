@@ -13,7 +13,7 @@ import {
   LocationUI,
 } from "@/game/data/uiText";
 import type { Location } from "@/game/types/location";
-import { FacilityType, LocationType } from "@/game/types/location";
+import { type FacilityType, LocationType } from "@/game/types/location";
 
 interface LocationDetailProps {
   location: Location;
