@@ -39,6 +39,7 @@ export const DialogueConditionType = {
   QuestState: "questState",
   HasItem: "hasItem",
   SkillLevel: "skillLevel",
+  QuestObjectivesComplete: "questObjectivesComplete",
 } as const;
 
 export type DialogueConditionType =
@@ -53,7 +54,7 @@ export interface DialogueCondition {
   /** Target ID (quest ID, item ID, skill ID) */
   targetId: string;
   /** Value to compare against (quest state, item quantity, skill level) */
-  value?: string | number;
+  value?: string | number | boolean;
   /** Comparison operator (default: 'eq') */
   comparison?: "eq" | "neq" | "gt" | "gte" | "lt" | "lte";
 }
@@ -63,6 +64,7 @@ export interface DialogueCondition {
  */
 export const DialogueActionType = {
   StartQuest: "startQuest",
+  CompleteQuest: "completeQuest",
 } as const;
 
 export type DialogueActionType =

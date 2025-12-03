@@ -130,9 +130,17 @@ export function QuestDetail({
             </Button>
           )}
           {canComplete && onComplete && (
-            <Button onClick={onComplete} className="w-full">
-              Complete Quest
-            </Button>
+            <>
+              {quest.type === "tutorial" ? (
+                <Button disabled className="w-full" variant="outline">
+                  Return to Oak to complete
+                </Button>
+              ) : (
+                <Button onClick={onComplete} className="w-full">
+                  Complete Quest
+                </Button>
+              )}
+            </>
           )}
           {isCompleted && (
             <div className="text-center text-green-600 font-semibold">

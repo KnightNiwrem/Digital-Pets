@@ -12,7 +12,7 @@ import {
   selectChoice,
   startDialogue,
 } from "@/game/core/dialogue";
-import { startQuest } from "@/game/core/quests/quests";
+import { completeQuest, startQuest } from "@/game/core/quests/quests";
 import { getNpc } from "@/game/data/npcs";
 import { useGameState } from "@/game/hooks/useGameState";
 import { DialogueActionType, DialogueNodeType } from "@/game/types/npc";
@@ -73,6 +73,15 @@ export function DialogueScreen({
             if (questResult.success) {
               actions.updateState(() => questResult.state);
               // TODO: Show toast/notification for started quest
+            }
+          } else if (result.action.type === DialogueActionType.CompleteQuest) {
+            const questResult = completeQuest(
+              gameState,
+              result.action.targetId,
+            );
+            if (questResult.success) {
+              actions.updateState(() => questResult.state);
+              // TODO: Show toast/notification for completed quest
             }
           }
         }

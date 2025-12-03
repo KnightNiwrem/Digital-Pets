@@ -2,9 +2,11 @@
  * Dialogue navigation logic.
  */
 
+import { areAllRequiredObjectivesComplete } from "@/game/core/quests/objectives";
 import { getQuestState } from "@/game/core/quests/quests";
 import { getDialogue } from "@/game/data/dialogues";
 import { getNpc } from "@/game/data/npcs";
+import { getQuest } from "@/game/data/quests";
 import type { GameState } from "@/game/types/gameState";
 import {
   type DialogueAction,
@@ -70,6 +72,23 @@ export function checkCondition(
       if (comparison === "lte") return level <= targetLevel;
       if (comparison === "lt") return level < targetLevel;
       return level >= targetLevel;
+    }
+    case DialogueConditionType.QuestObjectivesComplete: {
+      const questId = condition.targetId;
+      const quest = getQuest(questId);
+      if (!quest) return false;
+
+      const progress = state.quests.find((q) => q.questId === questId);
+      if (!progress) return false;
+
+      const areComplete = areAllRequiredObjectivesComplete(
+        quest.objectives,
+        progress,
+      );
+      const targetValue =
+        condition.value === undefined ? true : !!condition.value;
+
+      return areComplete === targetValue;
     }
     // Add other condition types here as needed
     default:
