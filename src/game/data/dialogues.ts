@@ -142,6 +142,46 @@ export const oakDialogue: DialogueTree = {
             targetId: "tutorial_first_steps",
           },
         },
+        {
+          text: "I'm ready for my next challenge!",
+          nextNodeId: "next_quest",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_first_steps",
+              value: QuestState.Completed,
+            },
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_exploration",
+              value: QuestState.Available,
+            },
+          ],
+          action: {
+            type: DialogueActionType.StartQuest,
+            targetId: "tutorial_exploration",
+          },
+        },
+        {
+          text: "How can I make my pet stronger?",
+          nextNodeId: "training_quest",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_exploration",
+              value: QuestState.Completed,
+            },
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_training",
+              value: QuestState.Available,
+            },
+          ],
+          action: {
+            type: DialogueActionType.StartQuest,
+            targetId: "tutorial_training",
+          },
+        },
         { text: "Any tips for training?", nextNodeId: "training_tips" },
         {
           text: "What should new trainers know?",
@@ -153,6 +193,16 @@ export const oakDialogue: DialogueTree = {
     start_adventure: messageNode(
       "start_adventure",
       "That's the spirit! I've prepared a few tasks to help you get started. Open your Quest Log to see what needs to be done.",
+      "greeting",
+    ),
+    next_quest: messageNode(
+      "next_quest",
+      "Excellent work! You're learning fast. Now, go out and explore the world. There's much to discover!",
+      "greeting",
+    ),
+    training_quest: messageNode(
+      "training_quest",
+      "Training is essential for any pet. Visit the training grounds and help your pet reach its full potential!",
       "greeting",
     ),
     training_tips: messageNode(
