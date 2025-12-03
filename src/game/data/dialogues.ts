@@ -3,10 +3,15 @@
  */
 
 import {
+  type DialogueAction,
+  DialogueActionType,
+  type DialogueCondition,
+  DialogueConditionType,
   type DialogueNode,
   DialogueNodeType,
   type DialogueTree,
 } from "@/game/types/npc";
+import { QuestState } from "@/game/types/quest";
 
 /**
  * Helper to create a message node.
@@ -30,7 +35,12 @@ function messageNode(
 function choiceNode(
   id: string,
   text: string,
-  choices: { text: string; nextNodeId: string }[],
+  choices: {
+    text: string;
+    nextNodeId: string;
+    conditions?: DialogueCondition[];
+    action?: DialogueAction;
+  }[],
 ): DialogueNode {
   return {
     id,
@@ -117,6 +127,127 @@ export const oakDialogue: DialogueTree = {
       "greeting",
       "Ah, a fellow pet trainer! I've dedicated my life to understanding these wonderful creatures. How can I assist you?",
       [
+        // Complete First Steps
+        {
+          text: "I've completed the basic care tasks.",
+          nextNodeId: "complete_first_steps",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_first_steps",
+              value: QuestState.Active,
+            },
+            {
+              type: DialogueConditionType.QuestObjectivesComplete,
+              targetId: "tutorial_first_steps",
+              value: true,
+            },
+          ],
+          action: {
+            type: DialogueActionType.CompleteQuest,
+            targetId: "tutorial_first_steps",
+          },
+        },
+        // Start First Steps
+        {
+          text: "I'm ready to start my journey!",
+          nextNodeId: "start_adventure",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_first_steps",
+              value: QuestState.Available,
+            },
+          ],
+          action: {
+            type: DialogueActionType.StartQuest,
+            targetId: "tutorial_first_steps",
+          },
+        },
+        // Complete Exploration
+        {
+          text: "I've explored the area and found some things.",
+          nextNodeId: "complete_exploration",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_exploration",
+              value: QuestState.Active,
+            },
+            {
+              type: DialogueConditionType.QuestObjectivesComplete,
+              targetId: "tutorial_exploration",
+              value: true,
+            },
+          ],
+          action: {
+            type: DialogueActionType.CompleteQuest,
+            targetId: "tutorial_exploration",
+          },
+        },
+        // Start Exploration
+        {
+          text: "I'm ready for my next challenge!",
+          nextNodeId: "next_quest",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_first_steps",
+              value: QuestState.Completed,
+            },
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_exploration",
+              value: QuestState.Available,
+            },
+          ],
+          action: {
+            type: DialogueActionType.StartQuest,
+            targetId: "tutorial_exploration",
+          },
+        },
+        // Complete Training
+        {
+          text: "I've finished my pet's training session.",
+          nextNodeId: "complete_training",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_training",
+              value: QuestState.Active,
+            },
+            {
+              type: DialogueConditionType.QuestObjectivesComplete,
+              targetId: "tutorial_training",
+              value: true,
+            },
+          ],
+          action: {
+            type: DialogueActionType.CompleteQuest,
+            targetId: "tutorial_training",
+          },
+        },
+        // Start Training
+        {
+          text: "How can I make my pet stronger?",
+          nextNodeId: "training_quest",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_exploration",
+              value: QuestState.Completed,
+            },
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_training",
+              value: QuestState.Available,
+            },
+          ],
+          action: {
+            type: DialogueActionType.StartQuest,
+            targetId: "tutorial_training",
+          },
+        },
         { text: "Any tips for training?", nextNodeId: "training_tips" },
         {
           text: "What should new trainers know?",
@@ -124,6 +255,36 @@ export const oakDialogue: DialogueTree = {
         },
         { text: "I should get going.", nextNodeId: "farewell" },
       ],
+    ),
+    start_adventure: messageNode(
+      "start_adventure",
+      "That's the spirit! I've prepared a few tasks to help you get started. Open your Quest Log to see what needs to be done.",
+      "greeting",
+    ),
+    complete_first_steps: messageNode(
+      "complete_first_steps",
+      "Wonderful! You're taking good care of your pet. Here's a small reward for your efforts.",
+      "greeting",
+    ),
+    next_quest: messageNode(
+      "next_quest",
+      "Excellent work! You're learning fast. Now, go out and explore the world. There's much to discover!",
+      "greeting",
+    ),
+    complete_exploration: messageNode(
+      "complete_exploration",
+      "You found some interesting items! Exploration is key to survival. Keep up the good work.",
+      "greeting",
+    ),
+    training_quest: messageNode(
+      "training_quest",
+      "Training is essential for any pet. Visit the training grounds and help your pet reach its full potential!",
+      "greeting",
+    ),
+    complete_training: messageNode(
+      "complete_training",
+      "Impressive! Your pet is growing stronger every day. I think you're ready for even greater challenges now.",
+      "greeting",
     ),
     training_tips: messageNode(
       "training_tips",

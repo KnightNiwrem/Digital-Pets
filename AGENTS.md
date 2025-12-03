@@ -159,6 +159,6 @@ Follow this workflow when implementing new features:
 6. **Evaluate each review comment** and determine if it's valid
 7. **Address valid issues** with code changes
 8. **Commit and push** to the current branch
-9. **Request re-review** from Copilot using the `gh pr edit` with the `--add-reviewer` flag
+9. **Request re-review** from Copilot using the `github` MCP server.
 10. **Wait ~10 minutes** again for PR feedback comments by using `sleep`
 11. **Repeat from step 5** until the PR is approved

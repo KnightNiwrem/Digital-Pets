@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { areAllRequiredObjectivesComplete } from "@/game/core/quests";
 import { getItemById } from "@/game/data/items";
 import type { Quest, QuestProgress, QuestReward } from "@/game/types/quest";
+import { QuestType } from "@/game/types/quest";
 import { formatTimeRemaining } from "./formatTimeRemaining";
 import { ObjectiveList } from "./ObjectiveList";
 import { hasExpiration } from "./questUtils";
@@ -129,11 +130,17 @@ export function QuestDetail({
               Accept Quest
             </Button>
           )}
-          {canComplete && onComplete && (
-            <Button onClick={onComplete} className="w-full">
-              Complete Quest
-            </Button>
-          )}
+          {canComplete &&
+            onComplete &&
+            (quest.type === QuestType.Tutorial ? (
+              <Button disabled className="w-full" variant="outline">
+                Return to Oak to complete
+              </Button>
+            ) : (
+              <Button onClick={onComplete} className="w-full">
+                Complete Quest
+              </Button>
+            ))}
           {isCompleted && (
             <div className="text-center text-green-600 font-semibold">
               ✅ Quest Completed

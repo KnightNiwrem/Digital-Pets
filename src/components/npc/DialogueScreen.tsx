@@ -2,23 +2,29 @@
  * Dialogue screen component for NPC conversations.
  */
 
-import { useCallback, useState } from "react";
-import { DialogueBox, DialogueChoices } from "@/components/npc";
+import { useCallback, useMemo, useState } from "react";
+import { DialogueBox } from "@/components/npc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   advanceDialogue,
+  checkCondition,
   selectChoice,
   startDialogue,
 } from "@/game/core/dialogue";
+import { completeQuest, startQuest } from "@/game/core/quests/quests";
 import { getNpc } from "@/game/data/npcs";
-import { DialogueNodeType } from "@/game/types/npc";
+import { useGameState } from "@/game/hooks/useGameState";
+import { DialogueActionType, DialogueNodeType } from "@/game/types/npc";
 
 interface DialogueScreenProps {
   npcId: string;
   onClose: () => void;
   onOpenShop?: (npcId: string) => void;
 }
+
+/** Duration in ms to show error messages */
+const ERROR_DISPLAY_DURATION = 3000;
 
 /**
  * Full-screen dialogue interface for NPC conversations.
@@ -29,6 +35,8 @@ export function DialogueScreen({
   onOpenShop,
 }: DialogueScreenProps) {
   const npc = getNpc(npcId);
+  const { state: gameState, actions } = useGameState();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Initialize dialogue state with a single startDialogue call
   const [dialogue, setDialogue] = useState(() => {
@@ -58,13 +66,48 @@ export function DialogueScreen({
     (index: number) => {
       if (!dialogueState) return;
 
-      const result = selectChoice(dialogueState, index);
+      const result = selectChoice(dialogueState, index, gameState || undefined);
       if (result.success && result.state && result.node) {
+        // Handle quest actions BEFORE advancing dialogue
+        if (result.action && gameState) {
+          const questActionMap: Record<
+            string,
+            typeof startQuest | typeof completeQuest
+          > = {
+            [DialogueActionType.StartQuest]: startQuest,
+            [DialogueActionType.CompleteQuest]: completeQuest,
+          };
+
+          const actionFn = questActionMap[result.action.type];
+          if (actionFn) {
+            const questResult = actionFn(gameState, result.action.targetId);
+            if (!questResult.success) {
+              // Show error message to user
+              setErrorMessage(questResult.message);
+              setTimeout(() => setErrorMessage(null), ERROR_DISPLAY_DURATION);
+              return;
+            }
+            actions.updateState(() => questResult.state);
+          }
+        }
+
+        // Only advance dialogue after successful quest action (or no action)
         setDialogue({ state: result.state, node: result.node });
       }
     },
-    [dialogueState],
+    [dialogueState, gameState, actions],
   );
+
+  // Filter choices based on conditions
+  const availableChoices = useMemo(() => {
+    if (!currentNode?.choices) return [];
+    return currentNode.choices
+      .map((choice, index) => ({ choice, index }))
+      .filter(({ choice }) => {
+        if (!choice.conditions || !gameState) return true;
+        return choice.conditions.every((c) => checkCondition(gameState, c));
+      });
+  }, [currentNode, gameState]);
 
   // Handle shop button
   const handleOpenShop = useCallback(() => {
@@ -121,6 +164,15 @@ export function DialogueScreen({
         </CardHeader>
       </Card>
 
+      {/* Error message */}
+      {errorMessage && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardContent className="py-2 text-sm text-destructive">
+            {errorMessage}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Dialogue content */}
       {currentNode.type === DialogueNodeType.Message && (
         <DialogueBox
@@ -134,12 +186,19 @@ export function DialogueScreen({
       {currentNode.type === DialogueNodeType.Choice && (
         <>
           <DialogueBox npc={npc} text={currentNode.text} />
-          {currentNode.choices && (
-            <DialogueChoices
-              choices={currentNode.choices}
-              onSelect={handleSelectChoice}
-            />
-          )}
+          <div className="flex flex-col gap-2">
+            {availableChoices.map(({ choice, index }, i) => (
+              <Button
+                key={`choice-${index}-${choice.nextNodeId}`}
+                variant="outline"
+                className="justify-start text-left h-auto py-3 px-4"
+                onClick={() => handleSelectChoice(index)}
+              >
+                <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                {choice.text}
+              </Button>
+            ))}
+          </div>
         </>
       )}
 

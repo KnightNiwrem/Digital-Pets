@@ -34,7 +34,7 @@ export const willowbrookTown: Location = {
   requirements: {
     questId: "tutorial_training",
   },
-  npcIds: ["shopkeeper_mira", "trainer_oak"],
+  npcIds: ["shopkeeper_mira"],
   emoji: "🏘️",
 };
 

@@ -2,9 +2,17 @@
  * Dialogue navigation logic.
  */
 
+import { getItemQuantity } from "@/game/core/inventory";
+import { areAllRequiredObjectivesComplete } from "@/game/core/quests/objectives";
+import { getQuestState } from "@/game/core/quests/quests";
 import { getDialogue } from "@/game/data/dialogues";
 import { getNpc } from "@/game/data/npcs";
+import { getQuest } from "@/game/data/quests";
+import type { GameState } from "@/game/types/gameState";
 import {
+  type DialogueAction,
+  type DialogueCondition,
+  DialogueConditionType,
   type DialogueNode,
   DialogueNodeType,
   type DialogueState,
@@ -29,6 +37,98 @@ export interface AdvanceDialogueResult {
   state?: DialogueState;
   node?: DialogueNode;
   ended: boolean;
+}
+
+/**
+ * Compare two numbers using the specified comparison operator.
+ */
+function compareNumbers(
+  actual: number,
+  target: number,
+  comparison: DialogueCondition["comparison"],
+): boolean {
+  switch (comparison) {
+    case "eq":
+      return actual === target;
+    case "neq":
+      return actual !== target;
+    case "gt":
+      return actual > target;
+    case "lte":
+      return actual <= target;
+    case "lt":
+      return actual < target;
+    default:
+      return actual >= target;
+  }
+}
+
+/**
+ * Check if a condition is met.
+ */
+export function checkCondition(
+  state: GameState,
+  condition: DialogueCondition,
+): boolean {
+  switch (condition.type) {
+    case DialogueConditionType.QuestState: {
+      const questState = getQuestState(state, condition.targetId) || "locked";
+      const targetValue = condition.value;
+      if (typeof targetValue !== "string") {
+        return false;
+      }
+      const comparison = condition.comparison || "eq";
+
+      if (comparison === "neq") return questState !== targetValue;
+      if (comparison === "eq") return questState === targetValue;
+      return false;
+    }
+    case DialogueConditionType.SkillLevel: {
+      const skill =
+        state.player.skills[
+          condition.targetId as keyof typeof state.player.skills
+        ];
+      if (!skill) return false;
+      const level = skill.level;
+      const targetLevel = Number(condition.value);
+      if (Number.isNaN(targetLevel)) {
+        return false;
+      }
+      return compareNumbers(level, targetLevel, condition.comparison || "gte");
+    }
+    case DialogueConditionType.HasItem: {
+      const itemId = condition.targetId;
+      const quantity = Number(condition.value ?? 1);
+      if (Number.isNaN(quantity)) {
+        return false;
+      }
+      const currentQuantity = getItemQuantity(state.player.inventory, itemId);
+      return compareNumbers(
+        currentQuantity,
+        quantity,
+        condition.comparison || "gte",
+      );
+    }
+    case DialogueConditionType.QuestObjectivesComplete: {
+      const questId = condition.targetId;
+      const quest = getQuest(questId);
+      if (!quest) return false;
+
+      const progress = state.quests.find((q) => q.questId === questId);
+      if (!progress) return false;
+
+      const areComplete = areAllRequiredObjectivesComplete(
+        quest.objectives,
+        progress,
+      );
+      const targetValue =
+        condition.value === undefined ? true : !!condition.value;
+
+      return areComplete === targetValue;
+    }
+    default:
+      return false;
+  }
 }
 
 /**
@@ -171,7 +271,8 @@ export function advanceDialogue(state: DialogueState): AdvanceDialogueResult {
 export function selectChoice(
   state: DialogueState,
   choiceIndex: number,
-): AdvanceDialogueResult {
+  gameState?: GameState,
+): AdvanceDialogueResult & { action?: DialogueAction } {
   const currentNode = getCurrentNode(state);
   if (!currentNode) {
     return {
@@ -217,6 +318,22 @@ export function selectChoice(
     };
   }
 
+  // Check conditions if gameState is provided
+  if (gameState && choice.conditions) {
+    const conditionsMet = choice.conditions.every((condition) =>
+      checkCondition(gameState, condition),
+    );
+    if (!conditionsMet) {
+      return {
+        success: false,
+        message: "Conditions not met for this choice.",
+        state,
+        node: currentNode,
+        ended: false,
+      };
+    }
+  }
+
   const dialogue = getDialogue(state.dialogueId);
   const nextNode = dialogue?.nodes[choice.nextNodeId];
   if (!nextNode) {
@@ -243,6 +360,7 @@ export function selectChoice(
     state: newState,
     node: nextNode,
     ended,
+    action: choice.action,
   };
 }
 

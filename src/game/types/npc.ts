@@ -33,6 +33,54 @@ export type DialogueNodeType =
   (typeof DialogueNodeType)[keyof typeof DialogueNodeType];
 
 /**
+ * Dialogue condition types.
+ */
+export const DialogueConditionType = {
+  QuestState: "questState",
+  HasItem: "hasItem",
+  SkillLevel: "skillLevel",
+  QuestObjectivesComplete: "questObjectivesComplete",
+} as const;
+
+export type DialogueConditionType =
+  (typeof DialogueConditionType)[keyof typeof DialogueConditionType];
+
+/**
+ * A condition that must be met for a dialogue choice to be available.
+ */
+export interface DialogueCondition {
+  /** Type of condition */
+  type: DialogueConditionType;
+  /** Target ID (quest ID, item ID, skill ID) */
+  targetId: string;
+  /** Value to compare against (quest state, item quantity, skill level) */
+  value?: string | number | boolean;
+  /** Comparison operator (default: 'eq') */
+  comparison?: "eq" | "neq" | "gt" | "gte" | "lt" | "lte";
+}
+
+/**
+ * Dialogue action types.
+ */
+export const DialogueActionType = {
+  StartQuest: "startQuest",
+  CompleteQuest: "completeQuest",
+} as const;
+
+export type DialogueActionType =
+  (typeof DialogueActionType)[keyof typeof DialogueActionType];
+
+/**
+ * An action to perform when a dialogue choice is selected.
+ */
+export interface DialogueAction {
+  /** Type of action */
+  type: DialogueActionType;
+  /** Target ID (quest ID) */
+  targetId: string;
+}
+
+/**
  * A dialogue choice option.
  */
 export interface DialogueChoice {
@@ -40,6 +88,10 @@ export interface DialogueChoice {
   text: string;
   /** Node ID to navigate to when selected */
   nextNodeId: string;
+  /** Conditions required to see this choice */
+  conditions?: DialogueCondition[];
+  /** Action to perform when selected */
+  action?: DialogueAction;
 }
 
 /**
