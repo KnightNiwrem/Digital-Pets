@@ -22,9 +22,10 @@ describe("calculateWildLevel", () => {
 
   test("returns level within location range", () => {
     // Meadow has levelMin: 1, levelMax: 5
+    // With player level 1, scaling factor is 0, so result is 1-5
     const result = calculateWildLevel("meadow", 1);
     expect(result).toBeGreaterThanOrEqual(1);
-    expect(result).toBeLessThanOrEqual(10); // Base + scaling + random
+    expect(result).toBeLessThanOrEqual(5);
   });
 
   test("scales with player pet level", () => {
