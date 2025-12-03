@@ -26,6 +26,18 @@ export interface PetMaxStats {
 }
 
 /**
+ * Zero-value battle stats for initialization.
+ */
+const ZERO_BATTLE_STATS: BattleStats = {
+  strength: 0,
+  endurance: 0,
+  agility: 0,
+  precision: 0,
+  fortitude: 0,
+  cunning: 0,
+};
+
+/**
  * Create default (zero) bonus max stats.
  */
 export function createDefaultBonusMaxStats(): BonusMaxStats {
@@ -35,14 +47,7 @@ export function createDefaultBonusMaxStats(): BonusMaxStats {
     happiness: 0,
     energy: 0,
     careLife: 0,
-    battle: {
-      strength: 0,
-      endurance: 0,
-      agility: 0,
-      precision: 0,
-      fortitude: 0,
-      cunning: 0,
-    },
+    battle: { ...ZERO_BATTLE_STATS },
   };
 }
 

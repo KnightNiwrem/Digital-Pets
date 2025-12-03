@@ -27,6 +27,7 @@ import {
 import { completeTraining } from "@/game/core/training";
 import { getFacility } from "@/game/data/facilities";
 import { getLocation } from "@/game/data/locations";
+import { FallbackNames } from "@/game/data/uiText";
 import type { TrainingResult } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import { now, TICK_DURATION_MS } from "@/game/types/common";
@@ -201,7 +202,7 @@ export function processGameTick(
       const locationId = updatedPet.activeExploration.locationId;
       const activityId = updatedPet.activeExploration.activityId;
       const location = getLocation(locationId);
-      const locationName = location?.name ?? "Unknown Location";
+      const locationName = location?.name ?? FallbackNames.unknownLocation;
 
       // Get completed quest IDs for requirement checking
       const completedQuestIds = updatedState.quests
@@ -310,7 +311,7 @@ export function processGameTick(
     // Emit training complete event
     if (trainingResultBeforeCompletion && facilityId) {
       const facility = getFacility(facilityId);
-      const facilityName = facility?.name ?? "Unknown Facility";
+      const facilityName = facility?.name ?? FallbackNames.unknownFacility;
 
       // Emit training complete event using statsGained from the result
       tickEvents.push(

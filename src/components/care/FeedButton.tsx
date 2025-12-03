@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ItemSelector } from "@/components/inventory/ItemSelector";
 import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
+import { CareUI } from "@/game/data/uiText";
 import { useGameState } from "@/game/hooks/useGameState";
 import { feedPet } from "@/game/state/actions/care";
 import { selectInventory } from "@/game/state/selectors";
@@ -42,16 +43,16 @@ export function FeedButton({ onSuccess }: FeedButtonProps) {
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 flex-1"
       >
-        <span>🍖</span>
-        <span>Feed</span>
+        <span>{CareUI.feed.icon}</span>
+        <span>{CareUI.feed.label}</span>
       </Button>
       <ItemSelector
         open={open}
         onOpenChange={setOpen}
         inventory={selectInventory(state)}
-        category="food"
-        title="Select Food"
-        description="Choose a food item to feed your pet."
+        category={CareUI.feed.category}
+        title={CareUI.feed.selectorTitle}
+        description={CareUI.feed.selectorDescription}
         onSelect={handleSelect}
       />
       <ErrorDialog

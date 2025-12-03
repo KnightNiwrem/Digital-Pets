@@ -6,6 +6,7 @@ import { NPCDisplay } from "@/components/npc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getNpcsAtLocation } from "@/game/data/npcs";
+import { LocationUI } from "@/game/data/uiText";
 import type { Location } from "@/game/types/location";
 import { FacilityType, LocationType } from "@/game/types/location";
 
@@ -125,7 +126,9 @@ export function LocationDetail({
           location.levelMin !== undefined &&
           location.levelMax !== undefined && (
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Level Range:</span>
+              <span className="text-muted-foreground">
+                {LocationUI.levelRange}
+              </span>
               <span className="font-medium">
                 {location.levelMin} - {location.levelMax}
               </span>
@@ -135,7 +138,9 @@ export function LocationDetail({
         {/* Facilities */}
         {location.facilities.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium mb-2">Facilities</h4>
+            <h4 className="text-sm font-medium mb-2">
+              {LocationUI.facilities}
+            </h4>
             <div className="flex flex-wrap gap-2">
               {location.facilities.map((facility) => {
                 const display = getFacilityDisplay(facility);
@@ -156,7 +161,9 @@ export function LocationDetail({
         {/* NPCs (only shown for current location) */}
         {isCurrentLocation && npcs.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium mb-2">People Here</h4>
+            <h4 className="text-sm font-medium mb-2">
+              {LocationUI.peopleHere}
+            </h4>
             <div className="flex flex-col gap-2">
               {npcs.map((npc) => (
                 <NPCDisplay
@@ -175,7 +182,7 @@ export function LocationDetail({
             <Button className="w-full" onClick={onTravel} disabled={!canTravel}>
               {canTravel ? (
                 <>
-                  Travel Here
+                  {LocationUI.travelHere}
                   {energyCost !== undefined && (
                     <span className="ml-2 text-xs opacity-80">
                       (⚡ {energyCost})
@@ -183,7 +190,7 @@ export function LocationDetail({
                   )}
                 </>
               ) : (
-                (travelMessage ?? "Cannot Travel")
+                (travelMessage ?? LocationUI.cannotTravel)
               )}
             </Button>
           </div>
@@ -191,7 +198,7 @@ export function LocationDetail({
 
         {isCurrentLocation && (
           <div className="pt-2 text-center text-sm text-muted-foreground">
-            📍 You are here
+            {LocationUI.youAreHere}
           </div>
         )}
       </CardContent>

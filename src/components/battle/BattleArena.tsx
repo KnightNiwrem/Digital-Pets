@@ -3,6 +3,7 @@
  */
 
 import type { Combatant } from "@/game/core/battle/turn";
+import { BattleUI } from "@/game/data/uiText";
 import { cn } from "@/lib/utils";
 import { PetBattleCard } from "./PetBattleCard";
 
@@ -46,7 +47,7 @@ export function BattleArena({
       {/* VS indicator - decorative, hidden from screen readers */}
       <div className="flex justify-center shrink-0" aria-hidden="true">
         <span className="text-lg sm:text-2xl font-bold text-muted-foreground">
-          ⚔️
+          {BattleUI.vsIndicator}
         </span>
       </div>
 
