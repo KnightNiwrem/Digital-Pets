@@ -25,7 +25,21 @@ import { PERCENTAGE_MAX, toMicro } from "@/game/types/common";
 import { ActivityState, GROWTH_STAGE_ORDER } from "@/game/types/constants";
 import type { ExplorationActivity } from "@/game/types/exploration";
 import type { Pet } from "@/game/types/pet";
-import type { PlayerSkills } from "@/game/types/skill";
+import { type PlayerSkills, SkillType } from "@/game/types/skill";
+
+/**
+ * Valid skill type values for type checking.
+ */
+const VALID_SKILL_TYPES = new Set<string>(Object.values(SkillType));
+
+/**
+ * Type guard to check if a skillId is a valid skill type.
+ */
+export function isValidSkillType(
+  skillId: string,
+): skillId is keyof PlayerSkills {
+  return VALID_SKILL_TYPES.has(skillId);
+}
 
 /**
  * Result of checking if exploration can start.
@@ -101,7 +115,13 @@ export function meetsRequirements(
     for (const [skillId, minLevel] of Object.entries(
       requirements.minSkillLevels,
     )) {
-      const skill = skills[skillId as keyof PlayerSkills];
+      if (!isValidSkillType(skillId)) {
+        return {
+          meets: false,
+          reason: `Unknown skill: ${skillId}`,
+        };
+      }
+      const skill = skills[skillId];
       if (!skill || skill.level < minLevel) {
         return {
           meets: false,
@@ -587,12 +607,8 @@ export function applySkillXpGains(
   const levelUps: Record<string, boolean> = {};
 
   for (const [skillId, xpGain] of Object.entries(skillXpGains)) {
-    if (skillId in skills) {
-      const result = addXpToPlayerSkill(
-        updatedSkills,
-        skillId as keyof PlayerSkills,
-        xpGain,
-      );
+    if (isValidSkillType(skillId)) {
+      const result = addXpToPlayerSkill(updatedSkills, skillId, xpGain);
       updatedSkills = result.skills;
       levelUps[skillId] = result.result.leveledUp;
     }

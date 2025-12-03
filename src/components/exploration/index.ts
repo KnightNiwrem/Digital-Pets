@@ -4,3 +4,4 @@
 
 export { ActivitySelect, type ActivityStatus } from "./ActivitySelect";
 export { ExplorationProgress } from "./ExplorationProgress";
+export { getActivityIcon } from "./utils";

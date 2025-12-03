@@ -3,7 +3,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { LocationDetail, LocationNode } from "@/components/map";
+import { LocationDetail, LocationHeader, LocationNode } from "@/components/map";
 import { DialogueScreen } from "@/components/npc";
 import { ShopScreen } from "@/components/screens/ShopScreen";
 import {
@@ -145,27 +145,11 @@ export function MapScreen() {
     <>
       <div className="space-y-4">
         {/* Current Location Header */}
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{currentLocation.emoji}</span>
-                <div>
-                  <CardTitle className="text-lg">
-                    {currentLocation.name}
-                  </CardTitle>
-                  <span className="text-sm text-muted-foreground">
-                    Current Location
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
-                <span className="text-lg">⚡</span>
-                <span className="font-medium">{currentEnergy}</span>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+        <LocationHeader
+          location={currentLocation}
+          currentEnergy={currentEnergy}
+          subtitle="Current Location"
+        />
 
         {/* Connected Locations */}
         <Card>
