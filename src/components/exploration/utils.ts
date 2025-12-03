@@ -2,18 +2,20 @@
  * Shared utilities for exploration components.
  */
 
+import { ActivityId } from "@/game/data/exploration/activities";
+
 /**
  * Get an emoji icon for an activity based on its ID.
  */
 export function getActivityIcon(activityId: string): string {
   switch (activityId) {
-    case "foraging":
+    case ActivityId.Foraging:
       return "🌿";
-    case "mining":
+    case ActivityId.Mining:
       return "⛏️";
-    case "fishing":
+    case ActivityId.Fishing:
       return "🎣";
-    case "deep_exploration":
+    case ActivityId.DeepExploration:
       return "🗺️";
     default:
       return "🔍";

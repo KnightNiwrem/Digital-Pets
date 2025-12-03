@@ -2,13 +2,15 @@
  * Tests for the encounter system.
  */
 
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import {
   calculateWildLevel,
   forceEncounter,
   getApproximatePetLevel,
   rollForEncounter,
 } from "@/game/core/exploration/encounter";
+import * as encounterTables from "@/game/data/tables/encounters";
+import { EncounterType } from "@/game/data/tables/encounters";
 import { createTestPet } from "@/game/testing/createTestPet";
 import { GrowthStage } from "@/game/types/constants";
 
@@ -59,7 +61,7 @@ describe("getApproximatePetLevel", () => {
     });
 
     const level = getApproximatePetLevel(pet);
-    expect(level).toBe(5); // (10 * 6) / 6 / 2 = 5
+    expect(level).toBe(5); // (10+10+10+10+10+10) / 6 / 2 = 5
   });
 
   test("returns minimum level of 1", () => {
@@ -141,36 +143,54 @@ describe("rollForEncounter", () => {
       growth: { stage: GrowthStage.Adult },
     });
 
-    // With 100% encounter chance, should trigger encounter (if RNG allows)
-    // Run multiple times to account for internal randomness
-    let hasEncounter = false;
-    for (let i = 0; i < 100; i++) {
-      const result = rollForEncounter("meadow", pet, "foraging", 1.0);
-      if (result.hasEncounter) {
-        hasEncounter = true;
-        expect(result.speciesId).toBeDefined();
-        expect(result.level).toBeDefined();
-        break;
-      }
-    }
+    // Mock Math.random to ensure encounter triggers and selection is predictable
+    const randomSpy = spyOn(Math, "random").mockReturnValue(0);
 
-    // At 100% chance, we should have gotten at least one encounter in 100 tries
-    expect(hasEncounter).toBe(true);
+    // With 100% encounter chance and mocked random, should always trigger
+    const result = rollForEncounter("meadow", pet, "foraging", 1.0);
+
+    expect(result.hasEncounter).toBe(true);
+    expect(result.speciesId).toBeDefined();
+    expect(result.level).toBeDefined();
+
+    // Restore original Math.random
+    randomSpy.mockRestore();
   });
 
   test("filters encounters by activity", () => {
+    const getEncounterTableSpy = spyOn(
+      encounterTables,
+      "getEncounterTable",
+    ).mockImplementation(() => ({
+      id: "test-meadow-table",
+      baseEncounterChance: 1.0,
+      entries: [
+        {
+          encounterType: EncounterType.WildBattle,
+          probability: 1,
+          speciesIds: ["florabit"],
+          levelOffset: [0, 0] as [number, number],
+          activityIds: ["foraging"], // Only for foraging
+        },
+      ],
+    }));
+
+    // Mock Math.random to ensure predictable behavior
+    const randomSpy = spyOn(Math, "random").mockReturnValue(0);
+
     const pet = createTestPet({
       growth: { stage: GrowthStage.Adult },
     });
 
-    // Test with different activities - encounters are filtered by activityIds
+    // Foraging should find an encounter
     const foragingResult = rollForEncounter("meadow", pet, "foraging", 1.0);
-    const miningResult = rollForEncounter("meadow", pet, "mining", 1.0);
+    expect(foragingResult.hasEncounter).toBe(true);
 
-    // Both activities should potentially trigger encounters at meadow
-    // (depending on encounter table configuration)
-    // The key is that they don't crash and return valid results
-    expect(foragingResult.hasEncounter !== undefined).toBe(true);
-    expect(miningResult.hasEncounter !== undefined).toBe(true);
+    // Mining should not find an encounter (filtered out by activityIds)
+    const miningResult = rollForEncounter("meadow", pet, "mining", 1.0);
+    expect(miningResult.hasEncounter).toBe(false);
+
+    getEncounterTableSpy.mockRestore();
+    randomSpy.mockRestore();
   });
 });
