@@ -40,6 +40,30 @@ export interface AdvanceDialogueResult {
 }
 
 /**
+ * Compare two numbers using the specified comparison operator.
+ */
+function compareNumbers(
+  actual: number,
+  target: number,
+  comparison: DialogueCondition["comparison"],
+): boolean {
+  switch (comparison) {
+    case "eq":
+      return actual === target;
+    case "neq":
+      return actual !== target;
+    case "gt":
+      return actual > target;
+    case "lte":
+      return actual <= target;
+    case "lt":
+      return actual < target;
+    default:
+      return actual >= target;
+  }
+}
+
+/**
  * Check if a condition is met.
  */
 export function checkCondition(
@@ -70,22 +94,7 @@ export function checkCondition(
       if (Number.isNaN(targetLevel)) {
         return false;
       }
-      const comparison = condition.comparison || "gte";
-
-      switch (comparison) {
-        case "eq":
-          return level === targetLevel;
-        case "neq":
-          return level !== targetLevel;
-        case "gt":
-          return level > targetLevel;
-        case "lte":
-          return level <= targetLevel;
-        case "lt":
-          return level < targetLevel;
-        default:
-          return level >= targetLevel;
-      }
+      return compareNumbers(level, targetLevel, condition.comparison || "gte");
     }
     case DialogueConditionType.HasItem: {
       const itemId = condition.targetId;
@@ -94,22 +103,11 @@ export function checkCondition(
         return false;
       }
       const currentQuantity = getItemQuantity(state.player.inventory, itemId);
-      const comparison = condition.comparison || "gte";
-
-      switch (comparison) {
-        case "eq":
-          return currentQuantity === quantity;
-        case "neq":
-          return currentQuantity !== quantity;
-        case "gt":
-          return currentQuantity > quantity;
-        case "lte":
-          return currentQuantity <= quantity;
-        case "lt":
-          return currentQuantity < quantity;
-        default:
-          return currentQuantity >= quantity;
-      }
+      return compareNumbers(
+        currentQuantity,
+        quantity,
+        condition.comparison || "gte",
+      );
     }
     case DialogueConditionType.QuestObjectivesComplete: {
       const questId = condition.targetId;

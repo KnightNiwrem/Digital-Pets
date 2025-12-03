@@ -23,6 +23,9 @@ interface DialogueScreenProps {
   onOpenShop?: (npcId: string) => void;
 }
 
+/** Duration in ms to show error messages */
+const ERROR_DISPLAY_DURATION = 3000;
+
 /**
  * Full-screen dialogue interface for NPC conversations.
  */
@@ -33,6 +36,7 @@ export function DialogueScreen({
 }: DialogueScreenProps) {
   const npc = getNpc(npcId);
   const { state: gameState, actions } = useGameState();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Initialize dialogue state with a single startDialogue call
   const [dialogue, setDialogue] = useState(() => {
@@ -78,7 +82,9 @@ export function DialogueScreen({
           if (actionFn) {
             const questResult = actionFn(gameState, result.action.targetId);
             if (!questResult.success) {
-              // Don't advance dialogue if quest action failed
+              // Show error message to user
+              setErrorMessage(questResult.message);
+              setTimeout(() => setErrorMessage(null), ERROR_DISPLAY_DURATION);
               return;
             }
             actions.updateState(() => questResult.state);
@@ -157,6 +163,15 @@ export function DialogueScreen({
           </div>
         </CardHeader>
       </Card>
+
+      {/* Error message */}
+      {errorMessage && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardContent className="py-2 text-sm text-destructive">
+            {errorMessage}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dialogue content */}
       {currentNode.type === DialogueNodeType.Message && (
