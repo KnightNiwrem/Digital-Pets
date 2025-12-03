@@ -3,6 +3,7 @@
  */
 
 export { ActionFeedback } from "./ActionFeedback";
+export { CareActionButton } from "./CareActionButton";
 export { CleanButton } from "./CleanButton";
 export { FeedButton } from "./FeedButton";
 export { PlayButton } from "./PlayButton";

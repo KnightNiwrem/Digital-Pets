@@ -2,7 +2,7 @@
  * Care stat decay logic per tick.
  */
 
-import { calculatePetMaxStats } from "@/game/core/petStats";
+import { calculatePetMaxStats, type PetMaxStats } from "@/game/core/petStats";
 import type { Pet } from "@/game/types/pet";
 import {
   CARE_DECAY_AWAKE,
@@ -25,15 +25,22 @@ export function getPoopHappinessMultiplier(poopCount: number): number {
 /**
  * Apply care stat decay for a single tick.
  * Returns the updated care stats (new object, does not mutate).
+ *
+ * @param pet - The pet to apply decay to
+ * @param precomputedMaxStats - Optional pre-computed max stats to avoid recalculation.
+ *   If not provided, max stats will be calculated from the pet.
  */
-export function applyCareDecay(pet: Pet): Pet["careStats"] {
+export function applyCareDecay(
+  pet: Pet,
+  precomputedMaxStats?: PetMaxStats | null,
+): Pet["careStats"] {
   const decayRate = pet.sleep.isSleeping
     ? CARE_DECAY_SLEEPING
     : CARE_DECAY_AWAKE;
   const poopMultiplier = getPoopHappinessMultiplier(pet.poop.count);
 
-  // Use centralized max stat calculation
-  const maxStats = calculatePetMaxStats(pet);
+  // Use pre-computed max stats if provided, otherwise calculate
+  const maxStats = precomputedMaxStats ?? calculatePetMaxStats(pet);
   const maxSatiety = maxStats?.care.satiety ?? 0;
   const maxHydration = maxStats?.care.hydration ?? 0;
   const maxHappiness = maxStats?.care.happiness ?? 0;

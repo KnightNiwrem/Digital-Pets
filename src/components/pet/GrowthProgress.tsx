@@ -4,6 +4,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { GrowthProgressDisplay } from "@/game/state/selectors";
+import { cn } from "@/lib/utils";
 
 interface GrowthProgressProps {
   progress: GrowthProgressDisplay;
@@ -22,7 +23,7 @@ function ProgressBar({
   const clampedPercent = Math.min(100, Math.max(0, percent));
   return (
     <div
-      className={`h-2 bg-secondary rounded-full overflow-hidden ${className}`}
+      className={cn("h-2 bg-secondary rounded-full overflow-hidden", className)}
       role="progressbar"
       aria-valuenow={clampedPercent}
       aria-valuemin={0}

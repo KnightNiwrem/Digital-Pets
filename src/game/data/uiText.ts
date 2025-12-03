@@ -27,12 +27,26 @@ export const CareUI = {
     selectorTitle: "Select Food",
     selectorDescription: "Choose a food item to feed your pet.",
   },
+  water: {
+    label: "Water",
+    icon: "💧",
+    category: "drink" as const,
+    selectorTitle: "Select Drink",
+    selectorDescription: "Choose a drink to give your pet.",
+  },
   play: {
     label: "Play",
     icon: "🎾",
     category: "toy" as const,
     selectorTitle: "Select Toy",
     selectorDescription: "Choose a toy to play with your pet.",
+  },
+  clean: {
+    label: "Clean",
+    icon: "🧹",
+    category: "cleaning" as const,
+    selectorTitle: "Select Cleaning Item",
+    selectorDescription: "Choose a cleaning item to clean up poop.",
   },
   sleep: {
     wakeUpLabel: "Wake Up",
