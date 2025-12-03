@@ -22,8 +22,10 @@ import {
 import {
   ActivityBlockedCard,
   getActivityBlockingInfo,
-} from "@/components/ui/ActivityBlockedCard";
+} from "@/components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useGameState } from "@/game/hooks/useGameState";
 import {
   selectCareStats,
@@ -97,21 +99,13 @@ export function CareScreen() {
   }, [triggerAction]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   const pet = state ? selectPet(state) : null;
 
   if (!state || !pet) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No pet found.</p>
-      </div>
-    );
+    return <EmptyState message="No pet found." />;
   }
 
   const petInfo = selectPetInfo(state);
@@ -135,11 +129,7 @@ export function CareScreen() {
     !poop ||
     !growthProgress
   ) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Error loading pet data.</p>
-      </div>
-    );
+    return <EmptyState message="Error loading pet data." />;
   }
 
   return (

@@ -3,6 +3,7 @@
  */
 
 import { useState } from "react";
+import { StatsGainedDisplay } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { StatsGainedDisplay } from "@/components/ui/StatsGainedDisplay";
 import { getItemById } from "@/game/data/items";
 import { toDisplay, toDisplayCare } from "@/game/types/common";
 import type {

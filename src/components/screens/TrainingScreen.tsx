@@ -3,15 +3,17 @@
  */
 
 import {
+  ActivityBlockedCard,
+  getActivityBlockingInfo,
+} from "@/components/shared";
+import {
   FacilityCard,
   StatsDisplay,
   TrainingProgress,
 } from "@/components/training";
-import {
-  ActivityBlockedCard,
-  getActivityBlockingInfo,
-} from "@/components/ui/ActivityBlockedCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { getAllFacilities } from "@/game/data/facilities";
 import { useGameState } from "@/game/hooks/useGameState";
 import { cancelTraining, startTraining } from "@/game/state/actions/training";
@@ -30,21 +32,13 @@ export function TrainingScreen() {
   const facilities = getAllFacilities();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   const pet = state ? selectPet(state) : null;
 
   if (!state || !pet) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No pet to train.</p>
-      </div>
-    );
+    return <EmptyState message="No pet to train." />;
   }
 
   const currentEnergy = toDisplay(pet.energyStats.energy);

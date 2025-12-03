@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 import { ItemDetail } from "@/components/inventory/ItemDetail";
 import { ItemGrid } from "@/components/inventory/ItemGrid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { getItemById } from "@/game/data/items";
 import { useGameState } from "@/game/hooks/useGameState";
 import { selectCurrency, selectInventory } from "@/game/state/selectors";
@@ -60,19 +62,11 @@ export function InventoryScreen() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!state) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No game state found.</p>
-      </div>
-    );
+    return <EmptyState message="No game state found." />;
   }
 
   // Get selected item details

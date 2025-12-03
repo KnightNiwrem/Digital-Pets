@@ -13,9 +13,11 @@ import { LocationHeader } from "@/components/map";
 import {
   ActivityBlockedCard,
   getActivityBlockingInfo,
-} from "@/components/ui/ActivityBlockedCard";
+} from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { forceEncounter } from "@/game/core/exploration/encounter";
 import {
   canStartExplorationActivity,
@@ -104,19 +106,11 @@ export function ExplorationScreen({
 
   // Early returns after all hooks
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!state || !pet) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No pet to explore with.</p>
-      </div>
-    );
+    return <EmptyState message="No pet to explore with." />;
   }
 
   const currentEnergy = toDisplay(pet.energyStats.energy);

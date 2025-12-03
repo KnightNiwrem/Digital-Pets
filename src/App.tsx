@@ -25,6 +25,7 @@ import {
   TrainingScreen,
 } from "@/components/screens";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/ui/loading-state";
 import { GameProvider } from "@/game/context/GameContext";
 import {
   type BattleRewards,
@@ -74,11 +75,7 @@ function GameContent({
 
   // Show loading state
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <LoadingState className="h-screen" />;
   }
 
   // Show error state

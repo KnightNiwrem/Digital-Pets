@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { StatsGainedDisplay } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { StatsGainedDisplay } from "@/components/ui/StatsGainedDisplay";
 import type { BattleStats } from "@/game/types/stats";
 import { cn } from "@/lib/utils";
 

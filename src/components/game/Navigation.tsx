@@ -2,6 +2,8 @@
  * Navigation component with tab navigation between screens.
  */
 
+import { cn } from "@/lib/utils";
+
 /**
  * Navigation tabs for the game.
  */
@@ -52,11 +54,12 @@ export function Navigation({
               type="button"
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-[4.5rem] rounded-lg transition-colors flex-shrink-0 ${
+              className={cn(
+                "flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-[4.5rem] rounded-lg transition-colors flex-shrink-0",
                 activeTab === tab.id
                   ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent"
-              }`}
+                  : "text-muted-foreground hover:bg-accent",
+              )}
             >
               <span className="text-xl">{tab.icon}</span>
               <span className="text-[10px] font-medium">{tab.label}</span>

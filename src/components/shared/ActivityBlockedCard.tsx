@@ -61,6 +61,10 @@ export function getActivityBlockingInfo(
       };
     case ActivityState.Idle:
       return null;
+    default: {
+      const _exhaustive: never = pet.activityState;
+      return _exhaustive;
+    }
   }
 }
 
