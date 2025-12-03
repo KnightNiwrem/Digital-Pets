@@ -4,11 +4,10 @@
 
 import { emitEvents } from "@/game/core/events";
 import {
-  applySkillXpGains,
   completeExplorationActivity,
   processExplorationTick,
 } from "@/game/core/exploration/exploration";
-import { addItem } from "@/game/core/inventory";
+import { applyExplorationRewards } from "@/game/core/exploration/rewards";
 import { calculatePetMaxStats } from "@/game/core/petStats";
 import {
   processTimedQuestExpiration,
@@ -224,54 +223,14 @@ export function processGameTick(
       };
 
       if (completionResult.success) {
-        // Apply skill XP gains
-        const { skills: updatedSkills } = applySkillXpGains(
-          updatedStateWithPet.player.skills,
-          completionResult.skillXpGains,
-        );
-
-        updatedStateWithPet = {
-          ...updatedStateWithPet,
-          player: {
-            ...updatedStateWithPet.player,
-            skills: updatedSkills,
-          },
-        };
-
-        // Add found items to inventory
-        let currentInventory = updatedStateWithPet.player.inventory;
-        for (const drop of completionResult.itemsFound) {
-          currentInventory = addItem(
-            currentInventory,
-            drop.itemId,
-            drop.quantity,
-          );
-        }
-
-        updatedStateWithPet = {
-          ...updatedStateWithPet,
-          player: {
-            ...updatedStateWithPet.player,
-            inventory: currentInventory,
-          },
-        };
-
-        // Update quest progress for Explore objectives
-        updatedStateWithPet = updateQuestProgress(
+        // Apply exploration rewards using shared helper
+        const rewardsResult = applyExplorationRewards(
           updatedStateWithPet,
-          ObjectiveType.Explore,
+          completionResult.itemsFound,
+          completionResult.skillXpGains,
           activityId,
         );
-
-        // Update quest progress for Collect objectives for each item found
-        for (const drop of completionResult.itemsFound) {
-          updatedStateWithPet = updateQuestProgress(
-            updatedStateWithPet,
-            ObjectiveType.Collect,
-            drop.itemId,
-            drop.quantity,
-          );
-        }
+        updatedStateWithPet = rewardsResult.state;
       }
 
       updatedState = updatedStateWithPet;
