@@ -4,18 +4,15 @@
  */
 
 import {
-  applySkillXpGains,
   type CompleteExplorationResult,
   cancelExploration as cancelExplorationCore,
   canStartExplorationActivity,
   startExplorationActivity,
 } from "@/game/core/exploration/exploration";
-import { addItem } from "@/game/core/inventory";
-import { updateQuestProgress } from "@/game/core/quests/quests";
+import { applyExplorationRewards } from "@/game/core/exploration/rewards";
 import type { ExplorationDrop } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
-import { ObjectiveType } from "@/game/types/quest";
 
 /**
  * Result of an exploration action.
@@ -185,62 +182,25 @@ export function applyExplorationResults(
   }
 
   // Start with updated pet state from completion result
-  let updatedState: GameState = {
+  const stateWithPet: GameState = {
     ...state,
     pet: result.pet,
   };
 
-  // Apply skill XP gains
-  const { skills: updatedSkills, levelUps } = applySkillXpGains(
-    updatedState.player.skills,
+  // Apply exploration rewards using shared helper
+  const rewardsResult = applyExplorationRewards(
+    stateWithPet,
+    result.itemsFound,
     result.skillXpGains,
-  );
-
-  updatedState = {
-    ...updatedState,
-    player: {
-      ...updatedState.player,
-      skills: updatedSkills,
-    },
-  };
-
-  // Add found items to inventory
-  let currentInventory = updatedState.player.inventory;
-  for (const drop of result.itemsFound) {
-    currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
-  }
-
-  updatedState = {
-    ...updatedState,
-    player: {
-      ...updatedState.player,
-      inventory: currentInventory,
-    },
-  };
-
-  // Update quest progress for Explore objectives
-  updatedState = updateQuestProgress(
-    updatedState,
-    ObjectiveType.Explore,
     activityId,
   );
 
-  // Update quest progress for Collect objectives for each item found
-  for (const drop of result.itemsFound) {
-    updatedState = updateQuestProgress(
-      updatedState,
-      ObjectiveType.Collect,
-      drop.itemId,
-      drop.quantity,
-    );
-  }
-
   return {
     success: true,
-    state: updatedState,
+    state: rewardsResult.state,
     message: result.message,
     itemsFound: result.itemsFound,
     skillXpGains: result.skillXpGains,
-    skillLevelUps: levelUps,
+    skillLevelUps: rewardsResult.skillLevelUps,
   };
 }
