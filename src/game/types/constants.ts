@@ -153,13 +153,32 @@ export const CareThreshold = {
 export type CareThreshold = (typeof CareThreshold)[keyof typeof CareThreshold];
 
 /**
+ * Percentage boundaries for care threshold levels.
+ * Each value represents the upper bound (inclusive) for its threshold.
+ */
+export const CARE_THRESHOLD_BOUNDARIES = {
+  /** At or below 0% - Critical state */
+  CRITICAL: 0,
+  /** For percentages > 0% and <= 25% - Distressed state */
+  DISTRESSED: 25,
+  /** For percentages > 25% and <= 50% - Uncomfortable state */
+  UNCOMFORTABLE: 50,
+  /** For percentages > 50% and <= 75% - Okay state */
+  OKAY: 75,
+  // For percentages > 75% - Content state (no upper bound needed)
+} as const;
+
+/**
  * Get the care threshold for a given percentage.
  */
 export function getCareThreshold(percentage: number): CareThreshold {
-  if (percentage <= 0) return CareThreshold.Critical;
-  if (percentage <= 25) return CareThreshold.Distressed;
-  if (percentage <= 50) return CareThreshold.Uncomfortable;
-  if (percentage <= 75) return CareThreshold.Okay;
+  if (percentage <= CARE_THRESHOLD_BOUNDARIES.CRITICAL)
+    return CareThreshold.Critical;
+  if (percentage <= CARE_THRESHOLD_BOUNDARIES.DISTRESSED)
+    return CareThreshold.Distressed;
+  if (percentage <= CARE_THRESHOLD_BOUNDARIES.UNCOMFORTABLE)
+    return CareThreshold.Uncomfortable;
+  if (percentage <= CARE_THRESHOLD_BOUNDARIES.OKAY) return CareThreshold.Okay;
   return CareThreshold.Content;
 }
 
