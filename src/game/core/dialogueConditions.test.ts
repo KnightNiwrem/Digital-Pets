@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { addItem } from "@/game/core/inventory";
 import { FOOD_ITEMS } from "@/game/data/items";
+import { tutorialFirstSteps } from "@/game/data/quests/tutorial";
 import { createInitialGameState } from "@/game/types/gameState";
 import { DialogueConditionType } from "@/game/types/npc";
 import { createQuestProgress, QuestState } from "@/game/types/quest";
@@ -169,6 +170,78 @@ describe("Dialogue Logic", () => {
       type: "unknownType" as DialogueConditionType,
       targetId: "test",
       value: "test",
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
+  });
+
+  test("checkCondition should work with QuestObjectivesComplete when all objectives are complete", () => {
+    const state = createInitialGameState();
+    const questId = tutorialFirstSteps.id;
+
+    // Start the quest and complete all objectives
+    state.quests.push({
+      ...createQuestProgress(questId),
+      state: QuestState.Active,
+      objectiveProgress: {
+        feed_pet: 1,
+        give_water: 1,
+      },
+    });
+
+    const condition = {
+      type: DialogueConditionType.QuestObjectivesComplete,
+      targetId: questId,
+      value: true,
+    };
+
+    expect(checkCondition(state, condition)).toBe(true);
+  });
+
+  test("checkCondition should return false for QuestObjectivesComplete when objectives are incomplete", () => {
+    const state = createInitialGameState();
+    const questId = tutorialFirstSteps.id;
+
+    // Start the quest but only complete one objective
+    state.quests.push({
+      ...createQuestProgress(questId),
+      state: QuestState.Active,
+      objectiveProgress: {
+        feed_pet: 1,
+        give_water: 0,
+      },
+    });
+
+    const condition = {
+      type: DialogueConditionType.QuestObjectivesComplete,
+      targetId: questId,
+      value: true,
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
+  });
+
+  test("checkCondition should return false for QuestObjectivesComplete when quest not in progress", () => {
+    const state = createInitialGameState();
+    const questId = tutorialFirstSteps.id;
+    // Quest not started
+
+    const condition = {
+      type: DialogueConditionType.QuestObjectivesComplete,
+      targetId: questId,
+      value: true,
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
+  });
+
+  test("checkCondition should return false for QuestObjectivesComplete when quest does not exist", () => {
+    const state = createInitialGameState();
+
+    const condition = {
+      type: DialogueConditionType.QuestObjectivesComplete,
+      targetId: "nonexistent_quest",
+      value: true,
     };
 
     expect(checkCondition(state, condition)).toBe(false);
