@@ -39,7 +39,7 @@ export const trainerOak: NPC = {
   description:
     "A seasoned trainer with years of experience. He can help your pet reach its full potential.",
   roles: [NpcRole.Trainer, NpcRole.Guide, NpcRole.QuestGiver],
-  locationId: "willowbrook",
+  locationId: "home",
   dialogueId: "oak_dialogue",
   questIds: [
     "main_new_journey",

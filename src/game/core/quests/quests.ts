@@ -115,6 +115,10 @@ export function getAvailableQuests(
   allQuests: Quest[],
 ): Quest[] {
   return allQuests.filter((quest) => {
+    // Tutorial quests are hidden from the available list as they are started via NPC dialogue
+    if (quest.type === QuestType.Tutorial) {
+      return false;
+    }
     const questState = getQuestState(state, quest.id);
     return questState === QuestState.Available;
   });

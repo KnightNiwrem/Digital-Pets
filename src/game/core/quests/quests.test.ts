@@ -81,13 +81,38 @@ test("getQuestState returns Completed for finished quest", () => {
 });
 
 test("getAvailableQuests returns quests that can be started", () => {
+  // Create a side quest for testing
+  const sideQuest: Quest = {
+    ...tutorialFirstSteps,
+    id: "side_quest_test",
+    type: QuestType.Side,
+    chainPrevious: undefined,
+    requirements: [],
+  };
+
+  // Mock the quest in the registry
+  const { quests } = require("@/game/data/quests");
+  try {
+    quests.side_quest_test = sideQuest;
+
+    const state = createTestState();
+    const available = getAvailableQuests(state, [
+      sideQuest,
+      tutorialExploration, // Locked
+    ]);
+    expect(available.length).toBe(1);
+    expect(available[0]?.id).toBe(sideQuest.id);
+  } finally {
+    delete quests.side_quest_test;
+  }
+});
+
+test("getAvailableQuests filters out tutorial quests", () => {
   const state = createTestState();
   const available = getAvailableQuests(state, [
-    tutorialFirstSteps,
-    tutorialExploration,
+    tutorialFirstSteps, // Available but is Tutorial type
   ]);
-  expect(available.length).toBe(1);
-  expect(available[0]?.id).toBe(tutorialFirstSteps.id);
+  expect(available.length).toBe(0);
 });
 
 test("getActiveQuests returns quests in progress", () => {
