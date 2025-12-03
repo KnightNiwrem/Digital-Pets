@@ -9,9 +9,11 @@ import { ShopScreen } from "@/components/screens/ShopScreen";
 import {
   ActivityBlockedCard,
   getActivityBlockingInfo,
-} from "@/components/ui/ActivityBlockedCard";
+} from "@/components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorDialog } from "@/components/ui/error-dialog";
+import { LoadingState } from "@/components/ui/loading-state";
 import { getConnectedLocations, getLocation } from "@/game/data/locations";
 import { useGameState } from "@/game/hooks/useGameState";
 import { checkCanTravel, travelToLocation } from "@/game/state/actions/travel";
@@ -103,19 +105,11 @@ export function MapScreen() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!state || !currentLocation) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Error loading map data.</p>
-      </div>
-    );
+    return <EmptyState message="Error loading map data." />;
   }
 
   // Get pet for blocking info
