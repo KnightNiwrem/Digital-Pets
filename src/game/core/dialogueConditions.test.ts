@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { addItem } from "@/game/core/inventory";
+import { FOOD_ITEMS } from "@/game/data/items";
 import { createInitialGameState } from "@/game/types/gameState";
 import { DialogueConditionType } from "@/game/types/npc";
 import { createQuestProgress, QuestState } from "@/game/types/quest";
@@ -40,6 +42,19 @@ describe("Dialogue Logic", () => {
     expect(checkCondition(state, condition)).toBe(false);
   });
 
+  test("checkCondition should return false for QuestState with invalid value type", () => {
+    const state = createInitialGameState();
+
+    const condition = {
+      type: DialogueConditionType.QuestState,
+      targetId: "test_quest",
+      value: 123, // Invalid: should be string
+      comparison: "eq" as const,
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
+  });
+
   test("checkCondition should work with SkillLevel", () => {
     const state = createInitialGameState();
     // Set skill level
@@ -62,5 +77,100 @@ describe("Dialogue Logic", () => {
     };
 
     expect(checkCondition(state, highCondition)).toBe(false);
+  });
+
+  test("checkCondition should return false for SkillLevel with NaN value", () => {
+    const state = createInitialGameState();
+    state.player.skills.foraging.level = 5;
+
+    const condition = {
+      type: DialogueConditionType.SkillLevel,
+      targetId: "foraging",
+      value: "not-a-number",
+      comparison: "gte" as const,
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
+  });
+
+  test("checkCondition should work with HasItem when player has exact quantity", () => {
+    const state = createInitialGameState();
+    state.player.inventory = addItem(
+      state.player.inventory,
+      FOOD_ITEMS.KIBBLE.id,
+      5,
+    );
+
+    const condition = {
+      type: DialogueConditionType.HasItem,
+      targetId: FOOD_ITEMS.KIBBLE.id,
+      value: 5,
+      comparison: "eq" as const,
+    };
+
+    expect(checkCondition(state, condition)).toBe(true);
+  });
+
+  test("checkCondition should work with HasItem when player has more than required", () => {
+    const state = createInitialGameState();
+    state.player.inventory = addItem(
+      state.player.inventory,
+      FOOD_ITEMS.KIBBLE.id,
+      10,
+    );
+
+    const condition = {
+      type: DialogueConditionType.HasItem,
+      targetId: FOOD_ITEMS.KIBBLE.id,
+      value: 5,
+      comparison: "gte" as const,
+    };
+
+    expect(checkCondition(state, condition)).toBe(true);
+  });
+
+  test("checkCondition should work with HasItem when player has less than required", () => {
+    const state = createInitialGameState();
+    state.player.inventory = addItem(
+      state.player.inventory,
+      FOOD_ITEMS.KIBBLE.id,
+      3,
+    );
+
+    const condition = {
+      type: DialogueConditionType.HasItem,
+      targetId: FOOD_ITEMS.KIBBLE.id,
+      value: 5,
+      comparison: "gte" as const,
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
+  });
+
+  test("checkCondition should work with HasItem when player has no item", () => {
+    const state = createInitialGameState();
+    // Clear inventory to ensure no items
+    state.player.inventory = { items: [] };
+
+    const condition = {
+      type: DialogueConditionType.HasItem,
+      targetId: FOOD_ITEMS.KIBBLE.id,
+      value: 1,
+      comparison: "gte" as const,
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
+  });
+
+  test("checkCondition should return false for unknown condition type", () => {
+    const state = createInitialGameState();
+
+    const condition = {
+      type: "unknownType" as DialogueConditionType,
+      targetId: "test",
+      value: "test",
+    };
+
+    expect(checkCondition(state, condition)).toBe(false);
   });
 });

@@ -2,6 +2,7 @@
  * Dialogue navigation logic.
  */
 
+import { getItemQuantity } from "@/game/core/inventory";
 import { areAllRequiredObjectivesComplete } from "@/game/core/quests/objectives";
 import { getQuestState } from "@/game/core/quests/quests";
 import { getDialogue } from "@/game/data/dialogues";
@@ -48,12 +49,15 @@ export function checkCondition(
   switch (condition.type) {
     case DialogueConditionType.QuestState: {
       const questState = getQuestState(state, condition.targetId) || "locked";
-      const targetValue = condition.value as string;
+      const targetValue = condition.value;
+      if (typeof targetValue !== "string") {
+        return false;
+      }
       const comparison = condition.comparison || "eq";
 
-      if (comparison === "eq") return questState === targetValue;
       if (comparison === "neq") return questState !== targetValue;
-      return questState === targetValue;
+      if (comparison === "eq") return questState === targetValue;
+      return false;
     }
     case DialogueConditionType.SkillLevel: {
       const skill =
@@ -63,15 +67,49 @@ export function checkCondition(
       if (!skill) return false;
       const level = skill.level;
       const targetLevel = Number(condition.value);
+      if (Number.isNaN(targetLevel)) {
+        return false;
+      }
       const comparison = condition.comparison || "gte";
 
-      if (comparison === "eq") return level === targetLevel;
-      if (comparison === "neq") return level !== targetLevel;
-      if (comparison === "gte") return level >= targetLevel;
-      if (comparison === "gt") return level > targetLevel;
-      if (comparison === "lte") return level <= targetLevel;
-      if (comparison === "lt") return level < targetLevel;
-      return level >= targetLevel;
+      switch (comparison) {
+        case "eq":
+          return level === targetLevel;
+        case "neq":
+          return level !== targetLevel;
+        case "gt":
+          return level > targetLevel;
+        case "lte":
+          return level <= targetLevel;
+        case "lt":
+          return level < targetLevel;
+        default:
+          return level >= targetLevel;
+      }
+    }
+    case DialogueConditionType.HasItem: {
+      const itemId = condition.targetId;
+      const quantity = Number(condition.value) || 1;
+      if (Number.isNaN(quantity)) {
+        return false;
+      }
+      const currentQuantity = getItemQuantity(state.player.inventory, itemId);
+      const comparison = condition.comparison || "gte";
+
+      switch (comparison) {
+        case "eq":
+          return currentQuantity === quantity;
+        case "neq":
+          return currentQuantity !== quantity;
+        case "gt":
+          return currentQuantity > quantity;
+        case "lte":
+          return currentQuantity <= quantity;
+        case "lt":
+          return currentQuantity < quantity;
+        default:
+          return currentQuantity >= quantity;
+      }
     }
     case DialogueConditionType.QuestObjectivesComplete: {
       const questId = condition.targetId;
@@ -90,9 +128,8 @@ export function checkCondition(
 
       return areComplete === targetValue;
     }
-    // Add other condition types here as needed
     default:
-      return true;
+      return false;
   }
 }
 

@@ -68,20 +68,19 @@ export function DialogueScreen({
 
         // Handle any actions associated with the choice
         if (result.action && gameState) {
-          if (result.action.type === DialogueActionType.StartQuest) {
-            const questResult = startQuest(gameState, result.action.targetId);
+          const questActionMap: Record<
+            string,
+            typeof startQuest | typeof completeQuest
+          > = {
+            [DialogueActionType.StartQuest]: startQuest,
+            [DialogueActionType.CompleteQuest]: completeQuest,
+          };
+
+          const actionFn = questActionMap[result.action.type];
+          if (actionFn) {
+            const questResult = actionFn(gameState, result.action.targetId);
             if (questResult.success) {
               actions.updateState(() => questResult.state);
-              // TODO: Show toast/notification for started quest
-            }
-          } else if (result.action.type === DialogueActionType.CompleteQuest) {
-            const questResult = completeQuest(
-              gameState,
-              result.action.targetId,
-            );
-            if (questResult.success) {
-              actions.updateState(() => questResult.state);
-              // TODO: Show toast/notification for completed quest
             }
           }
         }
