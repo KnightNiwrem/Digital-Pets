@@ -40,13 +40,13 @@ describe("checkCanTravel", () => {
       energyStats: { energy: toMicro(100) },
       activityState: ActivityState.Idle,
     });
-    // Meadow and ancient_grove are connected to each other but not directly from everywhere
+    // Home is only connected to meadow and willowbrook
     const state = createTestGameState(pet, {
-      player: { currentLocationId: "willowbrook" },
+      player: { currentLocationId: "home" },
     });
 
-    // Try to travel to a location not directly connected to willowbrook
-    const result = checkCanTravel(state, "whispering_coast");
+    // Try to travel to a location not directly connected to home
+    const result = checkCanTravel(state, "ironhaven");
 
     expect(result.canTravel).toBe(false);
   });
@@ -190,7 +190,7 @@ describe("travelToLocation", () => {
           objectiveProgress: {},
         },
         {
-          questId: "exploration_tutorial",
+          questId: "tutorial_exploration",
           state: QuestState.Active,
           objectiveProgress: {},
         },
@@ -200,9 +200,11 @@ describe("travelToLocation", () => {
     const result = travelToLocation(state, "meadow");
 
     expect(result.success).toBe(true);
-    // The visit objective progress should be updated if there's a matching objective
-    // This just verifies the state was transformed
-    expect(result.state).not.toBe(state);
+    // The Visit objective for "visit_meadow" should be incremented
+    const questProgress = result.state.quests.find(
+      (q) => q.questId === "tutorial_exploration",
+    );
+    expect(questProgress?.objectiveProgress.visit_meadow).toBe(1);
   });
 
   test("returns failure for requirements not met", () => {

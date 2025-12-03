@@ -45,25 +45,16 @@ export function applyExplorationRewards(
     skillXpGains,
   );
 
+  // Combine skills and inventory updates into a single state update
   let updatedState: GameState = {
     ...state,
     player: {
       ...state.player,
       skills: updatedSkills,
-    },
-  };
-
-  // Add found items to inventory
-  let currentInventory = updatedState.player.inventory;
-  for (const drop of itemsFound) {
-    currentInventory = addItem(currentInventory, drop.itemId, drop.quantity);
-  }
-
-  updatedState = {
-    ...updatedState,
-    player: {
-      ...updatedState.player,
-      inventory: currentInventory,
+      inventory: itemsFound.reduce(
+        (inv, drop) => addItem(inv, drop.itemId, drop.quantity),
+        state.player.inventory,
+      ),
     },
   };
 
@@ -75,14 +66,11 @@ export function applyExplorationRewards(
   );
 
   // Update quest progress for Collect objectives for each item found
-  for (const drop of itemsFound) {
-    updatedState = updateQuestProgress(
-      updatedState,
-      ObjectiveType.Collect,
-      drop.itemId,
-      drop.quantity,
-    );
-  }
+  updatedState = itemsFound.reduce(
+    (s, drop) =>
+      updateQuestProgress(s, ObjectiveType.Collect, drop.itemId, drop.quantity),
+    updatedState,
+  );
 
   return {
     state: updatedState,

@@ -11,16 +11,6 @@ import {
 const STORAGE_KEY = "digital_pets_save";
 
 /**
- * Validation error for malformed save data.
- */
-export class SaveValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "SaveValidationError";
-  }
-}
-
-/**
  * Validate that an unknown value is a valid GameState structure.
  * Performs runtime checks on required fields and types.
  */
@@ -56,8 +46,12 @@ export function validateGameState(value: unknown): value is GameState {
   const player = obj.player as Record<string, unknown>;
   if (typeof player.inventory !== "object" || player.inventory === null)
     return false;
+  const inventory = player.inventory as Record<string, unknown>;
+  if (!Array.isArray(inventory.items)) return false;
   if (typeof player.currency !== "object" || player.currency === null)
     return false;
+  const currency = player.currency as Record<string, unknown>;
+  if (typeof currency.coins !== "number") return false;
   if (typeof player.currentLocationId !== "string") return false;
   if (typeof player.skills !== "object" || player.skills === null) return false;
 
@@ -67,6 +61,17 @@ export function validateGameState(value: unknown): value is GameState {
   // pendingEvents must be an array (or undefined, will be initialized)
   if (obj.pendingEvents !== undefined && !Array.isArray(obj.pendingEvents)) {
     return false;
+  }
+
+  // activeBattle is optional but must have correct structure if present
+  if (obj.activeBattle !== undefined) {
+    if (typeof obj.activeBattle !== "object" || obj.activeBattle === null)
+      return false;
+    const battle = obj.activeBattle as Record<string, unknown>;
+    if (typeof battle.enemySpeciesId !== "string") return false;
+    if (typeof battle.enemyLevel !== "number") return false;
+    if (typeof battle.battleState !== "object" || battle.battleState === null)
+      return false;
   }
 
   return true;
@@ -191,15 +196,15 @@ export function importSave(data: string): LoadResult {
       return { success: false, error: "Invalid save data structure" };
     }
 
-    localStorage.setItem(STORAGE_KEY, data);
-
-    // Ensure pendingEvents is initialized (not persisted)
-    const stateWithEvents: GameState = {
+    // Create a clean state object to save, ensuring transient data is not persisted
+    const cleanState: GameState = {
       ...parsed,
-      pendingEvents: parsed.pendingEvents ?? [],
+      pendingEvents: [],
     };
 
-    return { success: true, state: stateWithEvents };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanState));
+
+    return { success: true, state: cleanState };
   } catch (error) {
     return {
       success: false,

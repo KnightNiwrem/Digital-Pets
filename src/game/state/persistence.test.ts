@@ -114,6 +114,46 @@ describe("validateGameState", () => {
     const invalid = { ...state, pet: { identity: null } };
     expect(validateGameState(invalid)).toBe(false);
   });
+
+  test("returns true for valid game state with activeBattle", () => {
+    const state = createTestGameState();
+    const stateWithBattle = {
+      ...state,
+      activeBattle: {
+        enemySpeciesId: "enemy_1",
+        enemyLevel: 5,
+        battleState: { turn: 1 },
+      },
+    };
+    expect(validateGameState(stateWithBattle)).toBe(true);
+  });
+
+  test("returns false for invalid activeBattle structure", () => {
+    const state = createTestGameState();
+    const invalidMissingFields = { ...state, activeBattle: {} };
+    expect(validateGameState(invalidMissingFields)).toBe(false);
+
+    const invalidNonObject = { ...state, activeBattle: "not an object" };
+    expect(validateGameState(invalidNonObject)).toBe(false);
+  });
+
+  test("returns false for invalid inventory.items", () => {
+    const state = createTestGameState();
+    const invalid = {
+      ...state,
+      player: { ...state.player, inventory: { items: "not an array" } },
+    };
+    expect(validateGameState(invalid)).toBe(false);
+  });
+
+  test("returns false for invalid currency.coins", () => {
+    const state = createTestGameState();
+    const invalid = {
+      ...state,
+      player: { ...state.player, currency: { coins: "not a number" } },
+    };
+    expect(validateGameState(invalid)).toBe(false);
+  });
 });
 
 describe("saveGame and loadGame", () => {
