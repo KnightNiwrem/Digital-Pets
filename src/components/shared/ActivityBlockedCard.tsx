@@ -63,7 +63,7 @@ export function getActivityBlockingInfo(
       return null;
     default: {
       const _exhaustive: never = pet.activityState;
-      return _exhaustive;
+      throw new Error(`Unhandled activity state: ${_exhaustive}`);
     }
   }
 }
