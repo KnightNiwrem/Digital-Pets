@@ -55,7 +55,7 @@ function processPlayerAttackAction(
   // Get the move by name
   const move = getMoveByName(battleState, moveName);
   if (!move) {
-    console.warn(`Move not found: ${moveName}`);
+    // Move not found - return state unchanged (silent failure for production)
     return state;
   }
 

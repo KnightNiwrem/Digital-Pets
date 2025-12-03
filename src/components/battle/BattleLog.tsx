@@ -2,7 +2,7 @@
  * Battle log component showing turn-by-turn actions.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BattleLogEntry } from "@/game/core/battle/battle";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,10 @@ export function BattleLog({ entries, maxEntries = 8 }: BattleLogProps) {
     }
   }, [entriesLength]);
 
-  const visibleEntries = entries.slice(-maxEntries);
+  const visibleEntries = useMemo(
+    () => entries.slice(-maxEntries),
+    [entries, maxEntries],
+  );
 
   return (
     <Card>

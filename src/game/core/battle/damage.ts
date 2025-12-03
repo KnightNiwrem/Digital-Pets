@@ -149,7 +149,8 @@ export function calculateDamage(
   move: Move,
 ): DamageResult {
   // Self-targeting moves (buffs) deal no damage
-  if (move.target === "self" || move.power === 0) {
+  // Zero power AND zero flat damage means no damage (pure effect moves)
+  if (move.target === "self" || (move.power === 0 && move.flatDamage === 0)) {
     return {
       damage: 0,
       isHit: true,
