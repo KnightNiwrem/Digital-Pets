@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { areAllRequiredObjectivesComplete } from "@/game/core/quests";
 import { getItemById } from "@/game/data/items";
+import { getNpc } from "@/game/data/npcs";
 import type { Quest, QuestProgress, QuestReward } from "@/game/types/quest";
 import { QuestType } from "@/game/types/quest";
 import { formatTimeRemaining } from "./formatTimeRemaining";
@@ -28,7 +29,10 @@ function formatReward(reward: QuestReward): string {
       return `${reward.quantity} coins`;
     case "item": {
       const item = getItemById(reward.target);
-      const itemName = item?.name ?? reward.target;
+      if (!item) {
+        console.warn(`Quest reward references unknown item: ${reward.target}`);
+      }
+      const itemName = item?.name ?? "Unknown Item";
       return `${reward.quantity}x ${itemName}`;
     }
     case "xp":
@@ -134,7 +138,8 @@ export function QuestDetail({
             onComplete &&
             (quest.type === QuestType.Tutorial ? (
               <Button disabled className="w-full" variant="outline">
-                Return to Oak to complete
+                Return to {getNpc(quest.giverId)?.name ?? "quest giver"} to
+                complete
               </Button>
             ) : (
               <Button onClick={onComplete} className="w-full">

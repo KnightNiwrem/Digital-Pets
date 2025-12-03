@@ -3,6 +3,7 @@
  */
 
 import { getNextDailyReset, getNextWeeklyReset } from "@/game/core/time";
+import { getLocation } from "@/game/data/locations";
 import { QuestMessages } from "@/game/data/messages";
 import { getDailyQuests, getQuest, getWeeklyQuests } from "@/game/data/quests";
 import type { GameState } from "@/game/types/gameState";
@@ -37,9 +38,10 @@ function validateStartLocation(
   currentLocationId: string,
 ): LocationValidationResult {
   if (quest.startLocationId && currentLocationId !== quest.startLocationId) {
+    const locationName = getLocation(quest.startLocationId)?.name;
     return {
       valid: false,
-      message: QuestMessages.goToStartLocation,
+      message: QuestMessages.goToStartLocation(locationName),
     };
   }
   return { valid: true };
@@ -56,9 +58,10 @@ function validateCompleteLocation(
     quest.completeLocationId &&
     currentLocationId !== quest.completeLocationId
   ) {
+    const locationName = getLocation(quest.completeLocationId)?.name;
     return {
       valid: false,
-      message: QuestMessages.goToTurnInLocation,
+      message: QuestMessages.goToTurnInLocation(locationName),
     };
   }
   return { valid: true };

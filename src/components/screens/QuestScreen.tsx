@@ -4,6 +4,7 @@
 
 import { useMemo, useState } from "react";
 import { QuestDetail, QuestList } from "@/components/quests";
+import { createProgressMap } from "@/components/quests/questUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -45,12 +46,6 @@ export function QuestScreen() {
       const available = getAvailableQuests(state, Object.values(allQuestsData));
       const completed = getCompletedQuests(state);
 
-      const map = new Map<string, QuestProgress>();
-      const quests = selectQuests(state);
-      for (const progress of quests) {
-        map.set(progress.questId, progress);
-      }
-
       return {
         activeQuests: active
           .map((p) => getQuest(p.questId))
@@ -59,7 +54,7 @@ export function QuestScreen() {
         completedQuests: completed
           .map((p) => getQuest(p.questId))
           .filter((q): q is Quest => q !== undefined),
-        progressMap: map,
+        progressMap: createProgressMap(selectQuests(state)),
       };
     }, [state]);
 

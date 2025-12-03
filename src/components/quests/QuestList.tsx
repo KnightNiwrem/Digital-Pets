@@ -4,7 +4,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { type Quest, type QuestProgress, QuestState } from "@/game/types/quest";
+import {
+  type Quest,
+  type QuestProgress,
+  QuestState,
+  QuestType,
+} from "@/game/types/quest";
 import { cn } from "@/lib/utils";
 import { formatTimeRemaining } from "./formatTimeRemaining";
 import { hasExpiration } from "./questUtils";
@@ -20,30 +25,30 @@ interface QuestListProps {
 /**
  * Quest type badge styling.
  */
-const TYPE_STYLES: Record<string, string> = {
-  main: "bg-purple-100 text-purple-700",
-  side: "bg-blue-100 text-blue-700",
-  tutorial: "bg-green-100 text-green-700",
-  daily: "bg-orange-100 text-orange-700",
-  weekly: "bg-amber-100 text-amber-700",
-  timed: "bg-red-100 text-red-700",
-  hidden: "bg-gray-100 text-gray-700",
+const TYPE_STYLES: Record<QuestType, string> = {
+  [QuestType.Main]: "bg-purple-100 text-purple-700",
+  [QuestType.Side]: "bg-blue-100 text-blue-700",
+  [QuestType.Tutorial]: "bg-green-100 text-green-700",
+  [QuestType.Daily]: "bg-orange-100 text-orange-700",
+  [QuestType.Weekly]: "bg-amber-100 text-amber-700",
+  [QuestType.Timed]: "bg-red-100 text-red-700",
+  [QuestType.Hidden]: "bg-gray-100 text-gray-700",
 };
 
 /**
  * Get quest type display name.
  */
-function getQuestTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    main: "Main",
-    side: "Side",
-    tutorial: "Tutorial",
-    daily: "Daily",
-    weekly: "Weekly",
-    timed: "Timed",
-    hidden: "Hidden",
+function getQuestTypeLabel(type: QuestType): string {
+  const labels: Record<QuestType, string> = {
+    [QuestType.Main]: "Main",
+    [QuestType.Side]: "Side",
+    [QuestType.Tutorial]: "Tutorial",
+    [QuestType.Daily]: "Daily",
+    [QuestType.Weekly]: "Weekly",
+    [QuestType.Timed]: "Timed",
+    [QuestType.Hidden]: "Hidden",
   };
-  return labels[type] ?? type;
+  return labels[type];
 }
 
 /**
@@ -89,7 +94,7 @@ export function QuestList({
                 <span
                   className={cn(
                     "text-xs px-2 py-0.5 rounded-full",
-                    TYPE_STYLES[quest.type] ?? TYPE_STYLES.side,
+                    TYPE_STYLES[quest.type],
                   )}
                 >
                   {getQuestTypeLabel(quest.type)}
