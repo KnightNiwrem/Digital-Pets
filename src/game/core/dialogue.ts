@@ -54,12 +54,18 @@ function compareNumbers(
       return actual !== target;
     case "gt":
       return actual > target;
+    case "gte":
+      return actual >= target;
     case "lte":
       return actual <= target;
     case "lt":
       return actual < target;
-    default:
+    case undefined:
       return actual >= target;
+    default: {
+      const _exhaustiveCheck: never = comparison;
+      return _exhaustiveCheck;
+    }
   }
 }
 
@@ -319,7 +325,19 @@ export function selectChoice(
   }
 
   // Check conditions if gameState is provided
-  if (gameState && choice.conditions) {
+  if (choice.conditions && choice.conditions.length > 0) {
+    if (!gameState) {
+      console.warn(
+        "selectChoice: Choice has conditions but no gameState provided",
+      );
+      return {
+        success: false,
+        message: "Cannot evaluate choice conditions without game state.",
+        state,
+        node: currentNode,
+        ended: false,
+      };
+    }
     const conditionsMet = choice.conditions.every((condition) =>
       checkCondition(gameState, condition),
     );

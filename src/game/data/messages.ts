@@ -214,10 +214,22 @@ export const QuestMessages = {
   questNotActive: "Quest is not active.",
   /** When not all objectives are complete */
   objectivesIncomplete: "Not all objectives are complete.",
-  /** When player needs to go to start location */
-  goToStartLocation: "Go to start location.",
-  /** When player needs to go to turn-in location */
-  goToTurnInLocation: "Go to turn-in location.",
+  /**
+   * Generate a message for needing to go to start location.
+   * @param locationName - Optional name of the location
+   */
+  goToStartLocation: (locationName?: string): string =>
+    locationName
+      ? `Go to ${locationName} to accept this quest.`
+      : "Go to start location.",
+  /**
+   * Generate a message for needing to go to turn-in location.
+   * @param locationName - Optional name of the location
+   */
+  goToTurnInLocation: (locationName?: string): string =>
+    locationName
+      ? `Go to ${locationName} to complete this quest.`
+      : "Go to turn-in location.",
   /** When quest is not a timed quest */
   notTimedQuest: "Quest is not a timed quest.",
   /** When timed quest has no duration configured */
