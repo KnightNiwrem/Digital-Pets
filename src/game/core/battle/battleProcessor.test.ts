@@ -6,7 +6,9 @@ import { expect, test } from "bun:test";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
 import { createTestCombatant } from "@/game/testing/createTestCombatant";
+import { DamageType } from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
+import { StatusEffectType } from "@/game/types/move";
 import { BattlePhase, type BattleState, initializeBattle } from "./battle";
 import { processBattleTick } from "./battleProcessor";
 
@@ -151,25 +153,17 @@ test("processBattleTick emits turnResolved event during turn resolution", () => 
   expect(battleEvent).toBeDefined();
 });
 
-test("processBattleTick emits battleEnd event when enemy defeated", () => {
+test("processBattleTick emits battleEnd event when enemy is defeated by DoT", () => {
   const player = createTestCombatant({
     name: "Player Pet",
     isPlayer: true,
-    battleStats: {
-      strength: 50,
-      endurance: 10,
-      agility: 10,
-      precision: 50, // High precision for guaranteed hit
-      fortitude: 10,
-      cunning: 10,
-    },
     moveSlots: [{ move: basicAttack, currentCooldown: 0 }],
   });
   const enemy = createTestCombatant({
     name: "Enemy Pet",
     isPlayer: false,
     derivedStats: {
-      currentHealth: 1, // Very low health
+      currentHealth: 5, // Low health
       maxHealth: 100,
       currentStamina: 50,
       maxStamina: 50,
@@ -178,13 +172,24 @@ test("processBattleTick emits battleEnd event when enemy defeated", () => {
       criticalDamage: 1.5,
       dodgeChance: 0,
     },
+    statusEffects: [
+      {
+        id: "dot-1",
+        type: StatusEffectType.DamageOverTime,
+        name: "Poison",
+        duration: 2,
+        value: 10, // Lethal DoT
+        damageType: DamageType.Chemical,
+      },
+    ],
     moveSlots: [{ move: basicAttack, currentCooldown: 0 }],
   });
+
   const battleState: BattleState = {
     ...initializeBattle(player, enemy),
-    phase: BattlePhase.EnemyTurn,
-    turnOrderIndex: 0,
-    turnOrder: ["enemy", "player"],
+    phase: BattlePhase.TurnResolution, // Test end-of-turn processing
+    playerActed: true,
+    enemyActed: true,
     player,
     enemy,
   };
@@ -192,10 +197,14 @@ test("processBattleTick emits battleEnd event when enemy defeated", () => {
 
   const newState = processBattleTick(state, 1000);
 
-  // Check for battleEnd event if battle ended
-  if (newState.activeBattle?.battleState.phase === BattlePhase.Defeat) {
-    const endEvent = newState.pendingEvents.find((e) => e.type === "battleEnd");
-    expect(endEvent).toBeDefined();
+  // Check that battle ended in victory
+  expect(newState.activeBattle?.battleState.phase).toBe(BattlePhase.Victory);
+
+  // Check for battleEnd event
+  const endEvent = newState.pendingEvents.find((e) => e.type === "battleEnd");
+  expect(endEvent).toBeDefined();
+  if (endEvent?.type === "battleEnd") {
+    expect(endEvent.isVictory).toBe(true);
   }
 });
 

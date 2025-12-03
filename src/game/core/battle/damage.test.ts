@@ -209,7 +209,7 @@ test("calculateDamage returns 0 damage for self-targeting moves", () => {
   expect(result.isDodged).toBe(false);
 });
 
-test("calculateDamage returns 0 damage for zero power moves", () => {
+test("calculateDamage returns 0 damage for zero power and zero flat damage moves", () => {
   const attacker = {
     battleStats: {
       strength: 20,
@@ -246,6 +246,47 @@ test("calculateDamage returns 0 damage for zero power moves", () => {
   const result = calculateDamage(attacker, defender, move);
 
   expect(result.damage).toBe(0);
+});
+
+test("calculateDamage deals damage for zero power moves with flat damage", () => {
+  const attacker = {
+    battleStats: {
+      strength: 10,
+      endurance: 10,
+      agility: 10,
+      precision: 100, // Guarantee hit
+      fortitude: 10,
+      cunning: 10,
+    },
+    criticalChance: 0,
+    criticalDamage: 1.5,
+  };
+  const defender = {
+    battleStats: {
+      strength: 10,
+      endurance: 0, // No mitigation
+      agility: 10,
+      precision: 10,
+      fortitude: 10,
+      cunning: 10,
+    },
+    resistances: {
+      slashing: 0,
+      piercing: 0,
+      crushing: 0,
+      chemical: 0,
+      thermal: 0,
+      electric: 0,
+    },
+    dodgeChance: 0,
+  };
+  const move = createTestMove({ power: 0, flatDamage: 15 });
+
+  const result = calculateDamage(attacker, defender, move);
+
+  // Damage should be based on flatDamage, variance, and mitigations
+  expect(result.damage).toBeGreaterThan(0);
+  expect(result.isHit).toBe(true);
 });
 
 test("calculateDamage deals at least 1 damage on hit", () => {
