@@ -21,7 +21,7 @@ import type {
   ExplorationRequirements,
 } from "@/game/types/activity";
 import type { Tick } from "@/game/types/common";
-import { toMicro } from "@/game/types/common";
+import { PERCENTAGE_MAX, toMicro } from "@/game/types/common";
 import { ActivityState, GROWTH_STAGE_ORDER } from "@/game/types/constants";
 import type { ExplorationActivity } from "@/game/types/exploration";
 import type { Pet } from "@/game/types/pet";
@@ -539,13 +539,13 @@ export function getExplorationProgress(
       locationId: exploration.locationId,
       totalTicks: exploration.durationTicks,
       ticksRemaining: exploration.ticksRemaining,
-      progressPercent: 100,
+      progressPercent: PERCENTAGE_MAX,
     };
   }
 
   const elapsed = exploration.durationTicks - exploration.ticksRemaining;
   const progressPercent = Math.round(
-    (elapsed / exploration.durationTicks) * 100,
+    (elapsed / exploration.durationTicks) * PERCENTAGE_MAX,
   );
 
   return {

@@ -7,6 +7,7 @@ import { getInitialGrowthStage, getSpeciesById } from "@/game/data/species";
 import type { Move, MoveSlot } from "@/game/types/move";
 import type { Pet } from "@/game/types/pet";
 import type { BattleStats } from "@/game/types/stats";
+import { BATTLE_REWARD_CONSTANTS } from "./constants";
 import { calculateDerivedStats } from "./stats";
 import {
   type Combatant,
@@ -504,11 +505,17 @@ export function calculateBattleRewards(
   // Base rewards scaled by enemy stats
   const enemyPower =
     state.enemy.battleStats.strength + state.enemy.battleStats.endurance;
-  const baseCoins = Math.floor(5 + enemyPower * 0.5);
+  const baseCoins = Math.floor(
+    BATTLE_REWARD_CONSTANTS.BASE_COIN_REWARD +
+      enemyPower * BATTLE_REWARD_CONSTANTS.COIN_POWER_SCALING,
+  );
 
   return {
     coins: baseCoins,
-    experience: Math.floor(10 + enemyPower * 0.3),
+    experience: Math.floor(
+      BATTLE_REWARD_CONSTANTS.BASE_EXPERIENCE_REWARD +
+        enemyPower * BATTLE_REWARD_CONSTANTS.EXPERIENCE_POWER_SCALING,
+    ),
     items: [], // Items could be added based on encounter tables
   };
 }

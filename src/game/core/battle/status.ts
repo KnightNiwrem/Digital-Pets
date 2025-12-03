@@ -9,6 +9,7 @@ import {
   StatusEffectType,
 } from "@/game/types/move";
 import type { BattleStats } from "@/game/types/stats";
+import { DAMAGE_CONSTANTS } from "./damage";
 
 /**
  * Status resistance bonus per point of Fortitude (%).
@@ -34,7 +35,9 @@ export function applyMoveEffect(
     effect.type === StatusEffectType.DamageOverTime ||
     effect.type === StatusEffectType.Stun
   ) {
-    const resistChance = (targetFortitude * FORTITUDE_RESIST_BONUS) / 100;
+    const resistChance =
+      (targetFortitude * FORTITUDE_RESIST_BONUS) /
+      DAMAGE_CONSTANTS.PERCENTAGE_SCALE;
     if (Math.random() < resistChance) {
       return null; // Resisted
     }
@@ -102,7 +105,7 @@ export function calculateEffectiveStats(
       effect.stat
     ) {
       const currentValue = effectiveStats[effect.stat];
-      const modifier = effect.value / 100;
+      const modifier = effect.value / DAMAGE_CONSTANTS.PERCENTAGE_SCALE;
       const multiplier =
         effect.type === StatusEffectType.StatBuff ? 1 + modifier : 1 - modifier;
       effectiveStats[effect.stat] = Math.max(

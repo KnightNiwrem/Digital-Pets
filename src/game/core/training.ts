@@ -12,7 +12,7 @@ import type {
   TrainingSession,
   TrainingSessionType,
 } from "@/game/types/activity";
-import { type Tick, toMicro } from "@/game/types/common";
+import { PERCENTAGE_MAX, type Tick, toMicro } from "@/game/types/common";
 import {
   ActivityState,
   GROWTH_STAGE_ORDER,
@@ -264,5 +264,5 @@ export function cancelTraining(pet: Pet): {
  */
 export function getTrainingProgress(training: ActiveTraining): number {
   const elapsed = training.durationTicks - training.ticksRemaining;
-  return Math.round((elapsed / training.durationTicks) * 100);
+  return Math.round((elapsed / training.durationTicks) * PERCENTAGE_MAX);
 }
