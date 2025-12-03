@@ -3,10 +3,15 @@
  */
 
 import {
+  type DialogueAction,
+  DialogueActionType,
+  type DialogueCondition,
+  DialogueConditionType,
   type DialogueNode,
   DialogueNodeType,
   type DialogueTree,
 } from "@/game/types/npc";
+import { QuestState } from "@/game/types/quest";
 
 /**
  * Helper to create a message node.
@@ -30,7 +35,12 @@ function messageNode(
 function choiceNode(
   id: string,
   text: string,
-  choices: { text: string; nextNodeId: string }[],
+  choices: {
+    text: string;
+    nextNodeId: string;
+    conditions?: DialogueCondition[];
+    action?: DialogueAction;
+  }[],
 ): DialogueNode {
   return {
     id,
@@ -117,6 +127,21 @@ export const oakDialogue: DialogueTree = {
       "greeting",
       "Ah, a fellow pet trainer! I've dedicated my life to understanding these wonderful creatures. How can I assist you?",
       [
+        {
+          text: "I'm ready to start my journey!",
+          nextNodeId: "start_adventure",
+          conditions: [
+            {
+              type: DialogueConditionType.QuestState,
+              targetId: "tutorial_first_steps",
+              value: QuestState.Available,
+            },
+          ],
+          action: {
+            type: DialogueActionType.StartQuest,
+            targetId: "tutorial_first_steps",
+          },
+        },
         { text: "Any tips for training?", nextNodeId: "training_tips" },
         {
           text: "What should new trainers know?",
@@ -124,6 +149,11 @@ export const oakDialogue: DialogueTree = {
         },
         { text: "I should get going.", nextNodeId: "farewell" },
       ],
+    ),
+    start_adventure: messageNode(
+      "start_adventure",
+      "That's the spirit! I've prepared a few tasks to help you get started. Open your Quest Log to see what needs to be done.",
+      "greeting",
     ),
     training_tips: messageNode(
       "training_tips",

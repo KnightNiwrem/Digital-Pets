@@ -2,9 +2,14 @@
  * Dialogue navigation logic.
  */
 
+import { getQuestState } from "@/game/core/quests/quests";
 import { getDialogue } from "@/game/data/dialogues";
 import { getNpc } from "@/game/data/npcs";
+import type { GameState } from "@/game/types/gameState";
 import {
+  type DialogueAction,
+  type DialogueCondition,
+  DialogueConditionType,
   type DialogueNode,
   DialogueNodeType,
   type DialogueState,
@@ -29,6 +34,47 @@ export interface AdvanceDialogueResult {
   state?: DialogueState;
   node?: DialogueNode;
   ended: boolean;
+}
+
+/**
+ * Check if a condition is met.
+ */
+export function checkCondition(
+  state: GameState,
+  condition: DialogueCondition,
+): boolean {
+  switch (condition.type) {
+    case DialogueConditionType.QuestState: {
+      const questState = getQuestState(state, condition.targetId) || "locked";
+      const targetValue = condition.value as string;
+      const comparison = condition.comparison || "eq";
+
+      if (comparison === "eq") return questState === targetValue;
+      if (comparison === "neq") return questState !== targetValue;
+      return questState === targetValue;
+    }
+    case DialogueConditionType.SkillLevel: {
+      const skill =
+        state.player.skills[
+          condition.targetId as keyof typeof state.player.skills
+        ];
+      if (!skill) return false;
+      const level = skill.level;
+      const targetLevel = Number(condition.value);
+      const comparison = condition.comparison || "gte";
+
+      if (comparison === "eq") return level === targetLevel;
+      if (comparison === "neq") return level !== targetLevel;
+      if (comparison === "gte") return level >= targetLevel;
+      if (comparison === "gt") return level > targetLevel;
+      if (comparison === "lte") return level <= targetLevel;
+      if (comparison === "lt") return level < targetLevel;
+      return level >= targetLevel;
+    }
+    // Add other condition types here as needed
+    default:
+      return true;
+  }
 }
 
 /**
@@ -171,7 +217,8 @@ export function advanceDialogue(state: DialogueState): AdvanceDialogueResult {
 export function selectChoice(
   state: DialogueState,
   choiceIndex: number,
-): AdvanceDialogueResult {
+  gameState?: GameState,
+): AdvanceDialogueResult & { action?: DialogueAction } {
   const currentNode = getCurrentNode(state);
   if (!currentNode) {
     return {
@@ -217,6 +264,22 @@ export function selectChoice(
     };
   }
 
+  // Check conditions if gameState is provided
+  if (gameState && choice.conditions) {
+    const conditionsMet = choice.conditions.every((condition) =>
+      checkCondition(gameState, condition),
+    );
+    if (!conditionsMet) {
+      return {
+        success: false,
+        message: "Conditions not met for this choice.",
+        state,
+        node: currentNode,
+        ended: false,
+      };
+    }
+  }
+
   const dialogue = getDialogue(state.dialogueId);
   const nextNode = dialogue?.nodes[choice.nextNodeId];
   if (!nextNode) {
@@ -243,6 +306,7 @@ export function selectChoice(
     state: newState,
     node: nextNode,
     ended,
+    action: choice.action,
   };
 }
 
