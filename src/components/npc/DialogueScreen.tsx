@@ -64,9 +64,7 @@ export function DialogueScreen({
 
       const result = selectChoice(dialogueState, index, gameState || undefined);
       if (result.success && result.state && result.node) {
-        setDialogue({ state: result.state, node: result.node });
-
-        // Handle any actions associated with the choice
+        // Handle quest actions BEFORE advancing dialogue
         if (result.action && gameState) {
           const questActionMap: Record<
             string,
@@ -79,11 +77,16 @@ export function DialogueScreen({
           const actionFn = questActionMap[result.action.type];
           if (actionFn) {
             const questResult = actionFn(gameState, result.action.targetId);
-            if (questResult.success) {
-              actions.updateState(() => questResult.state);
+            if (!questResult.success) {
+              // Don't advance dialogue if quest action failed
+              return;
             }
+            actions.updateState(() => questResult.state);
           }
         }
+
+        // Only advance dialogue after successful quest action (or no action)
+        setDialogue({ state: result.state, node: result.node });
       }
     },
     [dialogueState, gameState, actions],

@@ -89,7 +89,7 @@ export function checkCondition(
     }
     case DialogueConditionType.HasItem: {
       const itemId = condition.targetId;
-      const quantity = Number(condition.value) || 1;
+      const quantity = Number(condition.value ?? 1);
       if (Number.isNaN(quantity)) {
         return false;
       }

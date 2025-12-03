@@ -30,22 +30,20 @@ describe("Oak Dialogue Conditions", () => {
 
     const choice = getOakChoice("start my journey");
     expect(choice).toBeDefined();
+    expect(choice?.conditions).toBeDefined();
 
-    if (choice?.conditions) {
-      const met = choice.conditions.every((c) => checkCondition(state, c));
-      expect(met).toBe(true);
-    }
+    const met = choice?.conditions?.every((c) => checkCondition(state, c));
+    expect(met).toBe(true);
   });
 
   test("Second quest option should be hidden initially", () => {
     const state = createInitialGameState();
     const choice = getOakChoice("next challenge");
     expect(choice).toBeDefined();
+    expect(choice?.conditions).toBeDefined();
 
-    if (choice?.conditions) {
-      const met = choice.conditions.every((c) => checkCondition(state, c));
-      expect(met).toBe(false);
-    }
+    const met = choice?.conditions?.every((c) => checkCondition(state, c));
+    expect(met).toBe(false);
   });
 
   test("Second quest option should be available after completing first quest", () => {
@@ -59,11 +57,10 @@ describe("Oak Dialogue Conditions", () => {
 
     const choice = getOakChoice("next challenge");
     expect(choice).toBeDefined();
+    expect(choice?.conditions).toBeDefined();
 
-    if (choice?.conditions) {
-      const met = choice.conditions.every((c) => checkCondition(state, c));
-      expect(met).toBe(true);
-    }
+    const met = choice?.conditions?.every((c) => checkCondition(state, c));
+    expect(met).toBe(true);
   });
 
   test("Third quest option should be available after completing second quest", () => {
@@ -81,10 +78,9 @@ describe("Oak Dialogue Conditions", () => {
 
     const choice = getOakChoice("make my pet stronger");
     expect(choice).toBeDefined();
+    expect(choice?.conditions).toBeDefined();
 
-    if (choice?.conditions) {
-      const met = choice.conditions.every((c) => checkCondition(state, c));
-      expect(met).toBe(true);
-    }
+    const met = choice?.conditions?.every((c) => checkCondition(state, c));
+    expect(met).toBe(true);
   });
 });

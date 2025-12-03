@@ -29,5 +29,6 @@ export const homeLocation: Location = {
     FacilityType.PlayArea,
     FacilityType.Storage,
   ],
+  npcIds: ["trainer_oak"],
   emoji: "🏠",
 };
