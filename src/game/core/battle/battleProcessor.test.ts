@@ -137,7 +137,7 @@ test("processBattleTick processes turn resolution automatically", () => {
   expect(newState.activeBattle?.battleState.turn).toBe(battleState.turn + 1);
 });
 
-test("processBattleTick emits turnResolved event during turn resolution", () => {
+test("processBattleTick emits battleAction event during turn resolution", () => {
   const battleState = createTestBattleState({
     phase: BattlePhase.TurnResolution,
     playerActed: true,

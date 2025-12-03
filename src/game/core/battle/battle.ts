@@ -327,8 +327,8 @@ function executeTurnForActor(
           turn: state.turn,
           message:
             endCheck.winner === "player"
-              ? `${state.enemy.name} is defeated! Victory!`
-              : `${state.player.name} is defeated...`,
+              ? `${newEnemy.name} is defeated! Victory!`
+              : `${newPlayer.name} is defeated...`,
           type: "system",
         },
       ],
