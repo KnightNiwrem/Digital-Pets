@@ -24,10 +24,15 @@ export function SleepToggle() {
   const isSleeping = petInfo.isSleeping;
 
   const handleToggle = () => {
-    // Capture current sleep state before the update
-    const wasAsleep = isSleeping;
     actions.updateState((currentState) => {
-      const result = wasAsleep ? wakePet(currentState) : sleepPet(currentState);
+      // Use latest state from callback to avoid race conditions
+      const currentPetInfo = selectPetInfo(currentState);
+      if (!currentPetInfo) {
+        return currentState;
+      }
+      const result = currentPetInfo.isSleeping
+        ? wakePet(currentState)
+        : sleepPet(currentState);
       if (!result.success) {
         setErrorMessage(result.message);
       }

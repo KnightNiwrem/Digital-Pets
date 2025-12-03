@@ -12,8 +12,8 @@ import type { CareActionResult } from "@/game/state/actions/care";
 import { selectInventory } from "@/game/state/selectors";
 import type { GameState } from "@/game/types/gameState";
 
-/** Item categories that can be used with care actions */
-type CareItemCategory = "food" | "drink" | "cleaning" | "toy";
+/** Item categories that can be used with care actions, derived from ItemSelector */
+type CareItemCategory = React.ComponentProps<typeof ItemSelector>["category"];
 
 interface CareActionButtonProps {
   /** Action function to execute when an item is selected */
