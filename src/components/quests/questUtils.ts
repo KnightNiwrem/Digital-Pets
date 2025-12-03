@@ -28,9 +28,5 @@ export function hasExpiration(type: QuestType): boolean {
 export function createProgressMap(
   quests: QuestProgress[],
 ): Map<string, QuestProgress> {
-  const map = new Map<string, QuestProgress>();
-  for (const progress of quests) {
-    map.set(progress.questId, progress);
-  }
-  return map;
+  return new Map(quests.map((progress) => [progress.questId, progress]));
 }
