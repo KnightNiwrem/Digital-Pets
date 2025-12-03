@@ -159,13 +159,13 @@ export type CareThreshold = (typeof CareThreshold)[keyof typeof CareThreshold];
 export const CARE_THRESHOLD_BOUNDARIES = {
   /** At or below 0% - Critical state */
   CRITICAL: 0,
-  /** 1-25% - Distressed state */
+  /** For percentages > 0% and <= 25% - Distressed state */
   DISTRESSED: 25,
-  /** 26-50% - Uncomfortable state */
+  /** For percentages > 25% and <= 50% - Uncomfortable state */
   UNCOMFORTABLE: 50,
-  /** 51-75% - Okay state */
+  /** For percentages > 50% and <= 75% - Okay state */
   OKAY: 75,
-  // 76-100% - Content state (no upper bound needed)
+  // For percentages > 75% - Content state (no upper bound needed)
 } as const;
 
 /**
