@@ -8,7 +8,7 @@ import { ErrorDialog } from "@/components/ui/error-dialog";
 import { CareUI } from "@/game/data/uiText";
 import { useGameState } from "@/game/hooks/useGameState";
 import { sleepPet, wakePet } from "@/game/state/actions/sleep";
-import { selectPet, selectPetInfo } from "@/game/state/selectors";
+import { selectPetInfo } from "@/game/state/selectors";
 
 /**
  * Button to toggle the pet's sleep state.
@@ -25,11 +25,12 @@ export function SleepToggle() {
 
   const handleToggle = () => {
     actions.updateState((currentState) => {
-      const currentPet = selectPet(currentState);
-      if (!currentPet) {
+      // Use latest state from callback to avoid race conditions
+      const currentPetInfo = selectPetInfo(currentState);
+      if (!currentPetInfo) {
         return currentState;
       }
-      const result = currentPet.sleep.isSleeping
+      const result = currentPetInfo.isSleeping
         ? wakePet(currentState)
         : sleepPet(currentState);
       if (!result.success) {

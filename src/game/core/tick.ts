@@ -60,8 +60,8 @@ export function processPetTick(pet: Pet): Pet {
   // 3. Poop generation check
   const newPoop = processPoopTick(pet);
 
-  // 4. Care stat decay
-  const newCareStats = applyCareDecay(pet);
+  // 4. Care stat decay (use pre-computed max stats for efficiency)
+  const newCareStats = applyCareDecay(pet, maxStats);
 
   // 5. Sleep timer progress
   const newSleep = processSleepTick(pet.sleep);

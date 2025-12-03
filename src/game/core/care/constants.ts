@@ -3,6 +3,16 @@
  *
  * Per spec (care-system.md, training.md):
  * All time-based mechanics operate on game ticks (30 seconds each).
+ *
+ * ## Micro-Unit System
+ *
+ * Values are stored in micro-units (1/1000) to preserve precision during
+ * tick-based calculations. Display values are derived by dividing by 1000.
+ *
+ * Example conversions:
+ * - Micro-value 50000 → Display value 50
+ * - CARE_DECAY_AWAKE (50 micro/tick) → 6 display units/hour
+ *   (50 micro × 120 ticks/hour = 6000 micro/hour = 6 display/hour)
  */
 
 import type { MicroValue, Tick } from "@/game/types/common";
