@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ItemSelector } from "@/components/inventory/ItemSelector";
 import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
+import { CareUI } from "@/game/data/uiText";
 import { useGameState } from "@/game/hooks/useGameState";
 import { playWithPet } from "@/game/state/actions/care";
 import { selectInventory } from "@/game/state/selectors";
@@ -42,16 +43,16 @@ export function PlayButton({ onSuccess }: PlayButtonProps) {
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 flex-1"
       >
-        <span>🎾</span>
-        <span>Play</span>
+        <span>{CareUI.play.icon}</span>
+        <span>{CareUI.play.label}</span>
       </Button>
       <ItemSelector
         open={open}
         onOpenChange={setOpen}
         inventory={selectInventory(state)}
-        category="toy"
-        title="Select Toy"
-        description="Choose a toy to play with your pet."
+        category={CareUI.play.category}
+        title={CareUI.play.selectorTitle}
+        description={CareUI.play.selectorDescription}
         onSelect={handleSelect}
       />
       <ErrorDialog

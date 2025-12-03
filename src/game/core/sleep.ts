@@ -20,6 +20,11 @@ export interface SleepTransitionResult {
 }
 
 /**
+ * Activity reason string for sleep gating checks.
+ */
+const SLEEP_ACTIVITY_REASON = "put to sleep";
+
+/**
  * Default minimum sleep hours by growth stage.
  */
 const DEFAULT_MIN_SLEEP_HOURS: Record<GrowthStage, number> = {
@@ -82,7 +87,7 @@ export function putToSleep(pet: Pet): SleepTransitionResult {
     pet.activityState !== ActivityState.Idle &&
     pet.activityState !== ActivityState.Sleeping
   ) {
-    const gatingCheck = checkActivityIdle(pet, "put to sleep");
+    const gatingCheck = checkActivityIdle(pet, SLEEP_ACTIVITY_REASON);
     return {
       success: false,
       sleep: pet.sleep,

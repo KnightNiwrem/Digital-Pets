@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ErrorDialog } from "@/components/ui/error-dialog";
+import { CareUI } from "@/game/data/uiText";
 import { useGameState } from "@/game/hooks/useGameState";
 import { sleepPet, wakePet } from "@/game/state/actions/sleep";
 import { selectPet, selectPetInfo } from "@/game/state/selectors";
@@ -45,8 +46,12 @@ export function SleepToggle() {
         variant={isSleeping ? "secondary" : "default"}
         className="flex items-center gap-2 flex-1"
       >
-        <span>{isSleeping ? "☀️" : "🌙"}</span>
-        <span>{isSleeping ? "Wake Up" : "Sleep"}</span>
+        <span>
+          {isSleeping ? CareUI.sleep.wakeUpIcon : CareUI.sleep.sleepIcon}
+        </span>
+        <span>
+          {isSleeping ? CareUI.sleep.wakeUpLabel : CareUI.sleep.sleepLabel}
+        </span>
       </Button>
       <ErrorDialog
         open={errorMessage !== null}
