@@ -3,11 +3,13 @@
  * Uses the activity-based exploration system with requirements, cooldowns, and drop tables.
  */
 
+import { useMemo } from "react";
 import {
   ActivitySelect,
   type ActivityStatus,
   ExplorationProgress,
 } from "@/components/exploration";
+import { LocationHeader } from "@/components/map";
 import {
   ActivityBlockedCard,
   getActivityBlockingInfo,
@@ -46,50 +48,31 @@ export function ExplorationScreen({
 }) {
   const { state, isLoading, actions } = useGameState();
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
-
+  // All hooks must be called unconditionally before any early returns
   const pet = state ? selectPet(state) : null;
-
-  if (!state || !pet) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">No pet to explore with.</p>
-      </div>
-    );
-  }
-
-  const currentLocationId = selectCurrentLocationId(state);
-  const currentTick = selectTotalTicks(state);
-  const skills = selectSkills(state);
-  const currentEnergy = toDisplay(pet.energyStats.energy);
-  const isExploring = pet.activityState === ActivityState.Exploring;
-  const isBlocked = pet.activityState !== ActivityState.Idle;
-  const blockingInfo = getActivityBlockingInfo(pet, "explore");
+  const currentLocationId = state ? selectCurrentLocationId(state) : "home";
+  const currentTick = state ? selectTotalTicks(state) : 0;
+  const skills = state ? selectSkills(state) : null;
   const currentLocation = getLocation(currentLocationId);
 
-  // Check if current location is a wild area
-  const isWildArea = currentLocation?.type === LocationType.Wild;
-
-  // Check if location has battle area
-  const hasBattleArea = currentLocation?.facilities?.includes(
-    FacilityType.BattleArea,
+  // Get completed quest IDs for requirement checking (memoized for performance)
+  const completedQuestIds = useMemo(
+    () =>
+      state?.quests
+        .filter((q) => q.state === "completed")
+        .map((q) => q.questId) ?? [],
+    [state?.quests],
   );
 
-  // Get completed quest IDs for requirement checking
-  const completedQuestIds = state.quests
-    .filter((q) => q.state === "completed")
-    .map((q) => q.questId);
+  // Get available activities for this location with their status (memoized for performance)
+  const availableActivities = useMemo(
+    () => getAvailableActivities(currentLocationId),
+    [currentLocationId],
+  );
 
-  // Get available activities for this location with their status
-  const availableActivities = getAvailableActivities(currentLocationId);
-  const activityStatuses: ActivityStatus[] = availableActivities.map(
-    (activity) => {
+  const activityStatuses: ActivityStatus[] = useMemo(() => {
+    if (!pet || !skills) return [];
+    return availableActivities.map((activity) => {
       const canStart = canStartExplorationActivity(
         pet,
         skills,
@@ -109,7 +92,44 @@ export function ExplorationScreen({
         canStart,
         cooldownRemaining,
       };
-    },
+    });
+  }, [
+    availableActivities,
+    pet,
+    skills,
+    completedQuestIds,
+    currentLocationId,
+    currentTick,
+  ]);
+
+  // Early returns after all hooks
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!state || !pet) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">No pet to explore with.</p>
+      </div>
+    );
+  }
+
+  const currentEnergy = toDisplay(pet.energyStats.energy);
+  const isExploring = pet.activityState === ActivityState.Exploring;
+  const isBlocked = pet.activityState !== ActivityState.Idle;
+  const blockingInfo = getActivityBlockingInfo(pet, "explore");
+
+  // Check if current location is a wild area
+  const isWildArea = currentLocation?.type === LocationType.Wild;
+
+  // Check if location has battle area
+  const hasBattleArea = currentLocation?.facilities?.includes(
+    FacilityType.BattleArea,
   );
 
   // Handle starting exploration
@@ -146,36 +166,19 @@ export function ExplorationScreen({
   return (
     <div className="space-y-4">
       {/* Location & Energy Header */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{currentLocation?.emoji ?? "📍"}</span>
-              <CardTitle className="text-lg">
-                {currentLocation?.name ?? "Unknown Location"}
-              </CardTitle>
-            </div>
-            <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
-              <span className="text-lg">⚡</span>
-              <span className="font-medium">{currentEnergy}</span>
-            </div>
-          </div>
-        </CardHeader>
-        {!isExploring && (
-          <CardContent>
-            {isWildArea ? (
-              <p className="text-sm text-muted-foreground">
-                Explore this wild area to find useful items. Activities cost
-                energy and take time to complete.
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Travel to a wild area to explore and forage for items.
-              </p>
-            )}
-          </CardContent>
-        )}
-      </Card>
+      <LocationHeader location={currentLocation} currentEnergy={currentEnergy}>
+        {!isExploring &&
+          (isWildArea ? (
+            <p className="text-sm text-muted-foreground">
+              Explore this wild area to find useful items. Activities cost
+              energy and take time to complete.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Travel to a wild area to explore and forage for items.
+            </p>
+          ))}
+      </LocationHeader>
 
       {/* Activity Blocking Status */}
       {blockingInfo && !isExploring && (

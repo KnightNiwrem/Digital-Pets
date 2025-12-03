@@ -9,6 +9,7 @@ import type { CanStartExplorationResult } from "@/game/core/exploration/explorat
 import type { Tick } from "@/game/types/common";
 import { formatTicksAsTime } from "@/game/types/common";
 import type { ExplorationActivity } from "@/game/types/exploration";
+import { getActivityIcon } from "./utils";
 
 /**
  * Status information for a single activity.
@@ -29,24 +30,6 @@ interface ActivitySelectProps {
   currentEnergy: number;
   /** Callback when an activity is selected to start */
   onStartActivity: (activityId: string) => void;
-}
-
-/**
- * Get an emoji icon for an activity based on its ID.
- */
-function getActivityIcon(activityId: string): string {
-  switch (activityId) {
-    case "foraging":
-      return "🌿";
-    case "mining":
-      return "⛏️";
-    case "fishing":
-      return "🎣";
-    case "deep_exploration":
-      return "🗺️";
-    default:
-      return "🔍";
-  }
 }
 
 /**

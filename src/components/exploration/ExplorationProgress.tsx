@@ -9,6 +9,7 @@ import { getActivityById } from "@/game/data/exploration/activities";
 import { getLocation } from "@/game/data/locations";
 import type { ActiveExploration } from "@/game/types/activity";
 import { formatTicksAsTime } from "@/game/types/common";
+import { getActivityIcon } from "./utils";
 
 interface ExplorationProgressProps {
   exploration: ActiveExploration;
@@ -24,24 +25,6 @@ function getExplorationProgress(exploration: ActiveExploration): number {
   }
   const elapsed = exploration.durationTicks - exploration.ticksRemaining;
   return Math.round((elapsed / exploration.durationTicks) * 100);
-}
-
-/**
- * Get an emoji icon for an activity based on its ID.
- */
-function getActivityIcon(activityId: string): string {
-  switch (activityId) {
-    case "foraging":
-      return "🌿";
-    case "mining":
-      return "⛏️";
-    case "fishing":
-      return "🎣";
-    case "deep_exploration":
-      return "🗺️";
-    default:
-      return "🔍";
-  }
 }
 
 /**
