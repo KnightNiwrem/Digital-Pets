@@ -5,19 +5,23 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type Combatant, canUseMove } from "@/game/core/battle/turn";
+import {
+  DamageType,
+  type DamageType as DamageTypeValue,
+} from "@/game/types/constants";
 import type { Move, MoveSlot } from "@/game/types/move";
 import { cn } from "@/lib/utils";
 
-const DAMAGE_TYPE_EMOJIS: Record<string, string> = {
-  slashing: "⚔️",
-  piercing: "🗡️",
-  crushing: "🔨",
-  chemical: "🧪",
-  thermal: "🔥",
-  electric: "⚡",
+const DAMAGE_TYPE_EMOJIS: Record<DamageTypeValue, string> = {
+  [DamageType.Slashing]: "⚔️",
+  [DamageType.Piercing]: "🗡️",
+  [DamageType.Crushing]: "🔨",
+  [DamageType.Chemical]: "🧪",
+  [DamageType.Thermal]: "🔥",
+  [DamageType.Electric]: "⚡",
 };
 
-function getDamageTypeEmoji(type: string): string {
+function getDamageTypeEmoji(type: DamageTypeValue): string {
   return DAMAGE_TYPE_EMOJIS[type] ?? "💥";
 }
 

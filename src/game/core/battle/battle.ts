@@ -283,35 +283,44 @@ function addActionLogs(
 }
 
 /**
- * Execute the player's turn.
+ * Execute a turn for a given actor (player or enemy).
+ * Shared logic for both player and enemy turns.
  */
-export function executePlayerTurn(state: BattleState, move: Move): BattleState {
-  if (state.phase !== BattlePhase.PlayerTurn) {
-    return state;
-  }
+function executeTurnForActor(
+  state: BattleState,
+  move: Move,
+  actorId: "player" | "enemy",
+): BattleState {
+  const isPlayer = actorId === "player";
+  const actorCombatant = isPlayer ? state.player : state.enemy;
+  const targetCombatant = isPlayer ? state.enemy : state.player;
 
   const { actor, target, action } = executeAction(
-    state.player,
-    state.enemy,
+    actorCombatant,
+    targetCombatant,
     move,
-    "player",
+    actorId,
   );
 
   const newLog = addActionLogs(
     state.log,
     state.turn,
     action,
-    state.player.name,
-    state.enemy.name,
+    actorCombatant.name,
+    targetCombatant.name,
   );
 
-  // Check for battle end
-  const endCheck = checkBattleEnd(actor, target);
+  // Update combatants - actor and target positions depend on who acted
+  const newPlayer = isPlayer ? actor : target;
+  const newEnemy = isPlayer ? target : actor;
+
+  // Check for battle end (always check player vs enemy in consistent order)
+  const endCheck = checkBattleEnd(newPlayer, newEnemy);
   if (endCheck.isOver) {
     return {
       ...state,
-      player: actor,
-      enemy: target,
+      player: newPlayer,
+      enemy: newEnemy,
       log: [
         ...newLog,
         {
@@ -325,7 +334,8 @@ export function executePlayerTurn(state: BattleState, move: Move): BattleState {
       ],
       phase:
         endCheck.winner === "player" ? BattlePhase.Victory : BattlePhase.Defeat,
-      playerActed: true,
+      playerActed: isPlayer ? true : state.playerActed,
+      enemyActed: isPlayer ? state.enemyActed : true,
     };
   }
 
@@ -337,13 +347,24 @@ export function executePlayerTurn(state: BattleState, move: Move): BattleState {
 
   return {
     ...state,
-    player: actor,
-    enemy: target,
+    player: newPlayer,
+    enemy: newEnemy,
     log: newLog,
     phase: nextPhase,
     turnOrderIndex: nextIndex,
-    playerActed: true,
+    playerActed: isPlayer ? true : state.playerActed,
+    enemyActed: isPlayer ? state.enemyActed : true,
   };
+}
+
+/**
+ * Execute the player's turn.
+ */
+export function executePlayerTurn(state: BattleState, move: Move): BattleState {
+  if (state.phase !== BattlePhase.PlayerTurn) {
+    return state;
+  }
+  return executeTurnForActor(state, move, "player");
 }
 
 /**
@@ -353,62 +374,8 @@ export function executeEnemyTurn(state: BattleState): BattleState {
   if (state.phase !== BattlePhase.EnemyTurn) {
     return state;
   }
-
   const move = selectAIMove(state.enemy);
-  const { actor, target, action } = executeAction(
-    state.enemy,
-    state.player,
-    move,
-    "enemy",
-  );
-
-  const newLog = addActionLogs(
-    state.log,
-    state.turn,
-    action,
-    state.enemy.name,
-    state.player.name,
-  );
-
-  // Check for battle end
-  const endCheck = checkBattleEnd(target, actor);
-  if (endCheck.isOver) {
-    return {
-      ...state,
-      player: target,
-      enemy: actor,
-      log: [
-        ...newLog,
-        {
-          turn: state.turn,
-          message:
-            endCheck.winner === "player"
-              ? `${state.enemy.name} is defeated! Victory!`
-              : `${state.player.name} is defeated...`,
-          type: "system",
-        },
-      ],
-      phase:
-        endCheck.winner === "player" ? BattlePhase.Victory : BattlePhase.Defeat,
-      enemyActed: true,
-    };
-  }
-
-  // Determine next phase
-  const { nextPhase, nextIndex } = determineNextPhase(
-    state.turnOrder,
-    state.turnOrderIndex,
-  );
-
-  return {
-    ...state,
-    player: target,
-    enemy: actor,
-    log: newLog,
-    phase: nextPhase,
-    turnOrderIndex: nextIndex,
-    enemyActed: true,
-  };
+  return executeTurnForActor(state, move, "enemy");
 }
 
 /**

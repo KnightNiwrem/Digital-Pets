@@ -2,6 +2,7 @@
  * Pet battle card showing HP, stamina, and status effects.
  */
 
+import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getEffectSummary } from "@/game/core/battle/status";
 import type { Combatant } from "@/game/core/battle/turn";
@@ -42,7 +43,10 @@ export function PetBattleCard({
     derivedStats.maxStamina,
   );
 
-  const { buffs, debuffs, other } = getEffectSummary(statusEffects);
+  const { buffs, debuffs, other } = useMemo(
+    () => getEffectSummary(statusEffects),
+    [statusEffects],
+  );
 
   // Get species emoji for display
   const species = getSpeciesById(speciesId);

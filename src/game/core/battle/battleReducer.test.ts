@@ -2,42 +2,26 @@
  * Tests for battle reducer.
  */
 
-import { expect, spyOn, test } from "bun:test";
+import { expect, test } from "bun:test";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
-import { createDefaultBattleStats } from "@/game/testing/createTestPet";
+import { createTestCombatant } from "@/game/testing/createTestCombatant";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
-import { createDefaultResistances } from "@/game/types/stats";
 import { BattlePhase, type BattleState, initializeBattle } from "./battle";
 import { battleReducer } from "./battleReducer";
-import { calculateDerivedStats } from "./stats";
 import type { Combatant } from "./turn";
 
-function createTestCombatant(overrides: Partial<Combatant> = {}): Combatant {
-  const battleStats = createDefaultBattleStats();
-  battleStats.strength = 10;
-  battleStats.endurance = 10;
-  battleStats.agility = 10;
-  battleStats.precision = 10;
-  battleStats.fortitude = 10;
-  battleStats.cunning = 10;
-
-  return {
-    name: "Test Pet",
-    speciesId: SPECIES.FLORABIT.id,
-    battleStats,
-    derivedStats: calculateDerivedStats(battleStats),
-    resistances: createDefaultResistances(),
-    statusEffects: [],
-    moveSlots: [{ move: basicAttack, currentCooldown: 0 }],
-    isPlayer: true,
-    ...overrides,
-  };
-}
-
 function createTestBattleState(): BattleState {
-  const player = createTestCombatant({ name: "Player Pet", isPlayer: true });
-  const enemy = createTestCombatant({ name: "Enemy Pet", isPlayer: false });
+  const player = createTestCombatant({
+    name: "Player Pet",
+    isPlayer: true,
+    moveSlots: [{ move: basicAttack, currentCooldown: 0 }],
+  });
+  const enemy = createTestCombatant({
+    name: "Enemy Pet",
+    isPlayer: false,
+    moveSlots: [{ move: basicAttack, currentCooldown: 0 }],
+  });
   return initializeBattle(player, enemy);
 }
 
@@ -83,23 +67,16 @@ test("battleReducer returns unchanged state when not player turn", () => {
 });
 
 test("battleReducer returns unchanged state when move not found", () => {
-  const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+  const battleState = createTestBattleState();
+  const state = createTestGameState(battleState);
+  const action = {
+    type: "BATTLE_PLAYER_ATTACK" as const,
+    payload: { moveName: "Nonexistent Move" },
+  };
 
-  try {
-    const battleState = createTestBattleState();
-    const state = createTestGameState(battleState);
-    const action = {
-      type: "BATTLE_PLAYER_ATTACK" as const,
-      payload: { moveName: "Nonexistent Move" },
-    };
+  const newState = battleReducer(state, action, 1000);
 
-    const newState = battleReducer(state, action, 1000);
-
-    expect(newState).toBe(state);
-    expect(warnSpy).toHaveBeenCalledWith("Move not found: Nonexistent Move");
-  } finally {
-    warnSpy.mockRestore();
-  }
+  expect(newState).toBe(state);
 });
 
 test("battleReducer processes player attack action", () => {

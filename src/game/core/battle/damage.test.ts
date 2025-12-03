@@ -6,7 +6,9 @@ import { expect, test } from "bun:test";
 import { DamageType } from "@/game/types/constants";
 import type { Move } from "@/game/types/move";
 import {
+  applyVariance,
   calculateBaseDamage,
+  calculateDamage,
   calculateEnduranceMitigation,
   calculateHitChance,
   calculateResistanceMultiplier,
@@ -135,4 +137,211 @@ test("calculateEnduranceMitigation reduces damage", () => {
 test("calculateEnduranceMitigation returns 1 for 0 endurance", () => {
   const mitigation = calculateEnduranceMitigation(0);
   expect(mitigation).toBe(1);
+});
+
+// Tests for applyVariance
+test("applyVariance returns value within variance range", () => {
+  const baseDamage = 100;
+  const results: number[] = [];
+
+  for (let i = 0; i < 100; i++) {
+    results.push(applyVariance(baseDamage));
+  }
+
+  const minExpected = Math.round(baseDamage * DAMAGE_CONSTANTS.MIN_VARIANCE);
+  const maxExpected = Math.round(baseDamage * DAMAGE_CONSTANTS.MAX_VARIANCE);
+
+  for (const result of results) {
+    expect(result).toBeGreaterThanOrEqual(minExpected);
+    expect(result).toBeLessThanOrEqual(maxExpected);
+  }
+});
+
+test("applyVariance returns rounded integer", () => {
+  const baseDamage = 100;
+
+  for (let i = 0; i < 10; i++) {
+    const result = applyVariance(baseDamage);
+    expect(Number.isInteger(result)).toBe(true);
+  }
+});
+
+// Tests for calculateDamage (full pipeline)
+test("calculateDamage returns 0 damage for self-targeting moves", () => {
+  const attacker = {
+    battleStats: {
+      strength: 20,
+      endurance: 10,
+      agility: 10,
+      precision: 30,
+      fortitude: 10,
+      cunning: 10,
+    },
+    criticalChance: 10,
+    criticalDamage: 1.5,
+  };
+  const defender = {
+    battleStats: {
+      strength: 10,
+      endurance: 20,
+      agility: 10,
+      precision: 10,
+      fortitude: 10,
+      cunning: 10,
+    },
+    resistances: {
+      slashing: 0,
+      piercing: 0,
+      crushing: 0,
+      chemical: 0,
+      thermal: 0,
+      electric: 0,
+    },
+    dodgeChance: 10,
+  };
+  const move = createTestMove({ target: "self", power: 2.0 });
+
+  const result = calculateDamage(attacker, defender, move);
+
+  expect(result.damage).toBe(0);
+  expect(result.isHit).toBe(true);
+  expect(result.isCritical).toBe(false);
+  expect(result.isDodged).toBe(false);
+});
+
+test("calculateDamage returns 0 damage for zero power moves", () => {
+  const attacker = {
+    battleStats: {
+      strength: 20,
+      endurance: 10,
+      agility: 10,
+      precision: 30,
+      fortitude: 10,
+      cunning: 10,
+    },
+    criticalChance: 10,
+    criticalDamage: 1.5,
+  };
+  const defender = {
+    battleStats: {
+      strength: 10,
+      endurance: 20,
+      agility: 10,
+      precision: 10,
+      fortitude: 10,
+      cunning: 10,
+    },
+    resistances: {
+      slashing: 0,
+      piercing: 0,
+      crushing: 0,
+      chemical: 0,
+      thermal: 0,
+      electric: 0,
+    },
+    dodgeChance: 10,
+  };
+  const move = createTestMove({ power: 0, flatDamage: 0 });
+
+  const result = calculateDamage(attacker, defender, move);
+
+  expect(result.damage).toBe(0);
+});
+
+test("calculateDamage deals at least 1 damage on hit", () => {
+  const attacker = {
+    battleStats: {
+      strength: 1,
+      endurance: 10,
+      agility: 10,
+      precision: 100, // Guarantee hit
+      fortitude: 10,
+      cunning: 10,
+    },
+    criticalChance: 0,
+    criticalDamage: 1.5,
+  };
+  const defender = {
+    battleStats: {
+      strength: 10,
+      endurance: 1000, // Very high endurance
+      agility: 10,
+      precision: 10,
+      fortitude: 10,
+      cunning: 10,
+    },
+    resistances: {
+      slashing: 0,
+      piercing: 0,
+      crushing: 75, // Max resistance
+      chemical: 0,
+      thermal: 0,
+      electric: 0,
+    },
+    dodgeChance: 0,
+  };
+  const move = createTestMove({ power: 0.1, flatDamage: 0 });
+
+  const result = calculateDamage(attacker, defender, move);
+
+  if (result.isHit) {
+    expect(result.damage).toBeGreaterThanOrEqual(1);
+  }
+});
+
+test("calculateDamage applies resistance reduction", () => {
+  const attacker = {
+    battleStats: {
+      strength: 20,
+      endurance: 10,
+      agility: 10,
+      precision: 100,
+      fortitude: 10,
+      cunning: 10,
+    },
+    criticalChance: 0,
+    criticalDamage: 1.5,
+  };
+  const noResistDefender = {
+    battleStats: {
+      strength: 10,
+      endurance: 0,
+      agility: 10,
+      precision: 10,
+      fortitude: 10,
+      cunning: 10,
+    },
+    resistances: {
+      slashing: 0,
+      piercing: 0,
+      crushing: 0,
+      chemical: 0,
+      thermal: 0,
+      electric: 0,
+    },
+    dodgeChance: 0,
+  };
+  const resistDefender = {
+    ...noResistDefender,
+    resistances: {
+      slashing: 0,
+      piercing: 0,
+      crushing: 50,
+      chemical: 0,
+      thermal: 0,
+      electric: 0,
+    },
+  };
+  const move = createTestMove({ power: 2.0, flatDamage: 10 });
+
+  // Run multiple times and compare averages
+  let noResistTotal = 0;
+  let resistTotal = 0;
+  for (let i = 0; i < 50; i++) {
+    noResistTotal += calculateDamage(attacker, noResistDefender, move).damage;
+    resistTotal += calculateDamage(attacker, resistDefender, move).damage;
+  }
+
+  // Resistant defender should take less damage on average
+  expect(resistTotal / 50).toBeLessThan(noResistTotal / 50);
 });
