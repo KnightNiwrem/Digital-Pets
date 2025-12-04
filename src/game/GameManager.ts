@@ -122,18 +122,18 @@ export class GameManager {
     if (ticksToProcess >= OFFLINE_CATCHUP_THRESHOLD_TICKS) {
       // Too many ticks accumulated - use offline catchup for efficiency
       // This handles cases like browser tab being inactive for a long time
-      let ticksProcessed = 0;
       this.updateState((state) => {
         const result = processOfflineCatchup(
           state,
           ticksToProcess,
           MAX_OFFLINE_TICKS,
         );
-        ticksProcessed = result.ticksProcessed;
         return result.state;
       });
-      // Use ticksProcessed (not ticksToProcess) since offline catchup may cap at MAX_OFFLINE_TICKS
-      this.accumulator -= ticksProcessed * TICK_DURATION_MS;
+      // We assume all ticks are handled (processed or capped/discarded)
+      // so we remove them from the accumulator immediately.
+      // Do NOT rely on a variable updated in the async updateState callback.
+      this.accumulator -= ticksToProcess * TICK_DURATION_MS;
       // Reset battle accumulator since battles shouldn't continue during offline time
       this.battleAccumulator = 0;
     } else {
