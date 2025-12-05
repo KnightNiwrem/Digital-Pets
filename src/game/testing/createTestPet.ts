@@ -10,6 +10,7 @@ import type { Pet } from "@/game/types/pet";
 import { createInitialSkills } from "@/game/types/skill";
 import type { BattleStats } from "@/game/types/stats";
 import { createDefaultResistances } from "@/game/types/stats";
+import { FROZEN_TIME } from "./constants";
 
 /**
  * Create default (zero) battle stats for testing.
@@ -27,7 +28,7 @@ export function createDefaultBattleStats(): BattleStats {
 
 /**
  * Factory function to create default test pet values.
- * Using a factory ensures fresh timestamps for each call.
+ * Uses FROZEN_TIME for deterministic test fixtures.
  */
 const createDefaultTestPet = (): Pet => ({
   identity: {
@@ -38,7 +39,7 @@ const createDefaultTestPet = (): Pet => ({
   growth: {
     stage: GrowthStage.Baby,
     substage: 1,
-    birthTime: Date.now(),
+    birthTime: FROZEN_TIME,
     ageTicks: 0,
   },
   careStats: {
@@ -140,7 +141,7 @@ export function createSleepingTestPet(overrides: DeepPartial<Pet> = {}): Pet {
     sleep: {
       ...sleepOverrides,
       isSleeping: true,
-      sleepStartTime: sleepOverrides?.sleepStartTime ?? Date.now(),
+      sleepStartTime: sleepOverrides?.sleepStartTime ?? FROZEN_TIME,
     },
     activityState: ActivityState.Sleeping,
   });
@@ -157,12 +158,11 @@ export function createTestGameState(
     }
   > = {},
 ): GameState {
-  const now = Date.now();
   const { player: playerOverrides, ...stateOverrides } = overrides;
 
   return {
     version: 1,
-    lastSaveTime: now,
+    lastSaveTime: FROZEN_TIME,
     totalTicks: 0,
     pet,
     player: {
@@ -174,8 +174,8 @@ export function createTestGameState(
     },
     quests: [],
     isInitialized: true,
-    lastDailyReset: now,
-    lastWeeklyReset: now,
+    lastDailyReset: FROZEN_TIME,
+    lastWeeklyReset: FROZEN_TIME,
     pendingEvents: [],
     pendingNotifications: [],
     ...stateOverrides,
