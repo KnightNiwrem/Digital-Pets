@@ -7,6 +7,9 @@ import { createTestPet } from "@/game/testing/createTestPet";
 import { applyCareDecay, getPoopHappinessMultiplier } from "./careStats";
 import { CARE_DECAY_AWAKE, CARE_DECAY_SLEEPING } from "./constants";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 test("getPoopHappinessMultiplier returns 1.0 for 0-2 poop", () => {
   expect(getPoopHappinessMultiplier(0)).toBe(1.0);
   expect(getPoopHappinessMultiplier(1)).toBe(1.0);
@@ -41,7 +44,7 @@ test("applyCareDecay reduces stats by sleeping decay rate when sleeping", () => 
   const pet = createTestPet({
     sleep: {
       isSleeping: true,
-      sleepStartTime: Date.now(),
+      sleepStartTime: FROZEN_TIME,
       sleepTicksToday: 0,
     },
   });

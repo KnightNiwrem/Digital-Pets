@@ -6,6 +6,9 @@ import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 import { useGameNotifications } from "./useGameNotifications";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 describe("useGameNotifications", () => {
   const mockSetNotification = mock((_n: GameNotification | null) => {});
 
@@ -15,7 +18,7 @@ describe("useGameNotifications", () => {
       growth: {
         stage: GrowthStage.Baby,
         substage: 0,
-        birthTime: 0,
+        birthTime: FROZEN_TIME,
         ageTicks: 0,
       },
       activeTraining: undefined,
@@ -80,9 +83,9 @@ describe("useGameNotifications", () => {
       quests: [],
       pet: defaultPet,
       isInitialized: true,
-      lastSaveTime: Date.now(),
-      lastDailyReset: Date.now(),
-      lastWeeklyReset: Date.now(),
+      lastSaveTime: FROZEN_TIME,
+      lastDailyReset: FROZEN_TIME,
+      lastWeeklyReset: FROZEN_TIME,
       player: {
         inventory: { items: [] },
         currency: { coins: 0 },

@@ -22,6 +22,9 @@ import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import type { Move } from "@/game/types/move";
 import { createDefaultResistances } from "@/game/types/stats";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 // Helper to create test game state
 function createTestGameState(overrides: Partial<GameState> = {}): GameState {
   return {
@@ -85,7 +88,7 @@ describe("Care system integration", () => {
         growth: {
           stage: GrowthStage.Baby,
           substage: 1,
-          birthTime: Date.now(),
+          birthTime: FROZEN_TIME,
           ageTicks: 0,
         },
       }),
@@ -262,7 +265,7 @@ describe("Tick processor integration", () => {
       growth: {
         stage: GrowthStage.Baby,
         substage: 1,
-        birthTime: Date.now(),
+        birthTime: FROZEN_TIME,
         ageTicks: 0,
       },
       poop: { count: 0, ticksUntilNext: 960 }, // POOP_MICRO_THRESHOLD
@@ -284,7 +287,7 @@ describe("Tick processor integration", () => {
       growth: {
         stage: GrowthStage.Adult,
         substage: 1,
-        birthTime: Date.now() - 1000000,
+        birthTime: FROZEN_TIME - 1_000_000,
         ageTicks: 0,
       },
     });
@@ -337,7 +340,7 @@ describe("Growth system integration", () => {
       growth: {
         stage: GrowthStage.Baby,
         substage: 1,
-        birthTime: Date.now(),
+        birthTime: FROZEN_TIME,
         ageTicks: 0,
       },
     });

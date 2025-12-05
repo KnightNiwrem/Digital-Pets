@@ -23,6 +23,9 @@ import {
   useToyItem,
 } from "./items";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 function createTestState(): GameState {
   const pet = createNewPet("TestPet", SPECIES.FLORABIT.id);
   // Reduce stats to test restoration
@@ -33,9 +36,9 @@ function createTestState(): GameState {
 
   return {
     version: CURRENT_SAVE_VERSION,
-    lastSaveTime: Date.now(),
-    lastDailyReset: Date.now(),
-    lastWeeklyReset: Date.now(),
+    lastSaveTime: FROZEN_TIME,
+    lastDailyReset: FROZEN_TIME,
+    lastWeeklyReset: FROZEN_TIME,
     totalTicks: 0,
     pet,
     player: {

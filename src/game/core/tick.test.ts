@@ -10,9 +10,17 @@ import {
 import { createTestPet } from "@/game/testing/createTestPet";
 import { processPetTick } from "./tick";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 test("processPetTick increments ageTicks by 1", () => {
   const pet = createTestPet({
-    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 5 },
+    growth: {
+      stage: "baby",
+      substage: 1,
+      birthTime: FROZEN_TIME,
+      ageTicks: 5,
+    },
   });
   const updatedPet = processPetTick(pet);
 
@@ -34,7 +42,7 @@ test("processPetTick applies care stat decay when sleeping (slower rate)", () =>
   const sleepingPet = createTestPet({
     sleep: {
       isSleeping: true,
-      sleepStartTime: Date.now(),
+      sleepStartTime: FROZEN_TIME,
       sleepTicksToday: 0,
     },
   });
@@ -66,7 +74,7 @@ test("processPetTick regenerates energy faster when sleeping", () => {
     energyStats: { energy: 10_000 },
     sleep: {
       isSleeping: true,
-      sleepStartTime: Date.now(),
+      sleepStartTime: FROZEN_TIME,
       sleepTicksToday: 0,
     },
   });

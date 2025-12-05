@@ -18,6 +18,9 @@ import {
   wakeUp,
 } from "./sleep";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 test("putToSleep succeeds when pet is awake", () => {
   const pet = createTestPet();
   const result = putToSleep(pet);
@@ -81,7 +84,7 @@ test("wakeUp fails when pet is already awake", () => {
 test("processSleepTick accumulates sleep time when sleeping", () => {
   const sleep = {
     isSleeping: true,
-    sleepStartTime: Date.now(),
+    sleepStartTime: FROZEN_TIME,
     sleepTicksToday: 10,
   };
   const result = processSleepTick(sleep);
@@ -152,7 +155,7 @@ test("hasMetSleepRequirement returns true when exceeded requirement", () => {
 test("resetDailySleep resets sleepTicksToday to 0", () => {
   const sleep = {
     isSleeping: true,
-    sleepStartTime: Date.now(),
+    sleepStartTime: FROZEN_TIME,
     sleepTicksToday: 1500,
   };
   const result = resetDailySleep(sleep);

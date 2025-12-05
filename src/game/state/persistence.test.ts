@@ -14,6 +14,9 @@ import {
   validateGameState,
 } from "./persistence";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 // Mock localStorage for testing
 const localStorageData: Record<string, string> = {};
 
@@ -203,7 +206,7 @@ describe("saveGame and loadGame", () => {
     state.pendingEvents = [
       {
         type: "stageTransition",
-        timestamp: Date.now(),
+        timestamp: FROZEN_TIME,
         previousStage: "baby",
         newStage: "child",
         petName: "Test",

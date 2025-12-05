@@ -19,6 +19,9 @@ import {
 } from "./constants";
 import { getInitialPoopTimer, processPoopTick, removePoop } from "./poop";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 test("getInitialPoopTimer returns micro threshold", () => {
   expect(getInitialPoopTimer()).toBe(POOP_MICRO_THRESHOLD);
 });
@@ -38,7 +41,11 @@ test("processPoopTick decrements timer by awake decay rate when awake", () => {
 test("processPoopTick decrements timer by sleeping decay rate when asleep", () => {
   const pet = createTestPet({
     poop: { count: 0, ticksUntilNext: 100 },
-    sleep: { isSleeping: true, sleepStartTime: Date.now(), sleepTicksToday: 0 },
+    sleep: {
+      isSleeping: true,
+      sleepStartTime: FROZEN_TIME,
+      sleepTicksToday: 0,
+    },
   });
 
   const result = processPoopTick(pet);
@@ -62,7 +69,11 @@ test("processPoopTick generates poop when timer reaches 0 while awake", () => {
 test("processPoopTick generates poop when timer reaches 0 while sleeping", () => {
   const pet = createTestPet({
     poop: { count: 0, ticksUntilNext: POOP_DECAY_SLEEPING },
-    sleep: { isSleeping: true, sleepStartTime: Date.now(), sleepTicksToday: 0 },
+    sleep: {
+      isSleeping: true,
+      sleepStartTime: FROZEN_TIME,
+      sleepTicksToday: 0,
+    },
   });
 
   const result = processPoopTick(pet);
@@ -118,7 +129,11 @@ test("mid-cycle sleep extends remaining time proportionally", () => {
 
   const petSleeping = createTestPet({
     poop: { count: 0, ticksUntilNext: timerMidway },
-    sleep: { isSleeping: true, sleepStartTime: Date.now(), sleepTicksToday: 0 },
+    sleep: {
+      isSleeping: true,
+      sleepStartTime: FROZEN_TIME,
+      sleepTicksToday: 0,
+    },
   });
 
   // After one tick awake: 480 - 2 = 478

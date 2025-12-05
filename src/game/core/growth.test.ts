@@ -12,6 +12,9 @@ import { createTestPet } from "@/game/testing/createTestPet";
 import type { GrowthStage } from "@/game/types/constants";
 import { getNextStage, processGrowthTick } from "./growth";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 // Helper to get the min age ticks for a given stage from species data
 function getStageMinAgeTicks(speciesId: string, stage: GrowthStage): number {
   const species = getSpeciesById(speciesId);
@@ -35,7 +38,7 @@ test("processGrowthTick does not transition when within same stage", () => {
     growth: {
       stage: "baby",
       substage: 1,
-      birthTime: Date.now(),
+      birthTime: FROZEN_TIME,
       ageTicks: 100,
     },
   });
@@ -51,7 +54,7 @@ test("processGrowthTick transitions stage when reaching threshold", () => {
     growth: {
       stage: "baby",
       substage: 3,
-      birthTime: Date.now(),
+      birthTime: FROZEN_TIME,
       ageTicks: childMinAge - 1,
     },
     battleStats: {
@@ -90,7 +93,7 @@ for (const { from, to } of stageTransitions) {
       growth: {
         stage: from,
         substage: 3,
-        birthTime: Date.now(),
+        birthTime: FROZEN_TIME,
         ageTicks: toMinAge - 1,
       },
       battleStats: {
@@ -122,7 +125,7 @@ test("processGrowthTick handles substage transitions", () => {
     growth: {
       stage: "baby",
       substage: 1,
-      birthTime: Date.now(),
+      birthTime: FROZEN_TIME,
       ageTicks: babySubstage2.minAgeTicks - 1,
     },
   });
@@ -146,7 +149,7 @@ test("processGrowthTick recalculates battle stats on substage transition", () =>
     growth: {
       stage: "baby",
       substage: 1,
-      birthTime: Date.now(),
+      birthTime: FROZEN_TIME,
       ageTicks: babySubstage2.minAgeTicks - 1,
     },
     battleStats: {

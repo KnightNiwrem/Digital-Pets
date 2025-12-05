@@ -19,6 +19,9 @@ import { TrainingSessionType } from "@/game/types/activity";
 import { TICKS_PER_HOUR, toMicro } from "@/game/types/common";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 // canStartTraining tests
 test("canStartTraining returns true when pet is idle with enough energy", () => {
   const pet = createTestPet();
@@ -33,7 +36,11 @@ test("canStartTraining returns true when pet is idle with enough energy", () => 
 test("canStartTraining fails when pet is sleeping", () => {
   const pet = createTestPet({
     activityState: ActivityState.Sleeping,
-    sleep: { isSleeping: true, sleepStartTime: Date.now(), sleepTicksToday: 0 },
+    sleep: {
+      isSleeping: true,
+      sleepStartTime: FROZEN_TIME,
+      sleepTicksToday: 0,
+    },
   });
   const result = canStartTraining(
     pet,

@@ -13,6 +13,9 @@ import { toMicro } from "@/game/types/common";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import { cancelTraining, startTraining } from "./training";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 describe("startTraining", () => {
   test("returns failure when no pet", () => {
     const state = createTestGameState(null);
@@ -125,7 +128,7 @@ describe("startTraining", () => {
       growth: {
         stage: GrowthStage.Baby,
         substage: 1,
-        birthTime: Date.now(),
+        birthTime: FROZEN_TIME,
         ageTicks: 0,
       },
     });
@@ -149,7 +152,7 @@ describe("startTraining", () => {
       growth: {
         stage: GrowthStage.Child,
         substage: 1,
-        birthTime: Date.now(),
+        birthTime: FROZEN_TIME,
         ageTicks: 1000,
       },
     });

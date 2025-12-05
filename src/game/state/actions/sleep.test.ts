@@ -11,12 +11,15 @@ import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 import { sleepPet, wakePet } from "./sleep";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 function createTestGameState(isSleeping: boolean): GameState {
   return {
     version: 1,
-    lastSaveTime: Date.now(),
-    lastDailyReset: Date.now(),
-    lastWeeklyReset: Date.now(),
+    lastSaveTime: FROZEN_TIME,
+    lastDailyReset: FROZEN_TIME,
+    lastWeeklyReset: FROZEN_TIME,
     totalTicks: 0,
     pet: {
       identity: {
@@ -27,7 +30,7 @@ function createTestGameState(isSleeping: boolean): GameState {
       growth: {
         stage: GrowthStage.Baby,
         substage: 1,
-        birthTime: Date.now(),
+        birthTime: FROZEN_TIME,
         ageTicks: 0,
       },
       careStats: {
@@ -51,7 +54,7 @@ function createTestGameState(isSleeping: boolean): GameState {
       },
       sleep: {
         isSleeping,
-        sleepStartTime: isSleeping ? Date.now() : null,
+        sleepStartTime: isSleeping ? FROZEN_TIME : null,
         sleepTicksToday: 0,
       },
       activityState: isSleeping ? ActivityState.Sleeping : ActivityState.Idle,
@@ -72,9 +75,9 @@ function createTestGameState(isSleeping: boolean): GameState {
 function createEmptyGameState(): GameState {
   return {
     version: 1,
-    lastSaveTime: Date.now(),
-    lastDailyReset: Date.now(),
-    lastWeeklyReset: Date.now(),
+    lastSaveTime: FROZEN_TIME,
+    lastDailyReset: FROZEN_TIME,
+    lastWeeklyReset: FROZEN_TIME,
     totalTicks: 0,
     pet: null,
     player: {

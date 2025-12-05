@@ -15,9 +15,17 @@ import {
   createDefaultBonusMaxStats,
 } from "./petStats";
 
+// Fixed timestamp for deterministic test fixtures
+const FROZEN_TIME = 1_733_400_000_000;
+
 test("calculatePetMaxStats returns correct values for baby florabit at age 0", () => {
   const pet = createTestPet({
-    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 0 },
+    growth: {
+      stage: "baby",
+      substage: 1,
+      birthTime: FROZEN_TIME,
+      ageTicks: 0,
+    },
   });
   const maxStats = calculatePetMaxStats(pet);
 
@@ -46,7 +54,12 @@ test("calculatePetMaxStats includes bonus max stats", () => {
   bonusMaxStats.careLife = 500;
 
   const pet = createTestPet({
-    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 0 },
+    growth: {
+      stage: "baby",
+      substage: 1,
+      birthTime: FROZEN_TIME,
+      ageTicks: 0,
+    },
     bonusMaxStats,
   });
   const maxStats = calculatePetMaxStats(pet);
@@ -80,7 +93,12 @@ test("calculatePetMaxStats returns null for invalid species", () => {
 
 test("calculatePetMaxStats values differ between growth stages", () => {
   const babyPet = createTestPet({
-    growth: { stage: "baby", substage: 1, birthTime: Date.now(), ageTicks: 0 },
+    growth: {
+      stage: "baby",
+      substage: 1,
+      birthTime: FROZEN_TIME,
+      ageTicks: 0,
+    },
   });
 
   // Get the age ticks for an adult stage
@@ -96,7 +114,7 @@ test("calculatePetMaxStats values differ between growth stages", () => {
     growth: {
       stage: "adult",
       substage: 1,
-      birthTime: Date.now(),
+      birthTime: FROZEN_TIME,
       ageTicks: adultStage?.minAgeTicks ?? 0,
     },
   });
