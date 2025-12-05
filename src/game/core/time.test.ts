@@ -14,6 +14,8 @@ import { formatTicksAsTime } from "@/game/types/common";
 import {
   calculateCappedOfflineTicks,
   calculateElapsedTicks,
+  countDailyResets,
+  getMidnightTimestamp,
   getNextDailyReset,
   getNextWeeklyReset,
   getWeekStartTimestamp,
@@ -21,6 +23,7 @@ import {
   MS_PER_DAY,
   MS_PER_WEEK,
   msUntilNextTick,
+  shouldDailyReset,
   shouldWeeklyReset,
 } from "./time";
 
@@ -130,7 +133,6 @@ describe("shouldDailyReset tests", () => {
   afterEach(() => setSystemTime());
 
   test("shouldDailyReset returns true when last reset was before today midnight", () => {
-    const { shouldDailyReset } = require("./time");
     // Last reset was yesterday
     const now = new Date(FROZEN_TIME);
     const yesterday = new Date(FROZEN_TIME);
@@ -141,7 +143,6 @@ describe("shouldDailyReset tests", () => {
   });
 
   test("shouldDailyReset returns false when last reset was today", () => {
-    const { shouldDailyReset, getMidnightTimestamp } = require("./time");
     const now = new Date(FROZEN_TIME);
     now.setHours(14, 0, 0, 0); // 2 PM today
     const todayMidnight = getMidnightTimestamp(now.getTime());
@@ -150,7 +151,6 @@ describe("shouldDailyReset tests", () => {
   });
 
   test("shouldDailyReset returns true across midnight boundary", () => {
-    const { shouldDailyReset } = require("./time");
     // Last reset was 11:59 PM yesterday
     const now = new Date(FROZEN_TIME);
     const lastReset = new Date(FROZEN_TIME);
@@ -169,7 +169,6 @@ describe("countDailyResets tests", () => {
   afterEach(() => setSystemTime());
 
   test("countDailyResets returns 0 for same day", () => {
-    const { countDailyResets } = require("./time");
     const date = new Date(FROZEN_TIME);
     date.setHours(10, 0, 0, 0); // 10 AM
     const fromTime = date.getTime();
@@ -180,7 +179,6 @@ describe("countDailyResets tests", () => {
   });
 
   test("countDailyResets returns 1 for consecutive days", () => {
-    const { countDailyResets } = require("./time");
     const from = new Date(FROZEN_TIME);
     from.setHours(23, 0, 0, 0); // 11 PM Day 1
     const to = new Date(from);
@@ -191,7 +189,6 @@ describe("countDailyResets tests", () => {
   });
 
   test("countDailyResets returns 2 for 3 days apart", () => {
-    const { countDailyResets } = require("./time");
     const from = new Date(FROZEN_TIME);
     from.setHours(11, 0, 0, 0); // 11 AM Day 1
     const to = new Date(from);
@@ -203,7 +200,6 @@ describe("countDailyResets tests", () => {
   });
 
   test("countDailyResets handles different times of day", () => {
-    const { countDailyResets } = require("./time");
     // Late night to early morning next day
     const from = new Date(FROZEN_TIME);
     from.setHours(23, 59, 0, 0); // 11:59 PM
@@ -215,7 +211,6 @@ describe("countDailyResets tests", () => {
   });
 
   test("countDailyResets returns correct count for 7 days offline", () => {
-    const { countDailyResets } = require("./time");
     const from = new Date(FROZEN_TIME);
     from.setHours(12, 0, 0, 0); // Noon Day 1
     const to = new Date(from);

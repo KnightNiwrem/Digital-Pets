@@ -12,11 +12,13 @@ import {
 } from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
+import { QuestState } from "@/game/types/quest";
 import {
   processGameTick,
   processMultipleTicks,
   processOfflineCatchup,
 } from "./tickProcessor";
+import { getMidnightTimestamp } from "./time";
 
 // Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
 const FROZEN_TIME = 1_733_400_000_000;
@@ -301,7 +303,6 @@ describe("daily reset tests", () => {
   });
 
   test("processGameTick does not reset when already reset today", () => {
-    const { getMidnightTimestamp } = require("./time");
     const todayMidnight = getMidnightTimestamp(FROZEN_TIME);
 
     const pet = createTestPet({
@@ -401,13 +402,10 @@ describe("daily reset tests", () => {
     // Should update lastDailyReset without error
     expect(newState.pet).toBeNull();
     // lastDailyReset should be updated to today's midnight
-    const { getMidnightTimestamp } = require("./time");
     expect(newState.lastDailyReset).toBe(getMidnightTimestamp(FROZEN_TIME));
   });
 
   test("processGameTick refreshes daily quests on daily reset", () => {
-    const { QuestState } = require("@/game/types/quest");
-
     const yesterday = new Date(FROZEN_TIME);
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday.setHours(12, 0, 0, 0);
