@@ -2,11 +2,20 @@
  * Tests for time utilities.
  */
 
-import { expect, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import { formatTicksAsTime } from "@/game/types/common";
 import {
   calculateCappedOfflineTicks,
   calculateElapsedTicks,
+  countDailyResets,
+  getMidnightTimestamp,
   getNextDailyReset,
   getNextWeeklyReset,
   getWeekStartTimestamp,
@@ -14,8 +23,12 @@ import {
   MS_PER_DAY,
   MS_PER_WEEK,
   msUntilNextTick,
+  shouldDailyReset,
   shouldWeeklyReset,
 } from "./time";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z (Thursday)
+const FROZEN_TIME = 1_733_400_000_000;
 
 test("calculateElapsedTicks returns 0 for same timestamp", () => {
   const time = Date.now();
@@ -115,96 +128,97 @@ test("getMidnightTimestamp returns start of day", () => {
   expect(midnightDate.getMilliseconds()).toBe(0);
 });
 
-test("shouldDailyReset returns true when last reset was before today midnight", () => {
-  const { shouldDailyReset } = require("./time");
-  // Last reset was yesterday
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(12, 0, 0, 0);
+describe("shouldDailyReset tests", () => {
+  beforeEach(() => setSystemTime(FROZEN_TIME));
+  afterEach(() => setSystemTime());
 
-  expect(shouldDailyReset(yesterday.getTime(), now.getTime())).toBe(true);
+  test("shouldDailyReset returns true when last reset was before today midnight", () => {
+    // Last reset was yesterday
+    const now = new Date(FROZEN_TIME);
+    const yesterday = new Date(FROZEN_TIME);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(12, 0, 0, 0);
+
+    expect(shouldDailyReset(yesterday.getTime(), now.getTime())).toBe(true);
+  });
+
+  test("shouldDailyReset returns false when last reset was today", () => {
+    const now = new Date(FROZEN_TIME);
+    now.setHours(14, 0, 0, 0); // 2 PM today
+    const todayMidnight = getMidnightTimestamp(now.getTime());
+
+    expect(shouldDailyReset(todayMidnight, now.getTime())).toBe(false);
+  });
+
+  test("shouldDailyReset returns true across midnight boundary", () => {
+    // Last reset was 11:59 PM yesterday
+    const now = new Date(FROZEN_TIME);
+    const lastReset = new Date(FROZEN_TIME);
+    lastReset.setDate(lastReset.getDate() - 1);
+    lastReset.setHours(23, 59, 0, 0);
+
+    // Current time is 12:01 AM today
+    now.setHours(0, 1, 0, 0);
+
+    expect(shouldDailyReset(lastReset.getTime(), now.getTime())).toBe(true);
+  });
 });
 
-test("shouldDailyReset returns false when last reset was today", () => {
-  const { shouldDailyReset, getMidnightTimestamp } = require("./time");
-  const now = new Date();
-  now.setHours(14, 0, 0, 0); // 2 PM today
-  const todayMidnight = getMidnightTimestamp(now.getTime());
+describe("countDailyResets tests", () => {
+  beforeEach(() => setSystemTime(FROZEN_TIME));
+  afterEach(() => setSystemTime());
 
-  expect(shouldDailyReset(todayMidnight, now.getTime())).toBe(false);
-});
+  test("countDailyResets returns 0 for same day", () => {
+    const date = new Date(FROZEN_TIME);
+    date.setHours(10, 0, 0, 0); // 10 AM
+    const fromTime = date.getTime();
+    date.setHours(14, 0, 0, 0); // 2 PM same day
+    const toTime = date.getTime();
 
-test("shouldDailyReset returns true across midnight boundary", () => {
-  const { shouldDailyReset } = require("./time");
-  // Last reset was 11:59 PM yesterday
-  const now = new Date();
-  const lastReset = new Date(now);
-  lastReset.setDate(lastReset.getDate() - 1);
-  lastReset.setHours(23, 59, 0, 0);
+    expect(countDailyResets(fromTime, toTime)).toBe(0);
+  });
 
-  // Current time is 12:01 AM today
-  now.setHours(0, 1, 0, 0);
+  test("countDailyResets returns 1 for consecutive days", () => {
+    const from = new Date(FROZEN_TIME);
+    from.setHours(23, 0, 0, 0); // 11 PM Day 1
+    const to = new Date(from);
+    to.setDate(to.getDate() + 1);
+    to.setHours(1, 0, 0, 0); // 1 AM Day 2
 
-  expect(shouldDailyReset(lastReset.getTime(), now.getTime())).toBe(true);
-});
+    expect(countDailyResets(from.getTime(), to.getTime())).toBe(1);
+  });
 
-// countDailyResets tests
-test("countDailyResets returns 0 for same day", () => {
-  const { countDailyResets } = require("./time");
-  const date = new Date();
-  date.setHours(10, 0, 0, 0); // 10 AM
-  const fromTime = date.getTime();
-  date.setHours(14, 0, 0, 0); // 2 PM same day
-  const toTime = date.getTime();
+  test("countDailyResets returns 2 for 3 days apart", () => {
+    const from = new Date(FROZEN_TIME);
+    from.setHours(11, 0, 0, 0); // 11 AM Day 1
+    const to = new Date(from);
+    to.setDate(to.getDate() + 2);
+    to.setHours(13, 0, 0, 0); // 1 PM Day 3
 
-  expect(countDailyResets(fromTime, toTime)).toBe(0);
-});
+    // Resets at Day 2 midnight and Day 3 midnight
+    expect(countDailyResets(from.getTime(), to.getTime())).toBe(2);
+  });
 
-test("countDailyResets returns 1 for consecutive days", () => {
-  const { countDailyResets } = require("./time");
-  const from = new Date();
-  from.setHours(23, 0, 0, 0); // 11 PM Day 1
-  const to = new Date(from);
-  to.setDate(to.getDate() + 1);
-  to.setHours(1, 0, 0, 0); // 1 AM Day 2
+  test("countDailyResets handles different times of day", () => {
+    // Late night to early morning next day
+    const from = new Date(FROZEN_TIME);
+    from.setHours(23, 59, 0, 0); // 11:59 PM
+    const to = new Date(from);
+    to.setDate(to.getDate() + 1);
+    to.setHours(0, 1, 0, 0); // 12:01 AM next day
 
-  expect(countDailyResets(from.getTime(), to.getTime())).toBe(1);
-});
+    expect(countDailyResets(from.getTime(), to.getTime())).toBe(1);
+  });
 
-test("countDailyResets returns 2 for 3 days apart", () => {
-  const { countDailyResets } = require("./time");
-  const from = new Date();
-  from.setHours(11, 0, 0, 0); // 11 AM Day 1
-  const to = new Date(from);
-  to.setDate(to.getDate() + 2);
-  to.setHours(13, 0, 0, 0); // 1 PM Day 3
+  test("countDailyResets returns correct count for 7 days offline", () => {
+    const from = new Date(FROZEN_TIME);
+    from.setHours(12, 0, 0, 0); // Noon Day 1
+    const to = new Date(from);
+    to.setDate(to.getDate() + 7);
+    to.setHours(12, 0, 0, 0); // Noon Day 8
 
-  // Resets at Day 2 midnight and Day 3 midnight
-  expect(countDailyResets(from.getTime(), to.getTime())).toBe(2);
-});
-
-test("countDailyResets handles different times of day", () => {
-  const { countDailyResets } = require("./time");
-  // Late night to early morning next day
-  const from = new Date();
-  from.setHours(23, 59, 0, 0); // 11:59 PM
-  const to = new Date(from);
-  to.setDate(to.getDate() + 1);
-  to.setHours(0, 1, 0, 0); // 12:01 AM next day
-
-  expect(countDailyResets(from.getTime(), to.getTime())).toBe(1);
-});
-
-test("countDailyResets returns correct count for 7 days offline", () => {
-  const { countDailyResets } = require("./time");
-  const from = new Date();
-  from.setHours(12, 0, 0, 0); // Noon Day 1
-  const to = new Date(from);
-  to.setDate(to.getDate() + 7);
-  to.setHours(12, 0, 0, 0); // Noon Day 8
-
-  expect(countDailyResets(from.getTime(), to.getTime())).toBe(7);
+    expect(countDailyResets(from.getTime(), to.getTime())).toBe(7);
+  });
 });
 
 // Weekly reset tests
@@ -242,37 +256,38 @@ test("getWeekStartTimestamp handles Monday correctly", () => {
   expect(weekStartDate.getHours()).toBe(0);
 });
 
-test("shouldWeeklyReset returns true when last reset was before this week", () => {
-  // Last reset was last week
-  const lastWeek = new Date();
-  lastWeek.setDate(lastWeek.getDate() - 8); // 8 days ago
-  const now = Date.now();
+describe("weekly reset tests", () => {
+  beforeEach(() => setSystemTime(FROZEN_TIME));
+  afterEach(() => setSystemTime());
 
-  expect(shouldWeeklyReset(lastWeek.getTime(), now)).toBe(true);
-});
+  test("shouldWeeklyReset returns true when last reset was before this week", () => {
+    // Last reset was last week
+    const lastWeek = new Date(FROZEN_TIME);
+    lastWeek.setDate(lastWeek.getDate() - 8); // 8 days ago
 
-test("shouldWeeklyReset returns false when last reset was this week", () => {
-  const now = Date.now();
-  const thisWeekStart = getWeekStartTimestamp(now);
+    expect(shouldWeeklyReset(lastWeek.getTime(), FROZEN_TIME)).toBe(true);
+  });
 
-  expect(shouldWeeklyReset(thisWeekStart, now)).toBe(false);
-});
+  test("shouldWeeklyReset returns false when last reset was this week", () => {
+    const thisWeekStart = getWeekStartTimestamp(FROZEN_TIME);
 
-test("getNextDailyReset returns next midnight", () => {
-  const now = Date.now();
-  const nextReset = getNextDailyReset(now);
+    expect(shouldWeeklyReset(thisWeekStart, FROZEN_TIME)).toBe(false);
+  });
 
-  expect(nextReset).toBeGreaterThan(now);
-  expect(nextReset - now).toBeLessThanOrEqual(MS_PER_DAY);
-});
+  test("getNextDailyReset returns next midnight", () => {
+    const nextReset = getNextDailyReset(FROZEN_TIME);
 
-test("getNextWeeklyReset returns next Monday midnight", () => {
-  const now = Date.now();
-  const nextReset = getNextWeeklyReset(now);
+    expect(nextReset).toBeGreaterThan(FROZEN_TIME);
+    expect(nextReset - FROZEN_TIME).toBeLessThanOrEqual(MS_PER_DAY);
+  });
 
-  expect(nextReset).toBeGreaterThan(now);
-  expect(nextReset - now).toBeLessThanOrEqual(MS_PER_WEEK);
+  test("getNextWeeklyReset returns next Monday midnight", () => {
+    const nextReset = getNextWeeklyReset(FROZEN_TIME);
 
-  const nextResetDate = new Date(nextReset);
-  expect(nextResetDate.getDay()).toBe(1); // Monday
+    expect(nextReset).toBeGreaterThan(FROZEN_TIME);
+    expect(nextReset - FROZEN_TIME).toBeLessThanOrEqual(MS_PER_WEEK);
+
+    const nextResetDate = new Date(nextReset);
+    expect(nextResetDate.getDay()).toBe(1); // Monday
+  });
 });
