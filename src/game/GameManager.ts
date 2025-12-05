@@ -15,6 +15,7 @@ import { processBattleTick } from "@/game/core/battle/battleProcessor";
 import { battleReducer } from "@/game/core/battle/battleReducer";
 import {
   processGameTick,
+  processMultipleTicks,
   processOfflineCatchup,
 } from "@/game/core/tickProcessor";
 import { calculateElapsedTicks, MAX_OFFLINE_TICKS } from "@/game/core/time";
@@ -136,12 +137,14 @@ export class GameManager {
       this.accumulator -= ticksToProcess * TICK_DURATION_MS;
       // Reset battle accumulator since battles shouldn't continue during offline time
       this.battleAccumulator = 0;
-    } else {
-      // Process ticks individually for normal gameplay
-      while (this.accumulator >= TICK_DURATION_MS) {
-        this.tick();
-        this.accumulator -= TICK_DURATION_MS;
-      }
+    } else if (ticksToProcess > 0) {
+      // Use batch processing to ensure all notifications are accumulated
+      // in a single state update, preventing React batching from losing events
+      const startTime = currentTime - ticksToProcess * TICK_DURATION_MS;
+      this.updateState((state) =>
+        processMultipleTicks(state, ticksToProcess, startTime),
+      );
+      this.accumulator -= ticksToProcess * TICK_DURATION_MS;
     }
 
     // Process battle ticks at BATTLE_TICK_INTERVAL_MS for responsive combat

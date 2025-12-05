@@ -282,7 +282,7 @@ test("GameManager uses offline catchup when ticks >= threshold", () => {
   expect(regularTicksProcessed).toBe(0);
 });
 
-test("GameManager uses normal tick processing when ticks < threshold", () => {
+test("GameManager uses batch tick processing when ticks < threshold", () => {
   let updateCallCount = 0;
   let totalTicksProcessed = 0;
 
@@ -307,8 +307,8 @@ test("GameManager uses normal tick processing when ticks < threshold", () => {
   // Trigger update
   manager._testUpdate();
 
-  // Should have processed ticks individually (one call per tick)
-  expect(updateCallCount).toBe(ticksNeeded);
+  // Should have processed all ticks in a single batch call
+  expect(updateCallCount).toBe(1);
   expect(totalTicksProcessed).toBe(ticksNeeded);
 });
 

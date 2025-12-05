@@ -63,6 +63,11 @@ export function validateGameState(value: unknown): value is GameState {
     return false;
   }
 
+  // pendingNotifications must be an array
+  if (!Array.isArray(obj.pendingNotifications)) {
+    return false;
+  }
+
   // activeBattle is optional but must have correct structure if present
   if (obj.activeBattle !== undefined) {
     if (typeof obj.activeBattle !== "object" || obj.activeBattle === null)
@@ -139,7 +144,7 @@ export function loadGame(): LoadResult {
     // Ensure pendingEvents is initialized (not persisted)
     const stateWithEvents: GameState = {
       ...parsed,
-      pendingEvents: parsed.pendingEvents ?? [],
+      pendingEvents: [],
     };
 
     return { success: true, state: stateWithEvents };
@@ -196,7 +201,8 @@ export function importSave(data: string): LoadResult {
       return { success: false, error: "Invalid save data structure" };
     }
 
-    // Create a clean state object to save, ensuring transient data is not persisted
+    // Create a clean state object to save, clearing transient pendingEvents
+    // but keeping pendingNotifications (user-facing, must persist)
     const cleanState: GameState = {
       ...parsed,
       pendingEvents: [],

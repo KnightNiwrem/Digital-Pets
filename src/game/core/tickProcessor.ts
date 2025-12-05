@@ -39,6 +39,7 @@ import {
   type TrainingCompleteEvent,
 } from "@/game/types/event";
 import type { GameState } from "@/game/types/gameState";
+import type { GameNotification } from "@/game/types/notification";
 import type {
   CareStatsSnapshot,
   MaxStatsSnapshot,
@@ -47,6 +48,40 @@ import type {
   OfflineTrainingResult,
 } from "@/game/types/offline";
 import { ObjectiveType, QuestState } from "@/game/types/quest";
+
+/**
+ * Convert a game event to a notification for persistence.
+ * Returns null for events that don't require user acknowledgment.
+ */
+function eventToNotification(event: GameEvent): GameNotification | null {
+  switch (event.type) {
+    case "stageTransition":
+      return {
+        type: "stageTransition",
+        previousStage: event.previousStage,
+        newStage: event.newStage,
+        petName: event.petName,
+      };
+    case "trainingComplete":
+      return {
+        type: "trainingComplete",
+        facilityName: event.facilityName,
+        statsGained: event.statsGained,
+        message: event.message,
+        petName: event.petName,
+      };
+    case "explorationComplete":
+      return {
+        type: "explorationComplete",
+        locationName: event.locationName,
+        itemsFound: event.itemsFound,
+        message: event.message,
+        petName: event.petName,
+      };
+    default:
+      return null;
+  }
+}
 
 /**
  * Apply daily reset if needed.
@@ -288,9 +323,23 @@ export function processGameTick(
     }
   }
 
-  // Add all tick events to state
+  // Add all tick events to state (for transient event bus)
   if (tickEvents.length > 0) {
     updatedState = emitEvents(updatedState, ...tickEvents);
+
+    // Also add notifications to pendingNotifications for persistence
+    const newNotifications = tickEvents
+      .map(eventToNotification)
+      .filter((n): n is GameNotification => n !== null);
+    if (newNotifications.length > 0) {
+      updatedState = {
+        ...updatedState,
+        pendingNotifications: [
+          ...updatedState.pendingNotifications,
+          ...newNotifications,
+        ],
+      };
+    }
   }
 
   return updatedState;

@@ -1,21 +1,13 @@
 import { describe, expect, mock, test } from "bun:test";
 import { renderHook } from "@testing-library/react";
-import type {
-  ExplorationCompleteEvent,
-  GameNotification,
-  GameState,
-  Pet,
-  StageTransitionEvent,
-  TrainingCompleteEvent,
-} from "@/game/types";
+import type { GameNotification, GameState, Pet } from "@/game/types";
 import { GrowthStage } from "@/game/types";
-import { createEvent } from "@/game/types/event";
 import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 import { useGameNotifications } from "./useGameNotifications";
 
 describe("useGameNotifications", () => {
-  const mockSetNotification = mock((_n: GameNotification) => {});
+  const mockSetNotification = mock((_n: GameNotification | null) => {});
 
   const createMockState = (overrides: Partial<GameState> = {}): GameState => {
     const defaultPet: Pet = {
@@ -98,149 +90,128 @@ describe("useGameNotifications", () => {
         skills: createInitialSkills(),
       },
       pendingEvents: [],
+      pendingNotifications: [],
       ...overrides,
     };
   };
 
   describe("Stage Transitions", () => {
-    test("notifies when stageTransition event is in pendingEvents", () => {
+    test("shows notification when stageTransition is in pendingNotifications", () => {
       mockSetNotification.mockClear();
 
-      const stateWithEvent = createMockState({
-        pendingEvents: [
-          createEvent<StageTransitionEvent>({
-            type: "stageTransition",
-            previousStage: GrowthStage.Baby,
-            newStage: GrowthStage.Child,
-            petName: "Fluffy",
-          }),
-        ],
-      });
-
-      renderHook(() =>
-        useGameNotifications(stateWithEvent, mockSetNotification),
-      );
-
-      expect(mockSetNotification).toHaveBeenCalledTimes(1);
-      expect(mockSetNotification).toHaveBeenCalledWith({
+      const stageNotification: GameNotification = {
         type: "stageTransition",
         previousStage: GrowthStage.Baby,
         newStage: GrowthStage.Child,
         petName: "Fluffy",
+      };
+
+      const stateWithNotification = createMockState({
+        pendingNotifications: [stageNotification],
       });
-    });
-
-    test("does not notify if pendingEvents is empty", () => {
-      mockSetNotification.mockClear();
-
-      const stateNoEvents = createMockState({ pendingEvents: [] });
 
       renderHook(() =>
-        useGameNotifications(stateNoEvents, mockSetNotification),
+        useGameNotifications(stateWithNotification, mockSetNotification),
       );
 
-      expect(mockSetNotification).not.toHaveBeenCalled();
+      expect(mockSetNotification).toHaveBeenCalledTimes(1);
+      expect(mockSetNotification).toHaveBeenCalledWith(stageNotification);
+    });
+
+    test("sets null when pendingNotifications is empty", () => {
+      mockSetNotification.mockClear();
+
+      const stateNoNotifications = createMockState({
+        pendingNotifications: [],
+      });
+
+      renderHook(() =>
+        useGameNotifications(stateNoNotifications, mockSetNotification),
+      );
+
+      expect(mockSetNotification).toHaveBeenCalledTimes(1);
+      expect(mockSetNotification).toHaveBeenCalledWith(null);
     });
   });
 
   describe("Training Completion", () => {
-    test("notifies when trainingComplete event is in pendingEvents", () => {
+    test("shows notification when trainingComplete is in pendingNotifications", () => {
       mockSetNotification.mockClear();
 
-      const stateWithEvent = createMockState({
-        pendingEvents: [
-          createEvent<TrainingCompleteEvent>({
-            type: "trainingComplete",
-            facilityName: "Gym",
-            statsGained: { strength: 10, endurance: 5 },
-            message: "Training complete! +10 strength, +5 endurance",
-            petName: "Fluffy",
-          }),
-        ],
-      });
-
-      renderHook(() =>
-        useGameNotifications(stateWithEvent, mockSetNotification),
-      );
-
-      expect(mockSetNotification).toHaveBeenCalledTimes(1);
-      expect(mockSetNotification).toHaveBeenCalledWith({
+      const trainingNotification: GameNotification = {
         type: "trainingComplete",
         facilityName: "Gym",
         statsGained: { strength: 10, endurance: 5 },
         message: "Training complete! +10 strength, +5 endurance",
         petName: "Fluffy",
+      };
+
+      const stateWithNotification = createMockState({
+        pendingNotifications: [trainingNotification],
       });
+
+      renderHook(() =>
+        useGameNotifications(stateWithNotification, mockSetNotification),
+      );
+
+      expect(mockSetNotification).toHaveBeenCalledTimes(1);
+      expect(mockSetNotification).toHaveBeenCalledWith(trainingNotification);
     });
   });
 
   describe("Exploration Completion", () => {
-    test("notifies when explorationComplete event is in pendingEvents", () => {
+    test("shows notification when explorationComplete is in pendingNotifications", () => {
       mockSetNotification.mockClear();
 
-      const stateWithEvent = createMockState({
-        pendingEvents: [
-          createEvent<ExplorationCompleteEvent>({
-            type: "explorationComplete",
-            locationName: "Forest",
-            itemsFound: [],
-            message: "Found nothing",
-            petName: "Fluffy",
-          }),
-        ],
-      });
-
-      renderHook(() =>
-        useGameNotifications(stateWithEvent, mockSetNotification),
-      );
-
-      expect(mockSetNotification).toHaveBeenCalledTimes(1);
-      expect(mockSetNotification).toHaveBeenCalledWith({
+      const explorationNotification: GameNotification = {
         type: "explorationComplete",
         locationName: "Forest",
         itemsFound: [],
         message: "Found nothing",
         petName: "Fluffy",
+      };
+
+      const stateWithNotification = createMockState({
+        pendingNotifications: [explorationNotification],
       });
+
+      renderHook(() =>
+        useGameNotifications(stateWithNotification, mockSetNotification),
+      );
+
+      expect(mockSetNotification).toHaveBeenCalledTimes(1);
+      expect(mockSetNotification).toHaveBeenCalledWith(explorationNotification);
     });
 
-    test("does not duplicate notification for already-processed events", () => {
+    test("shows first notification when multiple are pending", () => {
       mockSetNotification.mockClear();
 
-      // Create event with a specific timestamp
-      const eventTimestamp = Date.now();
-      const event = createEvent<ExplorationCompleteEvent>(
-        {
-          type: "explorationComplete",
-          locationName: "Forest",
-          itemsFound: [],
-          message: "Found nothing",
-          petName: "Fluffy",
-        },
-        eventTimestamp,
-      );
+      const firstNotification: GameNotification = {
+        type: "explorationComplete",
+        locationName: "Forest",
+        itemsFound: [],
+        message: "Found nothing",
+        petName: "Fluffy",
+      };
 
-      const stateWithEvent = createMockState({
-        pendingEvents: [event],
+      const secondNotification: GameNotification = {
+        type: "trainingComplete",
+        facilityName: "Gym",
+        statsGained: { strength: 10 },
+        message: "Training complete!",
+        petName: "Fluffy",
+      };
+
+      const stateWithNotifications = createMockState({
+        pendingNotifications: [firstNotification, secondNotification],
       });
 
-      const { rerender } = renderHook<void, { state: GameState | null }>(
-        ({ state }) => useGameNotifications(state, mockSetNotification),
-        { initialProps: { state: stateWithEvent } },
+      renderHook(() =>
+        useGameNotifications(stateWithNotifications, mockSetNotification),
       );
 
-      // First render triggers notification
       expect(mockSetNotification).toHaveBeenCalledTimes(1);
-      mockSetNotification.mockClear();
-
-      // Create a NEW state object with the SAME event (same timestamp)
-      // This tests that the timestamp-based filter prevents duplicates
-      const newStateWithSameEvent = createMockState({
-        pendingEvents: [event],
-      });
-
-      rerender({ state: newStateWithSameEvent });
-      expect(mockSetNotification).not.toHaveBeenCalled();
+      expect(mockSetNotification).toHaveBeenCalledWith(firstNotification);
     });
   });
 });
