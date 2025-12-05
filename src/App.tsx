@@ -41,7 +41,7 @@ import "./index.css";
 
 /** Filter out battle events from pending events to prevent animation replay */
 const clearBattleEvents = (events: GameEvent[]) =>
-  events.filter((e) => e.type !== "battleAction");
+  events.filter((e) => e.type !== "battleAction" && e.type !== "battleEnd");
 
 /**
  * Main game content that renders based on active tab.
