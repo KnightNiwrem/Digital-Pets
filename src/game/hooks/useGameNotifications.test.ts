@@ -1,26 +1,15 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  mock,
-  setSystemTime,
-  test,
-} from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { renderHook } from "@testing-library/react";
+import { setupTimeFreezing } from "@/game/testing/time";
 import type { GameNotification, GameState, Pet } from "@/game/types";
 import { GrowthStage } from "@/game/types";
 import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 import { useGameNotifications } from "./useGameNotifications";
 
-// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
-const FROZEN_TIME = 1_733_400_000_000;
+setupTimeFreezing();
 
 describe("useGameNotifications", () => {
-  beforeEach(() => setSystemTime(FROZEN_TIME));
-  afterEach(() => setSystemTime());
-
   const mockSetNotification = mock((_n: GameNotification | null) => {});
 
   const createMockState = (overrides: Partial<GameState> = {}): GameState => {

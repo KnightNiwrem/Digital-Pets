@@ -3,14 +3,7 @@
  * Tests the interaction between multiple game mechanics.
  */
 
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  setSystemTime,
-  test,
-} from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { calculateDamage } from "@/game/core/battle/damage";
 import { applyCareLifeChange } from "@/game/core/care/careLife";
 import { applyCareDecay } from "@/game/core/care/careStats";
@@ -24,16 +17,13 @@ import {
   createSleepingTestPet,
   createTestPet,
 } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { DamageType, GrowthStage } from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import type { Move } from "@/game/types/move";
 import { createDefaultResistances } from "@/game/types/stats";
 
-// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
-const FROZEN_TIME = 1_733_400_000_000;
-
-beforeEach(() => setSystemTime(FROZEN_TIME));
-afterEach(() => setSystemTime());
+setupTimeFreezing();
 
 // Helper to create test game state
 function createTestGameState(overrides: Partial<GameState> = {}): GameState {

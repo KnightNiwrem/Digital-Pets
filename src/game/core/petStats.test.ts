@@ -2,24 +2,21 @@
  * Tests for pet stats calculation utilities.
  */
 
-import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
+import { expect, test } from "bun:test";
 import {
   getSpeciesById,
   getSpeciesGrowthStage,
   SPECIES,
 } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import {
   calculateMaxStatsForAge,
   calculatePetMaxStats,
   createDefaultBonusMaxStats,
 } from "./petStats";
 
-// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
-const FROZEN_TIME = 1_733_400_000_000;
-
-beforeEach(() => setSystemTime(FROZEN_TIME));
-afterEach(() => setSystemTime());
+setupTimeFreezing();
 
 test("calculatePetMaxStats returns correct values for baby florabit at age 0", () => {
   const pet = createTestPet({

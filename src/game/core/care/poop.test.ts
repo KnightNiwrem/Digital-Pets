@@ -9,15 +9,9 @@
  * This ensures mid-cycle state changes properly adjust timing.
  */
 
-import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
+import { expect, test } from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
-
-// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
-const FROZEN_TIME = 1_733_400_000_000;
-
-beforeEach(() => setSystemTime(FROZEN_TIME));
-afterEach(() => setSystemTime());
-
+import { setupTimeFreezing } from "@/game/testing/time";
 import {
   MAX_POOP_COUNT,
   POOP_DECAY_AWAKE,
@@ -25,6 +19,8 @@ import {
   POOP_MICRO_THRESHOLD,
 } from "./constants";
 import { getInitialPoopTimer, processPoopTick, removePoop } from "./poop";
+
+setupTimeFreezing();
 
 test("getInitialPoopTimer returns micro threshold", () => {
   expect(getInitialPoopTimer()).toBe(POOP_MICRO_THRESHOLD);

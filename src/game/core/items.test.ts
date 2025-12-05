@@ -2,7 +2,7 @@
  * Tests for item usage functions.
  */
 
-import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
+import { expect, test } from "bun:test";
 import {
   CLEANING_ITEMS,
   DRINK_ITEMS,
@@ -12,6 +12,7 @@ import {
 import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
 import { createSleepingTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
@@ -23,11 +24,7 @@ import {
   useToyItem,
 } from "./items";
 
-// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
-const FROZEN_TIME = 1_733_400_000_000;
-
-beforeEach(() => setSystemTime(FROZEN_TIME));
-afterEach(() => setSystemTime());
+setupTimeFreezing();
 
 function createTestState(): GameState {
   const pet = createNewPet("TestPet", SPECIES.FLORABIT.id);

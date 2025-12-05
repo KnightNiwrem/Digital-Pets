@@ -11,6 +11,7 @@ import {
   test,
 } from "bun:test";
 import { createTestGameState } from "@/game/testing/createTestPet";
+import { FROZEN_TIME } from "@/game/testing/time";
 import {
   deleteSave,
   exportSave,
@@ -20,9 +21,6 @@ import {
   saveGame,
   validateGameState,
 } from "./persistence";
-
-// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
-const FROZEN_TIME = 1_733_400_000_000;
 
 // Mock localStorage for testing
 const localStorageData: Record<string, string> = {};
