@@ -177,6 +177,7 @@ export function createTestGameState(
     lastDailyReset: now,
     lastWeeklyReset: now,
     pendingEvents: [],
+    pendingNotifications: [],
     ...stateOverrides,
   };
 }

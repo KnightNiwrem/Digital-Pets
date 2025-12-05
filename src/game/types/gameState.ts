@@ -5,6 +5,7 @@
 import type { BattleState } from "@/game/core/battle/battle";
 import { DEFAULT_LOCATION_ID, type Tick, type Timestamp } from "./common";
 import type { GameEvent } from "./event";
+import type { GameNotification } from "./notification";
 import type { Pet } from "./pet";
 import type { QuestProgress } from "./quest";
 import { createInitialSkills, type PlayerSkills } from "./skill";
@@ -106,6 +107,12 @@ export interface GameState {
    * Not persisted to storage.
    */
   pendingEvents: GameEvent[];
+  /**
+   * Notifications requiring user acknowledgment (exploration/training results, etc.).
+   * Persisted to storage and only cleared when user explicitly dismisses them.
+   * This ensures results are shown even after page refresh.
+   */
+  pendingNotifications: GameNotification[];
 }
 
 /**
@@ -134,5 +141,6 @@ export function createInitialGameState(): GameState {
     lastDailyReset: currentTime,
     lastWeeklyReset: currentTime,
     pendingEvents: [],
+    pendingNotifications: [],
   };
 }

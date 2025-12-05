@@ -129,8 +129,12 @@ export function GameProvider({ children }: GameProviderProps) {
   }, []);
 
   const dismissNotification = useCallback(() => {
-    setNotification(null);
-  }, []);
+    // Remove the first notification from pendingNotifications in state
+    updateState((state) => ({
+      ...state,
+      pendingNotifications: state.pendingNotifications.slice(1),
+    }));
+  }, [updateState]);
 
   /**
    * Process offline ticks and return the updated state plus report.
