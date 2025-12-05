@@ -7,6 +7,7 @@ import {
   createSleepingTestPet,
   createTestPet,
 } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { ActivityState } from "@/game/types/constants";
 import {
   canPerformCareActions,
@@ -17,6 +18,8 @@ import {
   resetDailySleep,
   wakeUp,
 } from "./sleep";
+
+setupTimeFreezing();
 
 test("putToSleep succeeds when pet is awake", () => {
   const pet = createTestPet();

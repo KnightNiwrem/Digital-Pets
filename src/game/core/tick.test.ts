@@ -8,7 +8,10 @@ import {
   ENERGY_REGEN_SLEEPING,
 } from "@/game/core/care/constants";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { processPetTick } from "./tick";
+
+setupTimeFreezing();
 
 test("processPetTick increments ageTicks by 1", () => {
   const pet = createTestPet({

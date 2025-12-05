@@ -2,8 +2,16 @@
  * Tests for persistence functions including save/load validation.
  */
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import { createTestGameState } from "@/game/testing/createTestPet";
+import { FROZEN_TIME } from "@/game/testing/time";
 import {
   deleteSave,
   exportSave,
@@ -39,10 +47,12 @@ Object.defineProperty(globalThis, "localStorage", {
 });
 
 beforeEach(() => {
+  setSystemTime(FROZEN_TIME);
   mockLocalStorage.clear();
 });
 
 afterEach(() => {
+  setSystemTime();
   mockLocalStorage.clear();
 });
 

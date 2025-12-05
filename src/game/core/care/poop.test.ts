@@ -11,6 +11,7 @@
 
 import { expect, test } from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import {
   MAX_POOP_COUNT,
   POOP_DECAY_AWAKE,
@@ -18,6 +19,8 @@ import {
   POOP_MICRO_THRESHOLD,
 } from "./constants";
 import { getInitialPoopTimer, processPoopTick, removePoop } from "./poop";
+
+setupTimeFreezing();
 
 test("getInitialPoopTimer returns micro threshold", () => {
   expect(getInitialPoopTimer()).toBe(POOP_MICRO_THRESHOLD);

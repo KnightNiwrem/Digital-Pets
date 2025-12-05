@@ -8,10 +8,13 @@ import {
   createTestGameState,
   createTestPet,
 } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { TrainingSessionType } from "@/game/types/activity";
 import { toMicro } from "@/game/types/common";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import { cancelTraining, startTraining } from "./training";
+
+setupTimeFreezing();
 
 describe("startTraining", () => {
   test("returns failure when no pet", () => {

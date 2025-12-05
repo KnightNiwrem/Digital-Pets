@@ -4,8 +4,11 @@
 
 import { expect, test } from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { applyCareDecay, getPoopHappinessMultiplier } from "./careStats";
 import { CARE_DECAY_AWAKE, CARE_DECAY_SLEEPING } from "./constants";
+
+setupTimeFreezing();
 
 test("getPoopHappinessMultiplier returns 1.0 for 0-2 poop", () => {
   expect(getPoopHappinessMultiplier(0)).toBe(1.0);

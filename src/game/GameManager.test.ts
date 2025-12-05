@@ -18,6 +18,7 @@ import {
   createDefaultBattleStats,
   createTestPet,
 } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { TICK_DURATION_MS } from "@/game/types/common";
 import type { GameState } from "@/game/types/gameState";
 import { createInitialGameState } from "@/game/types/gameState";
@@ -30,6 +31,8 @@ import {
   OFFLINE_CATCHUP_THRESHOLD_TICKS,
   type StateUpdateCallback,
 } from "./GameManager";
+
+setupTimeFreezing();
 
 // Tests for GameManager lifecycle
 

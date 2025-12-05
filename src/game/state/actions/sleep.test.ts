@@ -5,11 +5,14 @@
 import { expect, test } from "bun:test";
 import { createDefaultBonusMaxStats } from "@/game/core/petStats";
 import { createDefaultBattleStats } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
 import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 import { sleepPet, wakePet } from "./sleep";
+
+setupTimeFreezing();
 
 function createTestGameState(isSleeping: boolean): GameState {
   return {

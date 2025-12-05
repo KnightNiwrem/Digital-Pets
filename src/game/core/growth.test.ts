@@ -9,8 +9,11 @@ import {
   SPECIES,
 } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import type { GrowthStage } from "@/game/types/constants";
 import { getNextStage, processGrowthTick } from "./growth";
+
+setupTimeFreezing();
 
 // Helper to get the min age ticks for a given stage from species data
 function getStageMinAgeTicks(speciesId: string, stage: GrowthStage): number {

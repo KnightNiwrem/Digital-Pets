@@ -9,11 +9,14 @@ import {
   SPECIES,
 } from "@/game/data/species";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import {
   calculateMaxStatsForAge,
   calculatePetMaxStats,
   createDefaultBonusMaxStats,
 } from "./petStats";
+
+setupTimeFreezing();
 
 test("calculatePetMaxStats returns correct values for baby florabit at age 0", () => {
   const pet = createTestPet({

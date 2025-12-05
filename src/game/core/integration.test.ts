@@ -17,10 +17,13 @@ import {
   createSleepingTestPet,
   createTestPet,
 } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { DamageType, GrowthStage } from "@/game/types/constants";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import type { Move } from "@/game/types/move";
 import { createDefaultResistances } from "@/game/types/stats";
+
+setupTimeFreezing();
 
 // Helper to create test game state
 function createTestGameState(overrides: Partial<GameState> = {}): GameState {

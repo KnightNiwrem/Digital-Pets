@@ -14,10 +14,13 @@ import {
   startTraining,
 } from "@/game/core/training";
 import { createTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import type { ActiveTraining } from "@/game/types/activity";
 import { TrainingSessionType } from "@/game/types/activity";
 import { TICKS_PER_HOUR, toMicro } from "@/game/types/common";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
+
+setupTimeFreezing();
 
 // canStartTraining tests
 test("canStartTraining returns true when pet is idle with enough energy", () => {

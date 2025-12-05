@@ -12,6 +12,7 @@ import {
 import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
 import { createSleepingTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import { ActivityState } from "@/game/types/constants";
 import type { GameState } from "@/game/types/gameState";
@@ -22,6 +23,8 @@ import {
   useFoodItem,
   useToyItem,
 } from "./items";
+
+setupTimeFreezing();
 
 function createTestState(): GameState {
   const pet = createNewPet("TestPet", SPECIES.FLORABIT.id);

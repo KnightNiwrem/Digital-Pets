@@ -14,12 +14,15 @@ import { tutorialFirstSteps } from "@/game/data/quests/tutorial";
 import { SPECIES } from "@/game/data/species";
 import { createNewPet } from "@/game/data/starting";
 import { createSleepingTestPet } from "@/game/testing/createTestPet";
+import { setupTimeFreezing } from "@/game/testing/time";
 import { CURRENT_SAVE_VERSION } from "@/game/types";
 import type { GameState } from "@/game/types/gameState";
 import type { QuestProgress } from "@/game/types/quest";
 import { QuestState } from "@/game/types/quest";
 import { createInitialSkills } from "@/game/types/skill";
 import { cleanPet, feedPet, playWithPet, waterPet } from "./care";
+
+setupTimeFreezing();
 
 function createTestState(quests: QuestProgress[] = []): GameState {
   const pet = createNewPet("TestPet", SPECIES.FLORABIT.id);

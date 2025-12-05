@@ -1,10 +1,13 @@
 import { describe, expect, mock, test } from "bun:test";
 import { renderHook } from "@testing-library/react";
+import { setupTimeFreezing } from "@/game/testing/time";
 import type { GameNotification, GameState, Pet } from "@/game/types";
 import { GrowthStage } from "@/game/types";
 import { createInitialSkills } from "@/game/types/skill";
 import { createDefaultResistances } from "@/game/types/stats";
 import { useGameNotifications } from "./useGameNotifications";
+
+setupTimeFreezing();
 
 describe("useGameNotifications", () => {
   const mockSetNotification = mock((_n: GameNotification | null) => {});
