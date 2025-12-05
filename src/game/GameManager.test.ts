@@ -2,7 +2,15 @@
  * Tests for GameManager class.
  */
 
-import { expect, mock, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  setSystemTime,
+  test,
+} from "bun:test";
 import { BattlePhase, initializeBattle } from "@/game/core/battle/battle";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
@@ -247,141 +255,155 @@ test("GameManager.dispatchBattleAction() processes battle action correctly", () 
 
 // Tests for offline catchup threshold behavior
 
-test("GameManager uses offline catchup when ticks >= threshold", () => {
-  let ticksProcessedByOfflineCatchup = 0;
-  let regularTicksProcessed = 0;
+describe("GameManager offline catchup timing tests", () => {
+  const FROZEN_TIME = 1_000_000;
 
-  const updateState: StateUpdateCallback = (updater) => {
-    const initialState = {
-      ...createInitialGameState(),
-      pet: createTestPet(),
-      totalTicks: 0,
+  beforeEach(() => {
+    setSystemTime(FROZEN_TIME);
+  });
+
+  afterEach(() => {
+    setSystemTime();
+  });
+
+  test("uses offline catchup when ticks >= threshold", () => {
+    let ticksProcessedByOfflineCatchup = 0;
+    let regularTicksProcessed = 0;
+
+    const updateState: StateUpdateCallback = (updater) => {
+      const initialState = {
+        ...createInitialGameState(),
+        pet: createTestPet(),
+        totalTicks: 0,
+      };
+      const newState = updater(initialState);
+      // If totalTicks increased by a large amount, offline catchup was used
+      const ticksDelta = newState.totalTicks - initialState.totalTicks;
+      if (ticksDelta >= OFFLINE_CATCHUP_THRESHOLD_TICKS) {
+        ticksProcessedByOfflineCatchup = ticksDelta;
+      } else if (ticksDelta === 1) {
+        regularTicksProcessed++;
+      }
     };
-    const newState = updater(initialState);
-    // If totalTicks increased by a large amount, offline catchup was used
-    const ticksDelta = newState.totalTicks - initialState.totalTicks;
-    if (ticksDelta >= OFFLINE_CATCHUP_THRESHOLD_TICKS) {
-      ticksProcessedByOfflineCatchup = ticksDelta;
-    } else if (ticksDelta === 1) {
-      regularTicksProcessed++;
-    }
-  };
 
-  const manager = new GameManager(updateState);
+    const manager = new GameManager(updateState);
 
-  // Set up accumulator to trigger offline catchup (exactly at threshold)
-  const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
-  manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
-  manager._testSetLastTickTime(Date.now());
+    // Set up accumulator to trigger offline catchup (exactly at threshold)
+    const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
+    manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
+    manager._testSetLastTickTime(Date.now());
 
-  // Trigger update
-  manager._testUpdate();
+    // Trigger update
+    manager._testUpdate();
 
-  // Should have used offline catchup
-  expect(ticksProcessedByOfflineCatchup).toBe(OFFLINE_CATCHUP_THRESHOLD_TICKS);
-  expect(regularTicksProcessed).toBe(0);
-});
+    // Should have used offline catchup
+    expect(ticksProcessedByOfflineCatchup).toBe(
+      OFFLINE_CATCHUP_THRESHOLD_TICKS,
+    );
+    expect(regularTicksProcessed).toBe(0);
+  });
 
-test("GameManager uses batch tick processing when ticks < threshold", () => {
-  let updateCallCount = 0;
-  let totalTicksProcessed = 0;
+  test("uses batch tick processing when ticks < threshold", () => {
+    let updateCallCount = 0;
+    let totalTicksProcessed = 0;
 
-  const updateState: StateUpdateCallback = (updater) => {
-    updateCallCount++;
-    const initialState = {
-      ...createInitialGameState(),
-      pet: createTestPet(),
-      totalTicks: totalTicksProcessed,
+    const updateState: StateUpdateCallback = (updater) => {
+      updateCallCount++;
+      const initialState = {
+        ...createInitialGameState(),
+        pet: createTestPet(),
+        totalTicks: totalTicksProcessed,
+      };
+      const newState = updater(initialState);
+      totalTicksProcessed = newState.totalTicks;
     };
-    const newState = updater(initialState);
-    totalTicksProcessed = newState.totalTicks;
-  };
 
-  const manager = new GameManager(updateState);
+    const manager = new GameManager(updateState);
 
-  // Set up accumulator just below the threshold (29 ticks)
-  const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS - 1;
-  manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
-  manager._testSetLastTickTime(Date.now());
+    // Set up accumulator just below the threshold (29 ticks)
+    const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS - 1;
+    manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
+    manager._testSetLastTickTime(Date.now());
 
-  // Trigger update
-  manager._testUpdate();
+    // Trigger update
+    manager._testUpdate();
 
-  // Should have processed all ticks in a single batch call
-  expect(updateCallCount).toBe(1);
-  expect(totalTicksProcessed).toBe(ticksNeeded);
-});
+    // Should have processed all ticks in a single batch call
+    expect(updateCallCount).toBe(1);
+    expect(totalTicksProcessed).toBe(ticksNeeded);
+  });
 
-test("GameManager resets battle accumulator during offline catchup", () => {
-  const updateState: StateUpdateCallback = (updater) => {
-    const initialState = {
-      ...createInitialGameState(),
-      pet: createTestPet(),
-      totalTicks: 0,
+  test("resets battle accumulator during offline catchup", () => {
+    const updateState: StateUpdateCallback = (updater) => {
+      const initialState = {
+        ...createInitialGameState(),
+        pet: createTestPet(),
+        totalTicks: 0,
+      };
+      updater(initialState);
     };
-    updater(initialState);
-  };
 
-  const manager = new GameManager(updateState);
+    const manager = new GameManager(updateState);
 
-  // Set up accumulator to trigger offline catchup
-  const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
-  manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
-  manager._testSetBattleAccumulator(5000); // 5 seconds of battle ticks
-  manager._testSetLastTickTime(Date.now());
+    // Set up accumulator to trigger offline catchup
+    const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
+    manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
+    manager._testSetBattleAccumulator(5000); // 5 seconds of battle ticks
+    manager._testSetLastTickTime(Date.now());
 
-  // Trigger update
-  manager._testUpdate();
+    // Trigger update
+    manager._testUpdate();
 
-  // Battle accumulator should be reset to 0
-  expect(manager._testGetBattleAccumulator()).toBe(0);
-});
+    // Battle accumulator should be reset to 0
+    expect(manager._testGetBattleAccumulator()).toBe(0);
+  });
 
-test("GameManager correctly decrements accumulator after offline catchup", () => {
-  const updateState: StateUpdateCallback = (updater) => {
-    const initialState = {
-      ...createInitialGameState(),
-      pet: createTestPet(),
-      totalTicks: 0,
+  test("correctly decrements accumulator after offline catchup", () => {
+    const updateState: StateUpdateCallback = (updater) => {
+      const initialState = {
+        ...createInitialGameState(),
+        pet: createTestPet(),
+        totalTicks: 0,
+      };
+      updater(initialState);
     };
-    updater(initialState);
-  };
 
-  const manager = new GameManager(updateState);
+    const manager = new GameManager(updateState);
 
-  // Set up accumulator with exact tick boundary (no remainder)
-  const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
-  manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
-  manager._testSetLastTickTime(Date.now());
+    // Set up accumulator with exact tick boundary (no remainder)
+    const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
+    manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS);
+    manager._testSetLastTickTime(Date.now());
 
-  // Trigger update
-  manager._testUpdate();
+    // Trigger update
+    manager._testUpdate();
 
-  // Accumulator should be exactly 0 (no remainder since we set exact ticks)
-  expect(manager._testGetAccumulator()).toBe(0);
-});
+    // Accumulator should be exactly 0 (no remainder since we set exact ticks)
+    expect(manager._testGetAccumulator()).toBe(0);
+  });
 
-test("GameManager preserves accumulator remainder after offline catchup", () => {
-  const updateState: StateUpdateCallback = (updater) => {
-    const initialState = {
-      ...createInitialGameState(),
-      pet: createTestPet(),
-      totalTicks: 0,
+  test("preserves accumulator remainder after offline catchup", () => {
+    const updateState: StateUpdateCallback = (updater) => {
+      const initialState = {
+        ...createInitialGameState(),
+        pet: createTestPet(),
+        totalTicks: 0,
+      };
+      updater(initialState);
     };
-    updater(initialState);
-  };
 
-  const manager = new GameManager(updateState);
+    const manager = new GameManager(updateState);
 
-  // Set up accumulator with extra partial tick
-  const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
-  const partialTickMs = 5000; // 5 seconds extra
-  manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS + partialTickMs);
-  manager._testSetLastTickTime(Date.now());
+    // Set up accumulator with extra partial tick
+    const ticksNeeded = OFFLINE_CATCHUP_THRESHOLD_TICKS;
+    const partialTickMs = 5000; // 5 seconds extra
+    manager._testSetAccumulator(ticksNeeded * TICK_DURATION_MS + partialTickMs);
+    manager._testSetLastTickTime(Date.now());
 
-  // Trigger update
-  manager._testUpdate();
+    // Trigger update
+    manager._testUpdate();
 
-  // Accumulator should have the partial tick remainder
-  expect(manager._testGetAccumulator()).toBe(partialTickMs);
+    // Accumulator should have the partial tick remainder
+    expect(manager._testGetAccumulator()).toBe(partialTickMs);
+  });
 });
