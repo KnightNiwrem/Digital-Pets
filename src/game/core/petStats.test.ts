@@ -2,7 +2,7 @@
  * Tests for pet stats calculation utilities.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import {
   getSpeciesById,
   getSpeciesGrowthStage,
@@ -14,6 +14,12 @@ import {
   calculatePetMaxStats,
   createDefaultBonusMaxStats,
 } from "./petStats";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
 
 test("calculatePetMaxStats returns correct values for baby florabit at age 0", () => {
   const pet = createTestPet({

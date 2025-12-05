@@ -2,7 +2,7 @@
  * Tests for training system core logic.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import {
   applyTrainingCompletion,
   cancelTraining,
@@ -18,6 +18,12 @@ import type { ActiveTraining } from "@/game/types/activity";
 import { TrainingSessionType } from "@/game/types/activity";
 import { TICKS_PER_HOUR, toMicro } from "@/game/types/common";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
 
 // canStartTraining tests
 test("canStartTraining returns true when pet is idle with enough energy", () => {

@@ -2,7 +2,14 @@
  * Tests for training state actions.
  */
 
-import { describe, expect, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import { strengthFacility } from "@/game/data/facilities/facilities";
 import {
   createTestGameState,
@@ -12,6 +19,12 @@ import { TrainingSessionType } from "@/game/types/activity";
 import { toMicro } from "@/game/types/common";
 import { ActivityState, GrowthStage } from "@/game/types/constants";
 import { cancelTraining, startTraining } from "./training";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
 
 describe("startTraining", () => {
   test("returns failure when no pet", () => {

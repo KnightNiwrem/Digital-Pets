@@ -9,8 +9,15 @@
  * This ensures mid-cycle state changes properly adjust timing.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
+
 import {
   MAX_POOP_COUNT,
   POOP_DECAY_AWAKE,

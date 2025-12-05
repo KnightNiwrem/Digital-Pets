@@ -2,7 +2,14 @@
  * Tests for persistence functions including save/load validation.
  */
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import { createTestGameState } from "@/game/testing/createTestPet";
 import {
   deleteSave,
@@ -13,6 +20,9 @@ import {
   saveGame,
   validateGameState,
 } from "./persistence";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
 
 // Mock localStorage for testing
 const localStorageData: Record<string, string> = {};
@@ -39,10 +49,12 @@ Object.defineProperty(globalThis, "localStorage", {
 });
 
 beforeEach(() => {
+  setSystemTime(FROZEN_TIME);
   mockLocalStorage.clear();
 });
 
 afterEach(() => {
+  setSystemTime();
   mockLocalStorage.clear();
 });
 

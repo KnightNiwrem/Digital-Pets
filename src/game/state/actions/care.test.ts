@@ -2,7 +2,7 @@
  * Tests for care actions including quest progress updates.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import {
   CLEANING_ITEMS,
   DRINK_ITEMS,
@@ -20,6 +20,12 @@ import type { QuestProgress } from "@/game/types/quest";
 import { QuestState } from "@/game/types/quest";
 import { createInitialSkills } from "@/game/types/skill";
 import { cleanPet, feedPet, playWithPet, waterPet } from "./care";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
 
 function createTestState(quests: QuestProgress[] = []): GameState {
   const pet = createNewPet("TestPet", SPECIES.FLORABIT.id);

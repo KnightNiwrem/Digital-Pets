@@ -2,10 +2,16 @@
  * Tests for care stat decay logic.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
 import { applyCareDecay, getPoopHappinessMultiplier } from "./careStats";
 import { CARE_DECAY_AWAKE, CARE_DECAY_SLEEPING } from "./constants";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
 
 test("getPoopHappinessMultiplier returns 1.0 for 0-2 poop", () => {
   expect(getPoopHappinessMultiplier(0)).toBe(1.0);

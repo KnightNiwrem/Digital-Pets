@@ -2,7 +2,7 @@
  * Tests for growth logic.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import {
   getSpeciesById,
   getSpeciesGrowthStage,
@@ -11,6 +11,12 @@ import {
 import { createTestPet } from "@/game/testing/createTestPet";
 import type { GrowthStage } from "@/game/types/constants";
 import { getNextStage, processGrowthTick } from "./growth";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
 
 // Helper to get the min age ticks for a given stage from species data
 function getStageMinAgeTicks(speciesId: string, stage: GrowthStage): number {

@@ -2,12 +2,19 @@
  * Tests for sleep state transitions.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import {
   createSleepingTestPet,
   createTestPet,
 } from "@/game/testing/createTestPet";
 import { ActivityState } from "@/game/types/constants";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
+
 import {
   canPerformCareActions,
   getRemainingMinSleep,

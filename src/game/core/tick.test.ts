@@ -2,13 +2,19 @@
  * Tests for single tick processing logic.
  */
 
-import { expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, setSystemTime, test } from "bun:test";
 import {
   ENERGY_REGEN_AWAKE,
   ENERGY_REGEN_SLEEPING,
 } from "@/game/core/care/constants";
 import { createTestPet } from "@/game/testing/createTestPet";
 import { processPetTick } from "./tick";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
 
 test("processPetTick increments ageTicks by 1", () => {
   const pet = createTestPet({

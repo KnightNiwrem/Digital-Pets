@@ -31,6 +31,12 @@ import {
   type StateUpdateCallback,
 } from "./GameManager";
 
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
+
+beforeEach(() => setSystemTime(FROZEN_TIME));
+afterEach(() => setSystemTime());
+
 // Tests for GameManager lifecycle
 
 test("GameManager starts not running", () => {
