@@ -157,8 +157,7 @@ Follow this workflow when implementing new features:
 4. **Wait ~10 minutes** for PR feedback comments by using `sleep`
 5. **Fetch and review PR feedback** comments left after your latest commit using the `github` MCP server
 6. **Evaluate each review comment** and determine if it's valid
-7. **Address valid issues** with code changes
+7. **Address valid issues** with code changes. Do not add comments to the PR.
 8. **Commit and push** to the current branch
-9. **Request re-review** from Copilot using the `github` MCP server.
-10. **Wait ~10 minutes** again for PR feedback comments by using `sleep`
-11. **Repeat from step 5** until the PR is approved
+9. **Wait ~10 minutes** again for PR feedback comments by using `sleep`
+10. **Repeat from step 5** until the PR is approved
