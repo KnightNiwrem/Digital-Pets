@@ -2,7 +2,7 @@
  * Tests for GameManager class.
  */
 
-import { expect, mock, test } from "bun:test";
+import { expect, mock, setSystemTime, test } from "bun:test";
 import { BattlePhase, initializeBattle } from "@/game/core/battle/battle";
 import { basicAttack } from "@/game/data/moves";
 import { SPECIES } from "@/game/data/species";
@@ -248,6 +248,10 @@ test("GameManager.dispatchBattleAction() processes battle action correctly", () 
 // Tests for offline catchup threshold behavior
 
 test("GameManager uses offline catchup when ticks >= threshold", () => {
+  // Freeze time to ensure deterministic behavior
+  const frozenTime = 1000000;
+  setSystemTime(frozenTime);
+
   let ticksProcessedByOfflineCatchup = 0;
   let regularTicksProcessed = 0;
 
@@ -280,9 +284,16 @@ test("GameManager uses offline catchup when ticks >= threshold", () => {
   // Should have used offline catchup
   expect(ticksProcessedByOfflineCatchup).toBe(OFFLINE_CATCHUP_THRESHOLD_TICKS);
   expect(regularTicksProcessed).toBe(0);
+
+  // Reset system time
+  setSystemTime();
 });
 
 test("GameManager uses batch tick processing when ticks < threshold", () => {
+  // Freeze time to ensure deterministic behavior
+  const frozenTime = 1000000;
+  setSystemTime(frozenTime);
+
   let updateCallCount = 0;
   let totalTicksProcessed = 0;
 
@@ -310,9 +321,16 @@ test("GameManager uses batch tick processing when ticks < threshold", () => {
   // Should have processed all ticks in a single batch call
   expect(updateCallCount).toBe(1);
   expect(totalTicksProcessed).toBe(ticksNeeded);
+
+  // Reset system time
+  setSystemTime();
 });
 
 test("GameManager resets battle accumulator during offline catchup", () => {
+  // Freeze time to ensure deterministic behavior
+  const frozenTime = 1000000;
+  setSystemTime(frozenTime);
+
   const updateState: StateUpdateCallback = (updater) => {
     const initialState = {
       ...createInitialGameState(),
@@ -335,9 +353,16 @@ test("GameManager resets battle accumulator during offline catchup", () => {
 
   // Battle accumulator should be reset to 0
   expect(manager._testGetBattleAccumulator()).toBe(0);
+
+  // Reset system time
+  setSystemTime();
 });
 
 test("GameManager correctly decrements accumulator after offline catchup", () => {
+  // Freeze time to ensure deterministic behavior
+  const frozenTime = 1000000;
+  setSystemTime(frozenTime);
+
   const updateState: StateUpdateCallback = (updater) => {
     const initialState = {
       ...createInitialGameState(),
@@ -359,9 +384,16 @@ test("GameManager correctly decrements accumulator after offline catchup", () =>
 
   // Accumulator should be exactly 0 (no remainder since we set exact ticks)
   expect(manager._testGetAccumulator()).toBe(0);
+
+  // Reset system time
+  setSystemTime();
 });
 
 test("GameManager preserves accumulator remainder after offline catchup", () => {
+  // Freeze time to ensure deterministic behavior
+  const frozenTime = 1000000;
+  setSystemTime(frozenTime);
+
   const updateState: StateUpdateCallback = (updater) => {
     const initialState = {
       ...createInitialGameState(),
@@ -384,4 +416,7 @@ test("GameManager preserves accumulator remainder after offline catchup", () => 
 
   // Accumulator should have the partial tick remainder
   expect(manager._testGetAccumulator()).toBe(partialTickMs);
+
+  // Reset system time
+  setSystemTime();
 });
