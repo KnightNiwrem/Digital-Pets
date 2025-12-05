@@ -39,6 +39,10 @@ import type { BattleActionEvent, GameEvent } from "@/game/types/event";
 import { ObjectiveType } from "@/game/types/quest";
 import "./index.css";
 
+/** Filter out battle events from pending events to prevent animation replay */
+const clearBattleEvents = (events: GameEvent[]) =>
+  events.filter((e) => e.type !== "battleAction");
+
 /**
  * Main game content that renders based on active tab.
  */
@@ -92,10 +96,6 @@ function GameContent({
   if (!state?.isInitialized) {
     return <NewGameScreen onStartGame={actions.startNewGame} />;
   }
-
-  // Helper to filter out battle events from pending events
-  const clearBattleEvents = (events: GameEvent[]) =>
-    events.filter((e) => e.type !== "battleAction");
 
   // Handle starting a battle
   const handleStartBattle = (enemySpeciesId: string, enemyLevel: number) => {
