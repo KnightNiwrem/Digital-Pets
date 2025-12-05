@@ -2,7 +2,14 @@
  * Tests for tick processor batch processing.
  */
 
-import { expect, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import { createTestPet } from "@/game/testing/createTestPet";
 import { createInitialGameState, type GameState } from "@/game/types/gameState";
 import {
@@ -10,6 +17,9 @@ import {
   processMultipleTicks,
   processOfflineCatchup,
 } from "./tickProcessor";
+
+// Frozen time for deterministic tests: 2024-12-05T12:00:00.000Z
+const FROZEN_TIME = 1_733_400_000_000;
 
 function createTestGameState(overrides: Partial<GameState> = {}): GameState {
   return {
@@ -263,169 +273,169 @@ test("processOfflineCatchup uses provided elapsedMs", () => {
 
 // Tests for daily reset functionality
 
-test("processGameTick triggers daily reset when crossing midnight", () => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(12, 0, 0, 0);
+describe("daily reset tests", () => {
+  beforeEach(() => setSystemTime(FROZEN_TIME));
+  afterEach(() => setSystemTime());
 
-  const pet = createTestPet({
-    sleep: {
-      isSleeping: false,
-      sleepTicksToday: 100,
-      sleepStartTime: null,
-    },
-  });
-  const state = createTestGameState({
-    pet,
-    lastDailyReset: yesterday.getTime(),
-  });
+  test("processGameTick triggers daily reset when crossing midnight", () => {
+    const yesterday = new Date(FROZEN_TIME);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(12, 0, 0, 0);
 
-  const now = Date.now();
-  const newState = processGameTick(state, now);
-
-  // Daily sleep counter should be reset
-  expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
-});
-
-test("processGameTick does not reset when already reset today", () => {
-  const { getMidnightTimestamp } = require("./time");
-  const now = Date.now();
-  const todayMidnight = getMidnightTimestamp(now);
-
-  const pet = createTestPet({
-    sleep: {
-      isSleeping: false,
-      sleepTicksToday: 100,
-      sleepStartTime: null,
-    },
-  });
-  const state = createTestGameState({
-    pet,
-    lastDailyReset: todayMidnight,
-  });
-
-  const newState = processGameTick(state, now);
-
-  // Daily sleep counter should NOT be reset
-  expect(newState.pet?.sleep.sleepTicksToday).toBe(100);
-});
-
-test("processGameTick preserves other pet properties during daily reset", () => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(12, 0, 0, 0);
-
-  const pet = createTestPet({
-    careStats: {
-      satiety: 50_000,
-      hydration: 40_000,
-      happiness: 30_000,
-    },
-    sleep: {
-      isSleeping: false,
-      sleepTicksToday: 100,
-      sleepStartTime: null,
-    },
-  });
-  const state = createTestGameState({
-    pet,
-    lastDailyReset: yesterday.getTime(),
-  });
-
-  const now = Date.now();
-  const newState = processGameTick(state, now);
-
-  // Care stats should still be processed (decayed)
-  expect(newState.pet?.careStats.satiety).toBeLessThan(50_000);
-  // But sleep counter should be reset
-  expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
-});
-
-test("processMultipleTicks triggers daily resets during offline progression", () => {
-  const MS_PER_DAY = 24 * 60 * 60 * 1000;
-  const TICK_DURATION_MS = 30_000;
-
-  // Set up state from 3 days ago
-  const threeDaysAgo = new Date();
-  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-  threeDaysAgo.setHours(12, 0, 0, 0);
-
-  const pet = createTestPet({
-    sleep: {
-      isSleeping: false,
-      sleepTicksToday: 100,
-      sleepStartTime: null,
-    },
-  });
-  const state = createTestGameState({
-    pet,
-    lastSaveTime: threeDaysAgo.getTime(),
-    lastDailyReset: threeDaysAgo.getTime() - MS_PER_DAY, // Reset was day before that
-  });
-
-  // Process ticks spanning 3 days
-  const ticksFor3Days = Math.floor((3 * MS_PER_DAY) / TICK_DURATION_MS);
-  const newState = processMultipleTicks(
-    state,
-    ticksFor3Days,
-    threeDaysAgo.getTime(),
-  );
-
-  // Sleep counter should be reset (we crossed multiple midnights)
-  expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
-});
-
-test("processGameTick handles state with no pet during daily reset", () => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(12, 0, 0, 0);
-
-  const state = createTestGameState({
-    pet: null,
-    lastDailyReset: yesterday.getTime(),
-  });
-
-  const now = Date.now();
-  const newState = processGameTick(state, now);
-
-  // Should update lastDailyReset without error
-  expect(newState.pet).toBeNull();
-  // lastDailyReset should be updated to today's midnight
-  const { getMidnightTimestamp } = require("./time");
-  expect(newState.lastDailyReset).toBe(getMidnightTimestamp(now));
-});
-
-test("processGameTick refreshes daily quests on daily reset", () => {
-  const { QuestState } = require("@/game/types/quest");
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(12, 0, 0, 0);
-
-  const pet = createTestPet();
-  const state = createTestGameState({
-    pet,
-    lastDailyReset: yesterday.getTime(),
-    quests: [
-      {
-        questId: "daily_care_routine",
-        state: QuestState.Completed,
-        objectiveProgress: { feed_pet: 2, water_pet: 2 },
-        completedAt: yesterday.getTime(),
+    const pet = createTestPet({
+      sleep: {
+        isSleeping: false,
+        sleepTicksToday: 100,
+        sleepStartTime: null,
       },
-    ],
+    });
+    const state = createTestGameState({
+      pet,
+      lastDailyReset: yesterday.getTime(),
+    });
+
+    const newState = processGameTick(state, FROZEN_TIME);
+
+    // Daily sleep counter should be reset
+    expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
   });
 
-  const now = Date.now();
-  const newState = processGameTick(state, now);
+  test("processGameTick does not reset when already reset today", () => {
+    const { getMidnightTimestamp } = require("./time");
+    const todayMidnight = getMidnightTimestamp(FROZEN_TIME);
 
-  // Daily quest should be reset to Active
-  const dailyQuest = newState.quests.find(
-    (q) => q.questId === "daily_care_routine",
-  );
-  expect(dailyQuest).toBeDefined();
-  expect(dailyQuest?.state).toBe(QuestState.Active);
-  expect(dailyQuest?.objectiveProgress).toEqual({});
+    const pet = createTestPet({
+      sleep: {
+        isSleeping: false,
+        sleepTicksToday: 100,
+        sleepStartTime: null,
+      },
+    });
+    const state = createTestGameState({
+      pet,
+      lastDailyReset: todayMidnight,
+    });
+
+    const newState = processGameTick(state, FROZEN_TIME);
+
+    // Daily sleep counter should NOT be reset
+    expect(newState.pet?.sleep.sleepTicksToday).toBe(100);
+  });
+
+  test("processGameTick preserves other pet properties during daily reset", () => {
+    const yesterday = new Date(FROZEN_TIME);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(12, 0, 0, 0);
+
+    const pet = createTestPet({
+      careStats: {
+        satiety: 50_000,
+        hydration: 40_000,
+        happiness: 30_000,
+      },
+      sleep: {
+        isSleeping: false,
+        sleepTicksToday: 100,
+        sleepStartTime: null,
+      },
+    });
+    const state = createTestGameState({
+      pet,
+      lastDailyReset: yesterday.getTime(),
+    });
+
+    const newState = processGameTick(state, FROZEN_TIME);
+
+    // Care stats should still be processed (decayed)
+    expect(newState.pet?.careStats.satiety).toBeLessThan(50_000);
+    // But sleep counter should be reset
+    expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
+  });
+
+  test("processMultipleTicks triggers daily resets during offline progression", () => {
+    const MS_PER_DAY = 24 * 60 * 60 * 1000;
+    const TICK_DURATION_MS = 30_000;
+
+    // Set up state from 3 days ago
+    const threeDaysAgo = new Date(FROZEN_TIME);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    threeDaysAgo.setHours(12, 0, 0, 0);
+
+    const pet = createTestPet({
+      sleep: {
+        isSleeping: false,
+        sleepTicksToday: 100,
+        sleepStartTime: null,
+      },
+    });
+    const state = createTestGameState({
+      pet,
+      lastSaveTime: threeDaysAgo.getTime(),
+      lastDailyReset: threeDaysAgo.getTime() - MS_PER_DAY, // Reset was day before that
+    });
+
+    // Process ticks spanning 3 days
+    const ticksFor3Days = Math.floor((3 * MS_PER_DAY) / TICK_DURATION_MS);
+    const newState = processMultipleTicks(
+      state,
+      ticksFor3Days,
+      threeDaysAgo.getTime(),
+    );
+
+    // Sleep counter should be reset (we crossed multiple midnights)
+    expect(newState.pet?.sleep.sleepTicksToday).toBe(0);
+  });
+
+  test("processGameTick handles state with no pet during daily reset", () => {
+    const yesterday = new Date(FROZEN_TIME);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(12, 0, 0, 0);
+
+    const state = createTestGameState({
+      pet: null,
+      lastDailyReset: yesterday.getTime(),
+    });
+
+    const newState = processGameTick(state, FROZEN_TIME);
+
+    // Should update lastDailyReset without error
+    expect(newState.pet).toBeNull();
+    // lastDailyReset should be updated to today's midnight
+    const { getMidnightTimestamp } = require("./time");
+    expect(newState.lastDailyReset).toBe(getMidnightTimestamp(FROZEN_TIME));
+  });
+
+  test("processGameTick refreshes daily quests on daily reset", () => {
+    const { QuestState } = require("@/game/types/quest");
+
+    const yesterday = new Date(FROZEN_TIME);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(12, 0, 0, 0);
+
+    const pet = createTestPet();
+    const state = createTestGameState({
+      pet,
+      lastDailyReset: yesterday.getTime(),
+      quests: [
+        {
+          questId: "daily_care_routine",
+          state: QuestState.Completed,
+          objectiveProgress: { feed_pet: 2, water_pet: 2 },
+          completedAt: yesterday.getTime(),
+        },
+      ],
+    });
+
+    const newState = processGameTick(state, FROZEN_TIME);
+
+    // Daily quest should be reset to Active
+    const dailyQuest = newState.quests.find(
+      (q) => q.questId === "daily_care_routine",
+    );
+    expect(dailyQuest).toBeDefined();
+    expect(dailyQuest?.state).toBe(QuestState.Active);
+    expect(dailyQuest?.objectiveProgress).toEqual({});
+  });
 });
 
 test("processGameTick updates quest progress when training completes", () => {
