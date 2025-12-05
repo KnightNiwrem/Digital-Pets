@@ -35,7 +35,7 @@ import {
 } from "@/game/core/battle/battle";
 import { updateQuestProgress } from "@/game/core/quests/quests";
 import { useGameState } from "@/game/hooks/useGameState";
-import type { BattleActionEvent } from "@/game/types/event";
+import type { BattleActionEvent, GameEvent } from "@/game/types/event";
 import { ObjectiveType } from "@/game/types/quest";
 import "./index.css";
 
@@ -93,6 +93,10 @@ function GameContent({
     return <NewGameScreen onStartGame={actions.startNewGame} />;
   }
 
+  // Helper to filter out battle events from pending events
+  const clearBattleEvents = (events: GameEvent[]) =>
+    events.filter((e) => e.type !== "battleAction");
+
   // Handle starting a battle
   const handleStartBattle = (enemySpeciesId: string, enemyLevel: number) => {
     if (!state?.pet) return;
@@ -110,6 +114,8 @@ function GameContent({
         ...prev,
         pet: { ...prev.pet, activityState: "battling" as const },
         activeBattle: { enemySpeciesId, enemyLevel, battleState },
+        // Clear stale battle events to prevent animation replay
+        pendingEvents: clearBattleEvents(prev.pendingEvents),
       };
     });
 
@@ -120,13 +126,15 @@ function GameContent({
   const handleBattleEnd = (victory: boolean, rewards: BattleRewards) => {
     // Reset pet activity state, clear battle, and apply rewards
     actions.updateState((prev) => {
-      // First reset activity state and clear battle
+      // First reset activity state, clear battle, and clear battle events
       const stateWithIdlePet = {
         ...prev,
         pet: prev.pet
           ? { ...prev.pet, activityState: "idle" as const }
           : prev.pet,
         activeBattle: undefined,
+        // Clear battle events to prevent animation replay in next battle
+        pendingEvents: clearBattleEvents(prev.pendingEvents),
       };
 
       if (!victory) {
@@ -163,13 +171,14 @@ function GameContent({
 
   // Handle fleeing from battle
   const handleFlee = () => {
-    // Reset pet activity state and clear battle
+    // Reset pet activity state, clear battle, and clear battle events
     actions.updateState((prev) => ({
       ...prev,
       pet: prev.pet
         ? { ...prev.pet, activityState: "idle" as const }
         : prev.pet,
       activeBattle: undefined,
+      pendingEvents: clearBattleEvents(prev.pendingEvents),
     }));
 
     onTabChange("exploration");
