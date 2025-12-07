@@ -72,7 +72,7 @@ See [Battle](./battle.md) for move details.
 ## Stat Caps
 
 Maximum trainable stat values increase with growth stages. Caps are defined as:
-```
+```plaintext
 statCap = baseStatCap + (growthStage × stageBonusCap)
 ```
 

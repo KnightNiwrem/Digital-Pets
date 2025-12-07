@@ -58,8 +58,4 @@ Pets can enter exhausted state when:
 - Energy drops too low
 - Defeated in battle (see [Battle](./battle.md))
 
-| State | Description |
-|-------|-------------|
-| Awake | Normal activities available |
-| Sleeping | Energy regen ×3, care decay ×0.5 |
-| Exhausted | Forced rest until energy threshold reached |
+See [Sleep](./sleep.md) for a description of pet states including `Awake`, `Sleeping`, and `Exhausted`.

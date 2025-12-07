@@ -13,34 +13,34 @@ All time-based mechanics operate on **game ticks** (30 seconds each). This enabl
 - Consistent offline catch-up processing
 - Deterministic game state
 
-See [Time Mechanics](./mechanics/time.md) for details.
+See [Time Mechanics](./time.md) for details.
 
 ## Game Mechanics
 
 ### Pet Care
-- **[Care System](./mechanics/care.md)** - Satiety, Hydration, Happiness, Poop management, and Care Life
-- **[Items](./mechanics/items.md)** - Consumables, equipment, and inventory management
+- **[Care System](./care.md)** - Satiety, Hydration, Happiness, Poop management, and Care Life
+- **[Items](./items.md)** - Consumables, equipment, and inventory management
 
 ### Pet Development
-- **[Pet Species](./mechanics/species.md)** - Species with unique stats, multipliers, and resistances
-- **[Growth Stages](./mechanics/growth.md)** - Baby → Child → Teen → Young Adult → Adult progression
+- **[Pet Species](./species.md)** - Species with unique stats, multipliers, and resistances
+- **[Growth Stages](./growth.md)** - Baby → Child → Teen → Young Adult → Adult progression
 
 ### Combat
-- **[Battle System](./mechanics/battle.md)** - 1v1 turn-based combat with damage types and resistances
-- **[Training](./mechanics/training.md)** - Facilities, stat improvement, and move learning
+- **[Battle System](./battle.md)** - 1v1 turn-based combat with damage types and resistances
+- **[Training](./training.md)** - Facilities, stat improvement, and move learning
 
 ### Energy & Rest
-- **[Energy](./mechanics/energy.md)** - Activity costs and regeneration
-- **[Sleep](./mechanics/sleep.md)** - Rest mechanics and requirements
+- **[Energy](./energy.md)** - Activity costs and regeneration
+- **[Sleep](./sleep.md)** - Rest mechanics and requirements
 
 ### World
-- **[Locations](./mechanics/locations.md)** - Graph-based travel between areas
-- **[Exploration](./mechanics/exploration.md)** - Foraging, encounters, and rewards
-- **[Skills](./mechanics/skills.md)** - Non-battle skills for exploration and activities
-- **[Quests](./mechanics/quests.md)** - NPC interactions and quest progression
+- **[Locations](./locations.md)** - Graph-based travel between areas
+- **[Exploration](./exploration.md)** - Foraging, encounters, and rewards
+- **[Skills](./skills.md)** - Non-battle skills for exploration and activities
+- **[Quests](./quests.md)** - NPC interactions and quest progression
 
 ### Systems
-- **[Time Mechanics](./mechanics/time.md)** - Real-time progression with offline support
+- **[Time Mechanics](./time.md)** - Real-time progression with offline support
 
 ## Battle Stats
 

@@ -16,8 +16,8 @@ Each quest contains:
 | objectives | Tasks to complete |
 | rewards | Items, currency, unlocks |
 | chain | Next quest ID in series (optional) |
-| startLocationId | Location where quest can be accepted (see [Locations](./locations.md)) |
-| completeLocationId | Location where quest can be turned in (see [Locations](./locations.md)) |
+| startLocationId | Location where quest can be accepted (optional, see [Locations](./locations.md)) |
+| completeLocationId | Location where quest can be turned in (optional, see [Locations](./locations.md)) |
 
 ## Quest Types
 
