@@ -16,8 +16,8 @@ Each quest contains:
 | objectives | Tasks to complete |
 | rewards | Items, currency, unlocks |
 | chain | Next quest ID in series (optional) |
-| startLocationId | Location where quest can be accepted (optional) |
-| completeLocationId | Location where quest can be turned in (optional) |
+| startLocationId | Location where quest can be accepted (see [Locations](./locations.md)) |
+| completeLocationId | Location where quest can be turned in (see [Locations](./locations.md)) |
 
 ## Quest Types
 
@@ -59,7 +59,7 @@ Note: Daily and weekly quests never enter Expired state - they are reset on thei
 |----------|-------------|
 | id | Unique identifier |
 | name | Display name |
-| location | Location ID where found |
+| location | Location ID where found (see [Locations](./locations.md)) |
 | role | Merchant, Trainer, Quest Giver, etc |
 | dialogue | Dialogue tree reference |
 | quests | Array of quest IDs offered |
@@ -70,8 +70,8 @@ Note: Daily and weekly quests never enter Expired state - they are reset on thei
 | Role | Function |
 |------|----------|
 | Quest Giver | Offers quests, advances story |
-| Merchant | Sells items |
-| Trainer | Provides training services |
+| Merchant | Sells items (see [Items](./items.md)) |
+| Trainer | Provides training services (see [Training](./training.md)) |
 | Guide | Tutorial and hints |
 | Lore | Background information |
 
@@ -89,8 +89,8 @@ NPCs have dialogue trees with:
 
 Dialogue options may unlock based on:
 - Quest progress
-- Pet growth stage
-- Player skill levels
+- Pet growth stage (see [Growth](./growth.md))
+- Player skill levels (see [Skills](./skills.md))
 - Previous dialogue choices
 
 ## Quest Requirements
@@ -100,11 +100,11 @@ Dialogue options may unlock based on:
 | Type | Description |
 |------|-------------|
 | quest | Must complete another quest first |
-| stage | Pet must reach growth stage |
-| skill | Minimum skill level required |
-| item | Must possess certain item |
-| location | Must have discovered location |
-| battle | Must have won X battles |
+| stage | Pet must reach growth stage (see [Growth](./growth.md)) |
+| skill | Minimum skill level required (see [Skills](./skills.md)) |
+| item | Must possess certain item (see [Items](./items.md)) |
+| location | Must have discovered location (see [Locations](./locations.md)) |
+| battle | Must have won X battles (see [Battle](./battle.md)) |
 
 ### Requirement Evaluation
 
@@ -118,13 +118,13 @@ canStart = all requirements evaluate to true
 
 | Type | Description |
 |------|-------------|
-| Collect | Gather specific items |
-| Defeat | Win battles against targets |
-| Visit | Travel to location |
+| Collect | Gather specific items (see [Items](./items.md)) |
+| Defeat | Win battles against targets (see [Battle](./battle.md)) |
+| Visit | Travel to location (see [Locations](./locations.md)) |
 | Talk | Speak to NPC |
-| Explore | Complete exploration activities |
-| Train | Complete training sessions |
-| Care | Maintain care stats at threshold |
+| Explore | Complete exploration activities (see [Exploration](./exploration.md)) |
+| Train | Complete training sessions (see [Training](./training.md)) |
+| Care | Maintain care stats at threshold (see [Care](./care.md)) |
 
 ### Objective Properties
 
@@ -149,8 +149,8 @@ Objectives may be:
 | Type | Description |
 |------|-------------|
 | Currency | In-game money |
-| Item | Specific items |
-| XP | Skill experience |
+| Item | Specific items (see [Items](./items.md)) |
+| XP | Skill experience (see [Skills](./skills.md)) |
 | Unlock | New location, species, feature |
 | Equipment | Durability items |
 
@@ -180,7 +180,7 @@ Related quests form chains where completing one unlocks the next.
 | Expiration | Shows time until next reset |
 | No fail state | Reset instead of failing on expiration |
 
-Daily quests are automatically activated at midnight and show a countdown to the next reset.
+Daily quests are automatically activated at midnight and show a countdown to the next reset. See [Time](./time.md) for time mechanics.
 
 ## Weekly Quests
 
@@ -227,8 +227,8 @@ This simulates location-specific quest boards where players must physically trav
 ## Hidden Quests
 
 Discovered through:
-- Exploring hidden locations
-- High skill checks during activities
+- Exploring hidden locations (see [Exploration](./exploration.md))
+- High skill checks during activities (see [Skills](./skills.md))
 - Specific dialogue choices
 - Random events
 

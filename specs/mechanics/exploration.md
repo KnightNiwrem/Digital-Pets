@@ -13,8 +13,8 @@ Exploration activities are defined in game data. Each activity specifies its pro
 | id | Unique identifier for the activity |
 | name | Display name of the activity |
 | description | Text describing what the activity does |
-| duration | Time to complete, measured in ticks |
-| energyCost | Energy consumed when starting the activity |
+| duration | Time to complete, measured in ticks (see [Time](./time.md)) |
+| energyCost | Energy consumed when starting the activity (see [Energy](./energy.md)) |
 | requirements | Conditions that must be met to perform this activity |
 | encounterChance | Base probability of triggering an encounter |
 
@@ -24,9 +24,9 @@ Requirements determine whether a pet can perform an exploration activity. All re
 
 | Requirement | Description |
 |-------------|-------------|
-| minSkillLevels | Map of skill IDs to minimum required levels |
-| minPetStage | Minimum growth stage required (e.g., "juvenile", "adult") |
-| questCompleted | Quest IDs that must be completed |
+| minSkillLevels | Map of skill IDs to minimum required levels (see [Skills](./skills.md)) |
+| minPetStage | Minimum growth stage required (see [Growth](./growth.md)) |
+| questCompleted | Quest IDs that must be completed (see [Quests](./quests.md)) |
 
 A pet can only start an exploration activity if all specified requirements are met.
 
@@ -60,7 +60,7 @@ Each location has drop tables defining possible item rewards for exploration act
 
 | Property | Description |
 |----------|-------------|
-| itemId | Item that can drop |
+| itemId | Item that can drop (see [Items](./items.md)) |
 | quantity | Number of items granted when this entry passes |
 | minRoll | Minimum roll value required (0.0 to 1.0) |
 | requirements | Conditions that must be met for this entry to be evaluated |
@@ -180,8 +180,8 @@ Each location has encounter tables for events during exploration.
 
 | Type | Description |
 |------|-------------|
-| Wild Battle | Combat with wild pet |
-| NPC Meeting | Dialogue/quest opportunity |
+| Wild Battle | Combat with wild pet (see [Battle](./battle.md)) |
+| NPC Meeting | Dialogue/quest opportunity (see [Quests](./quests.md)) |
 | Discovery | Find hidden location or item |
 | Event | Random positive/negative occurrence |
 
@@ -211,7 +211,7 @@ Exploration sessions can be cancelled at any time before completion. When an exp
 | Reward Type | Description |
 |-------------|-------------|
 | Items | Rolled from location's drop table based on activity |
-| Skill XP | Awarded to skills in the activity's skillFactors |
+| Skill XP | Awarded to skills in the activity's skillFactors (see [Skills](./skills.md)) |
 | Currency | May be awarded based on activity and location |
 
 ### Battle Victory Rewards
@@ -225,7 +225,7 @@ Exploration sessions can be cancelled at any time before completion. When an exp
 
 ### Discovery Rewards
 
-- New location unlocked
+- New location unlocked (see [Locations](./locations.md))
 - Unique item granted
 - Quest triggered
 - Species unlock hint
@@ -247,4 +247,4 @@ Cooldowns prevent repeated farming. Measured in ticks. Each activity can define 
 
 ## Offline Behavior
 
-Exploration continues offline. Session timers progress during offline time, and sessions complete when their duration is reached.
+Exploration continues offline. Session timers progress during offline time, and sessions complete when their duration is reached. See [Time](./time.md) for offline progression details.

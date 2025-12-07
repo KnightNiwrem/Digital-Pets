@@ -14,7 +14,7 @@ Pets progress through five growth stages over approximately 12 months of real ti
 
 ## Stage Progression
 
-Stages are reached based on accumulated age (in ticks). Specific durations defined in game data, targeting approximately 12 months total to reach Adult.
+Stages are reached based on accumulated age (in ticks). Specific durations defined in game data, targeting approximately 12 months total to reach Adult. See [Time](./time.md) for tick definitions.
 
 ### Substages
 
@@ -26,7 +26,7 @@ Each main stage has substages (e.g., Baby 1, Baby 2, Baby 3) to maintain sense o
 | substageTransition | Triggers visual/notification updates |
 | statGains | Stats increase based on species growth stage definitions |
 
-**Species Variation:** Different species may have different numbers of substages.
+**Species Variation:** Different species may have different numbers of substages. See [Species](./species.md) for details.
 
 ## Stage Characteristics
 
@@ -35,10 +35,10 @@ Each growth stage affects:
 | Property | How It Changes |
 |----------|----------------|
 | Max Stats | All stats defined per species per stage |
-| Battle Eligibility | Unlocks progressively |
-| Training Eligibility | Unlocks progressively |
-| Exploration Access | Expands with stage |
-| Sleep Requirements | Decreases with maturity |
+| Battle Eligibility | Unlocks progressively (see [Battle](./battle.md)) |
+| Training Eligibility | Unlocks progressively (see [Training](./training.md)) |
+| Exploration Access | Expands with stage (see [Exploration](./exploration.md)) |
+| Sleep Requirements | Decreases with maturity (see [Sleep](./sleep.md)) |
 
 ### Progression Overview
 
@@ -95,6 +95,8 @@ While actual values vary by species, typical ranges are:
 | Young Adult | 140,000 - 170,000 |
 | Adult | 180,000 - 220,000 |
 
+See [Care](./care.md) for care stat details.
+
 ### Energy (micro-units)
 
 | Stage | Typical Range |
@@ -104,6 +106,8 @@ While actual values vary by species, typical ranges are:
 | Teen | 90,000 - 110,000 |
 | Young Adult | 130,000 - 160,000 |
 | Adult | 180,000 - 220,000 |
+
+See [Energy](./energy.md) for energy mechanics.
 
 ### Care Life (hours in micro-units)
 
@@ -124,8 +128,8 @@ totalMax = speciesGrowthStage.baseStats + pet.bonusMaxStats
 ```
 
 Bonus max stats can come from:
-- Quest rewards
-- Special items
+- Quest rewards (see [Quests](./quests.md))
+- Special items (see [Items](./items.md))
 - Events
 - Achievements
 
@@ -141,7 +145,7 @@ Minimum sleep per day decreases as pets mature.
 | Young Adult | Low |
 | Adult | Lowest |
 
-Specific values defined per species per growth stage.
+Specific values defined per species per growth stage. See [Sleep](./sleep.md) for sleep mechanics.
 
 ## Content Unlocks by Stage
 
@@ -186,4 +190,4 @@ currentAge = currentTime - petBirthTime (in ticks)
 currentStage = getSpeciesGrowthStage(speciesId, currentAge)
 ```
 
-Offline progression applies - pets continue aging when browser is closed.
+Offline progression applies - pets continue aging when browser is closed. See [Time](./time.md) for offline mechanics.
