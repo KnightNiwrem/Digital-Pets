@@ -8,8 +8,8 @@ Each species is defined by:
 
 | Attribute | Description |
 |-----------|-------------|
-| **Growth Stages** | Array of per-stage stat definitions |
-| **Resistance Profile** | Natural damage type resistances |
+| **Growth Stages** | Array of per-stage stat definitions (see [Growth](./growth.md)) |
+| **Resistance Profile** | Natural damage type resistances (see [Battle](./battle.md)) |
 | **Archetype** | Classification describing playstyle |
 
 ## Stat Distribution Categories
@@ -36,7 +36,7 @@ Each species defines its complete growth progression through an array of growth 
 | **name** | Display name (e.g., "Baby I", "Child II") |
 | **minAgeTicks** | Minimum age to enter this stage |
 | **baseStats** | Complete stat maximums for this stage |
-| **minSleepTicks** | Sleep requirement for this stage |
+| **minSleepTicks** | Sleep requirement for this stage (see [Sleep](./sleep.md)) |
 
 ### Base Stats Per Stage
 
@@ -45,20 +45,20 @@ Each growth stage defines all maximum stats:
 ```typescript
 baseStats: {
   care: {
-    satiety: MicroValue,   // Max satiety
-    hydration: MicroValue, // Max hydration
-    happiness: MicroValue  // Max happiness
+    satiety: MicroValue,   // Max satiety (see Care)
+    hydration: MicroValue, // Max hydration (see Care)
+    happiness: MicroValue  // Max happiness (see Care)
   },
   battle: {
-    strength: number,      // Physical power
+    strength: number,      // Physical power (see Battle)
     endurance: number,     // Physical defense/stamina
     agility: number,       // Speed/evasion
     precision: number,     // Accuracy/critical
     fortitude: number,     // HP/overall resilience
     cunning: number        // Status/debuff effectiveness
   },
-  energy: MicroValue,     // Max energy
-  careLife: MicroValue    // Max care life (hours)
+  energy: MicroValue,     // Max energy (see Energy)
+  careLife: MicroValue    // Max care life (see Care)
 }
 ```
 
@@ -74,8 +74,8 @@ Species can vary in:
 
 Pets can gain permanent bonus max stats from:
 
-- Quest rewards
-- Special items
+- Quest rewards (see [Quests](./quests.md))
+- Special items (see [Items](./items.md))
 - Events
 - Achievements
 
@@ -96,15 +96,15 @@ Species have innate resistances to damage types:
 | Moderate | 15-20% |
 | Strong | 25% |
 
-Resistances are per damage type (Slashing, Piercing, Crushing, Chemical, Thermal, Electric).
+Resistances are per damage type (Slashing, Piercing, Crushing, Chemical, Thermal, Electric). See [Battle](./battle.md) for damage type details.
 
 ## Species Unlocking
 
 | Unlock Method | Description |
 |---------------|-------------|
 | Starting | Available at game start |
-| Quest | Complete specific quest chain |
-| Discovery | Find during exploration |
+| Quest | Complete specific quest chain (see [Quests](./quests.md)) |
+| Discovery | Find during exploration (see [Exploration](./exploration.md)) |
 | Achievement | Reach certain milestones |
 
 ## Species Identity

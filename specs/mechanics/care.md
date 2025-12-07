@@ -4,11 +4,7 @@ The care system governs pet well-being through visible care stats and a hidden C
 
 ## Game Tick
 
-All time-based mechanics operate on **game ticks**. One game tick = 30 seconds real time.
-
-- 1 minute = 2 ticks
-- 1 hour = 120 ticks
-- 1 day = 2880 ticks
+All time-based mechanics operate on **game ticks**. See [Time](./time.md) for details.
 
 ## Care Stats
 
@@ -71,7 +67,7 @@ Stats generally increase as pets grow:
 | Young Adult | 140-170 |
 | Adult | 180-220 |
 
-Actual values vary by species.
+Actual values vary by species. See [Species](./species.md) and [Growth](./growth.md) for details.
 
 ### Decay Rates
 
@@ -85,6 +81,8 @@ Care stats decay at constant rates per game tick:
 This results in:
 - Awake: -6000 micro/hour = -6 display/hour
 - Sleeping: -3000 micro/hour = -3 display/hour
+
+See [Sleep](./sleep.md) for sleep state details.
 
 ## Poop System
 
@@ -128,6 +126,8 @@ Cleaning requires **cleaning items**. Each cleaning item has a `poopRemoved` pro
 ```
 remainingPoop = currentPoop - item.poopRemoved
 ```
+
+See [Items](./items.md) for cleaning item details.
 
 ## Care Life (Hidden Stat)
 
@@ -190,9 +190,11 @@ When processing ticks (including offline catch-up), the order is:
 4. Care stat decay
 5. Other mechanics (growth, etc.)
 
+See [Time](./time.md) for full tick processing details.
+
 ## Interactions with Other Systems
 
-- **Sleep**: Reduced decay rates, pet cannot eat/drink/play
-- **Training**: Requires minimum care thresholds to begin
-- **Battle**: Cannot participate if any care stat is critical
-- **Items**: Primary method for restoring care stats
+- **[Sleep](./sleep.md)**: Reduced decay rates, pet cannot eat/drink/play
+- **[Training](./training.md)**: Requires minimum care thresholds to begin
+- **[Battle](./battle.md)**: Cannot participate if any care stat is critical
+- **[Items](./items.md)**: Primary method for restoring care stats

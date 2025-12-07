@@ -6,15 +6,15 @@ Items provide care, battle, and utility functions. Most are consumables and stac
 
 | Category | Purpose | Stackable |
 |----------|---------|-----------|
-| Food | Restore Satiety | Yes |
-| Drink | Restore Hydration | Yes |
-| Toy | Restore Happiness | Durability |
-| Cleaning | Remove poop | Yes |
+| Food | Restore Satiety (see [Care](./care.md)) | Yes |
+| Drink | Restore Hydration (see [Care](./care.md)) | Yes |
+| Toy | Restore Happiness (see [Care](./care.md)) | Durability |
+| Cleaning | Remove poop (see [Care](./care.md)) | Yes |
 | Medicine | Heal or cure status | Yes |
-| Battle | Combat consumables | Yes |
+| Battle | Combat consumables (see [Battle](./battle.md)) | Yes |
 | Equipment | Passive bonuses | No (durability) |
 | Material | Crafting ingredients | Yes |
-| Key | Quest items | No |
+| Key | Quest items (see [Quests](./quests.md)) | No |
 
 ## Stackability Rules
 
@@ -43,7 +43,7 @@ Drink items restore Hydration (in micro-units).
 |----------|-------------|
 | hydrationRestore | microHydration restored on use |
 
-Some drinks may also restore Energy.
+Some drinks may also restore Energy (see [Energy](./energy.md)).
 
 ### Toy
 
@@ -81,7 +81,7 @@ Medicine items affect battle health or status.
 
 ## Battle Consumables
 
-Battle items provide temporary buffs during combat.
+Battle items provide temporary buffs during combat. See [Battle](./battle.md) for combat details.
 
 | Property | Description |
 |----------|-------------|
@@ -124,7 +124,7 @@ Items have rarity tiers affecting acquisition:
 | Legendary | Extremely rare, unique |
 
 Rarity affects:
-- Drop rates from foraging
+- Drop rates from exploration (see [Exploration](./exploration.md))
 - Shop availability
 - Crafting requirements
 - Sell value
@@ -158,7 +158,7 @@ All items share:
 | Property | Description |
 |----------|-------------|
 | Capacity | Larger than carried |
-| Access | Only at home/storage locations |
+| Access | Only at home/storage locations (see [Locations](./locations.md)) |
 
 ### Stack Limits
 
@@ -169,11 +169,11 @@ All items share:
 
 | Method | Description |
 |--------|-------------|
-| Shop | Purchased with currency |
-| Foraging | Found based on forage tables |
+| Shop | Purchased with currency (see [Locations](./locations.md)) |
+| Exploration | Found based on exploration tables (see [Exploration](./exploration.md)) |
 | Crafting | Created from materials |
-| Quest Reward | Given on quest completion |
-| Battle Drop | Chance from defeated enemies |
+| Quest Reward | Given on quest completion (see [Quests](./quests.md)) |
+| Battle Drop | Chance from defeated enemies (see [Battle](./battle.md)) |
 | Starting | Given to new players |
 
 ## Starting Inventory

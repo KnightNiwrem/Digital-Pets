@@ -36,9 +36,9 @@ Each location has:
 | levelRange | Min/max encounter levels |
 | requirements | Unlock conditions |
 | facilities | Available buildings/features |
-| forageTable | Reference to forage data |
-| encounterTable | Reference to encounter data |
-| npcs | Array of NPC IDs present |
+| forageTable | Reference to forage data (see [Exploration](./exploration.md)) |
+| encounterTable | Reference to encounter data (see [Exploration](./exploration.md)) |
+| npcs | Array of NPC IDs present (see [Quests](./quests.md)) |
 
 ## Location Types
 
@@ -59,8 +59,8 @@ Social hubs with shops and services.
 | Characteristic | Description |
 |----------------|-------------|
 | Safety | No wild encounters |
-| NPCs | Merchants, trainers, quest givers |
-| Facilities | Shops, training, services |
+| NPCs | Merchants, trainers, quest givers (see [Quests](./quests.md)) |
+| Facilities | Shops, training (see [Training](./training.md)), services |
 
 ### Wild
 
@@ -68,7 +68,7 @@ Exploration areas with foraging and encounters.
 
 | Characteristic | Description |
 |----------------|-------------|
-| Activities | Foraging, scouting, battles |
+| Activities | Foraging, scouting, battles (see [Exploration](./exploration.md)) |
 | Danger | Wild encounters possible |
 | Requirements | May have skill/stage requirements |
 
@@ -86,7 +86,7 @@ Challenge areas with difficult content.
 
 ### Travel Cost
 
-Travel consumes energy per edge traversed.
+Travel consumes energy per edge traversed. See [Energy](./energy.md) for energy mechanics.
 
 | Factor | Effect |
 |--------|--------|
@@ -105,11 +105,11 @@ totalCost = sum of (baseCost × terrainModifier) for each edge
 
 | Restriction | Check |
 |-------------|-------|
-| Growth stage | Some locations locked by stage |
-| Quest progress | Some require quest completion |
-| Skill level | Some require minimum skills |
+| Growth stage | Some locations locked by stage (see [Growth](./growth.md)) |
+| Quest progress | Some require quest completion (see [Quests](./quests.md)) |
+| Skill level | Some require minimum skills (see [Skills](./skills.md)) |
 | Energy | Cannot travel with insufficient energy |
-| Sleep | Cannot travel while sleeping |
+| Sleep | Cannot travel while sleeping (see [Sleep](./sleep.md)) |
 
 ## Location Facilities
 
@@ -117,28 +117,28 @@ totalCost = sum of (baseCost × terrainModifier) for each edge
 
 | Facility | Function |
 |----------|----------|
-| Rest Area | Sleep, energy recovery |
-| Food Station | Feed pet |
-| Water Station | Hydrate pet |
-| Play Area | Happiness activities |
-| Storage | Store items |
+| Rest Area | Sleep, energy recovery (see [Sleep](./sleep.md)) |
+| Food Station | Feed pet (see [Care](./care.md)) |
+| Water Station | Hydrate pet (see [Care](./care.md)) |
+| Play Area | Happiness activities (see [Care](./care.md)) |
+| Storage | Store items (see [Items](./items.md)) |
 
 ### Town Facilities
 
 | Facility | Function |
 |----------|----------|
 | Shop | Buy and sell items |
-| Trainer | Train battle stats |
+| Trainer | Train battle stats (see [Training](./training.md)) |
 | Inn | Rest and recover |
-| Quest Board | Accept quests |
+| Quest Board | Accept quests (see [Quests](./quests.md)) |
 
 ### Wild Facilities
 
 | Facility | Function |
 |----------|----------|
 | Rest Point | Partial recovery |
-| Forage Zone | Gather items |
-| Battle Area | Find encounters |
+| Forage Zone | Gather items (see [Exploration](./exploration.md)) |
+| Battle Area | Find encounters (see [Battle](./battle.md)) |
 
 ## Discovery System
 
@@ -146,9 +146,9 @@ Hidden locations can be discovered through:
 
 | Method | Description |
 |--------|-------------|
-| High Scouting | Skill check during exploration |
-| Quest Completion | Reveal through quest rewards |
-| Random Events | Exploration event outcomes |
+| High Scouting | Skill check during exploration (see [Skills](./skills.md)) |
+| Quest Completion | Reveal through quest rewards (see [Quests](./quests.md)) |
+| Random Events | Exploration event outcomes (see [Exploration](./exploration.md)) |
 | NPC Hints | Dialogue options |
 
 Discovered locations are permanently added to the player's map.
@@ -159,9 +159,9 @@ Discovered locations are permanently added to the player's map.
 
 | Type | Description |
 |------|-------------|
-| stage | Minimum growth stage |
-| quest | Must complete specific quest |
-| skill | Minimum skill level |
+| stage | Minimum growth stage (see [Growth](./growth.md)) |
+| quest | Must complete specific quest (see [Quests](./quests.md)) |
+| skill | Minimum skill level (see [Skills](./skills.md)) |
 | discovery | Must have discovered location |
 
 ### Requirement Evaluation

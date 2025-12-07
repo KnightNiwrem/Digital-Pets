@@ -44,12 +44,12 @@ When the browser is closed:
 
 Each tick processes mechanics in this specific order:
 
-1. **Care Life drain/recovery** - Evaluate based on current care stat state
-2. **Energy regeneration** - Add energy based on awake/sleeping state
-3. **Poop generation check** - Decrement poop timer, generate if ready
-4. **Care stat decay** - Reduce Satiety, Hydration, Happiness
-5. **Sleep timer progress** - If sleeping, accumulate sleep time
-6. **Growth stage time** - Accumulate age, check stage transitions
+1. **Care Life drain/recovery** - Evaluate based on current care stat state (see [Care](./care.md))
+2. **Energy regeneration** - Add energy based on awake/sleeping state (see [Energy](./energy.md))
+3. **Poop generation check** - Decrement poop timer, generate if ready (see [Care](./care.md))
+4. **Care stat decay** - Reduce Satiety, Hydration, Happiness (see [Care](./care.md))
+5. **Sleep timer progress** - If sleeping, accumulate sleep time (see [Sleep](./sleep.md))
+6. **Growth stage time** - Accumulate age, check stage transitions (see [Growth](./growth.md))
 7. **Activity timers** - Progress any ongoing activities
 
 ## Offline Calculation
@@ -94,10 +94,10 @@ Key timestamps stored (as Unix timestamps or equivalent integer):
 | Timestamp | Purpose |
 |-----------|---------|
 | lastSaveTime | Calculate offline progression |
-| petBirthTime | Calculate age and growth stage |
-| sleepStartTime | Calculate sleep duration |
+| petBirthTime | Calculate age and growth stage (see [Growth](./growth.md)) |
+| sleepStartTime | Calculate sleep duration (see [Sleep](./sleep.md)) |
 | activityStartTime | Track ongoing activities |
-| nextPoopTime | Track poop generation timer |
+| nextPoopTime | Track poop generation timer (see [Care](./care.md)) |
 
 ## Activity Duration
 
@@ -129,6 +129,8 @@ Certain events trigger at specific real-world times:
 |-------|---------|
 | Daily reset | Midnight local time |
 | Weekly reset | Sunday midnight local |
+
+See [Quests](./quests.md) for daily and weekly quest resets.
 
 ## Tick Event System
 

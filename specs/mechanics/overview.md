@@ -13,21 +13,25 @@ All time-based mechanics operate on **game ticks** (30 seconds each). This enabl
 - Consistent offline catch-up processing
 - Deterministic game state
 
-See [Time Mechanics](./time-mechanics.md) for details.
+See [Time Mechanics](./time.md) for details.
 
 ## Game Mechanics
 
 ### Pet Care
-- **[Care System](./care-system.md)** - Satiety, Hydration, Happiness, Poop management, and Care Life
+- **[Care System](./care.md)** - Satiety, Hydration, Happiness, Poop management, and Care Life
 - **[Items](./items.md)** - Consumables, equipment, and inventory management
 
 ### Pet Development
-- **[Pet Species](./pet-species.md)** - Species with unique stats, multipliers, and resistances
-- **[Growth Stages](./growth-stages.md)** - Baby → Child → Teen → Young Adult → Adult progression
+- **[Pet Species](./species.md)** - Species with unique stats, multipliers, and resistances
+- **[Growth Stages](./growth.md)** - Baby → Child → Teen → Young Adult → Adult progression
 
 ### Combat
-- **[Battle System](./battle-system.md)** - 1v1 turn-based combat with damage types and resistances
-- **[Training](./training.md)** - Facilities, energy management, and sleep mechanics
+- **[Battle System](./battle.md)** - 1v1 turn-based combat with damage types and resistances
+- **[Training](./training.md)** - Facilities, stat improvement, and move learning
+
+### Energy & Rest
+- **[Energy](./energy.md)** - Activity costs and regeneration
+- **[Sleep](./sleep.md)** - Rest mechanics and requirements
 
 ### World
 - **[Locations](./locations.md)** - Graph-based travel between areas
@@ -36,7 +40,7 @@ See [Time Mechanics](./time-mechanics.md) for details.
 - **[Quests](./quests.md)** - NPC interactions and quest progression
 
 ### Systems
-- **[Time Mechanics](./time-mechanics.md)** - Real-time progression with offline support
+- **[Time Mechanics](./time.md)** - Real-time progression with offline support
 
 ## Battle Stats
 

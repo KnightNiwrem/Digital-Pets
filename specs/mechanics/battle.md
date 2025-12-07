@@ -57,6 +57,8 @@ Resistance calculation:
 resistanceMultiplier = 1 - (resistance / 100)
 ```
 
+See [Species](./species.md) for species-specific resistance profiles.
+
 ## Damage Formula
 
 ### Base Damage Calculation
@@ -121,8 +123,8 @@ Pets have limited active move slots. Additional moves must be swapped.
 ### Skill Acquisition
 
 Moves are acquired rarely via:
-- Training at specialized facilities
-- Quest rewards
+- Training at specialized facilities (see [Training](./training.md))
+- Quest rewards (see [Quests](./quests.md))
 - Random chance during battles (very rare)
 
 ## Status Effects
@@ -181,3 +183,5 @@ Defeated pets enter exhausted state:
 - Cannot battle for a duration (ticks)
 - Training effectiveness reduced
 - Clears after rest period
+
+See [Energy](./energy.md) for exhaustion recovery mechanics.

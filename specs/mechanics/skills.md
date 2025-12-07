@@ -43,13 +43,13 @@ Skills gain XP from related activities:
 
 | Skill | XP Sources |
 |-------|------------|
-| Foraging | Foraging plants, herbs, general gathering |
-| Mining | Mining ores and minerals |
-| Fishing | Fishing activities |
-| Scouting | Scouting, exploration |
+| Foraging | Foraging plants, herbs, general gathering (see [Exploration](./exploration.md)) |
+| Mining | Mining ores and minerals (see [Exploration](./exploration.md)) |
+| Fishing | Fishing activities (see [Exploration](./exploration.md)) |
+| Scouting | Scouting, exploration (see [Exploration](./exploration.md)) |
 | Crafting | Crafting items |
 | Trading | Shop transactions |
-| Social | Completing NPC-given quests, dialogue interactions |
+| Social | Completing NPC-given quests (see [Quests](./quests.md)), dialogue interactions |
 
 ### XP Modifiers
 
@@ -112,7 +112,7 @@ Higher levels provide:
 ### Social
 
 Higher levels provide:
-- Better NPC dialogue options
+- Better NPC dialogue options (see [Quests](./quests.md))
 - Improved quest rewards
 - Access to exclusive quests
 - Reputation bonuses with NPCs
@@ -125,13 +125,13 @@ Skills level up by performing related activities. This is the primary leveling m
 
 ### Active Training
 
-Some locations have skill trainers:
+Some locations have skill trainers (see [Locations](./locations.md)):
 
 | Trainer Property | Description |
 |-----------------|-------------|
 | skill | Skill that can be trained |
 | cost | Currency cost per session |
-| duration | Time required (ticks) |
+| duration | Time required (ticks, see [Time](./time.md)) |
 | xpGranted | XP awarded on completion |
 | dailyLimit | How often trainer can be used |
 
