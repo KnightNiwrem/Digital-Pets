@@ -45,6 +45,44 @@ export function Navigation({
     onTabChange?.(tab);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent, currentIndex: number) => {
+    let newIndex: number | null = null;
+
+    switch (event.key) {
+      case "ArrowLeft":
+        newIndex = currentIndex > 0 ? currentIndex - 1 : TABS.length - 1;
+        break;
+      case "ArrowRight":
+        newIndex = currentIndex < TABS.length - 1 ? currentIndex + 1 : 0;
+        break;
+      case "Home":
+        newIndex = 0;
+        break;
+      case "End":
+        newIndex = TABS.length - 1;
+        break;
+      case " ":
+      case "Enter":
+        handleTabClick(TABS[currentIndex]?.id ?? "care");
+        event.preventDefault();
+        return;
+      default:
+        return;
+    }
+
+    if (newIndex !== null) {
+      event.preventDefault();
+      const newTab = TABS[newIndex];
+      if (newTab) {
+        handleTabClick(newTab.id);
+        const button = document.querySelector(
+          `[aria-controls="${newTab.id}-panel"]`,
+        ) as HTMLButtonElement | null;
+        button?.focus();
+      }
+    }
+  };
+
   return (
     <nav
       aria-label="Main Navigation"
@@ -55,13 +93,16 @@ export function Navigation({
           role="tablist"
           className="flex sm:justify-center overflow-x-auto no-scrollbar py-2 gap-1 sm:gap-4"
         >
-          {TABS.map((tab) => (
+          {TABS.map((tab, index) => (
             <button
               type="button"
               role="tab"
-              aria-selected={activeTab === tab.id}
+              aria-selected={activeTab === tab.id ? "true" : "false"}
+              aria-controls={`${tab.id}-panel`}
+              tabIndex={activeTab === tab.id ? 0 : -1}
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-[4.5rem] rounded-lg transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95",
                 activeTab === tab.id
