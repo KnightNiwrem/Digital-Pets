@@ -45,8 +45,14 @@ export function Navigation({
     onTabChange?.(tab);
   };
 
+  /**
+   * Handles keyboard navigation for the tab list per WAI-ARIA tabs pattern.
+   * - ArrowLeft/ArrowRight: Move focus between tabs (wraps around)
+   * - Home/End: Move focus to first/last tab
+   * - Enter/Space: Activate the focused tab (handled by click)
+   */
   const handleKeyDown = (event: React.KeyboardEvent, currentIndex: number) => {
-    let newIndex: number | null = null;
+    let newIndex: number;
 
     switch (event.key) {
       case "ArrowLeft":
@@ -61,25 +67,17 @@ export function Navigation({
       case "End":
         newIndex = TABS.length - 1;
         break;
-      case " ":
-      case "Enter":
-        handleTabClick(TABS[currentIndex]?.id ?? "care");
-        event.preventDefault();
-        return;
       default:
         return;
     }
 
-    if (newIndex !== null) {
-      event.preventDefault();
-      const newTab = TABS[newIndex];
-      if (newTab) {
-        handleTabClick(newTab.id);
-        const button = document.querySelector(
-          `[aria-controls="${newTab.id}-panel"]`,
-        ) as HTMLButtonElement | null;
-        button?.focus();
-      }
+    event.preventDefault();
+    const newTab = TABS[newIndex];
+    if (newTab) {
+      const button = document.getElementById(
+        `${newTab.id}-tab`,
+      ) as HTMLButtonElement | null;
+      button?.focus();
     }
   };
 
@@ -96,8 +94,9 @@ export function Navigation({
           {TABS.map((tab, index) => (
             <button
               type="button"
+              id={`${tab.id}-tab`}
               role="tab"
-              aria-selected={activeTab === tab.id ? "true" : "false"}
+              aria-selected={activeTab === tab.id}
               aria-controls={`${tab.id}-panel`}
               tabIndex={activeTab === tab.id ? 0 : -1}
               key={tab.id}
