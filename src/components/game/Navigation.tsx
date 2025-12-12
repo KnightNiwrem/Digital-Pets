@@ -46,19 +46,27 @@ export function Navigation({
   };
 
   return (
-    <nav className="border-t bg-card fixed bottom-0 left-0 right-0 safe-area-inset-bottom">
+    <nav
+      aria-label="Main Navigation"
+      className="border-t bg-card fixed bottom-0 left-0 right-0 safe-area-inset-bottom"
+    >
       <div className="container mx-auto px-1">
-        <div className="flex sm:justify-center overflow-x-auto no-scrollbar py-2 gap-1 sm:gap-4">
+        <div
+          role="tablist"
+          className="flex sm:justify-center overflow-x-auto no-scrollbar py-2 gap-1 sm:gap-4"
+        >
           {TABS.map((tab) => (
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-[4.5rem] rounded-lg transition-colors flex-shrink-0",
+                "flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-[4.5rem] rounded-lg transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95",
                 activeTab === tab.id
                   ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent",
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
               <span className="text-xl">{tab.icon}</span>

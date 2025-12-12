@@ -167,6 +167,10 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 /* cool Bun background animation 😎 */
