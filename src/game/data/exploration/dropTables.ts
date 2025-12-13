@@ -183,7 +183,7 @@ export const coastForagingDropTable: DropTable = {
     {
       itemId: FOOD_ITEMS.BERRIES.id,
       quantity: 1,
-      minRoll: 0.45,
+      minRoll: 0.15,
       requirements: undefined,
     },
     // Stone - beach pebbles
