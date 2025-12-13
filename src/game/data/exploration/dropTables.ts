@@ -6,6 +6,7 @@
  * Higher skill levels can unlock additional entries for the same item.
  */
 
+import { DRINK_ITEMS } from "@/game/data/items/drinks";
 import { FOOD_ITEMS } from "@/game/data/items/food";
 import { MATERIAL_ITEMS } from "@/game/data/items/materials";
 import { GrowthStage } from "@/game/types/constants";
@@ -190,6 +191,13 @@ export const coastForagingDropTable: DropTable = {
       itemId: MATERIAL_ITEMS.STONE.id,
       quantity: 1,
       minRoll: 0.5,
+      requirements: undefined,
+    },
+    // Coconut - coastal fruit
+    {
+      itemId: DRINK_ITEMS.COCONUT.id,
+      quantity: 1,
+      minRoll: 0.55,
       requirements: undefined,
     },
   ],
