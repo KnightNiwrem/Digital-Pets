@@ -1,8 +1,12 @@
 /**
  * Pet battle card showing HP, stamina, and status effects.
+ *
+ * Uses visual state buffering to sync HP changes with hit animations.
+ * The displayed HP only updates when an attack animation completes,
+ * preventing the jarring effect of HP dropping before the animation plays.
  */
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getEffectSummary } from "@/game/core/battle/status";
 import type { Combatant } from "@/game/core/battle/turn";
@@ -26,6 +30,9 @@ function clampPercent(value: number, max: number): number {
 
 /**
  * Displays a pet's battle status including HP bar, stamina, and effects.
+ *
+ * Uses visual state buffering: displayedHealth only updates when isHit
+ * transitions to true, syncing the HP bar with the hit animation.
  */
 export function PetBattleCard({
   combatant,
@@ -34,10 +41,33 @@ export function PetBattleCard({
   isHit = false,
 }: PetBattleCardProps) {
   const { derivedStats, statusEffects, name, speciesId } = combatant;
-  const hpPercent = clampPercent(
+
+  // Visual state buffering: track displayed health separately from actual health
+  const [displayedHealth, setDisplayedHealth] = useState(
     derivedStats.currentHealth,
-    derivedStats.maxHealth,
   );
+  const prevIsHitRef = useRef(isHit);
+
+  // Sync displayed health with actual health when hit animation triggers
+  useEffect(() => {
+    const wasHit = !prevIsHitRef.current && isHit;
+    prevIsHitRef.current = isHit;
+
+    if (wasHit) {
+      // Update displayed health when hit animation starts
+      setDisplayedHealth(derivedStats.currentHealth);
+    }
+  }, [isHit, derivedStats.currentHealth]);
+
+  // Also sync when health increases (healing) or on initial render
+  useEffect(() => {
+    if (derivedStats.currentHealth > displayedHealth) {
+      setDisplayedHealth(derivedStats.currentHealth);
+    }
+  }, [derivedStats.currentHealth, displayedHealth]);
+
+  // Use displayed health for the visual HP bar
+  const hpPercent = clampPercent(displayedHealth, derivedStats.maxHealth);
   const staminaPercent = clampPercent(
     derivedStats.currentStamina,
     derivedStats.maxStamina,
@@ -79,7 +109,7 @@ export function PetBattleCard({
           <div className="flex justify-between text-[10px] sm:text-xs mb-0.5 sm:mb-1">
             <span>HP</span>
             <span>
-              {derivedStats.currentHealth}/{derivedStats.maxHealth}
+              {displayedHealth}/{derivedStats.maxHealth}
             </span>
           </div>
           <div className="h-2 sm:h-3 bg-muted rounded-full overflow-hidden">
