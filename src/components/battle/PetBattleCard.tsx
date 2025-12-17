@@ -2,8 +2,9 @@
  * Pet battle card showing HP, stamina, and status effects.
  *
  * Uses visual state buffering to sync HP changes with hit animations.
- * The displayed HP only updates when an attack animation completes,
- * preventing the jarring effect of HP dropping before the animation plays.
+ * The displayed HP only updates when the hit animation starts
+ * (when isHit transitions from false to true), preventing the jarring effect
+ * of HP dropping before the animation plays.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -32,7 +33,7 @@ function clampPercent(value: number, max: number): number {
  * Displays a pet's battle status including HP bar, stamina, and effects.
  *
  * Uses visual state buffering: displayedHealth only updates when isHit
- * transitions to true, syncing the HP bar with the hit animation.
+ * transitions from false to true, syncing the HP bar with the hit animation.
  */
 export function PetBattleCard({
   combatant,
@@ -47,24 +48,42 @@ export function PetBattleCard({
     derivedStats.currentHealth,
   );
   const prevIsHitRef = useRef(isHit);
+  const prevCombatantRef = useRef(combatant);
 
-  // Sync displayed health with actual health when hit animation triggers
+  // Unified effect for syncing displayed health with actual health
+  // Handles: hit animations, healing, DoT damage, and combatant changes
   useEffect(() => {
     const wasHit = !prevIsHitRef.current && isHit;
+    const combatantChanged = prevCombatantRef.current !== combatant;
     prevIsHitRef.current = isHit;
+    prevCombatantRef.current = combatant;
 
+    // Reset state when combatant changes (new battle)
+    if (combatantChanged) {
+      setDisplayedHealth(derivedStats.currentHealth);
+      return;
+    }
+
+    // Update on hit animation start (attack damage)
     if (wasHit) {
-      // Update displayed health when hit animation starts
       setDisplayedHealth(derivedStats.currentHealth);
+      return;
     }
-  }, [isHit, derivedStats.currentHealth]);
 
-  // Also sync when health increases (healing) or on initial render
-  useEffect(() => {
-    if (derivedStats.currentHealth > displayedHealth) {
-      setDisplayedHealth(derivedStats.currentHealth);
-    }
-  }, [derivedStats.currentHealth, displayedHealth]);
+    // Handle healing or non-hit damage (e.g., DoT during turn resolution)
+    // Use functional update to avoid infinite loops
+    setDisplayedHealth((prev) => {
+      // Healing: immediately reflect increased health
+      if (derivedStats.currentHealth > prev) {
+        return derivedStats.currentHealth;
+      }
+      // Non-hit damage (DoT): sync when not animating a hit
+      if (derivedStats.currentHealth < prev && !isHit) {
+        return derivedStats.currentHealth;
+      }
+      return prev;
+    });
+  }, [isHit, derivedStats.currentHealth, combatant]);
 
   // Use displayed health for the visual HP bar
   const hpPercent = clampPercent(displayedHealth, derivedStats.maxHealth);
