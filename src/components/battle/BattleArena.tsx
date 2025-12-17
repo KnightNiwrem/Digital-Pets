@@ -7,7 +7,7 @@
  * - This ensures damage appears to happen when the attack "lands"
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Combatant } from "@/game/core/battle/turn";
 import { BattleUI } from "@/game/data/uiText";
 import { cn } from "@/lib/utils";
@@ -45,9 +45,11 @@ export function BattleArena({
     enemy.derivedStats.currentHealth,
   );
 
-  // Track previous hit states to detect rising edges (false -> true)
-  const prevPlayerHitRef = useRef(false);
-  const prevEnemyHitRef = useRef(false);
+  // Track previous states to detect changes
+  const prevPlayerHitRef = useRef(playerHit);
+  const prevEnemyHitRef = useRef(enemyHit);
+  const prevPlayerMaxHpRef = useRef(player.derivedStats.maxHealth);
+  const prevEnemyMaxHpRef = useRef(enemy.derivedStats.maxHealth);
 
   // Update displayed HP when hit animation triggers (rising edge detection)
   useEffect(() => {
@@ -66,35 +68,53 @@ export function BattleArena({
     prevEnemyHitRef.current = enemyHit;
   }, [enemyHit, enemy.derivedStats.currentHealth]);
 
-  // Sync displayed HP on battle initialization or when HP increases (healing/new battle)
+  // Sync displayed HP on combatant change (maxHealth differs) or HP increase (healing)
   useEffect(() => {
-    if (player.derivedStats.currentHealth > displayedPlayerHp) {
-      setDisplayedPlayerHp(player.derivedStats.currentHealth);
-    }
-  }, [player.derivedStats.currentHealth, displayedPlayerHp]);
+    const playerMaxHpChanged =
+      player.derivedStats.maxHealth !== prevPlayerMaxHpRef.current;
+    setDisplayedPlayerHp((prev) => {
+      if (playerMaxHpChanged || player.derivedStats.currentHealth > prev) {
+        return player.derivedStats.currentHealth;
+      }
+      return prev;
+    });
+    prevPlayerMaxHpRef.current = player.derivedStats.maxHealth;
+  }, [player.derivedStats.currentHealth, player.derivedStats.maxHealth]);
 
   useEffect(() => {
-    if (enemy.derivedStats.currentHealth > displayedEnemyHp) {
-      setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
-    }
-  }, [enemy.derivedStats.currentHealth, displayedEnemyHp]);
+    const enemyMaxHpChanged =
+      enemy.derivedStats.maxHealth !== prevEnemyMaxHpRef.current;
+    setDisplayedEnemyHp((prev) => {
+      if (enemyMaxHpChanged || enemy.derivedStats.currentHealth > prev) {
+        return enemy.derivedStats.currentHealth;
+      }
+      return prev;
+    });
+    prevEnemyMaxHpRef.current = enemy.derivedStats.maxHealth;
+  }, [enemy.derivedStats.currentHealth, enemy.derivedStats.maxHealth]);
 
-  // Create display combatants with buffered HP values
-  const displayPlayer: Combatant = {
-    ...player,
-    derivedStats: {
-      ...player.derivedStats,
-      currentHealth: displayedPlayerHp,
-    },
-  };
+  // Create display combatants with buffered HP values (memoized for performance)
+  const displayPlayer = useMemo<Combatant>(
+    () => ({
+      ...player,
+      derivedStats: {
+        ...player.derivedStats,
+        currentHealth: displayedPlayerHp,
+      },
+    }),
+    [player, displayedPlayerHp],
+  );
 
-  const displayEnemy: Combatant = {
-    ...enemy,
-    derivedStats: {
-      ...enemy.derivedStats,
-      currentHealth: displayedEnemyHp,
-    },
-  };
+  const displayEnemy = useMemo<Combatant>(
+    () => ({
+      ...enemy,
+      derivedStats: {
+        ...enemy.derivedStats,
+        currentHealth: displayedEnemyHp,
+      },
+    }),
+    [enemy, displayedEnemyHp],
+  );
 
   return (
     <div
