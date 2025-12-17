@@ -115,11 +115,15 @@ export function BattleScreen({
   // Trigger immediate HP sync for non-animated HP changes (DoT, etc.)
   const triggerHpSync = useCallback(() => {
     setAnimationState((prev) => ({ ...prev, syncHpNow: true }));
-    // Reset syncHpNow on next tick to allow future syncs
-    setTimeout(() => {
-      setAnimationState((prev) => ({ ...prev, syncHpNow: false }));
-    }, 0);
   }, []);
+
+  // Reset syncHpNow after it has been observed by BattleArena
+  // This avoids setTimeout race conditions with multiple rapid events
+  useEffect(() => {
+    if (animationState.syncHpNow) {
+      setAnimationState((prev) => ({ ...prev, syncHpNow: false }));
+    }
+  }, [animationState.syncHpNow]);
 
   // Consume battle events for animations
   // The game state is ALREADY updated - we just play animations to visualize what happened

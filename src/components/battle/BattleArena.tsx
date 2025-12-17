@@ -49,68 +49,72 @@ export function BattleArena({
   );
 
   // Track previous states to detect changes
-  const prevPlayerHitRef = useRef(playerHit);
-  const prevEnemyHitRef = useRef(enemyHit);
+  // Initialize hit refs to false to ensure first render edge detection works
+  const prevPlayerHitRef = useRef(false);
+  const prevEnemyHitRef = useRef(false);
   const prevPlayerMaxHpRef = useRef(player.derivedStats.maxHealth);
   const prevEnemyMaxHpRef = useRef(enemy.derivedStats.maxHealth);
 
-  // Update displayed HP when hit animation triggers (rising edge detection)
-  useEffect(() => {
-    // Player was just hit (enemy attacked) - update player's displayed HP
-    if (playerHit && !prevPlayerHitRef.current) {
-      setDisplayedPlayerHp(player.derivedStats.currentHealth);
-    }
-    prevPlayerHitRef.current = playerHit;
-  }, [playerHit, player.derivedStats.currentHealth]);
-
-  useEffect(() => {
-    // Enemy was just hit (player attacked) - update enemy's displayed HP
-    if (enemyHit && !prevEnemyHitRef.current) {
-      setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
-    }
-    prevEnemyHitRef.current = enemyHit;
-  }, [enemyHit, enemy.derivedStats.currentHealth]);
-
-  // Sync displayed HP on combatant change (maxHealth differs) or HP increase (healing)
+  // Consolidated HP sync logic - handles all update scenarios in priority order:
+  // 1. syncHpNow (DoT damage, etc.) - highest priority, sync immediately
+  // 2. Hit animation trigger (rising edge) - sync on hit
+  // 3. Combatant change (maxHealth differs) - sync on new combatant
+  // 4. Healing (HP increased) - sync immediately
   useEffect(() => {
     const playerMaxHpChanged =
       player.derivedStats.maxHealth !== prevPlayerMaxHpRef.current;
-    setDisplayedPlayerHp((prev) => {
-      if (playerMaxHpChanged || player.derivedStats.currentHealth > prev) {
-        return player.derivedStats.currentHealth;
-      }
-      return prev;
-    });
-    prevPlayerMaxHpRef.current = player.derivedStats.maxHealth;
-  }, [player.derivedStats.currentHealth, player.derivedStats.maxHealth]);
-
-  useEffect(() => {
     const enemyMaxHpChanged =
       enemy.derivedStats.maxHealth !== prevEnemyMaxHpRef.current;
-    setDisplayedEnemyHp((prev) => {
-      if (enemyMaxHpChanged || enemy.derivedStats.currentHealth > prev) {
-        return enemy.derivedStats.currentHealth;
-      }
-      return prev;
-    });
-    prevEnemyMaxHpRef.current = enemy.derivedStats.maxHealth;
-  }, [enemy.derivedStats.currentHealth, enemy.derivedStats.maxHealth]);
+    const playerHitRisingEdge = playerHit && !prevPlayerHitRef.current;
+    const enemyHitRisingEdge = enemyHit && !prevEnemyHitRef.current;
 
-  // Sync displayed HP for DoT damage and other non-animated HP changes
-  // DoT is applied during turnResolved phase which has no animation.
-  // BattleScreen signals this via syncHpNow prop.
-  useEffect(() => {
-    if (syncHpNow) {
+    // Update player displayed HP
+    if (syncHpNow || playerMaxHpChanged) {
+      // Immediate sync for DoT or combatant change
       setDisplayedPlayerHp(player.derivedStats.currentHealth);
-      setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
+    } else if (playerHitRisingEdge) {
+      // Sync on hit animation start
+      setDisplayedPlayerHp(player.derivedStats.currentHealth);
+    } else {
+      // Sync on healing (HP increase)
+      setDisplayedPlayerHp((prev) =>
+        player.derivedStats.currentHealth > prev
+          ? player.derivedStats.currentHealth
+          : prev,
+      );
     }
+
+    // Update enemy displayed HP
+    if (syncHpNow || enemyMaxHpChanged) {
+      setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
+    } else if (enemyHitRisingEdge) {
+      setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
+    } else {
+      setDisplayedEnemyHp((prev) =>
+        enemy.derivedStats.currentHealth > prev
+          ? enemy.derivedStats.currentHealth
+          : prev,
+      );
+    }
+
+    // Update refs for next render
+    prevPlayerHitRef.current = playerHit;
+    prevEnemyHitRef.current = enemyHit;
+    prevPlayerMaxHpRef.current = player.derivedStats.maxHealth;
+    prevEnemyMaxHpRef.current = enemy.derivedStats.maxHealth;
   }, [
     syncHpNow,
+    playerHit,
+    enemyHit,
     player.derivedStats.currentHealth,
+    player.derivedStats.maxHealth,
     enemy.derivedStats.currentHealth,
+    enemy.derivedStats.maxHealth,
   ]);
 
   // Create display combatants with buffered HP values (memoized for performance)
+  // Note: Dependencies include full objects since we spread them; memoization
+  // breaks on any combatant change, but this is acceptable given the spread usage
   const displayPlayer = useMemo<Combatant>(
     () => ({
       ...player,
