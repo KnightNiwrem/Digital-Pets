@@ -20,6 +20,8 @@ interface BattleArenaProps {
   enemyAttacking?: boolean;
   playerHit?: boolean;
   enemyHit?: boolean;
+  /** When true, immediately sync displayed HP with actual HP (used for DoT, etc.) */
+  syncHpNow?: boolean;
   className?: string;
 }
 
@@ -34,6 +36,7 @@ export function BattleArena({
   enemyAttacking = false,
   playerHit = false,
   enemyHit = false,
+  syncHpNow = false,
   className,
 }: BattleArenaProps) {
   // Visual state buffering: track displayed HP separately from actual HP
@@ -92,6 +95,20 @@ export function BattleArena({
     });
     prevEnemyMaxHpRef.current = enemy.derivedStats.maxHealth;
   }, [enemy.derivedStats.currentHealth, enemy.derivedStats.maxHealth]);
+
+  // Sync displayed HP for DoT damage and other non-animated HP changes
+  // DoT is applied during turnResolved phase which has no animation.
+  // BattleScreen signals this via syncHpNow prop.
+  useEffect(() => {
+    if (syncHpNow) {
+      setDisplayedPlayerHp(player.derivedStats.currentHealth);
+      setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
+    }
+  }, [
+    syncHpNow,
+    player.derivedStats.currentHealth,
+    enemy.derivedStats.currentHealth,
+  ]);
 
   // Create display combatants with buffered HP values (memoized for performance)
   const displayPlayer = useMemo<Combatant>(
