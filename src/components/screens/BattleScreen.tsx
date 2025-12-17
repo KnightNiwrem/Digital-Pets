@@ -48,6 +48,8 @@ interface AnimationState {
   enemyAttacking: boolean;
   playerHit: boolean;
   enemyHit: boolean;
+  /** Force immediate HP sync (for DoT damage, etc.) */
+  syncHpNow: boolean;
 }
 
 const initialAnimationState: AnimationState = {
@@ -55,6 +57,7 @@ const initialAnimationState: AnimationState = {
   enemyAttacking: false,
   playerHit: false,
   enemyHit: false,
+  syncHpNow: false,
 };
 
 /**
@@ -99,6 +102,7 @@ export function BattleScreen({
         enemyAttacking: !isPlayerAttack,
         playerHit: !isPlayerAttack,
         enemyHit: isPlayerAttack,
+        syncHpNow: false,
       });
 
       animationTimeoutRef.current = setTimeout(() => {
@@ -107,6 +111,19 @@ export function BattleScreen({
       }, ATTACK_ANIMATION_DURATION_MS);
     });
   }, []);
+
+  // Trigger immediate HP sync for non-animated HP changes (DoT, etc.)
+  const triggerHpSync = useCallback(() => {
+    setAnimationState((prev) => ({ ...prev, syncHpNow: true }));
+  }, []);
+
+  // Reset syncHpNow after it has been observed by BattleArena
+  // This avoids setTimeout race conditions with multiple rapid events
+  useEffect(() => {
+    if (animationState.syncHpNow) {
+      setAnimationState((prev) => ({ ...prev, syncHpNow: false }));
+    }
+  }, [animationState.syncHpNow]);
 
   // Consume battle events for animations
   // The game state is ALREADY updated - we just play animations to visualize what happened
@@ -135,8 +152,11 @@ export function BattleScreen({
           await triggerAttackAnimation(true);
         } else if (event.action === "enemyAttack") {
           await triggerAttackAnimation(false);
+        } else if (event.action === "turnResolved") {
+          // turnResolved has no animation, but may include DoT damage
+          // Signal BattleArena to sync HP immediately
+          triggerHpSync();
         }
-        // turnResolved has no animation - it's a state transition event only
       }
 
       if (isMounted) setIsAnimating(false);
@@ -150,7 +170,7 @@ export function BattleScreen({
     return () => {
       isMounted = false;
     };
-  }, [battleEvents, triggerAttackAnimation]);
+  }, [battleEvents, triggerAttackAnimation, triggerHpSync]);
 
   // Handle player move selection
   // UI simply expresses intent via dispatch - logic runs in the engine
@@ -226,6 +246,7 @@ export function BattleScreen({
           enemyAttacking={animationState.enemyAttacking}
           playerHit={animationState.playerHit}
           enemyHit={animationState.enemyHit}
+          syncHpNow={animationState.syncHpNow}
         />
 
         {/* Battle log */}
