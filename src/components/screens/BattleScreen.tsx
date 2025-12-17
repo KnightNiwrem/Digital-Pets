@@ -8,6 +8,11 @@
  *
  * The UI knows NOTHING about game rules/math - it simply expresses
  * intent via dispatched actions, and the game engine handles the logic.
+ *
+ * Animation Synchronization:
+ * The game state updates HP instantly, but we need to show animations first.
+ * This component buffers combatant state and only updates the visual HP
+ * when animations complete, ensuring proper cause-effect visual ordering.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,6 +32,7 @@ import {
   isBattleComplete,
 } from "@/game/core/battle/battle";
 import type { BattleAction } from "@/game/core/battle/battleActions";
+import type { Combatant } from "@/game/core/battle/turn";
 import type { BattleActionEvent } from "@/game/types/event";
 import type { Move } from "@/game/types/move";
 
@@ -59,6 +65,10 @@ const initialAnimationState: AnimationState = {
 
 /**
  * Main battle screen component managing the battle flow.
+ *
+ * Uses visual state buffering: displayedPlayer/displayedEnemy hold the HP values
+ * shown to the user, which only update when attack animations complete.
+ * This ensures the HP bar drops AFTER the attack animation plays.
  */
 export function BattleScreen({
   battleState,
@@ -71,6 +81,15 @@ export function BattleScreen({
   const [animationState, setAnimationState] = useState<AnimationState>(
     initialAnimationState,
   );
+  // Visual state buffering: these hold the combatant states shown to the user
+  // They only update when animations complete, not immediately when state changes
+  const [displayedPlayer, setDisplayedPlayer] = useState<Combatant>(
+    battleState.player,
+  );
+  const [displayedEnemy, setDisplayedEnemy] = useState<Combatant>(
+    battleState.enemy,
+  );
+
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -78,6 +97,11 @@ export function BattleScreen({
   const processedEventsRef = useRef<Set<number>>(new Set());
   // Guard against concurrent event processing
   const isProcessingRef = useRef(false);
+  // Track if we have pending state updates to apply after animation
+  const pendingStateRef = useRef<{
+    player: Combatant;
+    enemy: Combatant;
+  } | null>(null);
 
   // Cleanup animation timeout on unmount
   useEffect(() => {
@@ -88,28 +112,71 @@ export function BattleScreen({
     };
   }, []);
 
-  // Trigger attack animation (returns a promise for sequencing)
-  const triggerAttackAnimation = useCallback((isPlayerAttack: boolean) => {
-    return new Promise<void>((resolve) => {
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-      }
-      setAnimationState({
-        playerAttacking: isPlayerAttack,
-        enemyAttacking: !isPlayerAttack,
-        playerHit: !isPlayerAttack,
-        enemyHit: isPlayerAttack,
-      });
+  // Sync displayed state when battle/combatant changes (new battle started)
+  useEffect(() => {
+    // Only sync if not currently animating - prevents mid-animation resets
+    if (!isAnimating) {
+      setDisplayedPlayer(battleState.player);
+      setDisplayedEnemy(battleState.enemy);
+    } else {
+      // Store pending state to apply after animation completes
+      pendingStateRef.current = {
+        player: battleState.player,
+        enemy: battleState.enemy,
+      };
+    }
+  }, [battleState.player, battleState.enemy, isAnimating]);
 
-      animationTimeoutRef.current = setTimeout(() => {
-        setAnimationState(initialAnimationState);
-        resolve();
-      }, ATTACK_ANIMATION_DURATION_MS);
-    });
+  // Apply pending state updates after animation completes
+  const applyPendingState = useCallback(() => {
+    if (pendingStateRef.current) {
+      setDisplayedPlayer(pendingStateRef.current.player);
+      setDisplayedEnemy(pendingStateRef.current.enemy);
+      pendingStateRef.current = null;
+    }
   }, []);
 
+  // Trigger attack animation and update the target's displayed HP when animation starts
+  const triggerAttackAnimation = useCallback(
+    (isPlayerAttack: boolean) => {
+      return new Promise<void>((resolve) => {
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
+        }
+
+        // Start animation
+        setAnimationState({
+          playerAttacking: isPlayerAttack,
+          enemyAttacking: !isPlayerAttack,
+          playerHit: !isPlayerAttack,
+          enemyHit: isPlayerAttack,
+        });
+
+        // Update the target's HP when animation starts (synced with visual impact)
+        // The attacker's state may have changed too (e.g., stamina), so update both
+        if (isPlayerAttack) {
+          // Player attacked enemy - update enemy HP
+          setDisplayedEnemy(battleState.enemy);
+          setDisplayedPlayer(battleState.player);
+        } else {
+          // Enemy attacked player - update player HP
+          setDisplayedPlayer(battleState.player);
+          setDisplayedEnemy(battleState.enemy);
+        }
+
+        animationTimeoutRef.current = setTimeout(() => {
+          setAnimationState(initialAnimationState);
+          applyPendingState();
+          resolve();
+        }, ATTACK_ANIMATION_DURATION_MS);
+      });
+    },
+    [battleState.player, battleState.enemy, applyPendingState],
+  );
+
   // Consume battle events for animations
-  // The game state is ALREADY updated - we just play animations to visualize what happened
+  // The game state is ALREADY updated - we buffer the visual state
+  // and only show HP changes when the animation triggers
   useEffect(() => {
     let isMounted = true;
 
@@ -135,8 +202,11 @@ export function BattleScreen({
           await triggerAttackAnimation(true);
         } else if (event.action === "enemyAttack") {
           await triggerAttackAnimation(false);
+        } else if (event.action === "turnResolved") {
+          // Turn resolved: update both combatants for DoT/status effects
+          setDisplayedPlayer(battleState.player);
+          setDisplayedEnemy(battleState.enemy);
         }
-        // turnResolved has no animation - it's a state transition event only
       }
 
       if (isMounted) setIsAnimating(false);
@@ -150,7 +220,12 @@ export function BattleScreen({
     return () => {
       isMounted = false;
     };
-  }, [battleEvents, triggerAttackAnimation]);
+  }, [
+    battleEvents,
+    triggerAttackAnimation,
+    battleState.player,
+    battleState.enemy,
+  ]);
 
   // Handle player move selection
   // UI simply expresses intent via dispatch - logic runs in the engine
@@ -218,10 +293,10 @@ export function BattleScreen({
 
       {/* Scrollable middle section: Arena + Log */}
       <div className="flex-1 overflow-y-auto min-h-0 space-y-2 sm:space-y-4 py-2 sm:py-0">
-        {/* Battle arena */}
+        {/* Battle arena - uses buffered displayed state for HP sync */}
         <BattleArena
-          player={battleState.player}
-          enemy={battleState.enemy}
+          player={displayedPlayer}
+          enemy={displayedEnemy}
           playerAttacking={animationState.playerAttacking}
           enemyAttacking={animationState.enemyAttacking}
           playerHit={animationState.playerHit}
@@ -234,7 +309,7 @@ export function BattleScreen({
 
       {/* Fixed bottom: Move selection + Flee */}
       <div className="shrink-0 space-y-2 pt-2 bg-background">
-        {/* Move selection (player's turn only) */}
+        {/* Move selection (player's turn only) - uses real state for move availability */}
         {isPlayerTurn && (
           <MoveSelect
             combatant={battleState.player}
