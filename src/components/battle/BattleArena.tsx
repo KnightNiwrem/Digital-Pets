@@ -56,12 +56,14 @@ export function BattleArena({
   const prevEnemyMaxHpRef = useRef(enemy.derivedStats.maxHealth);
   const prevPlayerSpeciesRef = useRef(player.speciesId);
   const prevEnemySpeciesRef = useRef(enemy.speciesId);
+  const prevPlayerHpRef = useRef(player.derivedStats.currentHealth);
+  const prevEnemyHpRef = useRef(enemy.derivedStats.currentHealth);
 
   // Consolidated HP sync logic - handles all update scenarios in priority order:
   // 1. syncHpNow (DoT damage, etc.) - highest priority, sync immediately
   // 2. Hit animation trigger (rising edge) - sync on hit
   // 3. Combatant change (speciesId or maxHealth differs) - sync on new combatant
-  // 4. Healing (HP increased) - sync immediately
+  // 4. Healing (HP increased compared to previous actual HP) - sync immediately
   useEffect(() => {
     const playerCombatantChanged =
       player.derivedStats.maxHealth !== prevPlayerMaxHpRef.current ||
@@ -71,6 +73,11 @@ export function BattleArena({
       enemy.speciesId !== prevEnemySpeciesRef.current;
     const playerHitRisingEdge = playerHit && !prevPlayerHitRef.current;
     const enemyHitRisingEdge = enemyHit && !prevEnemyHitRef.current;
+    // Detect healing: HP increased compared to previous actual HP value
+    const playerHealed =
+      player.derivedStats.currentHealth > prevPlayerHpRef.current;
+    const enemyHealed =
+      enemy.derivedStats.currentHealth > prevEnemyHpRef.current;
 
     // Update player displayed HP
     if (syncHpNow || playerCombatantChanged) {
@@ -79,13 +86,9 @@ export function BattleArena({
     } else if (playerHitRisingEdge) {
       // Sync on hit animation start
       setDisplayedPlayerHp(player.derivedStats.currentHealth);
-    } else {
-      // Sync on healing (HP increase)
-      setDisplayedPlayerHp((prev) =>
-        player.derivedStats.currentHealth > prev
-          ? player.derivedStats.currentHealth
-          : prev,
-      );
+    } else if (playerHealed) {
+      // Sync on healing (HP increased from previous actual value)
+      setDisplayedPlayerHp(player.derivedStats.currentHealth);
     }
 
     // Update enemy displayed HP
@@ -93,12 +96,8 @@ export function BattleArena({
       setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
     } else if (enemyHitRisingEdge) {
       setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
-    } else {
-      setDisplayedEnemyHp((prev) =>
-        enemy.derivedStats.currentHealth > prev
-          ? enemy.derivedStats.currentHealth
-          : prev,
-      );
+    } else if (enemyHealed) {
+      setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
     }
 
     // Update refs for next render
@@ -108,6 +107,8 @@ export function BattleArena({
     prevEnemyMaxHpRef.current = enemy.derivedStats.maxHealth;
     prevPlayerSpeciesRef.current = player.speciesId;
     prevEnemySpeciesRef.current = enemy.speciesId;
+    prevPlayerHpRef.current = player.derivedStats.currentHealth;
+    prevEnemyHpRef.current = enemy.derivedStats.currentHealth;
   }, [
     syncHpNow,
     playerHit,
