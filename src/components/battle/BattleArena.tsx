@@ -7,7 +7,7 @@
  * - This ensures damage appears to happen when the attack "lands"
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Combatant } from "@/game/core/battle/turn";
 import { BattleUI } from "@/game/data/uiText";
 import { cn } from "@/lib/utils";
@@ -54,22 +54,26 @@ export function BattleArena({
   const prevEnemyHitRef = useRef(false);
   const prevPlayerMaxHpRef = useRef(player.derivedStats.maxHealth);
   const prevEnemyMaxHpRef = useRef(enemy.derivedStats.maxHealth);
+  const prevPlayerSpeciesRef = useRef(player.speciesId);
+  const prevEnemySpeciesRef = useRef(enemy.speciesId);
 
   // Consolidated HP sync logic - handles all update scenarios in priority order:
   // 1. syncHpNow (DoT damage, etc.) - highest priority, sync immediately
   // 2. Hit animation trigger (rising edge) - sync on hit
-  // 3. Combatant change (maxHealth differs) - sync on new combatant
+  // 3. Combatant change (speciesId or maxHealth differs) - sync on new combatant
   // 4. Healing (HP increased) - sync immediately
   useEffect(() => {
-    const playerMaxHpChanged =
-      player.derivedStats.maxHealth !== prevPlayerMaxHpRef.current;
-    const enemyMaxHpChanged =
-      enemy.derivedStats.maxHealth !== prevEnemyMaxHpRef.current;
+    const playerCombatantChanged =
+      player.derivedStats.maxHealth !== prevPlayerMaxHpRef.current ||
+      player.speciesId !== prevPlayerSpeciesRef.current;
+    const enemyCombatantChanged =
+      enemy.derivedStats.maxHealth !== prevEnemyMaxHpRef.current ||
+      enemy.speciesId !== prevEnemySpeciesRef.current;
     const playerHitRisingEdge = playerHit && !prevPlayerHitRef.current;
     const enemyHitRisingEdge = enemyHit && !prevEnemyHitRef.current;
 
     // Update player displayed HP
-    if (syncHpNow || playerMaxHpChanged) {
+    if (syncHpNow || playerCombatantChanged) {
       // Immediate sync for DoT or combatant change
       setDisplayedPlayerHp(player.derivedStats.currentHealth);
     } else if (playerHitRisingEdge) {
@@ -85,7 +89,7 @@ export function BattleArena({
     }
 
     // Update enemy displayed HP
-    if (syncHpNow || enemyMaxHpChanged) {
+    if (syncHpNow || enemyCombatantChanged) {
       setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
     } else if (enemyHitRisingEdge) {
       setDisplayedEnemyHp(enemy.derivedStats.currentHealth);
@@ -102,40 +106,38 @@ export function BattleArena({
     prevEnemyHitRef.current = enemyHit;
     prevPlayerMaxHpRef.current = player.derivedStats.maxHealth;
     prevEnemyMaxHpRef.current = enemy.derivedStats.maxHealth;
+    prevPlayerSpeciesRef.current = player.speciesId;
+    prevEnemySpeciesRef.current = enemy.speciesId;
   }, [
     syncHpNow,
     playerHit,
     enemyHit,
     player.derivedStats.currentHealth,
     player.derivedStats.maxHealth,
+    player.speciesId,
     enemy.derivedStats.currentHealth,
     enemy.derivedStats.maxHealth,
+    enemy.speciesId,
   ]);
 
-  // Create display combatants with buffered HP values (memoized for performance)
-  // Note: Dependencies include full objects since we spread them; memoization
-  // breaks on any combatant change, but this is acceptable given the spread usage
-  const displayPlayer = useMemo<Combatant>(
-    () => ({
-      ...player,
-      derivedStats: {
-        ...player.derivedStats,
-        currentHealth: displayedPlayerHp,
-      },
-    }),
-    [player, displayedPlayerHp],
-  );
+  // Create display combatants with buffered HP values
+  // Note: No useMemo here since we spread the full objects and they change
+  // frequently during battle - memoization would provide no benefit
+  const displayPlayer: Combatant = {
+    ...player,
+    derivedStats: {
+      ...player.derivedStats,
+      currentHealth: displayedPlayerHp,
+    },
+  };
 
-  const displayEnemy = useMemo<Combatant>(
-    () => ({
-      ...enemy,
-      derivedStats: {
-        ...enemy.derivedStats,
-        currentHealth: displayedEnemyHp,
-      },
-    }),
-    [enemy, displayedEnemyHp],
-  );
+  const displayEnemy: Combatant = {
+    ...enemy,
+    derivedStats: {
+      ...enemy.derivedStats,
+      currentHealth: displayedEnemyHp,
+    },
+  };
 
   return (
     <div
