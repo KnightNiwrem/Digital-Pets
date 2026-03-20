@@ -1,8 +1,11 @@
 #!/usr/bin/env bun
 import { existsSync } from "node:fs";
-import { rm } from "node:fs/promises";
+import { copyFile, rm } from "node:fs/promises";
 import path from "node:path";
 import plugin from "bun-plugin-tailwind";
+
+const SW_ENABLED = process.env.SW === "1";
+const DEV_MODE = process.env.DEV === "1";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
   console.log(`
@@ -138,6 +141,8 @@ const result = await Bun.build({
   sourcemap: "linked",
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
+    "process.env.SW_ENABLED": JSON.stringify(SW_ENABLED ? "true" : "false"),
+    "process.env.DEV_MODE": JSON.stringify(DEV_MODE ? "true" : "false"),
   },
   ...cliConfig,
 });
@@ -151,6 +156,42 @@ const outputTable = result.outputs.map((output) => ({
 }));
 
 console.table(outputTable);
+
+if (SW_ENABLED) {
+  console.log("\n📦 Building service worker...");
+
+  const precacheUrls = result.outputs
+    .map((o) => `./${path.relative(outdir, o.path)}`)
+    .concat(["./index.html"]);
+
+  const swResult = await Bun.build({
+    entrypoints: [path.resolve("src", "sw.ts")],
+    outdir,
+    minify: true,
+    target: "browser",
+    format: "iife",
+    splitting: false,
+    define: {
+      __BUILD_TIMESTAMP__: JSON.stringify(String(Date.now())),
+      __PRECACHE_URLS__: JSON.stringify(precacheUrls),
+    },
+  });
+
+  for (const output of swResult.outputs) {
+    outputTable.push({
+      File: path.relative(process.cwd(), output.path),
+      Type: output.kind,
+      Size: formatFileSize(output.size),
+    });
+  }
+
+  await copyFile(
+    path.resolve("src", "manifest.json"),
+    path.resolve(outdir, "manifest.json"),
+  );
+  console.log("✅ Service worker and manifest written to dist/");
+}
+
 const buildTime = (end - start).toFixed(2);
 
 console.log(`\n✅ Build completed in ${buildTime}ms\n`);

@@ -4,6 +4,7 @@
 
 export { BattleScreen } from "./BattleScreen";
 export { CareScreen } from "./CareScreen";
+export { DeveloperScreen } from "./DeveloperScreen";
 export { ExplorationScreen } from "./ExplorationScreen";
 export { InventoryScreen } from "./InventoryScreen";
 export { MapScreen } from "./MapScreen";

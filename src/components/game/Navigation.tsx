@@ -16,7 +16,8 @@ export type NavigationTab =
   | "skills"
   | "quests"
   | "menu"
-  | "battle";
+  | "battle"
+  | "developer";
 
 interface NavigationProps {
   activeTab?: NavigationTab;
@@ -32,6 +33,9 @@ const TABS: { id: NavigationTab; label: string; icon: string }[] = [
   { id: "skills", label: "Skills", icon: "⭐" },
   { id: "quests", label: "Quests", icon: "📜" },
   { id: "menu", label: "Menu", icon: "⚙️" },
+  ...(process.env.DEV_MODE === "true"
+    ? [{ id: "developer" as const, label: "Dev", icon: "🛠️" }]
+    : []),
 ];
 
 /**

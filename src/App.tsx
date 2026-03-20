@@ -11,10 +11,12 @@ import {
   OfflineReport,
   StageTransitionNotification,
   TrainingCompleteNotification,
+  UpdateBanner,
 } from "@/components/game";
 import {
   BattleScreen,
   CareScreen,
+  DeveloperScreen,
   ExplorationScreen,
   InventoryScreen,
   MapScreen,
@@ -215,6 +217,8 @@ function GameContent({
         return <QuestScreen />;
       case "menu":
         return <MenuScreen />;
+      case "developer":
+        return <DeveloperScreen />;
       case "battle":
         // Fallback if no battle info (useEffect will redirect)
         return <ExplorationScreen onStartBattle={handleStartBattle} />;
@@ -228,6 +232,7 @@ function GameContent({
 
   return (
     <Layout activeTab={activeTab} onTabChange={onTabChange}>
+      <UpdateBanner />
       <div className={isBattleActive ? "" : "pb-20"}>{renderScreen()}</div>
       {offlineReport && (
         <OfflineReport
