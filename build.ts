@@ -160,9 +160,13 @@ console.table(outputTable);
 if (SW_ENABLED) {
   console.log("\n📦 Building service worker...");
 
-  const precacheUrls = result.outputs
-    .map((o) => `./${path.relative(outdir, o.path)}`)
-    .concat(["./index.html"]);
+  const precacheUrls = [
+    ...new Set(
+      result.outputs
+        .filter((o) => o.kind !== "sourcemap")
+        .map((o) => `./${path.relative(outdir, o.path)}`),
+    ),
+  ];
 
   const swResult = await Bun.build({
     entrypoints: [path.resolve("src", "sw.ts")],
